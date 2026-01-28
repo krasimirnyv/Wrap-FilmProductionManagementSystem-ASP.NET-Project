@@ -22,9 +22,12 @@ public class Program
             ? secretConnection
             : defaultConnection
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-        
+
         builder.Services.AddDbContext<FilmProductionDbContext>(options =>
-            options.UseSqlite(connectionString));
+        {
+            options
+                .UseSqlServer(connectionString);
+        });
         
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
