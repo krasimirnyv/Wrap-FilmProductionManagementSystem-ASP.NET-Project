@@ -1,8 +1,8 @@
 namespace FilmProductionManagementSystem.Web;
 
 using Data;
+using Infrastructure;
 
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 public class Program
@@ -31,7 +31,7 @@ public class Program
         
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-        builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
             .AddEntityFrameworkStores<FilmProductionDbContext>();
         builder.Services.AddControllersWithViews();
 

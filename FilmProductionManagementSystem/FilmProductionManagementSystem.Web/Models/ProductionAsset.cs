@@ -3,6 +3,8 @@ namespace FilmProductionManagementSystem.Web.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Microsoft.EntityFrameworkCore;
+
 using Enums;
 
 using static Common.EntityConstants.ProductionAsset;
@@ -17,16 +19,20 @@ public class ProductionAsset
     public ProductionAssetType AssetType { get; set; }
 
     [Required]
+    [Unicode]
     [MaxLength(TitleMaxLength)]
     public string Title { get; set; } = null!;
 
+    [Unicode]
     [MaxLength(DescriptionMaxLength)]
     public string? Description { get; set; }
     
     [Required]
+    [Unicode]
     [MaxLength(FilePathMaxLength)]
     public string FilePath { get; set; } = null!;
 
+    [Unicode(false)]
     [MaxLength(FileTypeMaxLength)]
     public string? FileType { get; set; }
 

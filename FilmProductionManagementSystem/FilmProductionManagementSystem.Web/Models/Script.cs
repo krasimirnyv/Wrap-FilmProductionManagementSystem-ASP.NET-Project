@@ -3,6 +3,8 @@ namespace FilmProductionManagementSystem.Web.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Microsoft.EntityFrameworkCore;
+
 using static Common.EntityConstants.Script;
 using static Common.DataValidation;
 
@@ -12,9 +14,11 @@ public class Script
     public Guid Id { get; set; }
 
     [Required]
+    [Unicode]
     [MaxLength(TitleMaxLength)]
     public string Title { get; set; } = null!;
 
+    [Unicode]
     [Column(TypeName = TextTypeFormat)]
     public string? Content { get; set; }
     

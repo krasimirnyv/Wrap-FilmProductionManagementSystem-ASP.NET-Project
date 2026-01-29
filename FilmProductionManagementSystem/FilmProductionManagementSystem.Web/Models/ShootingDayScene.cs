@@ -8,8 +8,8 @@ public class ShootingDayScene
     [Key]
     public Guid Id { get; set; }
     
+    [Required]
     public int Order { get; set; }
-    // The order of shooting for the day
 
     [ForeignKey(nameof(ShootingDay))]
     public Guid ShootingDayId { get; set; }

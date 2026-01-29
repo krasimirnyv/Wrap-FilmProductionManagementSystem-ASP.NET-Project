@@ -3,6 +3,8 @@ namespace FilmProductionManagementSystem.Web.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Microsoft.EntityFrameworkCore;
+
 using static Common.EntityConstants.ShootingDay;
 using static Common.DataValidation;
 
@@ -14,6 +16,7 @@ public class ShootingDay
     [Column(TypeName = DateTimeTypeFormat)]
     public DateTime Date { get; set; }
 
+    [Unicode]
     [MaxLength(NotesMaxLength)]
     public string? Notes { get; set; }
     
