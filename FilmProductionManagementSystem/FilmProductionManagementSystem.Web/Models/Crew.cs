@@ -64,4 +64,7 @@ public class Crew
 
     public virtual ICollection<SceneCrew> CrewMemberScenes { get; set; }
         = new List<SceneCrew>();
+    
+    public virtual ICollection<CrewSkill> Skills { get; set; }
+        = new List<CrewSkill>();
 }

@@ -12,7 +12,6 @@ public static class EntityConstants
         public const int ThumbnailMaxLength = 500;
         
         public const decimal BudgetMinValue = 0;
-        public const decimal BudgetMaxValue = 100_000_000;
     }
     
     public static class Scene

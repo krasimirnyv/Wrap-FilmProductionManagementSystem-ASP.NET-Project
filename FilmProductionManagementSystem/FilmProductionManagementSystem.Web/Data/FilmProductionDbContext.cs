@@ -145,9 +145,6 @@ public class FilmProductionDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ShootingDayScene>(entity =>
         {
             entity
-                .HasKey(sds => sds.Id);
-
-            entity
                 .HasIndex(sds => new { sds.ShootingDayId, sds.SceneId });
 
             entity

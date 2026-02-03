@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using FilmProductionManagementSystem.Web.Data;
 namespace FilmProductionManagementSystem.Web;
 
 using Data;
@@ -54,6 +57,7 @@ public class Program
 
         app.UseRouting();
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllerRoute(

@@ -1,0 +1,80 @@
+@using FilmProductionManagementSystem.Web.ViewModels.Script
+@using FilmProductionManagementSystem.Web.ViewModels.Enums
+@model ScriptEditorViewModel
+
+@{
+    ViewData["Title"] = "Script Editor";
+}
+
+<link rel="stylesheet" href="~/css/script-editor.css" asp-append-version="true" />
+
+<section class="script-editor"
+         data-script-id="@Model.ScriptId"
+         data-production-id="@Model.ProductionId"
+         data-readonly="@Model.IsReadOnly"
+         data-version="@Model.LastEditedAt">
+
+    @Html.AntiForgeryToken()
+    
+    <!-- Toolbar -->
+    <div class="script-toolbar">
+        @if (!Model.IsReadOnly)
+        {
+            <button type="button" data-block="@ScriptBlockType.SceneHeading">Scene</button>
+            <button type="button" data-block="@ScriptBlockType.Subheader">Subheader</button>
+            <button type="button" data-block="@ScriptBlockType.Action">Action</button>
+            <button type="button" data-block="@ScriptBlockType.Character">Character</button>
+            <button type="button" data-block="@ScriptBlockType.Extension">Extension</button>
+            <button type="button" data-block="@ScriptBlockType.Parenthetical">Parenthetical</button>
+            <button type="button" data-block="@ScriptBlockType.Dialogue">Dialogue</button>
+            <button type="button" data-block="@ScriptBlockType.Transition">Transition</button>
+        }
+
+        <button type="button" id="btnPrint">Print PDF</button>
+    </div>
+    
+    <div class="script-status" id="scriptStatus">
+        Saved
+    </div>
+
+    <!-- Title Page -->
+    <section class="script-title-page">
+        <div class="title">@Model.TitlePageViewModel.Title</div>
+        <div class="written-by">Written by</div>
+        <div class="author">@Model.TitlePageViewModel.WrittenBy</div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.TitlePageViewModel.BasedOn))
+        {
+            <div class="based-on">
+                Based on: @Model.TitlePageViewModel.BasedOn
+            </div>
+        }
+
+        <div class="contact">@Model.TitlePageViewModel.ContactInfo</div>
+        <div class="last-edited-at">Last edited: @Model.LastEditedAt</div>
+    </section>
+
+    <!-- Script Pages -->
+    @if (!Model.ScriptPages.Any())
+    {
+        <div class="script-empty-hint">
+            Start writing your screenplay…
+        </div>
+    }
+    else
+    {
+        <div class="script-pages">
+            @foreach (var page in Model.ScriptPages)
+            {
+                <partial asp-name="_PartialScriptPage" model="page" />
+            }
+        </div>
+    }
+</section>
+
+<script src="~/js/script-editor/editor.core.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.behavior.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.pagination.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.history.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.print.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.autosave.js" asp-append-version="true"></script>
