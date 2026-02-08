@@ -1,0 +1,140 @@
+@model ScriptEditorViewModel
+
+@{
+    ViewData["Title"] = $"Script Editor - {Model.ScriptTitle}";
+}
+
+<link rel="stylesheet" href="~/css/script-editor.css" asp-append-version="true" />
+
+<section class="script-editor"
+         data-script-id="@Model.ScriptId"
+         data-production-id="@Model.ProductionId"
+         data-readonly="@Model.IsReadOnly.ToString().ToLower()"
+         data-version="@Model.LastEditedAt">
+
+    @Html.AntiForgeryToken()
+    
+    <!-- Toolbar -->
+        @if (!Model.IsReadOnly)
+        {
+            <div class="btn-group p-2 m-0 border-0 bd-example m-0 border-0" role="group" aria-label="Button group with nested dropdown">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        @Model.Blocks.Last().BlockType.ToString()
+                    </button>
+                    <ul class="dropdown-menu" style="">
+                        <li><a class="dropdown-item" href="#" type="button" data-block="SceneHeading">Scene</a>
+                        <li><a class="dropdown-item" href="#" type="button" data-block="Subheader">Subheader</a></li>
+                        <li><a class="dropdown-item" href="#" type="button" data-block="Action">Action</a></li>
+                        <li><a class="dropdown-item" href="#" type="button" data-block="Character">Character</a></li>
+                        <li><a class="dropdown-item" href="#" type="button" data-block="Extension">Extension</a></li>
+                        <li><a class="dropdown-item" href="#" type="button" data-block="Parenthetical">Parenthetical</a></li>
+                        <li><a class="dropdown-item" href="#" type="button" data-block="Dialogue">Dialogue</a></li>
+                        <li><a class="dropdown-item" href="#" type="button" data-block="Transition">Transition</a></li>
+                    </ul>
+                </div>
+            </div>
+                
+            <div class="toolbar-divider"></div>
+            
+            <div class="script-toolbar">
+            <button type="button" id="btnUndo" title="Undo (Ctrl+Z)">↶ Undo</button>
+            <button type="button" id="btnRedo" title="Redo (Ctrl+Y)">↷ Redo</button>
+            </div>
+        }
+        
+    <div class="script-toolbar">
+        <button type="button" id="btnPrint">🖨 Print PDF</button>
+        <button type="button" id="btnExport">💾 Export JSON</button>
+    </div>
+    
+        <div class="script-status" id="scriptStatus">
+        Saved
+    </div>
+
+    <!-- Title Page -->
+    <section class="script-title-page">
+        <div class="title">@Model.TitlePage.Title</div>
+        <div class="written-by">Written by</div>
+        <div class="author">@Model.TitlePage.WrittenBy</div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.TitlePage.BasedOn))
+        {
+            <div class="based-on">
+                Based on: @Model.TitlePage.BasedOn
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.TitlePage.DraftVersion))
+        {
+            <div class="draft-version">@Model.TitlePage.DraftVersion</div>
+        }
+
+        <div class="contact">@Model.TitlePage.ContactInfo</div>
+    </section>
+
+    <!-- Script Pages Container -->
+    <div class="script-pages">
+        @if (!Model.Blocks.Any())
+        {
+            <!-- Initial empty block to start writing -->
+            <div class="script-page">
+                <div class="script-block action" 
+                     contenteditable="@(!Model.IsReadOnly ? "true" : "false")" 
+                     data-block-type="Action"
+                     data-block-id="">
+                    <!-- Empty - user can start typing -->
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- Render all blocks - pagination will split them into pages -->
+            @foreach (ScriptBlocksViewModel block in Model.Blocks.OrderBy(b => b.OrderIndex))
+            {
+                <div class="script-block @block.BlockType.ToString().ToLower()" 
+                     contenteditable="@(!Model.IsReadOnly ? "true" : "false")" 
+                     data-block-type="@block.BlockType"
+                     data-block-id="@(block.Id?.ToString() ?? "")"
+                     data-order-index="@block.OrderIndex">
+                    @Html.Raw(block.Content ?? "")
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Character Autocomplete (hidden, populated by JS) -->
+    <datalist id="characterNames">
+        @foreach (string name in Model.CharacterNames)
+        {
+            <option value="@name"></option>
+        }
+    </datalist>
+</section>
+
+<!-- Scripts in correct load order -->
+<script src="~/js/script-editor/editor.core.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.history.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.autocomplete.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.behavior.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.pagination.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.autosave.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.print.js" asp-append-version="true"></script>
+<script src="~/js/script-editor/editor.export.js" asp-append-version="true"></script>
+
+<script>
+    // Initialize editor after all scripts load
+    document.addEventListener("DOMContentLoaded", function() {
+        // Trigger initial pagination
+        if (typeof paginateByHeight === "function") {
+            paginateByHeight();
+        }
+        
+        // Initialize undo/redo
+        if (typeof pushUndoState === "function") {
+            pushUndoState();
+        }
+        
+        console.log("Script Editor initialized");
+    });
+</script>

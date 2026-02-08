@@ -1,0 +1,221 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="dashboard-wrapper">
+    <div class="container">
+        
+        <!-- Success Message -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>@TempData["SuccessMessage"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <h1>Welcome to Wrap! 🎬</h1>
+            <p>Your film production management platform. Let's create something amazing today.</p>
+        </div>
+
+        <!-- Stats Section -->
+        <h3 class="section-title">Overview</h3>
+        <div class="row">
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="bi bi-camera-reels"></i>
+                    </div>
+                    <h2 class="stat-number">12</h2>
+                    <p class="stat-label">Active Projects</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h2 class="stat-number">48</h2>
+                    <p class="stat-label">Team Members</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                    <h2 class="stat-number">8</h2>
+                    <p class="stat-label">Upcoming Shoots</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon info">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h2 class="stat-number">156</h2>
+                    <p class="stat-label">Hours Logged</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <h3 class="section-title mt-4">Quick Actions</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <a href="#" class="action-card">
+                    <div class="action-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <i class="bi bi-plus-circle"></i>
+                    </div>
+                    <h5>Create New Project</h5>
+                    <p>Start a new film production project</p>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="#" class="action-card">
+                    <div class="action-card-icon" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <h5>Add Team Member</h5>
+                    <p>Invite crew or cast to your project</p>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="#" class="action-card">
+                    <div class="action-card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <h5>Schedule Shoot</h5>
+                    <p>Plan your next shooting day</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Activity & Projects -->
+        <h3 class="section-title mt-4">Recent Activity</h3>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="recent-activity">
+                    <h4><i class="bi bi-activity me-2"></i>Latest Updates</h4>
+                    
+                    <div class="activity-item">
+                        <div class="activity-title">New scene added to "Midnight Dreams"</div>
+                        <div class="activity-time">2 hours ago</div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-title">John Doe joined as Director of Photography</div>
+                        <div class="activity-time">5 hours ago</div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-title">Location scouting completed for Act 2</div>
+                        <div class="activity-time">1 day ago</div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-title">Budget approved for Q1 production</div>
+                        <div class="activity-time">2 days ago</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="recent-activity">
+                    <h4><i class="bi bi-film me-2"></i>Active Projects</h4>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <strong>Midnight Dreams</strong>
+                            <br>
+                            <small class="text-muted">Feature Film</small>
+                        </div>
+                        <span class="badge bg-success badge-custom">In Production</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <strong>Urban Legends</strong>
+                            <br>
+                            <small class="text-muted">Documentary</small>
+                        </div>
+                        <span class="badge bg-warning badge-custom text-dark">Pre-Production</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Silent Echoes</strong>
+                            <br>
+                            <small class="text-muted">Short Film</small>
+                        </div>
+                        <span class="badge bg-info badge-custom">Post-Production</span>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a class="btn btn-custom">
+                            <i class="bi bi-eye me-2"></i>View All Projects
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Resources -->
+        <h3 class="section-title mt-4">Resources & Tools</h3>
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6">
+                <a href="#" class="action-card">
+                    <div class="action-card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <h5>Script Library</h5>
+                    <p>Access all scripts</p>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="#" class="action-card">
+                    <div class="action-card-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+                        <i class="bi bi-camera"></i>
+                    </div>
+                    <h5>Equipment</h5>
+                    <p>Manage gear & rentals</p>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="#" class="action-card">
+                    <div class="action-card-icon" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white;">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <h5>Budget Tracker</h5>
+                    <p>Monitor expenses</p>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="#" class="action-card">
+                    <div class="action-card-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333;">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <h5>Messages</h5>
+                    <p>Team communication</p>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Dismiss alert automatically after 5 seconds
+        setTimeout(function() {
+            var alert = document.querySelector('.alert');
+            if (alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    </script>
+}

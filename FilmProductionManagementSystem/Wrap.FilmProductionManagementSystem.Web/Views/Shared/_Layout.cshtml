@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"] - Wrap </title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+<header>
+    @{ bool isInRegisterModule = ViewData["Title"]?.ToString() == "Start"
+                                 || ViewData["Title"]?.ToString() == "Join as Actor"
+                                 || ViewData["Title"]?.ToString() == "Join as Filmmaker" 
+                                 || ViewData["Title"]?.ToString() == "Log In";
+    }
+    
+    @if (!isInRegisterModule)
+    {
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+            <div class="container-fluid">
+
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="GeneralPage">
+                    <img class="navbar-logo" src="~/img/clapperboard.png" alt="Clapperboard logo"> <text class="navbar-text-logo">WRAP</text>
+                </a>
+
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#wrapNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="wrapNavbar">
+
+                    <!-- Left navigation -->
+                    <partial name="_PartialNavBar"/>
+
+                    <!-- Right (Login / Profile) -->
+                    <partial name="_LoginPartial"/>
+
+                </div>
+            </div>
+        </nav>
+    }
+</header>
+
+@if (!isInRegisterModule)
+{
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+}
+else
+{
+    <main role="main">
+        @RenderBody()
+    </main>
+}
+
+@if (!isInRegisterModule)
+{
+    <footer class="wrap-footer">
+            <div class="footer-content">
+                <span>© @DateTime.Now.Year Wrap</span>
+                <span class="footer-separator">•</span>
+                <span>Your Film Production Management System</span>
+                <span class="footer-separator">•</span>
+                <a class="footer-tagline" asp-controller="Home" asp-action="GeneralPage">It’s a wrap</a>
+            </div>
+    </footer>
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

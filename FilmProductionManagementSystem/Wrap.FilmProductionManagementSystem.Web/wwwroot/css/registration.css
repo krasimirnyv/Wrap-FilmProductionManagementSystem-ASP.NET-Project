@@ -1,0 +1,703 @@
+/* =========================
+   WRAP REGISTRATION STYLES
+   Color scheme from home page screenshot
+   ========================= */
+html {
+    scrollbar-gutter: stable;
+}
+
+:root {
+    --wrap-bg: #3D5A6C;         /* Dark blue-gray background */
+    --wrap-red: #E84545;        /* Bright red accent */
+    --wrap-red-hover: #D63838;  /* Darker red for hover */
+    --wrap-text-light: #E8F0F2; /* Light text */
+    --wrap-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Home Page when register vibe */
+.home-hero {
+    min-height: 100vh;
+    position: relative;
+    width: 100%;
+
+    background: linear-gradient(
+            120deg,
+            #64afe1,
+            #4182c3,
+            #204360
+    );
+    background-size: 1000% 1000%;
+    animation: gradientMove 10s ease-in-out infinite;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #fff;
+}
+
+.hero-section {
+    min-height: calc(100vh - 70px); /* navbar height */
+    position: relative;
+    padding-bottom: 2.5rem;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 1% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 1% 50%; }
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.hero-content {
+    margin-top: 1.5rem;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    max-width: 900px;
+    padding: 2rem;
+    transform: translateY(-3vh);
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.hero-title span {
+    color: #e94935;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+.hero-subtitle.secondary {
+    margin-top: 0.5rem;
+    opacity: 0.7;
+}
+
+.hero-subtitle.secondary-2 {
+    padding-top: 1rem;
+    margin-top: 2rem;
+    opacity: 0.7;
+}
+
+.hero-actions {
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-actions-small {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-role {
+    min-width: 220px;
+    padding: 0.9rem 1.2rem;
+    font-size: 1.1rem;
+    border-radius: 20px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    border: 2px solid #e94935;
+    color: #e94935;
+    background: transparent;
+
+    transition: all 0.25s ease;
+
+    position: relative;
+    overflow: visible;
+}
+
+.btn-role:hover {
+    background: #e94935;
+    color: #000;
+    transform: translateY(-2px);
+}
+
+.hero-login-link {
+    margin-top: 5rem;
+    position: static;
+    bottom: 0.5rem;
+    width: 100%;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.75);
+    text-align: center;
+    animation: fadeUp 0.8s ease-out both;
+    animation-delay: 0.4s;
+}
+
+.hero-login-link .login-link {
+    margin-left: 0.25rem;
+    color: #e94935;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.hero-login-link .login-link:hover {
+    transform: translateY(-2px);
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.role-selector {
+    margin: 1.5rem 0;
+}
+
+.role-label {
+    color: #ccc;
+    margin-bottom: .5rem;
+}
+
+.role-option {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    cursor: pointer;
+    margin-bottom: .5rem;
+    color: #eee;
+    font-size: 1rem;
+}
+
+.role-option input {
+    display: none;
+}
+
+.custom-radio {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #e94935;
+    border-radius: 50%;
+    position: relative;
+}
+
+.role-option input:checked + .custom-radio::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: #e94935;
+    border-radius: 50%;
+}
+
+/* =========================
+   CONTAINER
+   ========================= */
+
+body {
+    background: var(--wrap-bg);
+    color: var(--wrap-text-light);
+    min-height: 100vh;
+    overflow-y: scroll;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.registration-container {
+    width: 100%;
+    min-height: 70vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+    align-items: flex-start;
+}
+
+.registration-card {
+    box-sizing: border-box;
+    background: #204360;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--wrap-border);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    max-width: 680px;
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.registration-card.skills-selection {
+    max-width: 800px;
+    min-width: 300px;
+}
+
+/* =========================
+   HEADER
+   ========================= */
+
+.registration-header {
+    margin-bottom: 2rem;
+}
+
+.registration-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--wrap-text-light);
+}
+
+.text-wrap-red {
+    color: var(--wrap-red);
+}
+
+.registration-header .text-muted {
+    color: rgba(232, 240, 242, 0.7) !important;
+}
+
+/* =========================
+   PROGRESS STEPS
+   ========================= */
+
+.progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2rem;
+    gap: 1rem;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s;
+}
+
+.step.active .step-circle {
+    background: var(--wrap-red);
+    border-color: var(--wrap-red);
+    color: white;
+}
+
+.step.completed .step-circle {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.step-label {
+    font-size: 0.875rem;
+    color: rgba(232, 240, 242, 0.7);
+}
+
+.step.active .step-label {
+    color: var(--wrap-text-light);
+    font-weight: 600;
+}
+
+.step-connector {
+    width: 60px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.step-connector.active {
+    background: var(--wrap-red);
+}
+
+/* =========================
+   FORM ELEMENTS
+   ========================= */
+
+.form-label {
+    color: var(--wrap-text-light);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-group-list{
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--wrap-border);
+    color: var(--wrap-text-light);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s;
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--wrap-border);
+    color: var(--wrap-text-light);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--wrap-red);
+    color: var(--wrap-text-light);
+    box-shadow: 0 0 0 0.2rem rgba(232, 69, 69, 0.25);
+}
+
+.form-group-list:focus{
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--wrap-red);
+    color: var(--wrap-text-light);
+    box-shadow: 0 0 0 0.2rem rgba(232, 69, 69, 0.25);
+}
+
+.form-control::placeholder {
+    color: rgba(232, 240, 242, 0.4);
+}
+
+.form-group-list::placeholder{
+    color: rgba(232, 240, 242, 0.4);
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+
+.form-text {
+    color: rgba(232, 240, 242, 0.6);
+}
+
+/* =========================
+   BUTTONS
+   ========================= */
+
+.btn-wrap-primary {
+    background: var(--wrap-red);
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-wrap-primary:hover:not(:disabled) {
+    background: var(--wrap-red-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(232, 69, 69, 0.4);
+}
+
+.btn-wrap-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-outline-secondary {
+    border: 1px solid var(--wrap-border);
+    color: var(--wrap-text-light);
+    background: transparent;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--wrap-text-light);
+}
+
+/* =========================
+   IMAGE UPLOAD
+   ========================= */
+
+.image-upload-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+}
+
+.image-upload-container .text-danger{
+    text-align: center;
+}
+
+.image-upload-box{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.image-preview {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 3px dashed var(--wrap-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    overflow: hidden;
+}
+
+.image-preview:hover {
+    border-color: var(--wrap-red);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.image-preview.has-image {
+    border-style: solid;
+    border-color: var(--wrap-red);
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.placeholder-text {
+    color: rgba(232, 240, 242, 0.5);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* =========================
+   GENDER SELECTION
+   ========================= */
+
+.gender-selection {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+}
+
+.form-check-input {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--wrap-border);
+}
+
+.form-check-input:checked {
+    background-color: var(--wrap-red);
+    border-color: var(--wrap-red);
+}
+
+.form-check-label {
+    color: var(--wrap-text-light);
+}
+
+/* =========================
+   ACCORDION (SKILLS)
+   ========================= */
+
+.selected-count {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--wrap-red);
+}
+
+.accordion {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.accordion-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--wrap-border);
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.accordion-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--wrap-text-light);
+    font-weight: 600;
+    border: none;
+    padding: 1rem 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(232, 69, 69, 0.2);
+    color: var(--wrap-text-light);
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: var(--wrap-red);
+}
+
+.accordion-button::after {
+    filter: brightness(0) invert(1);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.department-name {
+    flex: 1;
+}
+
+.department-count {
+    background: var(--wrap-red);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-left: 1rem;
+}
+
+.accordion-body {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1.5rem;
+    overflow-x: hidden;
+    min-width: 0;
+}
+
+/* =========================
+   SKILL BUBBLES
+   ========================= */
+
+.skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.skill-bubble {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid var(--wrap-border);
+    color: var(--wrap-text-light);
+    padding: 0.5rem 1.25rem;
+    border-radius: 24px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.skills-grid .skill-bubble {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+}
+
+.skill-bubble:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.skill-bubble.selected {
+    background: var(--wrap-red);
+    border-color: var(--wrap-red);
+    color: white;
+    box-shadow: 0 4px 12px rgba(232, 69, 69, 0.4);
+}
+
+.skill-bubble.selected:hover {
+    background: var(--wrap-red-hover);
+}
+
+/* =========================
+   VALIDATION
+   ========================= */
+
+.text-danger {
+    color: #ff6b6b !important;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.validation-summary-errors ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 768px) {
+    .registration-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .registration-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .progress-steps {
+        gap: 0.5rem;
+    }
+
+    .step-connector {
+        width: 40px;
+    }
+
+    .step-label {
+        display: none;
+    }
+
+    .skills-grid {
+        gap: 0.5rem;
+    }
+
+    .skill-bubble {
+        font-size: 0.875rem;
+        padding: 0.4rem 1rem;
+    }
+}

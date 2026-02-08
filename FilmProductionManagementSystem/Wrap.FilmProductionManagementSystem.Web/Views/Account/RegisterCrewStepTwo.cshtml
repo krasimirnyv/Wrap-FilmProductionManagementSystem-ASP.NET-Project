@@ -1,0 +1,108 @@
+@using Wrap.ViewModels.LoginAndRegistration;
+@using Wrap.ViewModels.LoginAndRegistration.Helpers;
+
+@model CrewRegistrationStepTwoInputModel
+
+@{
+    ViewData["Title"] = "Join as Filmmaker";
+}
+
+<link rel="stylesheet" href="~/css/registration.css" asp-append-version="true" />
+
+<section class="home-hero" xmlns="http://www.w3.org/1999/html">
+    <div class="registration-container">
+        <div class="registration-card skills-selection">
+            <!-- Header -->
+            <div class="registration-header">
+                <h2 class="text-center">🎯 Select Your <span class="text-wrap-red">Skills</span></h2>
+                <p class="text-center text-muted">Choose all the roles you're capable of</p>
+
+                <!-- Progress Steps -->
+                <div class="progress-steps">
+                    <div class="step completed">
+                        <div class="step-circle">✓</div>
+                        <div class="step-label">Basic Info</div>
+                    </div>
+                    <div class="step-connector active"></div>
+                    <div class="step active">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Skills</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selected Skills Count -->
+            <div class="selected-count mb-3">
+                <span id="selectedCount">0</span> skills selected
+            </div>
+
+            <!-- Form -->
+            <form asp-controller="Account" asp-action="RegisterCrewStepTwo" method="post" id="skillsForm">
+                <input type="hidden" name="SelectedSkills" id="hiddenSelectedSkills" />
+
+                <!-- Accordion -->
+                <div class="accordion" id="departmentsAccordion">
+                    @{
+                        int index = 0;
+                        foreach (KeyValuePair<string, IReadOnlyCollection<CrewRoleType>> department in Model.SkillsByDepartment)
+                        {
+                            string departmentId = $"department{index}";
+                            bool isFirstDepartment = index == 0;
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button @(isFirstDepartment ? "" : "collapsed")"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@departmentId"
+                                            aria-expanded="@(isFirstDepartment ? "true" : "false")">
+                                        <span class="department-name">@department.Key</span>
+                                        <span class="department-count" id="count-@departmentId">0</span>
+                                    </button>
+                                </h2>
+                                <div id="@departmentId"
+                                     class="accordion-collapse collapse @(isFirstDepartment ? "show" : "")"
+                                     data-bs-parent="#departmentsAccordion">
+                                    <div class="accordion-body">
+                                        <div class="skills-grid">
+                                            @foreach (CrewRoleType skill in department.Value)
+                                            {
+                                                string skillName = CrewRolesDepartments.GetDisplayName(skill);
+                                                string skillValue = ((int)skill).ToString();
+
+                                                <button type="button"
+                                                        class="skill-bubble"
+                                                        data-skill="@skillValue"
+                                                        data-department="@departmentId">
+                                                    @skillName
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            index++;
+                        }
+                    }
+                </div>
+
+                <div asp-validation-summary="All" class="text-danger mt-3"></div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-controller="Account" asp-action="RegisterCrewStepOne" class="btn btn-outline-secondary">
+                        ← Back
+                    </a>
+                    <button type="submit" class="btn btn-wrap-primary" id="submitBtn">
+                        Complete Registration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/Registration/registration-skills.js" asp-append-version="true"></script>
+}

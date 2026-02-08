@@ -1,0 +1,362 @@
+/* =========================
+   SCRIPT EDITOR - ENHANCED
+   ========================= */
+
+/* Base script page */
+.script-page {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 2rem auto;
+    padding-left: 1.5in;
+    padding-right: 1in;
+    padding-top: 1in;
+    padding-bottom: 1in;
+
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12pt;
+    line-height: 1.1;
+
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.script-block {
+    white-space: pre-wrap;
+    margin-bottom: 0.8em;
+    min-height: 1.1em;
+}
+
+.script-block:focus {
+    outline: 2px solid #4A90E2;
+    outline-offset: 2px;
+}
+
+.script-block:empty:before {
+    content: attr(data-placeholder);
+    color: #999;
+    font-style: italic;
+}
+
+/* =========================
+   TOOLBAR
+   ========================= */
+
+.script-toolbar {
+    position: sticky;
+    top: 0;
+    background: white;
+    border-bottom: 2px solid #ddd;
+    padding: 0.75rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.script-toolbar button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.script-toolbar button:hover {
+    background: #f5f5f5;
+    border-color: #4A90E2;
+}
+
+.script-toolbar button:active {
+    background: #e8e8e8;
+}
+
+.toolbar-divider {
+    width: 1px;
+    background: #ddd;
+    margin: 0 0.5rem;
+}
+
+/* =========================
+   TITLE PAGE
+   ========================= */
+
+.script-title-page {
+    width: 8.5in;
+    height: 11in;
+    margin: 2rem auto;
+    padding: 1in;
+
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12pt;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.script-title-page .title {
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-bottom: 1.5em;
+    font-size: 14pt;
+}
+
+.script-title-page .written-by {
+    margin-bottom: 0.5em;
+}
+
+.script-title-page .author {
+    margin-bottom: 2em;
+}
+
+.script-title-page .contact {
+    position: absolute;
+    bottom: 1in;
+    left: 1.5in;
+}
+
+/* =========================
+   SCRIPT BLOCKS
+   ========================= */
+
+/* Scene Heading */
+.script-block.sceneheading {
+    text-transform: uppercase;
+    margin-bottom: 1.2em;
+    font-weight: bold;
+}
+
+/* Subheading */
+.script-block.subheader {
+    text-transform: uppercase;
+    margin-left: 0;
+    margin-bottom: 1em;
+}
+
+/* Action */
+.script-block.action {
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 1em;
+}
+
+/* Character */
+.script-block.character {
+    margin-left: 3.7in;
+    text-transform: uppercase;
+    margin-bottom: 0.2em;
+    font-weight: bold;
+}
+
+/* Extension (V.O., O.S., CONT'D) */
+.script-block.extension {
+    margin-left: 3.7in;
+    margin-top: -0.2em;
+    margin-bottom: 0.1em;
+    font-style: italic;
+    font-size: 11.5pt;
+}
+
+/* Parenthetical */
+.script-block.parenthetical {
+    margin-left: 3.1in;
+    margin-right: 2.5in;
+    margin-top: 0;
+    margin-bottom: 0.2em;
+    font-style: italic;
+    line-height: 1.05;
+}
+
+.script-block.parenthetical::before {
+    content: "(";
+}
+
+.script-block.parenthetical::after {
+    content: ")";
+}
+
+/* Dialogue */
+.script-block.dialogue {
+    margin-left: 2.5in;
+    margin-right: 2in;
+}
+
+/* Transition */
+.script-block.transition {
+    text-align: right;
+    text-transform: uppercase;
+    margin-top: 1em;
+}
+
+/* =========================
+   PAGE NUMBERS
+   ========================= */
+
+.script-page-number {
+    position: absolute;
+    top: 0.5in;
+    right: 1in;
+    font-size: 12pt;
+}
+
+/* =========================
+   LOCKED PAGES
+   ========================= */
+
+.script-page.locked {
+    opacity: 0.9;
+    background: #fafafa;
+}
+
+.script-page.locked .script-block {
+    pointer-events: none;
+    user-select: text;
+}
+
+.unlock-page {
+    position: absolute;
+    top: 0.5in;
+    left: 0.5in;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    background: #ff9800;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.unlock-page:hover {
+    opacity: 1;
+}
+
+/* =========================
+   AUTOCOMPLETE
+   ========================= */
+
+.autocomplete-suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    max-width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+.autocomplete-item {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-family: "Courier New", monospace;
+    font-size: 12pt;
+    border-bottom: 1px solid #eee;
+}
+
+.autocomplete-item:hover {
+    background: #f0f0f0;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+/* =========================
+   SAVE STATUS
+   ========================= */
+
+.script-status {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    font-size: 12px;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.script-status.saving {
+    color: orange;
+    border-left: 3px solid orange;
+}
+
+.script-status.saved {
+    color: green;
+    border-left: 3px solid green;
+}
+
+.script-status.error {
+    color: red;
+    border-left: 3px solid red;
+    opacity: 1;
+}
+
+/* =========================
+   PRINT STYLES
+   ========================= */
+
+.print-mode .script-toolbar {
+    display: none !important;
+}
+
+.print-mode .unlock-page {
+    display: none !important;
+}
+
+.print-mode .script-status {
+    display: none !important;
+}
+
+@media print {
+    body {
+        background: white !important;
+    }
+
+    @page {
+        size: letter;
+        margin: 0;
+    }
+
+    .script-page {
+        margin: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+    }
+
+    .script-title-page {
+        page-break-after: always;
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .script-toolbar,
+    .script-status,
+    .unlock-page {
+        display: none !important;
+    }
+}
+
+/* =========================
+   EMPTY STATE
+   ========================= */
+
+.script-empty-hint {
+    text-align: center;
+    padding: 3rem;
+    color: #999;
+    font-style: italic;
+    font-size: 1.2rem;
+}
