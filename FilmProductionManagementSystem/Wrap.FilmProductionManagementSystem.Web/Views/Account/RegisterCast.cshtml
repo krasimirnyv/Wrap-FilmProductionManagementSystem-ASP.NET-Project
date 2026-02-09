@@ -1,4 +1,5 @@
 @using Wrap.ViewModels.LoginAndRegistration
+@using static Wrap.GCommon.ApplicationConstants;
 
 @model CastRegistrationInputModel
 
@@ -26,9 +27,9 @@
             </div>
 
             <!-- Form -->
-            <form asp-controller="Account" asp-action="RegisterCast" method="post" class="registration-form">
+            <form asp-controller="Account" asp-action="RegisterCast" method="post" enctype="multipart/form-data" class="registration-form">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
+                
                 <!-- Profile Image Upload -->
                 <div class="form-group mb-4 text-center">
                     <label class="form-label d-block">Profile Image</label>
@@ -39,6 +40,7 @@
                         </label>
                         <input type="file"
                                asp-for="ProfilePicturePath"
+                               name="ProfilePicturePath"
                                class="form-control d-none"
                                id="profileImageInput"
                                accept="image/*" />
@@ -155,7 +157,7 @@
                     <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
                         ← Back to Home
                     </a>
-                    <button type="submit" class="btn btn-wrap-primary" id="submitBtn">
+                    <button type="submit" class="btn btn-wrap-primary" id="submitBtn" value="Upload">
                         Complete Registration
                     </button>
                 </div>
@@ -200,8 +202,8 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
       }
 
-      // по желание: basic validation
-      if (!file.type.startsWith("image/")) {
+      if (file.size > @MaxFileSize) {
+          alert("File size must be less than 5MB.");
           input.value = "";
           return;
       }
@@ -214,5 +216,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
     </script>
-
 }

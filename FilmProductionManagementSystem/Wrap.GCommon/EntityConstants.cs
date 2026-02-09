@@ -41,7 +41,7 @@ public static class EntityConstants
     {
         public const int ProfileImagePathMaxLength = 500;
         
-        public const string DefaultProfileImagePath = "../../../Wrap.FilmProductionManagementSystem.Web/wwwroot/img/profile/default-profile.png";
+        public const string DefaultProfileImagePath = "/../../Wrap.FilmProductionManagementSystem.Web/wwwroot/img/profile/default-profile.png";
 
         public const int FirstNameMinLength = 2;
         public const int FirstNameMaxLength = 150;

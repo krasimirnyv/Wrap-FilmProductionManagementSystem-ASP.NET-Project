@@ -7,6 +7,7 @@ using Wrap.Services.Core.Interface;
 using Wrap.Services.Core.Utilities;
 
 using Wrap.ViewModels.LoginAndRegistration;
+using Wrap.ViewModels.Profile;
 
 public class AccountController(IWrapAccountService accountService, ILogger<AccountController> logger) : Controller
 {
@@ -53,7 +54,7 @@ public class AccountController(IWrapAccountService accountService, ILogger<Accou
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RegisterCrewStepTwo(CrewRegistrationStepTwoInputModel model)
     {
-        if (ActionResult(model)) // bool method
+        if (IsSkillSelected(model)) // bool method
             return View(model);
         
         try
@@ -141,8 +142,8 @@ public class AccountController(IWrapAccountService accountService, ILogger<Accou
                 return View(model);
             }
 
-            (bool, string) logindStatus = await accountService.LoginStatusAsync(model);
-            switch (logindStatus)
+            (bool, string) loginStatus = await accountService.LoginStatusAsync(model);
+            switch (loginStatus)
             {
                 case (true, "Crew"):
                 case (true, "Cast"):
@@ -176,7 +177,7 @@ public class AccountController(IWrapAccountService accountService, ILogger<Accou
         return RedirectToAction("Index", "Home");
     }
     
-    private bool ActionResult(CrewRegistrationStepTwoInputModel model)
+    private bool IsSkillSelected(CrewRegistrationStepTwoInputModel model)
     {
         if (model.SelectedSkills.Count > 0)
             return false;

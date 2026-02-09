@@ -1,7 +1,5 @@
 namespace Wrap.ViewModels.LoginAndRegistration;
 
-using static Wrap.GCommon.EntityConstants.Crew;
-
 public class CrewRegistrationStepOneDraft
 {
     public string UserName { get; set; } = null!;
@@ -18,7 +16,7 @@ public class CrewRegistrationStepOneDraft
 
     public string? Nickname { get; set; }
 
-    public string? ProfilePicturePath { get; set; } = DefaultProfileImagePath;
+    public string? ProfilePicturePath { get; set; }
     
     public string? Biography { get; set; }
 }

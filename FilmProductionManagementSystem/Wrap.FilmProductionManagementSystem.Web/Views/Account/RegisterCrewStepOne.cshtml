@@ -1,5 +1,5 @@
 @using Wrap.ViewModels.LoginAndRegistration
-@using Wrap.ViewModels.LoginAndRegistration.Helpers
+@using static Wrap.GCommon.ApplicationConstants;
 
 @model CrewRegistrationStepOneInputModel
 
@@ -32,7 +32,7 @@
         </div>
 
         <!-- Form -->
-        <form asp-controller="Account" asp-action="RegisterCrewStepOne" method="post" class="registration-form">
+        <form asp-controller="Account" asp-action="RegisterCrewStepOne" method="post" enctype="multipart/form-data" class="registration-form">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <!-- Profile Image Upload -->
@@ -45,6 +45,7 @@
                     </label>
                     <input type="file"
                            asp-for="ProfilePicturePath"
+                           name="ProfilePicturePath"
                            class="form-control d-none"
                            id="profileImageInput"
                            accept="image/*" />
@@ -163,8 +164,8 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
       }
 
-      // по желание: basic validation
-      if (!file.type.startsWith("image/")) {
+      if (file.size > @MaxFileSize) {
+          alert("File size must be less than 5MB.");
           input.value = "";
           return;
       }

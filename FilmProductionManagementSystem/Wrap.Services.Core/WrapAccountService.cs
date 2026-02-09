@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Hosting;
 
 using Data;
 using Data.Models;
@@ -13,21 +14,21 @@ using Data.Models.Infrastructure;
 using ViewModels.LoginAndRegistration;
 using ViewModels.LoginAndRegistration.Helpers;
 
-using Services.Core.Interface;
+using Interface;
 
-using Wrap.GCommon;
 using GCommon.Enums;
 
-using static GCommon.EntityConstants.Crew;
+using static GCommon.ApplicationConstants;
 
 public class WrapAccountService(UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
-                                FilmProductionDbContext context) : IWrapAccountService
+                                FilmProductionDbContext context,
+                                IWebHostEnvironment environment) : IWrapAccountService
 {
  
     public async Task<CrewRegistrationStepOneDraft> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model)
     {
-        CrewRegistrationStepOneDraft draftModel = new CrewRegistrationStepOneDraft()
+        CrewRegistrationStepOneDraft draftModel = new CrewRegistrationStepOneDraft
         {
             UserName = model.UserName,
             Email = model.Email,
@@ -36,14 +37,10 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
             FirstName = model.FirstName,
             LastName = model.LastName,
             Nickname = model.Nickname,
-            Biography = model.Biography
+            Biography = model.Biography,
+            ProfilePicturePath = await SaveProfileImageAsync(model.ProfilePicturePath)
         };
-        
-        if (model.ProfilePicturePath is not null && model.ProfilePicturePath.Length > 0)
-        {
-            draftModel.ProfilePicturePath = await SaveProfileImage(model.ProfilePicturePath);
-        }
-        
+
         return draftModel;
     }
 
@@ -72,14 +69,14 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
         IdentityResult result = await userManager.CreateAsync(user, draft.Password);
         if (!result.Succeeded)
             return result;
-
+        
         await using IDbContextTransaction transaction = await context.Database.BeginTransactionAsync();
 
         Crew newCrew = new Crew
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
-            ProfileImagePath = draft.ProfilePicturePath ?? DefaultProfileImagePath,
+            ProfileImagePath = draft.ProfilePicturePath,
             FirstName = draft.FirstName,
             LastName = draft.LastName,
             Nickname = draft.Nickname,
@@ -125,7 +122,7 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
-            ProfileImagePath = model.ProfilePicturePath ?? DefaultProfileImagePath,
+            ProfileImagePath = await SaveProfileImageAsync(model.ProfilePicturePath),
             FirstName = model.FirstName,
             LastName = model.LastName,
             Nickname = model.Nickname,
@@ -194,7 +191,6 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
         await signInManager.SignOutAsync();
     }
 
-
     private async Task<ApplicationUser?> GetValueAsync(AccountLogInInputModel model)
     {
         ApplicationUser? user = await userManager.FindByNameAsync(model.UserName);
@@ -207,21 +203,36 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
 
         return signInResult.Succeeded ? user : null;
     }
-
-
-    private async Task<string> SaveProfileImage(IFormFile file)
+    
+    private async Task<string> SaveProfileImageAsync(IFormFile? photo)
     {
-        string uploadsFolder = Path.Combine("..", "..", "Web", "Wrap.FilmProductionManagementSystem.Web", "wwwroot", "img", "profile");
-        Directory.CreateDirectory(uploadsFolder);
+        if (photo is null || photo.Length <= 0)
+            return Path.Combine("img", "profile", "default-profile.png");
 
-        string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-        string fullPath = Path.Combine(uploadsFolder, fileName);
+        string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heif", ".heic", ".hif"];
+        string fileExtension = Path.GetExtension(photo.FileName).ToLowerInvariant();
 
-        await using FileStream fs = new FileStream(fullPath, FileMode.Create);
-        await file.CopyToAsync(fs);
+        if (!allowedExtensions.Contains(fileExtension))
+            throw new NotSupportedException($"The file extension {fileExtension} is not supported.");
 
-        string pathToFile = Path.Combine("..", "..", "Web", "Wrap.FilmProductionManagementSystem.Web", "wwwroot", "img", "profile", fileName);
+        if (photo.Length > MaxFileSize)
+            throw new NotSupportedException($"The file size limit {MaxFileSize} exceeded.");
         
-        return pathToFile;
+        string fileName = $"{Guid.NewGuid()}.{photo.Name}";
+        
+        string wwwrootPath = environment.WebRootPath;
+        string uploadsFolder = Path.Combine(wwwrootPath, "img", "profile");
+
+        Directory.CreateDirectory(uploadsFolder);
+        
+        string physicalPath = Path.Combine(uploadsFolder, fileName);
+        string webPath = Path.Combine("img", "profile", fileName);
+        
+        await using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create))
+        {
+            await photo.CopyToAsync(fileStream);
+        }
+
+        return webPath;
     }
 }

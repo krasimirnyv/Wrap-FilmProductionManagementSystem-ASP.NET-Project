@@ -6,6 +6,8 @@ using Wrap.Data.Models.Infrastructure;
 using Wrap.Services.Core;
 using Wrap.Services.Core.Interface;
 
+using static Wrap.GCommon.ApplicationConstants;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http.Features;
 
@@ -60,7 +62,7 @@ public class Program
         // Configure file upload size (if needed)
         builder.Services.Configure<FormOptions>(options =>
         {
-            options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+            options.MultipartBodyLengthLimit = MaxFileSize; // 10MB
         });
         
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
