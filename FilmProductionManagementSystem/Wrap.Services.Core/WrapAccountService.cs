@@ -199,7 +199,7 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
             return null;
         
         SignInResult signInResult = await signInManager
-            .PasswordSignInAsync(user, model.Password, false, false);
+            .PasswordSignInAsync(user, model.Password, model.RememberMe, false);
 
         return signInResult.Succeeded ? user : null;
     }

@@ -383,6 +383,10 @@ body {
     background: linear-gradient(135deg, #64afe1 0%, #4182c3 100%) !important;
 }
 
+.bg-end.badge-custom {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333;" !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .welcome-banner h1 {

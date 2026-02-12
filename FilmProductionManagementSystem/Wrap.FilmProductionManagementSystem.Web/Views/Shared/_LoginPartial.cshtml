@@ -1,53 +1,39 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using Wrap.Data.Models.Infrastructure
+﻿@using Microsoft.AspNetCore.Identity;
+@using Wrap.Data.Models.Infrastructure;
+@using Wrap.ViewModels.General;
 
 @inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+
+@model ProfilePictureViewModel
 
 <ul class="navbar-nav ms-auto">
 
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle"
+            <a class="nav-link dropdown-toggle d-flex align-items-center"
                data-bs-toggle="dropdown"
-               role="button">
+               role="button"
+               style="cursor: pointer;">
                 @User.Identity!.Name
+                
+                @if (Model.Role == "Crew")
+                {
+                    <img src="@Model.ProfilePicture"
+                         alt="Profile"
+                         class="rounded-circle me-2"
+                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e94935;">
+                    <span>@Model.Name</span>
+                }
+                else if (Model.Role == "Cast")
+                {
+                    <img src="@Model.ProfilePicture"
+                         alt="Profile"
+                         class="rounded-circle me-2"
+                         style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e94935;">
+                    <span>@Model.Name</span>
+                }
             </a>
-
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <a class="dropdown-item"
-                       asp-controller="Profile"
-                       asp-action="Index">
-                        Profile
-                    </a>
-                </li>
-
-                <li><hr class="dropdown-divider"/></li>
-
-                <li>
-                    <form asp-controller="Account" asp-action="Logout" method="post">
-                        <button class="dropdown-item text-danger">
-                            Logout
-                        </button>
-                    </form>
-                </li>
-            </ul>
-        </li>
-        
-        <li class="nav-item dropdown">
-            @* <a class="nav-link dropdown-toggle d-flex align-items-center" *@
-            @*    data-bs-toggle="dropdown" *@
-            @*    role="button" *@
-            @*    style="cursor: pointer;"> *@
-            @*     <img src="@profileImagePath"  *@
-            @*          alt="Profile"  *@
-            @*          class="rounded-circle me-2" *@
-            @*          style="width: 32px; height: 32px; object-fit: cover; border: 2px solid #e94935;" *@
-            @*          onerror="this.src='/img/default-avatar.png';"> *@
-            @*     <span>@displayName</span> *@
-            @* </a> *@
 
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
@@ -55,9 +41,9 @@
                         <i class="bi bi-person me-2"></i>Profile
                     </a>
                 </li>
-                
+
                 <li>
-                    <a class="dropdown-item" asp-controller="Settings" asp-action="Index">
+                    <a class="dropdown-item" asp-controller="Profile" asp-action="Edit">
                         <i class="bi bi-gear me-2"></i>Settings
                     </a>
                 </li>

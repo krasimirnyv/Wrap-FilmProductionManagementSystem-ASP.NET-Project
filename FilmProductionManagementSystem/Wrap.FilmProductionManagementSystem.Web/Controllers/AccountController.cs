@@ -2,16 +2,18 @@ namespace FilmProductionManagementSystem.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 using Wrap.Services.Core.Interface;
 using Wrap.Services.Core.Utilities;
 
 using Wrap.ViewModels.LoginAndRegistration;
-using Wrap.ViewModels.Profile;
 
-public class AccountController(IWrapAccountService accountService, ILogger<AccountController> logger) : Controller
+public class AccountController(IWrapAccountService accountService, 
+                               ILogger<AccountController> logger) : Controller
 {
     private const string CrewDraftKey = "CrewDraft";
+    private const string SuccessMessage = "Registration successful! Welcome to Wrap!";
 
     [HttpGet]
     public IActionResult RegisterCrewStepOne()
@@ -76,7 +78,7 @@ public class AccountController(IWrapAccountService accountService, ILogger<Accou
             }
         
             HttpContext.Session.Remove(CrewDraftKey);
-            TempData["SuccessMessage"] = "Registration successful! Welcome to Wrap!";
+            TempData["SuccessMessage"] = SuccessMessage;
         }
         catch (Exception e)
         {
@@ -110,7 +112,7 @@ public class AccountController(IWrapAccountService accountService, ILogger<Accou
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = "Registration successful! Welcome to Wrap!";
+            TempData["SuccessMessage"] = SuccessMessage;
         }
         catch (Exception e)
         {
@@ -171,6 +173,7 @@ public class AccountController(IWrapAccountService accountService, ILogger<Accou
     
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize]
     public async Task<IActionResult> Logout()
     {
         await accountService.LogoutAsync();
