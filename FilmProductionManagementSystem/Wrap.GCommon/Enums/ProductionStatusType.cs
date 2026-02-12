@@ -2,6 +2,8 @@ namespace Wrap.GCommon.Enums;
 
 public enum ProductionStatusType
 {
+    /* Pre-production */
+
     // Early development
     Concept = 1, // Initial idea, pitch phase
     Development = 2, // Script writing, financing, planning
@@ -13,10 +15,13 @@ public enum ProductionStatusType
     LocationScouting = 6, // Finding and securing locations
     Rehearsals = 7, // Actor rehearsals
 
+    /* Production */
     // Production
     Production = 8, // Active shooting
     OnHold = 9, // Temporarily paused
     Reshoots = 10, // Additional shooting after main unit
+
+    /* Post-production */
 
     // Post-production
     PostProduction = 11, // Editing, sound, VFX
@@ -25,6 +30,8 @@ public enum ProductionStatusType
     ColorGrading = 14, // Color correction / grading
     VisualEffects = 15, // VFX production
     MusicComposition = 16, // Score composition
+
+    /* Distribution */
 
     // Distribution & release
     Marketing = 17, // Trailers, posters, festivals

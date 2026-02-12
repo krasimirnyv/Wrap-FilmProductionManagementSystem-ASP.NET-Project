@@ -37,6 +37,7 @@
 
 
     <ItemGroup>
+      <Folder Include="Areas\Identity\Pages\Account\" />
       <Folder Include="wwwroot\img\profile\" />
     </ItemGroup>
 
