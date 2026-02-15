@@ -20,10 +20,10 @@ using GCommon.Enums;
 
 using static GCommon.ApplicationConstants;
 
-public class WrapAccountService(UserManager<ApplicationUser> userManager,
+public class LoginRegisterService(UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
                                 FilmProductionDbContext context,
-                                IWebHostEnvironment environment) : IWrapAccountService
+                                IWebHostEnvironment environment) : ILoginRegisterService
 {
  
     public async Task<CrewRegistrationStepOneDraft> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model)
@@ -76,7 +76,7 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
-            ProfileImagePath = draft.ProfilePicturePath,
+            ProfileImagePath = draft.ProfilePicturePath!,
             FirstName = draft.FirstName,
             LastName = draft.LastName,
             Nickname = draft.Nickname,
@@ -191,6 +191,11 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
         await signInManager.SignOutAsync();
     }
 
+    /// <summary>
+    /// Gets the user based on the provided username and password in the login form.
+    /// </summary>
+    /// <param name="model">AccountLogInInputModel</param>
+    /// <returns>ApplicationUser -> if succeeded returns user, else - null</returns>
     private async Task<ApplicationUser?> GetValueAsync(AccountLogInInputModel model)
     {
         ApplicationUser? user = await userManager.FindByNameAsync(model.UserName);
@@ -204,10 +209,18 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
         return signInResult.Succeeded ? user : null;
     }
     
+    /// <summary>
+    /// Get the profile image from the form,
+    /// validate it, save it to the server
+    /// and return the web path to be stored in the database.
+    /// </summary>
+    /// <param name="photo">IFormFile?</param>
+    /// <returns>webPath of photo -> "/img/profile/{fileName}"</returns>
+    /// <exception cref="NotSupportedException"> for unsupported file extensions and very large image size</exception>
     private async Task<string> SaveProfileImageAsync(IFormFile? photo)
     {
         if (photo is null || photo.Length <= 0)
-            return Path.Combine("img", "profile", "default-profile.png");
+            return "/img/profile/default-profile.png";
 
         string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heif", ".heic", ".hif"];
         string fileExtension = Path.GetExtension(photo.FileName).ToLowerInvariant();
@@ -218,7 +231,7 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
         if (photo.Length > MaxFileSize)
             throw new NotSupportedException($"The file size limit {MaxFileSize} exceeded.");
         
-        string fileName = $"{Guid.NewGuid()}.{photo.Name}";
+        string fileName = $"{Guid.NewGuid()}{fileExtension}";
         
         string wwwrootPath = environment.WebRootPath;
         string uploadsFolder = Path.Combine(wwwrootPath, "img", "profile");
@@ -226,7 +239,7 @@ public class WrapAccountService(UserManager<ApplicationUser> userManager,
         Directory.CreateDirectory(uploadsFolder);
         
         string physicalPath = Path.Combine(uploadsFolder, fileName);
-        string webPath = Path.Combine("img", "profile", fileName);
+        string webPath = $"/img/profile/{fileName}";
         
         await using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create))
         {
