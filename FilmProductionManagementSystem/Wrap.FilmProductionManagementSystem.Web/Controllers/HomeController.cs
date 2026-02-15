@@ -1,23 +1,34 @@
 namespace FilmProductionManagementSystem.Web.Controllers;
 
 using System.Diagnostics;
+
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 using Wrap.ViewModels;
+using Wrap.ViewModels.General;
 
-public class HomeController : Controller
-{
-    //ILogger<HomeController> logger
+using Wrap.Services.Core.Interface;
+
+[Authorize]
+public class HomeController(IHomeService homeService) : Controller
+{ 
+    [HttpGet]
+    [AllowAnonymous]
     public IActionResult Index()
     {
         return View();
     }
     
-    public IActionResult GeneralPage()
+    [HttpGet]
+    public async Task<IActionResult> Dashboard()
     {
-        return View();
+        GeneralPageViewModel general = await homeService.GetGeneralInformation();
+        return View(general);
     }
 
+    [HttpGet]
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
@@ -25,6 +36,7 @@ public class HomeController : Controller
     }
     
     [HttpGet]
+    [AllowAnonymous]
     [Route("Error/{statusCode:int}")]
     public IActionResult StatusCodeError(int statusCode)
     {

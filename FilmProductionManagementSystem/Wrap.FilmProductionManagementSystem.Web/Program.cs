@@ -41,9 +41,18 @@ public class Program
                 ConfigureIdentity(options, builder.Configuration);
             })
             .AddEntityFrameworkStores<FilmProductionDbContext>();
+        
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.LoginPath = LoginPath;
+            options.LogoutPath = LogoutPath;
+        });
 
-        builder.Services.AddScoped<IWrapService, WrapService>();
-        builder.Services.AddScoped<IWrapAccountService, WrapAccountService>();
+        
+        builder.Services.AddScoped<IHomeService, HomeService>();
+        builder.Services.AddScoped<ILoginRegisterService, LoginRegisterService>();
+        builder.Services.AddScoped<INavBarService, NavBarService>();
+        builder.Services.AddScoped<IProfileService, ProfileService>();
 
         // Using session + "draft" JSON for the two-step registration form for crew members.
         builder.Services.AddDistributedMemoryCache();

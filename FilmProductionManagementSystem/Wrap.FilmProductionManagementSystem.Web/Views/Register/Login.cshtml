@@ -23,8 +23,9 @@
         </div>
 
         <!-- Form -->
-        <form asp-controller="Account"
+        <form asp-controller="Register"
               asp-action="Login"
+              asp-route-returnUrl="@Context.Request.Query["ReturnUrl"]"
               method="post"
               class="registration-form">
 

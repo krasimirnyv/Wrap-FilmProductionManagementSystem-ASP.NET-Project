@@ -19,10 +19,11 @@ public class Crew
 {
     [Key]
     public Guid Id { get; set; }
-    
+
     [Unicode]
+    [Required]
     [MaxLength(ProfileImagePathMaxLength)]
-    public string? ProfileImagePath { get; set; }
+    public string ProfileImagePath { get; set; } = null!;
     // Example: "/images/crew/john-doe.jpg"
 
     [Required]
@@ -74,5 +75,5 @@ public class Crew
         = new List<SceneCrew>();
     
     public virtual ICollection<CrewSkill> Skills { get; set; }
-        = new List<CrewSkill>();
+        = new HashSet<CrewSkill>();
 }

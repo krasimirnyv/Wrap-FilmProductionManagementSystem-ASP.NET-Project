@@ -1,3 +1,5 @@
+@model GeneralPageViewModel
+
 @{
     ViewData["Title"] = "Dashboard";
 }
@@ -17,56 +19,73 @@
 
         <!-- Welcome Banner -->
         <div class="welcome-banner">
-            <h1>Welcome to Wrap! 🎬</h1>
-            <p>Your film production management platform. Let's create something amazing today.</p>
+            <h1>Welcome to Wrap!</h1>
+            <p>Your film production management platform. Let's create something amazing today!</p>
         </div>
 
         <!-- Stats Section -->
         <h3 class="section-title">Overview</h3>
         <div class="row">
             <div class="col-md-3 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon primary">
-                        <i class="bi bi-camera-reels"></i>
+                <a class="text-decoration-none text-reset" asp-controller="Production" asp-action="AllActiveProjects" >
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="bi bi-camera-reels"></i>
+                        </div>
+                        <h2 class="stat-number">@Model.Productions.Count()</h2>
+                        <p class="stat-label">Active Projects</p>
                     </div>
-                    <h2 class="stat-number">12</h2>
-                    <p class="stat-label">Active Projects</p>
-                </div>
+                    </a>
             </div>
             <div class="col-md-3 col-sm-6">
+                <a class="text-decoration-none text-reset" asp-controller="Search" asp-action="FindFilmmakers" >
                 <div class="stat-card">
                     <div class="stat-icon success">
                         <i class="bi bi-people"></i>
                     </div>
-                    <h2 class="stat-number">48</h2>
-                    <p class="stat-label">Team Members</p>
+                    <h2 class="stat-number">@Model.CrewMembers</h2>
+                    <p class="stat-label">Find filmmakers</p>
                 </div>
+                </a>
             </div>
             <div class="col-md-3 col-sm-6">
+                <a class="text-decoration-none text-reset" asp-controller="Search" asp-action="FindActors" >
                 <div class="stat-card">
-                    <div class="stat-icon warning">
+                    <div class="stat-icon success">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h2 class="stat-number">@Model.CastMembers</h2>
+                    <p class="stat-label">Find actors</p>
+                </div>
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a class="text-decoration-none text-reset" asp-controller="Schedule" asp-action="UpcomingShoots" >
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
                         <i class="bi bi-calendar-check"></i>
                     </div>
-                    <h2 class="stat-number">8</h2>
-                    <p class="stat-label">Upcoming Shoots</p>
+                    <h2 class="stat-number" >@Model.UpcomingScenes</h2>
+                    <p class="stat-label">Upcoming Scenes</p>
                 </div>
+                </a>
             </div>
-            <div class="col-md-3 col-sm-6">
-                <div class="stat-card">
-                    <div class="stat-icon info">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
-                    <h2 class="stat-number">156</h2>
-                    <p class="stat-label">Hours Logged</p>
-                </div>
-            </div>
+            @* <div class="col-md-3 col-sm-6"> *@
+            @*     <div class="stat-card"> *@
+            @*         <div class="stat-icon info"> *@
+            @*             <i class="bi bi-clock-history"></i> *@
+            @*         </div> *@
+            @*         <h2 class="stat-number">@Model.CurrentMemberDaysLogged</h2> *@
+            @*         <p class="stat-label">Days Logged</p> *@
+            @*     </div> *@
+            @* </div> *@
         </div>
 
         <!-- Quick Actions -->
         <h3 class="section-title mt-4">Quick Actions</h3>
-        <div class="row">
-            <div class="col-md-4">
-                <a href="#" class="action-card">
+        <div  class="row">
+            <div class="col-md-4" >
+                <a asp-controller="Production" asp-action="Create" class="action-card" >
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                         <i class="bi bi-plus-circle"></i>
                     </div>
@@ -75,7 +94,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a href="#" class="action-card">
+                <a asp-controller="Production" asp-action="AddMember" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
                         <i class="bi bi-person-plus"></i>
                     </div>
@@ -84,7 +103,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a href="#" class="action-card">
+                <a asp-controller="Production" asp-action="Schedule" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
                         <i class="bi bi-calendar-event"></i>
                     </div>
@@ -94,7 +113,7 @@
             </div>
         </div>
 
-        <!-- Recent Activity & Projects -->
+        <!-- Recent Activity & Projects (hard-coded activities for now)-->
         <h3 class="section-title mt-4">Recent Activity</h3>
         <div class="row">
             <div class="col-lg-8">
@@ -127,35 +146,43 @@
                 <div class="recent-activity">
                     <h4><i class="bi bi-film me-2"></i>Active Projects</h4>
                     
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <strong>Midnight Dreams</strong>
-                            <br>
-                            <small class="text-muted">Feature Film</small>
-                        </div>
-                        <span class="badge bg-success badge-custom">In Production</span>
-                    </div>
                     
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <strong>Urban Legends</strong>
-                            <br>
-                            <small class="text-muted">Documentary</small>
-                        </div>
-                        <span class="badge bg-warning badge-custom text-dark">Pre-Production</span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Silent Echoes</strong>
-                            <br>
-                            <small class="text-muted">Short Film</small>
-                        </div>
-                        <span class="badge bg-info badge-custom">Post-Production</span>
-                    </div>
+                    @{ int i = 0;
+                       foreach (ProductionViewModel production in Model.Productions)
+                       {
+                           if (i == 2)
+                           {
+                               break;
+                           }
+                           
+                           i++;
+                           <div class="d-flex justify-content-between align-items-center mb-3">
+                               <div>
+                                   <strong>@production.Title</strong>
+                                   <br>
+                                   <small class="text-muted" style="width: 150px; overflow: hidden; text-overflow: ellipsis;">@production.Description</small>
+                               </div>
+                               @switch (production.AbstractStatus)
+                               {
+                                   case "Pre-production":
+                                       <span class="badge bg-warning badge-custom text-dark">@production.Status</span>
+                                       break;
+                                   case "Production":
+                                       <span class="badge bg-success badge-custom">@production.Status</span>
+                                       break;
+                                   case "Post-production":
+                                       <span class="badge bg-info badge-custom">@production.Status</span>
+                                       break;
+                                   case "Distribution":
+                                       <span class="badge bg-end badge-custom">@production.Status</span>
+                                       break;
+                               }
+                           </div>
+                       }
+                    }
                     
                     <div class="text-center mt-4">
-                        <a class="btn btn-custom">
+                        <a asp-controller="Production" asp-action="AllProjects" class="btn btn-custom">
                             <i class="bi bi-eye me-2"></i>View All Projects
                         </a>
                     </div>
@@ -164,42 +191,35 @@
         </div>
 
         <!-- Additional Resources -->
+        
         <h3 class="section-title mt-4">Resources & Tools</h3>
-        <div class="row mb-4">
-            <div class="col-md-3 col-sm-6">
-                <a href="#" class="action-card">
+        <div class="row">
+            <div class="col-md-4">
+                <a asp-controller="Scripts" asp-action="Index" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
-                        <i class="bi bi-book"></i>
+                        <i class="bi bi-plus-circle"></i>
                     </div>
                     <h5>Script Library</h5>
                     <p>Access all scripts</p>
                 </a>
             </div>
-            <div class="col-md-3 col-sm-6">
-                <a href="#" class="action-card">
+            <div class="col-md-4">
+                <a asp-controller="Assets" asp-action="Index" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
-                        <i class="bi bi-camera"></i>
+                        <i class="bi bi-plus-circle"></i>
                     </div>
                     <h5>Equipment</h5>
                     <p>Manage gear & rentals</p>
                 </a>
             </div>
-            <div class="col-md-3 col-sm-6">
-                <a href="#" class="action-card">
+            <div class="col-md-4">
+                <a asp-controller="Production" asp-action="Budget" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white;">
-                        <i class="bi bi-cash-stack"></i>
+                        <i class="bi bi-plus-circle"></i>
                     </div>
+                    @* Hard-coded value TODO: create it*@
                     <h5>Budget Tracker</h5>
                     <p>Monitor expenses</p>
-                </a>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <a href="#" class="action-card">
-                    <div class="action-card-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333;">
-                        <i class="bi bi-chat-dots"></i>
-                    </div>
-                    <h5>Messages</h5>
-                    <p>Team communication</p>
                 </a>
             </div>
         </div>

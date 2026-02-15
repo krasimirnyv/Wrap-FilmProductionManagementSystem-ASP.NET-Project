@@ -2,6 +2,7 @@ namespace FilmProductionManagementSystem.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 
 using Wrap.Services.Core.Interface;
@@ -9,8 +10,9 @@ using Wrap.Services.Core.Utilities;
 
 using Wrap.ViewModels.LoginAndRegistration;
 
-public class AccountController(IWrapAccountService accountService, 
-                               ILogger<AccountController> logger) : Controller
+[AllowAnonymous]
+public class RegisterController(ILoginRegisterService registerService, 
+                                ILogger<RegisterController> logger) : Controller
 {
     private const string CrewDraftKey = "CrewDraft";
     private const string SuccessMessage = "Registration successful! Welcome to Wrap!";
@@ -28,7 +30,7 @@ public class AccountController(IWrapAccountService accountService,
 
         try
         {
-            CrewRegistrationStepOneDraft draft = await accountService.BuildCrewDraftAsync(model);
+            CrewRegistrationStepOneDraft draft = await registerService.BuildCrewDraftAsync(model);
             SessionJsonExtensions.SetJson(HttpContext.Session, CrewDraftKey, draft);
         }
         catch (Exception e)
@@ -49,7 +51,7 @@ public class AccountController(IWrapAccountService accountService,
         if (draft is null)
             return RedirectToAction(nameof(RegisterCrewStepOne));
         
-        return View(accountService.GetNewModelWithSkills());
+        return View(registerService.GetNewModelWithSkills());
     }
 
     [HttpPost]
@@ -67,13 +69,13 @@ public class AccountController(IWrapAccountService accountService,
             if (draft is null)
                 return RedirectToAction(nameof(RegisterCrewStepOne));
             
-            IdentityResult identityResult = await accountService.CompleteCrewRegistrationAsync(draft, model.SelectedSkills);
+            IdentityResult identityResult = await registerService.CompleteCrewRegistrationAsync(draft, model.SelectedSkills);
             if (!identityResult.Succeeded)
             {
                 foreach (IdentityError error in identityResult.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
 
-                accountService.GetSkills(model);
+                registerService.GetSkills(model);
                 return View(model);
             }
         
@@ -87,7 +89,7 @@ public class AccountController(IWrapAccountService accountService,
             return View(model);
         }
         
-        return RedirectToAction("GeneralPage", "Home");
+        return RedirectToAction("Dashboard", "Home");
     }
 
     [HttpGet]
@@ -103,7 +105,7 @@ public class AccountController(IWrapAccountService accountService,
 
         try
         {
-            IdentityResult identityResult = await accountService.CompleteCastRegistrationAsync(model);
+            IdentityResult identityResult = await registerService.CompleteCastRegistrationAsync(model);
             if (!identityResult.Succeeded)
             {
                 foreach (IdentityError error in identityResult.Errors)
@@ -121,35 +123,47 @@ public class AccountController(IWrapAccountService accountService,
             return View(model);
         }
         
-        return RedirectToAction("GeneralPage", "Home");
+        return RedirectToAction("Dashboard", "Home");
     }
 
     [HttpGet]
-    public IActionResult Login() 
-        => View(new AccountLogInInputModel());
+    public async Task<IActionResult> Login()
+    {
+        // Clear the existing external cookie to ensure a clean login process
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        
+        return View(new AccountLogInInputModel());
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(AccountLogInInputModel model)
+    public async Task<IActionResult> Login(AccountLogInInputModel model, string? returnUrl = null)
     {
         if (!ModelState.IsValid)
             return View(model);
         
         try 
         {
-            bool isCorrect = await accountService.IsUsernameAndPasswordCorrectAsync(model);
+            bool isCorrect = await registerService.IsUsernameAndPasswordCorrectAsync(model);
             if (!isCorrect)
             {
                 ModelState.AddModelError(string.Empty, "Invalid username or password.");
                 return View(model);
             }
 
-            (bool, string) loginStatus = await accountService.LoginStatusAsync(model);
+            (bool, string) loginStatus = await registerService.LoginStatusAsync(model);
+
+            if (loginStatus.Item1)
+            {
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
+            }
+
             switch (loginStatus)
             {
                 case (true, "Crew"):
                 case (true, "Cast"):
-                    return RedirectToAction("GeneralPage", "Home");
+                    return RedirectToAction("Dashboard", "Home");
                 case (false, "Crew"):
                     ModelState.AddModelError(string.Empty, "This account is not registered as Crew.");
                     break;
@@ -160,7 +174,7 @@ public class AccountController(IWrapAccountService accountService,
                     ModelState.AddModelError(string.Empty, "Please select a role.");
                     break;
             }
-            
+                
             return View(model);
         }
         catch (Exception e)
@@ -176,7 +190,7 @@ public class AccountController(IWrapAccountService accountService,
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        await accountService.LogoutAsync();
+        await registerService.LogoutAsync();
         return RedirectToAction("Index", "Home");
     }
     
@@ -186,7 +200,7 @@ public class AccountController(IWrapAccountService accountService,
             return false;
         
         ModelState.AddModelError(string.Empty, "Please select at least one skill.");
-        accountService.GetSkills(model);
+        registerService.GetSkills(model);
         return true;
     }
 }

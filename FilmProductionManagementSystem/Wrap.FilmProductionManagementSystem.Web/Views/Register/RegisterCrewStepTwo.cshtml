@@ -37,7 +37,7 @@
             </div>
 
             <!-- Form -->
-            <form asp-controller="Account" asp-action="RegisterCrewStepTwo" method="post" id="skillsForm">
+            <form asp-controller="Register" asp-action="RegisterCrewStepTwo" method="post" id="skillsForm">
                 <input type="hidden" name="SelectedSkills" id="hiddenSelectedSkills" />
 
                 <!-- Accordion -->
@@ -91,7 +91,7 @@
 
                 <!-- Actions -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a asp-controller="Account" asp-action="RegisterCrewStepOne" class="btn btn-outline-secondary">
+                    <a asp-controller="Register" asp-action="RegisterCrewStepOne" class="btn btn-outline-secondary">
                         ← Back
                     </a>
                     <button type="submit" class="btn btn-wrap-primary" id="submitBtn">
