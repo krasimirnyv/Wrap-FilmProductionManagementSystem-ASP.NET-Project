@@ -21,7 +21,7 @@
                              alt="@Model.FirstName @Model.LastName"
                              class="profile-image">
                         <div class="edit-icon-overlay" title="Edit Profile">
-                            <a asp-controller="Profile" asp-action="Edit" class="text-white" style="text-decoration: none;">
+                            <a asp-controller="Profile" asp-action="EditFilmmaker" class="text-white" style="text-decoration: none;">
                                 <i class="bi bi-pencil-fill"></i>
                                 Edit
                             </a>
@@ -150,10 +150,16 @@
                     <i class="bi bi-tools" style="font-size: 3rem;"></i>
                     <p class="mt-2">No skills added yet</p>
                     <a asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
-                        <i class="bi bi-plus-circle me-2"></i>Add Skills
+                        <i class="bi bi-plus-circle me-2"></i>Edit Skills
                     </a>
                 </div>
             }
+            <div class="text-center py-4 text-muted">
+                <a asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
+                    <i class="bi bi-plus-circle me-2"></i>Edit Skills
+                </a>
+            </div>
+
         </div>
 
         <!-- Productions Section -->

@@ -23,7 +23,7 @@ public class HomeController(IHomeService homeService) : Controller
     [HttpGet]
     public async Task<IActionResult> Dashboard()
     {
-        GeneralPageViewModel general = await homeService.GetGeneralInformation();
+        DashboardViewModel general = await homeService.GetGeneralInformation();
         return View(general);
     }
 

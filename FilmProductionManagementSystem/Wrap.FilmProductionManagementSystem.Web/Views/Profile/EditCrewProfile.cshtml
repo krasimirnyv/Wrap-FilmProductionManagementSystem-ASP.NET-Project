@@ -1,0 +1,200 @@
+@model EditCrewProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Filmmaker Profile";
+}
+
+<link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+
+<div class="profile-wrapper">
+    <div class="container">
+        
+        <!-- Edit Profile Header -->
+        <div class="profile-header-card">
+            <div class="text-center mb-4">
+                <h2 class="text-wrap-blue">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Edit Filmmaker Profile
+                </h2>
+                <p class="text-muted">Update your profile information</p>
+            </div>
+
+            <form asp-controller="Profile" asp-action="EditFilmmaker" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Profile Image Upload -->
+                <div class="row mb-4">
+                    <div class="col-md-4 text-center">
+                        <div class="profile-image-container">
+                            <img src="@Model.CurrentProfileImagePath" 
+                                 id="profilePreview"
+                                 alt="Profile Preview" 
+                                 class="profile-image">
+                            <label for="profileImageInput" class="edit-icon-overlay" title="Change Profile Picture">
+                                <i class="bi bi-camera-fill">📸</i>
+                            </label>
+                        </div>
+                        
+                        <input type="file"
+                               asp-for="ProfileImage"
+                               id="profileImageInput"
+                               class="d-none"
+                               accept="image/*" />
+                        
+                        <small class="text-muted d-block mt-2">Click the camera icon to change photo</small>
+                        <span asp-validation-for="ProfileImage" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Profile Picture Tips:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Use a clear photo of you (optional)</li>
+                                <li>Maximum file size: 10MB</li>
+                                <li>Supported formats: .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="bi bi-person-fill me-2"></i>
+                        <h3>Personal Information</h3>
+                    </div>
+
+                    <div class="row">
+                        <!-- First Name -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FirstName" class="form-label">First Name *</label>
+                            <input asp-for="FirstName" class="form-control" placeholder="John" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LastName" class="form-label">Last Name *</label>
+                            <input asp-for="LastName" class="form-control" placeholder="Doe" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Nickname -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Nickname" class="form-label">Nickname (optional)</label>
+                            <input asp-for="Nickname" class="form-control" placeholder="JD" />
+                            <span asp-validation-for="Nickname" class="text-danger"></span>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">Phone Number *</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="0878123456" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Email (Read-only) -->
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="text" class="form-control" style="color: #6c757d" value="@Model.Email" readonly disabled />
+                        <small class="text-muted" style="color: #6c757d" >Email cannot be changed from profile settings</small>
+                    </div>
+
+                    <!-- Biography -->
+                    <div class="mb-3">
+                        <label asp-for="Biography" class="form-label">Biography (Optional)</label>
+                        <textarea asp-for="Biography"
+                                  class="form-control"
+                                  rows="6"
+                                  placeholder="Share your experience, passion for filmmaking, and what drives you as a creator..."
+                                  maxlength="4000"
+                                  id="biographyField"></textarea>
+                        <span asp-validation-for="Biography" class="text-danger"></span>
+                        <small class="form-text text-muted">
+                            <span id="bioCharCount">0</span> / 4000 characters
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mt-4 mb-5">
+                    <button type="submit" class="btn btn-custom btn-lg me-2">
+                        <i class="bi bi-check-circle me-2"></i>Save Changes
+                    </button>
+                    <a asp-controller="Profile" asp-action="FilmmakerProfile" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+
+    <script>
+        $(document).ready(function() {
+            // Character counter for biography
+            const bioField = $('#biographyField');
+            const counter = $('#bioCharCount');
+
+            bioField.on('input', function() {
+                counter.text($(this).val().length);
+            });
+
+            // Initialize counter
+            counter.text(bioField.val().length);
+
+            // Image preview
+            $('#profileImageInput').on('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        alert('Please select an image file.');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Validate file size (5MB max)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('File size must be less than 5MB.');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Preview image
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#profilePreview').attr('src', e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Confirm before leaving if form has changes
+            let formChanged = false;
+            $('form :input').on('change', function() {
+                formChanged = true;
+            });
+
+            window.addEventListener('beforeunload', function (e) {
+                if (formChanged) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                }
+            });
+
+            // Don't warn on submit
+            $('form').on('submit', function() {
+                formChanged = false;
+            });
+        });
+    </script>
+}
