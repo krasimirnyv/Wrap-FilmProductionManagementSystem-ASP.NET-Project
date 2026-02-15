@@ -33,4 +33,8 @@ public static class ApplicationConstants
     public const string PasswordRequiredLength = "IdentityOptions:Password:RequiredLength";
 
     public const string StoresProtectPersonalData = "IdentityOptions:Stores:ProtectPersonalData";
+    
+    /* Constants for Application Cookie options */
+    public const string LoginPath = "/Register/Login";
+    public const string LogoutPath = "/Register/Logout"; 
 }
