@@ -16,8 +16,6 @@ public class CastProfileViewModel
 
     public string PhoneNumber { get; set; } = null!;
     
-    public string BirthDate { get; set; } = null!;
-
     public string Age { get; set; } = null!;
 
     public string Gender { get; set; } = null!;

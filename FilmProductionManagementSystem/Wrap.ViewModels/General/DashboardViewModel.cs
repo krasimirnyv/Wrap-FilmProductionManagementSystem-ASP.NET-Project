@@ -1,6 +1,6 @@
 namespace Wrap.ViewModels.General;
 
-public class GeneralPageViewModel
+public class DashboardViewModel
 {
     public int CrewMembers { get; set; }
     

@@ -13,7 +13,7 @@ using static ViewModels.General.Helper.ProductionStatusAbstraction;
 
 public class HomeService(FilmProductionDbContext context) : IHomeService
 {
-    public async Task<GeneralPageViewModel> GetGeneralInformation()
+    public async Task<DashboardViewModel> GetGeneralInformation()
     {
         IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap = GetStatusTypeByAbstraction();
         DateTime now = DateTime.Now;
@@ -42,7 +42,7 @@ public class HomeService(FilmProductionDbContext context) : IHomeService
             .AsNoTracking()
             .CountAsync();
 
-        GeneralPageViewModel general = new GeneralPageViewModel()
+        DashboardViewModel general = new DashboardViewModel()
         {
             CrewMembers = crewCount,
             CastMembers = castCount,

@@ -3,7 +3,6 @@ namespace Wrap.Services.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 
@@ -15,10 +14,9 @@ using ViewModels.LoginAndRegistration;
 using ViewModels.LoginAndRegistration.Helpers;
 
 using Interface;
-
 using GCommon.Enums;
 
-using static GCommon.ApplicationConstants;
+using static Utilities.HelperSaveProfile;
 
 public class LoginRegisterService(UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
@@ -38,7 +36,7 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
             LastName = model.LastName,
             Nickname = model.Nickname,
             Biography = model.Biography,
-            ProfilePicturePath = await SaveProfileImageAsync(model.ProfilePicturePath)
+            ProfilePicturePath = await SaveProfileImageAsync(environment, model.ProfilePicturePath)
         };
 
         return draftModel;
@@ -122,7 +120,7 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
-            ProfileImagePath = await SaveProfileImageAsync(model.ProfilePicturePath),
+            ProfileImagePath = await SaveProfileImageAsync(environment, model.ProfilePicturePath),
             FirstName = model.FirstName,
             LastName = model.LastName,
             Nickname = model.Nickname,
@@ -207,45 +205,5 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
             .PasswordSignInAsync(user, model.Password, model.RememberMe, false);
 
         return signInResult.Succeeded ? user : null;
-    }
-    
-    /// <summary>
-    /// Get the profile image from the form,
-    /// validate it, save it to the server
-    /// and return the web path to be stored in the database.
-    /// </summary>
-    /// <param name="photo">IFormFile?</param>
-    /// <returns>webPath of photo -> "/img/profile/{fileName}"</returns>
-    /// <exception cref="NotSupportedException"> for unsupported file extensions and very large image size</exception>
-    private async Task<string> SaveProfileImageAsync(IFormFile? photo)
-    {
-        if (photo is null || photo.Length <= 0)
-            return "/img/profile/default-profile.png";
-
-        string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heif", ".heic", ".hif"];
-        string fileExtension = Path.GetExtension(photo.FileName).ToLowerInvariant();
-
-        if (!allowedExtensions.Contains(fileExtension))
-            throw new NotSupportedException($"The file extension {fileExtension} is not supported.");
-
-        if (photo.Length > MaxFileSize)
-            throw new NotSupportedException($"The file size limit {MaxFileSize} exceeded.");
-        
-        string fileName = $"{Guid.NewGuid()}{fileExtension}";
-        
-        string wwwrootPath = environment.WebRootPath;
-        string uploadsFolder = Path.Combine(wwwrootPath, "img", "profile");
-
-        Directory.CreateDirectory(uploadsFolder);
-        
-        string physicalPath = Path.Combine(uploadsFolder, fileName);
-        string webPath = $"/img/profile/{fileName}";
-        
-        await using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create))
-        {
-            await photo.CopyToAsync(fileStream);
-        }
-
-        return webPath;
     }
 }

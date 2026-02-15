@@ -1,6 +1,7 @@
 namespace Wrap.Services.Core;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 
 using Interface;
 
@@ -12,8 +13,15 @@ using ViewModels.LoginAndRegistration.Helpers;
 
 using GCommon.Enums;
 
-public class ProfileService(FilmProductionDbContext context) : IProfileService
+using static Utilities.HelperSaveProfile;
+
+public class ProfileService(FilmProductionDbContext context,
+                            IWebHostEnvironment environment) : IProfileService
 {
+    private const string CrewNotFoundMessage = "Crew member with username '{0}' not found.";
+    private const string CastNotFoundMessage = "Cast member with username '{0}' not found.";
+
+    
     public async Task<bool> IsUserCrewAsync(string username)
     {
         Crew? crewMembers = await GetCrewMemberAsync(username);
@@ -30,7 +38,7 @@ public class ProfileService(FilmProductionDbContext context) : IProfileService
     {
         Crew? crew = await GetCrewMemberAsync(username);
         if (crew is null)
-            throw new ArgumentException($"Crew member with username '{username}' not found.");
+            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
         
         // Get user's skills with departments
         IEnumerable<CrewRoleType> userSkills = await context
@@ -97,8 +105,8 @@ public class ProfileService(FilmProductionDbContext context) : IProfileService
     {
         Cast? cast = await GetCastMemberAsync(username);
         if (cast is null)
-            throw new ArgumentException($"Cast member with username '{username}' not found.");
-                
+            throw new ArgumentException(string.Format(CastNotFoundMessage, username));
+        
         // Get production
         IEnumerable<CastMemberProduction> productions = await context
             .ProductionsCastMembers
@@ -139,7 +147,6 @@ public class ProfileService(FilmProductionDbContext context) : IProfileService
             UserName = cast.User.UserName!,
             Email = cast.User.Email!,
             PhoneNumber = cast.User.PhoneNumber!,
-            BirthDate = cast.BirthDate.ToString("dd.MM.yyyy"), //TODO: fix the date with constant
             Age = cast.Age.ToString(),
             Gender = cast.Gender.ToString(),
             Role = cast.Role,
@@ -151,13 +158,107 @@ public class ProfileService(FilmProductionDbContext context) : IProfileService
 
         return viewModel;
     }
-    
+
+    public async Task<EditCrewProfileViewModel> GetEditCrewProfileAsync(string username)
+    {
+        Crew? crew = await GetCrewMemberAsync(username);
+        if (crew is null)
+            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
+        
+        EditCrewProfileViewModel viewModel = new EditCrewProfileViewModel
+        {
+            FirstName = crew.FirstName,
+            LastName = crew.LastName,
+            Nickname = crew.Nickname,
+            PhoneNumber = crew.User.PhoneNumber!,
+            Biography = crew.Biography,
+            Email = crew.User.Email!,
+            CurrentProfileImagePath = crew.ProfileImagePath
+        };
+
+        return viewModel;
+    }
+
+    public async Task UpdateCrewProfileAsync(string username, EditCrewProfileViewModel model)
+    {
+        Crew? crew = await context
+            .CrewMembers
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
+
+        if (crew is null)
+            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
+        
+        crew.FirstName = model.FirstName;
+        crew.LastName = model.LastName;
+        crew.Nickname = model.Nickname;
+        crew.Biography = model.Biography;
+        crew.User.PhoneNumber = model.PhoneNumber;
+        
+        if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+        {
+            string newImagePath = await SaveProfileImageAsync(environment, model.ProfileImage);
+            crew.ProfileImagePath = newImagePath;
+        }
+        
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<EditCastProfileViewModel> GetEditCastProfileAsync(string username)
+    {
+        Cast? cast = await GetCastMemberAsync(username);
+
+        if (cast is null)
+            throw new ArgumentException(string.Format(CastNotFoundMessage, username));
+
+        EditCastProfileViewModel viewModel = new EditCastProfileViewModel
+        {
+            FirstName = cast.FirstName,
+            LastName = cast.LastName,
+            Nickname = cast.Nickname,
+            PhoneNumber = cast.User.PhoneNumber!,
+            CurrentRole = cast.Role,
+            Biography = cast.Biography,
+            Email = cast.User.Email!,
+            CurrentProfileImagePath = cast.ProfileImagePath,
+            Age = cast.Age.ToString(),
+            Gender = cast.Gender.ToString()
+        };
+
+        return viewModel;
+    }
+
+    public async Task UpdateCastProfileAsync(string username, EditCastProfileViewModel model)
+    {
+        Cast? cast = await context
+            .CastMembers
+            .Include(c => c.User)
+            .FirstOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
+
+        if (cast is null)
+            throw new ArgumentException(string.Format(CastNotFoundMessage, username));
+        
+        cast.FirstName = model.FirstName;
+        cast.LastName = model.LastName;
+        cast.Nickname = model.Nickname;
+        cast.Role = model.CurrentRole;
+        cast.Biography = model.Biography;
+        cast.User.PhoneNumber = model.PhoneNumber;
+        
+        if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+        {
+            string newImagePath = await SaveProfileImageAsync(environment, model.ProfileImage);
+            cast.ProfileImagePath = newImagePath;
+        }
+        
+        await context.SaveChangesAsync();
+    }
+
     private async Task<Crew?> GetCrewMemberAsync(string username)
     {
         Crew? crewMembers = await context
             .CrewMembers
-            .Include(c => c.User)
-            .Include(c => c.Skills)
+            .Include(cm => cm.User)
             .AsNoTracking()
             .SingleOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
         
@@ -168,7 +269,7 @@ public class ProfileService(FilmProductionDbContext context) : IProfileService
     {
         Cast? castMember = await context
             .CastMembers
-            .Include(c => c.User)
+            .Include(cm => cm.User)
             .AsNoTracking()
             .SingleOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
         
