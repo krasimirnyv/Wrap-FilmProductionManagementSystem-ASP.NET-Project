@@ -1,48 +1,63 @@
 namespace Wrap.Services.Core;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Hosting;
 
 using Data;
-using Data.Models;
-using Data.Models.Infrastructure;
 
-using ViewModels.LoginAndRegistration;
-using ViewModels.LoginAndRegistration.Helpers;
-
+using ViewModels.General;
 using Interface;
 
 using GCommon.Enums;
 
-public class WrapService(UserManager<ApplicationUser> userManager,
-                        SignInManager<ApplicationUser> signInManager,
-                        FilmProductionDbContext context, 
-                        IWebHostEnvironment environment) : IWrapService
+using static ViewModels.General.Helper.ProductionStatusAbstraction;
+
+public class HomeService(FilmProductionDbContext context) : IHomeService
 {
-    public async Task<string> GetProfileImagePathAsync(Guid userId, string userType)
+    public async Task<GeneralPageViewModel> GetGeneralInformation()
     {
-        string? imagePath = null;
+        IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap = GetStatusTypeByAbstraction();
+        DateTime now = DateTime.Now;
 
-        if (userType == "Crew")
-        {
-            Crew? crew = await context.CrewMembers
-                .SingleOrDefaultAsync(c => Equals(c.UserId, userId) && !c.IsDeleted);
+        var productionRaw = await context
+            .Productions
+            .AsNoTracking()
+            .Select(p => new
+            {
+                p.Title,
+                p.Description,
+                p.StatusType,
+                UpcomingScenesCount = p.Scenes
+                    .SelectMany(s => s.ShootingDayScenes)
+                    .Count(sds => sds.ShootingDay.Date > now)
+            })
+            .ToArrayAsync();
 
-            imagePath = crew?.ProfileImagePath;
-        }
-        else if (userType == "Cast")
-        {
-            Cast? cast = await context.CastMembers
-                .SingleOrDefaultAsync(c => Equals(c.UserId, userId) && !c.IsDeleted);
-            
-            imagePath = cast?.ProfileImagePath;
-        }
+        int crewCount = await context
+            .CrewMembers
+            .AsNoTracking()
+            .CountAsync();
         
-        string defaultPath = Path.Combine("img", "profile", "default-profile.png");
-        return imagePath ?? defaultPath;
+        int castCount = await context
+            .CastMembers
+            .AsNoTracking()
+            .CountAsync();
+
+        GeneralPageViewModel general = new GeneralPageViewModel()
+        {
+            CrewMembers = crewCount,
+            CastMembers = castCount,
+            UpcomingScenes = productionRaw.Sum(p => p.UpcomingScenesCount),
+            Productions = productionRaw
+                .Select(p => new ProductionViewModel()
+                {
+                    Title = p.Title,
+                    Description = p.Description,
+                    Status = p.StatusType.ToString(),
+                    AbstractStatus = statusMap.First(kvp => kvp.Value.Contains(p.StatusType)).Key
+                })
+                .ToArray()
+        };
+
+        return general;
     }
 }
