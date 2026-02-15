@@ -135,6 +135,12 @@ body {
     margin-bottom: -1rem;
 }
 
+@keyframes gradientMove {
+    0% { background-position: 1% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 1% 50%; }
+}
+
 .dashboard-overlay {
     position: absolute;
     inset: 0;
@@ -362,6 +368,23 @@ body {
     background: linear-gradient(135deg, var(--wrap-red-hover) 0%, var(--wrap-red) 100%);
 }
 
+.btn-custom-1{
+    background: #e94935;
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(232, 69, 69, 0.3);
+}
+
+.btn-custom-1:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(232, 69, 69, 0.4);
+    color: white;
+    background:  #e94935;
+}
 /* Badge Custom */
 .badge-custom {
     padding: 0.4rem 1rem;
@@ -407,27 +430,95 @@ body {
     margin-left: 0.5rem;
 }
 
-/* Search Bar Styling */
-.navbar .input-group-text {
-    background-color: #1a1e21 !important;
-    border-color: #495057 !important;
+/* =========================
+   NAVBAR SEARCH (WRAP)
+   ========================= */
+
+.wrap-search {
+    width: clamp(260px, 32vw, 520px);
+    margin-left: auto;
+    margin-right: 16px;
 }
 
-.navbar .form-control {
-    background-color: #2d3238 !important;
-    border-color: #495057 !important;
-    color: white !important;
+.wrap-search__group {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 44px;
+
+    border-radius: 999px;
+    overflow: hidden;
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 
-.navbar .form-control:focus {
-    background-color: #343a40 !important;
-    border-color: var(--wrap-red) !important;
-    color: white !important;
-    box-shadow: 0 0 0 0.2rem rgba(232, 69, 69, 0.25);
+/* Icon button */
+.wrap-search__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+
+    border: 0;
+    background: rgba(0, 0, 0, 0.50);
+    padding: 0;
+
+    color: rgba(255, 255, 255, 0.9);
+    opacity: 1;
+    cursor: pointer;
 }
 
-.navbar .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+.wrap-search__icon i {
+    font-size: 1rem;
+    line-height: 1;
+    color: inherit;
+}
+
+/* Input */
+.wrap-search__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 44px;
+
+    border: 0;
+    outline: none;
+    background: transparent;
+
+    color: #fff;
+    padding: 0 14px 0 10px;
+
+    /* убива bootstrap focus/glow ако се намеси */
+    box-shadow: none;
+}
+
+.wrap-search__input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.wrap-search__input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Focus/hover states */
+.wrap-search__group:focus-within {
+    border-color: var(--wrap-red);
+    box-shadow: 0 0 0 3px rgba(232, 69, 69, 0.25);
+}
+
+.wrap-search__group:focus-within .wrap-search__icon {
+    color: var(--wrap-red);
+}
+
+.wrap-search__icon:hover {
+    color: rgba(255, 255, 255, 0.95);
 }
 
 /* Dropdown Menu Styling */
@@ -463,4 +554,16 @@ body {
 .navbar-nav .dropdown-toggle:hover img {
     border-color: white !important;
     transform: scale(1.05);
+}
+
+/* focus на целия container (не само на input-а) */
+.wrap-search__group:focus-within {
+    border-color: rgba(232, 69, 69, .75); /* wrap red */
+    background: rgba(0,0,0,.28);
+    box-shadow: 0 0 0 .18rem rgba(232, 69, 69, .22);
+}
+
+/* по-добър fit на мобилни */
+@media (max-width: 992px) {
+    .wrap-search__input { min-width: 180px; }
 }

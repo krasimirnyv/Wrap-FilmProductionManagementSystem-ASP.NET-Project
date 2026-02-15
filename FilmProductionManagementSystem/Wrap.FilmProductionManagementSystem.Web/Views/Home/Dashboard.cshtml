@@ -16,6 +16,16 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
+        
+        <!-- Error Message -->
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>@TempData["Error"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
 
         <!-- Welcome Banner -->
         <div class="welcome-banner">
@@ -103,7 +113,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a asp-controller="Production" asp-action="Schedule" class="action-card">
+                <a asp-controller="Schedule" asp-action="Index" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
                         <i class="bi bi-calendar-event"></i>
                     </div>
@@ -116,7 +126,7 @@
         <!-- Recent Activity & Projects (hard-coded activities for now)-->
         <h3 class="section-title mt-4">Recent Activity</h3>
         <div class="row">
-            <div class="col-lg-8">
+            <div class="col-lg-8 mt-3">
                 <div class="recent-activity">
                     <h4><i class="bi bi-activity me-2"></i>Latest Updates</h4>
                     
@@ -142,11 +152,9 @@
                 </div>
             </div>
 
-            <div class="col-lg-4">
+            <div class="col-lg-4 mt-3">
                 <div class="recent-activity">
                     <h4><i class="bi bi-film me-2"></i>Active Projects</h4>
-                    
-                    
                     @{ int i = 0;
                        foreach (ProductionViewModel production in Model.Productions)
                        {
@@ -191,7 +199,6 @@
         </div>
 
         <!-- Additional Resources -->
-        
         <h3 class="section-title mt-4">Resources & Tools</h3>
         <div class="row">
             <div class="col-md-4">

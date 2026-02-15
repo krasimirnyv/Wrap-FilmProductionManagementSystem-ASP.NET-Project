@@ -11,6 +11,7 @@
     
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -26,7 +27,7 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
             <div class="container-fluid">
 
-                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="GeneralPage">
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Dashboard">
                     <img class="navbar-logo" src="~/img/clapperboard.png" alt="Clapperboard logo"> <text class="navbar-text-logo">WRAP</text>
                 </a>
 
@@ -37,13 +38,7 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="wrapNavbar">
-
-                    <!-- Left navigation -->
-                    <partial name="_PartialNavBar"/>
-
-                    <!-- Right (Profile) -->
-                    <partial name="_LoginPartial" model="typeof(ProfilePictureViewModel)"/>
-
+                    @await Component.InvokeAsync("NavBarUserComponent")
                 </div>
             </div>
         </nav>
@@ -71,10 +66,11 @@ else
                 <span class="footer-separator">•</span>
                 <span>Your Film Production Management System</span>
                 <span class="footer-separator">•</span>
-                <a class="footer-tagline" asp-controller="Home" asp-action="GeneralPage">It’s a wrap</a>
+                <a class="footer-tagline" asp-controller="Home" asp-action="Dashboard">It’s a wrap</a>
             </div>
     </footer>
 }
+
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>

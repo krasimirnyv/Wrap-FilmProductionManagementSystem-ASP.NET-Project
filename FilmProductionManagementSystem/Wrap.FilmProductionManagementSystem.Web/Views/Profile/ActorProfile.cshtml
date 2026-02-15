@@ -1,0 +1,228 @@
+@model CastProfileViewModel
+
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Actor Profile";
+}
+
+<link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+
+<div class="profile-wrapper">
+    <div class="container">
+        
+        <!-- Profile Header Card -->
+        <div class="profile-header-card">
+            <div class="row align-items-center">
+                <!-- Left: Profile Image -->
+                <div class="col-md-4 text-center">
+                    <div class="profile-image-container">
+                        <img src="@Model.ProfileImagePath" 
+                             alt="@Model.FirstName @Model.LastName" 
+                             class="profile-image">
+                        <div class="edit-icon-overlay" title="Edit Profile">
+                            <a asp-controller="Profile" asp-action="Edit" class="text-white" style="text-decoration: none;">
+                                <i class="bi bi-pencil-fill"></i>
+                                Edit
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Role Badge -->
+                    <div class="role-badge actor-badge mt-3">
+                        🎭 Actor
+                    </div>
+                </div>
+
+                <!-- Right: Personal Information -->
+                <div class="col-md-8">
+                    <div class="profile-info">
+                        <!-- Name & Username -->
+                        <div class="profile-name-section mb-4">
+                            <h1 class="profile-name">@Model.FirstName @Model.LastName</h1>
+                            @if (!string.IsNullOrEmpty(Model.Nickname))
+                            {
+                                <p class="profile-nickname">"@Model.Nickname"</p>
+                            }
+                            <p class="profile-username text-muted">@Model.UserName</p>
+                        </div>
+
+                        <!-- Info Grid -->
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Name:</div>
+                                    <div class="info-value">@Model.FirstName @Model.LastName</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Age:</div>
+                                    <div class="info-value">@Model.Age</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Gender:</div>
+                                    <div class="info-value">
+                                        @Model.Gender
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(Model.Role))
+                                {
+                                    <div class="info-item">
+                                        <div class="info-label">Current Role:</div>
+                                        <div class="info-value">@Model.Role</div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Възраст:</div>
+                                    <div class="info-value">@Model.Age години</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Email:</div>
+                                    <div class="info-value">@Model.Email</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Phone:</div>
+                                    <div class="info-value">@Model.PhoneNumber</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="mt-3">
+                            <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary") badge-custom">
+                                Status: @(Model.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biography Section -->
+        @if (!string.IsNullOrEmpty(Model.Biography))
+        {
+            <div class="section-card mt-4">
+                <div class="section-header">
+                    <i class="bi bi-person-lines-fill me-2"></i>
+                    <h3>Biography</h3>
+                </div>
+                <div class="biography-content">
+                    @Model.Biography
+                </div>
+            </div>
+        }
+        
+        <!-- Productions Section -->
+        <div class="section-card mt-4">
+            <div class="section-header">
+                <i class="bi bi-film me-2"></i>
+                <h3>Productions (@Model.CastMemberProductionsCount)</h3>
+            </div>
+        
+            @if (Model.CastMemberProductions is not null && Model.CastMemberProductions.Any())
+            {
+                <div class="row">
+                    @foreach (CastMemberProduction productionCast in Model.CastMemberProductions)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <div class="production-card">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="production-title">@productionCast.ProductionTitle</h5>
+                                        @if (!string.IsNullOrEmpty(productionCast.CharacterName))
+                                        {
+                                            <p class="character-role">as <strong>@productionCast.CharacterName</strong></p>
+                                        }
+                                        <small class="text-muted">Project status: @productionCast.ProjectStatus</small>
+                                    </div>
+                                    <a asp-controller="Production"
+                                       asp-action="Details"
+                                       asp-route-id="@productionCast.ProductionId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-film" style="font-size: 3rem;"></i>
+                    <p class="mt-2">No productions yet</p>
+                </div>
+            }
+        </div>
+        
+        <!-- Scenes Section -->
+        @if (Model.CastMemberScenes is not null && Model.CastMemberScenes.Any())
+        {
+            <div class="section-card mt-4">
+                <div class="section-header">
+                    <i class="bi bi-camera-reels me-2"></i>
+                    <h3>Scenes (@Model.CastMemberScenesCount)</h3>
+                </div>
+        
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Scene</th>
+                                <th>Production</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (CastMemberScene sceneCast in Model.CastMemberScenes)
+                            {
+                                <tr>
+                                    <td>@sceneCast.SceneName</td>
+                                    <td>@sceneCast.ProductionTitle</td>
+                                    <td>
+                                        <a asp-controller="Scene"
+                                           asp-action="Details"
+                                           asp-route-id="@sceneCast.SceneId"
+                                           class="btn btn-sm btn-link">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add smooth scroll animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.section-card, .profile-header-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 100);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,268 @@
+@using Wrap.ViewModels.LoginAndRegistration.Helpers
+
+@model CrewProfileViewModel
+
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Filmmaker Profile";
+}
+
+<link rel="stylesheet" href="~/css/profile.css" asp-append-version="true"/>
+
+<div class="profile-wrapper">
+    <div class="container">
+    
+        <!-- Profile Header Card -->
+        <div class="profile-header-card">
+            <div class="row align-items-center">
+                <!-- Left: Profile Image -->
+                <div class="col-md-4 text-center">
+                    <div class="profile-image-container">
+                        <img src="@Model.ProfileImagePath"
+                             alt="@Model.FirstName @Model.LastName"
+                             class="profile-image">
+                        <div class="edit-icon-overlay" title="Edit Profile">
+                            <a asp-controller="Profile" asp-action="Edit" class="text-white" style="text-decoration: none;">
+                                <i class="bi bi-pencil-fill"></i>
+                                Edit
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Role Badge -->
+                    <div class="role-badge filmmaker-badge mt-3">
+                        🎬 Filmmaker
+                    </div>
+                </div>
+
+                <!-- Right: Personal Information -->
+                <div class="col-md-8">
+                    <div class="profile-info">
+                        <!-- Name & Username -->
+                        <div class="profile-name-section mb-4">
+                            <h1 class="profile-name">@Model.FirstName @Model.LastName</h1>
+                            @if (Model.Nickname != " - ")
+                            {
+                                <p class="profile-nickname">"@Model.Nickname"</p>
+                            }
+                            <p class="profile-username text-muted">@Model.UserName</p>
+                        </div>
+
+                        <!-- Info Grid -->
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Name:</div>
+                                    <div class="info-value">@Model.FirstName @Model.LastName</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Email:</div>
+                                    <div class="info-value">@Model.Email</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Phone:</div>
+                                    <div class="info-value">@Model.PhoneNumber</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Total Skills:</div>
+                                    <div class="info-value">@Model.SkillsCount</div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Nickname:</div>
+                                    <div class="info-value">@Model.Nickname</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Productions:</div>
+                                    <div class="info-value">@Model.CrewMemberProductionsCount</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Status:</div>
+                                    <div class="info-value">
+                                        <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary") badge-custom">
+                                            @(Model.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biography Section -->
+        @if (!string.IsNullOrEmpty(Model.Biography))
+        {
+            <div class="section-card mt-4">
+                <div class="section-header">
+                    <i class="bi bi-person-lines-fill me-2"></i>
+                    <h3>Biography</h3>
+                </div>
+                <div class="biography-content">
+                    @Model.Biography
+                </div>
+            </div>
+        }
+
+        <!-- Skills Section -->
+        <div class="section-card mt-4">
+            <div class="section-header">
+                <i class="bi bi-star-fill me-2"></i>
+                <h3>Skills & Expertise @Model.SkillsCount</h3>
+            </div>
+
+            @if (Model.DepartmentSkills.Any())
+            {
+                <div class="row">
+                    @foreach (var department in Model.DepartmentSkills)
+                    {
+                        <div class="col-md-6 mb-4">
+                            <div class="department-section">
+                                <h5 class="department-title">
+                                    @department.Key
+                                    <span class="badge bg-info ms-2" style="color: var(--wrap-dark-blue)">@department.Value.Count</span>
+                                </h5>
+                                <div class="skills-container">
+                                    @foreach (CrewRoleType skill in department.Value)
+                                    {
+                                        <span class="skill-badge">
+                                            @CrewRolesDepartments.GetDisplayName(skill)
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-tools" style="font-size: 3rem;"></i>
+                    <p class="mt-2">No skills added yet</p>
+                    <a asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
+                        <i class="bi bi-plus-circle me-2"></i>Add Skills
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Productions Section -->
+        <div class="section-card mt-4">
+            <div class="section-header">
+                <i class="bi bi-film me-2"></i>
+                <h3>Productions (@Model.CrewMemberProductionsCount)</h3>
+            </div>
+
+            @if (Model.CrewMemberProductions is not null && Model.CrewMemberProductions.Any())
+            {
+                <div class="row">
+                    @foreach (CrewMemberProduction productionCrew in Model.CrewMemberProductions)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <div class="production-card">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="production-title">@productionCrew.ProductionTitle</h5>
+                                        <p class="production-role">
+                                            <span class="role-badge-small">@productionCrew.RoleType</span>
+                                        </p>
+                                        <small class="text-muted">Project status: @productionCrew.ProjectStatus</small>
+                                    </div>
+                                    <a asp-controller="Production"
+                                       asp-action="Details"
+                                       asp-route-id="@productionCrew.ProductionId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-film" style="font-size: 3rem;"></i>
+                    <p class="mt-2">No productions yet</p>
+                </div>
+            }
+        </div>
+
+        <!-- Scenes Section -->
+        @if ((Model.CrewMemberScenes is not null && Model.CrewMemberScenes.Any()))
+        {
+            <div class="section-card mt-4">
+                <div class="section-header">
+                    <i class="bi bi-camera-reels me-2"></i>
+                    <h3>Scenes (@Model.CrewMemberScenesCount)</h3>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Scene</th>
+                            <th>Production</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (CrewMemberScene sceneCrew in Model.CrewMemberScenes)
+                        {
+                            <tr>
+                                <td>@sceneCrew.SceneName</td>
+                                <td>@sceneCrew.ProductionTitle</td>
+                                <td>
+                                    <span class="badge bg-info badge-custom">@sceneCrew.RoleType</span>
+                                </td>
+                                <td>
+                                    <a asp-controller="Scene"
+                                       asp-action="Details"
+                                       asp-route-id="@sceneCrew.SceneId"
+                                       class="btn btn-sm btn-link">
+                                        View Details
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add smooth scroll animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.section-card, .profile-header-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 100);
+            });
+        });
+    </script>
+}
