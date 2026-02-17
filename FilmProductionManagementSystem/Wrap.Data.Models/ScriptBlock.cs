@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 using GCommon.Enums;
 
-using static GCommon.DataValidation;
+using static GCommon.DataFormat;
 
 /// <summary>
 /// Това Entity представлява единичен блок от сценария (име на сцена, дейсвие, диалог, транзишън и тн.)

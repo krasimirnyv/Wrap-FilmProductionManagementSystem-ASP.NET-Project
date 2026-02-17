@@ -10,7 +10,7 @@ using Infrastructure;
 using MappingEntities;
 
 using static GCommon.EntityConstants.Cast;
-using static GCommon.DataValidation;
+using static GCommon.DataFormat;
 
 /// <summary>
 /// Entity представящо актьор
@@ -84,8 +84,8 @@ public class Cast
         = new List<SceneCast>();
     
     [NotMapped]
-    public int Age =>
-        DateTime.Today.Year - BirthDate.Year -
-        (BirthDate.Date > DateTime.Today.AddYears(
-            -(DateTime.Today.Year - BirthDate.Year)) ? 1 : 0);
+    public byte Age =>
+        (byte)(DateTime.Today.Year - BirthDate.Year - 
+               (BirthDate.Date > DateTime.Today.AddYears(
+                   -(DateTime.Today.Year - BirthDate.Year)) ? 1 : 0));
 }

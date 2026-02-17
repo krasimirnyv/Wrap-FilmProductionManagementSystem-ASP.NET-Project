@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 using static GCommon.EntityConstants.Script;
-using static GCommon.DataValidation;
+using static GCommon.DataFormat;
 
 /// <summary>
 /// Entity за сценарий, който принадлежи към дадена продукция

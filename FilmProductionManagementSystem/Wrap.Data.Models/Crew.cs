@@ -10,7 +10,7 @@ using Infrastructure;
 using MappingEntities;
 
 using static GCommon.EntityConstants.Crew;
-using static GCommon.DataValidation;
+using static GCommon.DataFormat;
 
 /// <summary>
 /// Entity представящо човек от снимачен екип

@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 using static GCommon.EntityConstants.ShootingDay;
-using static GCommon.DataValidation;
+using static GCommon.DataFormat;
 
 /// <summary>
 /// Това entity ще се изпозлва за по-нататък, когато се започне изграждането на план-график възможност в апликацията

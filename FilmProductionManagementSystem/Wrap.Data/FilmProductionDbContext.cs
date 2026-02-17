@@ -55,12 +55,19 @@ public class FilmProductionDbContext : IdentityDbContext<ApplicationUser>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
+            .Entity<CrewSkill>()
+            .HasOne(cs => cs.CrewMember)
+            .WithMany(c => c.Skills)
+            .HasForeignKey(cs => cs.CrewMemberId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder
             .Entity<Cast>()
             .HasOne(c => c.User)
             .WithMany(au => au.CastMembers)
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-
+        
         builder
             .Entity<Production>()
             .HasOne(p => p.Script)

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using GCommon.Enums;
 
 using static GCommon.EntityConstants.ProductionAsset;
-using static GCommon.DataValidation;
+using static GCommon.DataFormat;
 
 /// <summary>
 /// Entity представляващо различни аудио-визални инструменти, които се представят по сходен начин в апликацията

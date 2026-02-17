@@ -10,7 +10,7 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
 {
     private readonly Production[] productions =
     [
-        new()
+        new Production
         {
             Id = Guid.Parse("809f7100-5b1d-4eee-8b82-8e4084ef0928"),
             Title = "Test Film",

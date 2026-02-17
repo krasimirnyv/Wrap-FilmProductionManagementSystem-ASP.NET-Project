@@ -256,6 +256,7 @@ namespace Wrap.Data.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ProfileImagePath")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .IsUnicode(true)
                         .HasColumnType("nvarchar(500)");
@@ -459,8 +460,8 @@ namespace Wrap.Data.Migrations
                             Id = new Guid("809f7100-5b1d-4eee-8b82-8e4084ef0928"),
                             Budget = 1000.00m,
                             Description = "This is a test",
-                            StatusEndDate = new DateTime(2026, 2, 13, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(6920),
-                            StatusStartDate = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(6920),
+                            StatusEndDate = new DateTime(2026, 2, 21, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(1550),
+                            StatusStartDate = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(1550),
                             StatusType = 1,
                             Title = "Test Film"
                         });
@@ -582,7 +583,7 @@ namespace Wrap.Data.Migrations
                         new
                         {
                             Id = new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d"),
-                            LastEditedAt = new DateTime(2026, 2, 8, 20, 23, 51, 405, DateTimeKind.Utc).AddTicks(1050),
+                            LastEditedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(4240),
                             ProductionId = new Guid("809f7100-5b1d-4eee-8b82-8e4084ef0928"),
                             Title = "Test Screenplay"
                         });
@@ -629,8 +630,8 @@ namespace Wrap.Data.Migrations
                             Id = new Guid("65a5a61f-204d-4274-be48-bf4b440ff6a1"),
                             BlockType = 1,
                             Content = "INT. COFFEE SHOP - DAY",
-                            CreatedAt = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(9970),
-                            LastModifiedAt = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(9970),
+                            CreatedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(3320),
+                            LastModifiedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(3320),
                             OrderIndex = 0,
                             ScriptId = new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d")
                         },
@@ -639,8 +640,8 @@ namespace Wrap.Data.Migrations
                             Id = new Guid("c5cc8272-c35d-4b4b-bb31-137df7fe86d5"),
                             BlockType = 3,
                             Content = "A bustling morning crowd. Steam rises from espresso machines.",
-                            CreatedAt = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(9980),
-                            LastModifiedAt = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(9980),
+                            CreatedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(3320),
+                            LastModifiedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(3320),
                             OrderIndex = 1,
                             ScriptId = new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d")
                         },
@@ -649,8 +650,8 @@ namespace Wrap.Data.Migrations
                             Id = new Guid("befd3f37-d237-4e46-8a21-e08704c6ef00"),
                             BlockType = 4,
                             Content = "JOHN",
-                            CreatedAt = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(9980),
-                            LastModifiedAt = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(9980),
+                            CreatedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(3320),
+                            LastModifiedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(3320),
                             OrderIndex = 2,
                             ScriptId = new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d")
                         },
@@ -659,8 +660,8 @@ namespace Wrap.Data.Migrations
                             Id = new Guid("3bed994a-cbee-4d60-b22f-a922b82eb841"),
                             BlockType = 7,
                             Content = "I'll have a double espresso. Make it strong.",
-                            CreatedAt = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(9980),
-                            LastModifiedAt = new DateTime(2026, 2, 8, 20, 23, 51, 404, DateTimeKind.Utc).AddTicks(9980),
+                            CreatedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(3330),
+                            LastModifiedAt = new DateTime(2026, 2, 16, 13, 8, 3, 606, DateTimeKind.Utc).AddTicks(3330),
                             OrderIndex = 3,
                             ScriptId = new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d")
                         });
