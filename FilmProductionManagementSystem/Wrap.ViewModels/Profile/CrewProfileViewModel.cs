@@ -1,5 +1,7 @@
 namespace Wrap.ViewModels.Profile;
 
+using HelperViewModels;
+
 using GCommon.Enums;
 
 public class CrewProfileViewModel
@@ -37,11 +39,11 @@ public class CrewProfileViewModel
         = new List<CrewMemberProduction>();
 
     public int CrewMemberProductionsCount 
-        => CrewMemberProductions?.Count() ?? 0;
+        => CrewMemberProductions?.Count ?? 0;
 
     public ICollection<CrewMemberScene>? CrewMemberScenes { get; set; }
         = new List<CrewMemberScene>();
     
     public int CrewMemberScenesCount
-        => CrewMemberScenes?.Count() ?? 0;
+        => CrewMemberScenes?.Count ?? 0;
 }

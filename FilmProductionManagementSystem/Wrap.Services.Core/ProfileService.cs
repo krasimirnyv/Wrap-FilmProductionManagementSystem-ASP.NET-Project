@@ -9,6 +9,7 @@ using Data;
 using Data.Models;
 
 using ViewModels.Profile;
+using ViewModels.Profile.HelperViewModels;
 using ViewModels.LoginAndRegistration.Helpers;
 
 using GCommon.Enums;
@@ -254,6 +255,71 @@ public class ProfileService(FilmProductionDbContext context,
         await context.SaveChangesAsync();
     }
 
+    public async Task<EditSkillsViewModel> GetEditSkillsAsync(string username)
+    {
+        Crew? crew = await GetCrewMemberAsync(username);
+        if (crew is null)
+            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
+
+        ICollection<CrewRoleType> currentSkills = await context
+            .CrewSkills
+            .AsNoTracking()
+            .Where(cs => cs.CrewMemberId == crew.Id)
+            .Select(cs => cs.RoleType)
+            .ToArrayAsync();
+
+        EditSkillsViewModel viewModel = new EditSkillsViewModel
+        {
+            CurrentSkills = currentSkills,
+            AllDepartments = CrewRolesDepartments.GetRolesByDepartment()
+        };
+
+        return viewModel;
+    }
+
+    public async Task UpdateSkillsAsync(string username, EditSkillsViewModel model)
+    {
+        Crew? crew = await GetCrewMemberAsync(username);
+        if (crew is null)
+            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
+
+        IList<CrewSkill> currentSkills = await context
+            .CrewSkills
+            .Where(cs => cs.CrewMemberId == crew.Id)
+            .ToListAsync();
+        
+        HashSet<CrewRoleType> currentSkillTypes = currentSkills
+            .Select(s => s.RoleType)
+            .ToHashSet();
+        
+        ICollection<CrewRoleType> newSkills = ParseSelectedSkills(model.SelectedSkills);
+        if (newSkills.Count == 0)
+            throw new ArgumentException("At least one skill must be selected.");
+        
+        ICollection<CrewSkill> skillsToRemove = currentSkills
+            .Where(s => !newSkills.Contains(s.RoleType))
+            .ToList();
+        
+        IEnumerable<CrewRoleType> skillsToAdd = newSkills
+            .Where(s => !currentSkillTypes.Contains(s))
+            .ToList();
+
+        if (skillsToRemove.Count > 0)
+            context.CrewSkills.RemoveRange(skillsToRemove);
+        
+        foreach (CrewRoleType skill in skillsToAdd)
+        {
+            context.CrewSkills.Add(new CrewSkill
+            {
+                Id = Guid.NewGuid(),
+                RoleType = skill,
+                CrewMemberId = crew.Id
+            });
+        }
+        
+        await context.SaveChangesAsync();
+    }
+    
     private async Task<Crew?> GetCrewMemberAsync(string username)
     {
         Crew? crewMembers = await context
@@ -274,6 +340,19 @@ public class ProfileService(FilmProductionDbContext context,
             .SingleOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
         
         return castMember;
+    }
+    
+    private static ICollection<CrewRoleType> ParseSelectedSkills(string selectedSkillsString)
+    {
+        if (string.IsNullOrWhiteSpace(selectedSkillsString))
+            return new List<CrewRoleType>();
+    
+        ICollection<CrewRoleType> listSelectedSkills = selectedSkillsString
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => (CrewRoleType)int.Parse(s.Trim()))
+            .ToList();
+
+        return listSelectedSkills;
     }
     
     /// <summary>

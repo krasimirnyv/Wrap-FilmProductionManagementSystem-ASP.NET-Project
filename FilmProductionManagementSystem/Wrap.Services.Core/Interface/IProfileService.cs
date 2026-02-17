@@ -61,4 +61,18 @@ public interface IProfileService
     /// <param name="username">string</param>
     /// <param name="model">EditCastProfileViewModel</param>
     Task UpdateCastProfileAsync(string username, EditCastProfileViewModel model);
+    
+    /// <summary>
+    /// Gets the data for editing a crew member's skills including the current skills
+    /// </summary>
+    /// <param name="username">string</param>
+    /// <returns>EditSkillsViewModel</returns>
+    Task<EditSkillsViewModel> GetEditSkillsAsync(string username);
+
+    /// <summary>
+    /// Updates the crew member's skills with the provided information from the EditSkillsViewModel
+    /// </summary>
+    /// <param name="username">string</param>
+    /// <param name="model">EditSkillsViewModel</param>
+    Task UpdateSkillsAsync(string username, EditSkillsViewModel model);
 }

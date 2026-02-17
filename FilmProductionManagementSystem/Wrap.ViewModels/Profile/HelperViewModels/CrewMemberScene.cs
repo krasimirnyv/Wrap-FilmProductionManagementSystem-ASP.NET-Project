@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.Profile;
+namespace Wrap.ViewModels.Profile.HelperViewModels;
 
 public class CrewMemberScene
 {

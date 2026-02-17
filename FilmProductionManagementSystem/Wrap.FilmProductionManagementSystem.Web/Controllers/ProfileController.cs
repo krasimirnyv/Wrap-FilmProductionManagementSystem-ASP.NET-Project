@@ -8,9 +8,8 @@ using Wrap.Services.Core.Interface;
 using Wrap.ViewModels.Profile;
 
 [Authorize]
-public class ProfileController(
-    IProfileService profileService,
-    ILogger<ProfileController> logger) : Controller
+public class ProfileController(IProfileService profileService, 
+                               ILogger<ProfileController> logger) : Controller
 {
     private const string NotFoundMessage = "Invalid user identifier.";
     private const string UsernameIsNullOrEmptyMessage = "Username is null or empty.";
@@ -86,7 +85,8 @@ public class ProfileController(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception occured while trying to get data of your profile as an actor. {ExMessage}", e.Message);
+            logger.LogError(e, "Exception occured while trying to get data of your profile as an actor. {ExMessage}",
+                e.Message);
             TempData["Error"] = $"Error loading profile: {e.Message}";
             return RedirectToAction("Dashboard", "Home");
         }
@@ -126,7 +126,7 @@ public class ProfileController(
     public async Task<IActionResult> EditFilmmaker(string? username = null)
     {
         try
-        { 
+        {
             username ??= User.Identity?.Name;
             if (string.IsNullOrEmpty(username))
             {
@@ -160,7 +160,7 @@ public class ProfileController(
                 logger.LogWarning($"EditFilmmaker POST: {UsernameIsNullOrEmptyMessage}");
                 return View("NotFound", NotFoundMessage);
             }
-            
+
             await profileService.UpdateCrewProfileAsync(username, model);
 
             TempData["SuccessMessage"] = "Profile updated successfully!";
@@ -185,7 +185,7 @@ public class ProfileController(
                 logger.LogWarning($"EditActor: {UsernameIsNullOrEmptyMessage}");
                 return View("NotFound", NotFoundMessage);
             }
-            
+
             EditCastProfileViewModel model = await profileService.GetEditCastProfileAsync(username);
             return View("EditCastProfile", model);
         }
@@ -212,7 +212,7 @@ public class ProfileController(
                 logger.LogWarning($"EditActor POST: {UsernameIsNullOrEmptyMessage}");
                 return View("NotFound", NotFoundMessage);
             }
-            
+
             await profileService.UpdateCastProfileAsync(username, model);
 
             TempData["SuccessMessage"] = "Profile updated successfully!";
@@ -225,10 +225,65 @@ public class ProfileController(
             return View("EditCastProfile", model);
         }
     }
-    
+
     [HttpGet]
-    public IActionResult EditSkills()
+    public async Task<IActionResult> EditSkills(string? username)
     {
-        throw new NotImplementedException();
+        try
+        {
+            username ??= User.Identity?.Name;
+            if (string.IsNullOrEmpty(username))
+            {
+                logger.LogWarning($"EditSkills: {UsernameIsNullOrEmptyMessage}");
+                return View("NotFound", NotFoundMessage);
+            }
+
+            EditSkillsViewModel model = await profileService.GetEditSkillsAsync(username);
+            return View(model);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "EditSkills exception: {ExMessage}", e.Message);
+            TempData["Error"] = $"Error loading skills editor: {e.Message}";
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditSkills(EditSkillsViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            string? username = User.Identity?.Name;
+            if (!string.IsNullOrEmpty(username))
+            {
+                EditSkillsViewModel currentModel = await profileService.GetEditSkillsAsync(username);
+                model.CurrentSkills = currentModel.CurrentSkills;
+            }
+
+            return View(model);
+        }
+
+        try
+        {
+            string? username = User.Identity?.Name;
+            if (string.IsNullOrEmpty(username))
+            {
+                logger.LogWarning($"EditFilmmaker POST: {UsernameIsNullOrEmptyMessage}");
+                return View("NotFound", NotFoundMessage);
+            }
+
+            await profileService.UpdateSkillsAsync(username, model);
+
+            TempData["SuccessMessage"] = "Skills updated successfully!";
+            return RedirectToAction("FilmmakerProfile");
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "EditSkills POST exception: {ExMessage}", e.Message);
+            ModelState.AddModelError("", $"Error updating skills: {e.Message}");
+            return View(model);
+        }
     }
 }

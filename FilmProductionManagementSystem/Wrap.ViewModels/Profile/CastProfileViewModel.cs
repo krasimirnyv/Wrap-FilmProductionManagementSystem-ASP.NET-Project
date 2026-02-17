@@ -1,5 +1,7 @@
 namespace Wrap.ViewModels.Profile;
 
+using HelperViewModels;
+
 public class CastProfileViewModel
 {
     public string FirstName { get; set; } = null!;
