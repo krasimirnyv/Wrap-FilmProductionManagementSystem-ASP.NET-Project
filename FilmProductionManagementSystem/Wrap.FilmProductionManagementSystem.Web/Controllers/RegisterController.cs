@@ -127,7 +127,7 @@ public class RegisterController(ILoginRegisterService registerService,
     }
 
     [HttpGet]
-    public async Task<IActionResult> Login()
+    public async Task<IActionResult> Login(string? returnUrl = null)
     {
         // Clear the existing external cookie to ensure a clean login process
         await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
