@@ -44,6 +44,7 @@ public class HomeController(IHomeService homeService) : Controller
         {
             404 => View("NotFound"),
             400 => View("BadRequest"),
+            405 => View("Index"),
             _ => View("Error")
         };
     }

@@ -38,7 +38,9 @@
 
     <ItemGroup>
       <Folder Include="Areas\Identity\Pages\Account\" />
+      <Folder Include="Views\Production\" />
       <Folder Include="wwwroot\img\profile\" />
+      <Folder Include="wwwroot\img\thumbnail\" />
     </ItemGroup>
 
 </Project>

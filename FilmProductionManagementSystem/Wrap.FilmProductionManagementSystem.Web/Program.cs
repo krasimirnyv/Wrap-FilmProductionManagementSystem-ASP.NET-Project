@@ -47,18 +47,16 @@ public class Program
             options.LoginPath = LoginPath;
             options.LogoutPath = LogoutPath;
         });
-
         
         builder.Services.AddScoped<IHomeService, HomeService>();
         builder.Services.AddScoped<ILoginRegisterService, LoginRegisterService>();
         builder.Services.AddScoped<INavBarService, NavBarService>();
         builder.Services.AddScoped<IProfileService, ProfileService>();
+        builder.Services.AddScoped<IProductionService, ProductionService>();
 
         // Using session + "draft" JSON for the two-step registration form for crew members.
         builder.Services.AddDistributedMemoryCache();
-        
         builder.Services.AddSession(ConfigureSession);
-
         builder.Services.AddHttpContextAccessor();
         
         // Configure file upload size.
@@ -68,9 +66,7 @@ public class Program
         });
         
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-        
         builder.Services.AddControllersWithViews();
-        
         builder.Services.AddRazorPages();
 
         WebApplication app = builder.Build();
@@ -86,18 +82,18 @@ public class Program
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
-
-        app.UseStatusCodePagesWithReExecute("Home/StatusCodeError", "?statusCode={0}");
-
+        
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
         app.UseRouting();
-
-        app.UseSession();
         
+        app.UseSession();
+
         app.UseAuthentication();
         app.UseAuthorization();
+        
+        app.UseStatusCodePagesWithReExecute("/Error/{0}");
         
         app.MapControllerRoute(
             name: "default",
