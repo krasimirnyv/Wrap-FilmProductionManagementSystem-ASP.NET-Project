@@ -140,3 +140,6 @@ $RECYCLE.BIN/
 
 # Archives
 *.zip
+
+# Environment
+.env
