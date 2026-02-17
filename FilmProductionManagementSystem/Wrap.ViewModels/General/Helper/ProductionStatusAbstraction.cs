@@ -1,5 +1,7 @@
 namespace Wrap.ViewModels.General.Helper;
 
+using System.Text.RegularExpressions;
+
 using GCommon.Enums;
 
 /// <summary>
@@ -54,5 +56,14 @@ public static class ProductionStatusAbstraction
                 ProductionStatusType.Cancelled
             ]
         };
+    }
+    
+    /// <summary>
+    /// Get friendly display name for ProductionStatusType
+    /// Converts PascalCase to "Spaced Case"
+    /// </summary>
+    public static string GetDisplayName(string status)
+    {
+        return Regex.Replace(status, "([A-Z])", " $1").Trim();
     }
 }
