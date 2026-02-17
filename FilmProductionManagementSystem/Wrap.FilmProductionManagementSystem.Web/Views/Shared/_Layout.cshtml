@@ -16,10 +16,15 @@
 </head>
 <body>
 <header>
-    @{ bool isInRegisterModule = ViewData["Title"]?.ToString() == "Start"
-                                 || ViewData["Title"]?.ToString() == "Join as Actor"
-                                 || ViewData["Title"]?.ToString() == "Join as Filmmaker" 
-                                 || ViewData["Title"]?.ToString() == "Log In";
+    @{ 
+        string? controller = ViewContext.RouteData.Values["controller"]?.ToString();
+        string? action = ViewContext.RouteData.Values["action"]?.ToString();
+
+        bool isInRegisterModule =    (controller == "Home" && action == "Index")
+                                  || (controller == "Register" && action == "Login")
+                                  || (controller == "Register" && action == "RegisterCrewStepOne")
+                                  || (controller == "Register" && action == "RegisterCrewStepTwo")
+                                  || (controller == "Register" && action == "RegisterCast");
     }
     
     @if (!isInRegisterModule)

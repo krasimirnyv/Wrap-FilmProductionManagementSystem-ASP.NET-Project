@@ -1,4 +1,5 @@
-@using Wrap.ViewModels.LoginAndRegistration.Helpers
+@using Wrap.ViewModels.Profile.HelperViewModels;
+@using static Wrap.ViewModels.LoginAndRegistration.Helpers.CrewRolesDepartments;
 
 @model CrewProfileViewModel
 
@@ -11,6 +12,16 @@
 <div class="profile-wrapper">
     <div class="container">
     
+        <!-- Success Message -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>@TempData["SuccessMessage"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        
         <!-- Profile Header Card -->
         <div class="profile-header-card">
             <div class="row align-items-center">
@@ -40,11 +51,6 @@
                         <!-- Name & Username -->
                         <div class="profile-name-section mb-4">
                             <h1 class="profile-name">@Model.FirstName @Model.LastName</h1>
-                            @if (Model.Nickname != " - ")
-                            {
-                                <p class="profile-nickname">"@Model.Nickname"</p>
-                            }
-                            <p class="profile-username text-muted">@Model.UserName</p>
                         </div>
 
                         <!-- Info Grid -->
@@ -135,7 +141,7 @@
                                     @foreach (CrewRoleType skill in department.Value)
                                     {
                                         <span class="skill-badge">
-                                            @CrewRolesDepartments.GetDisplayName(skill)
+                                            @GetDisplayName(skill)
                                         </span>
                                     }
                                 </div>
@@ -270,5 +276,15 @@
                 }, index * 100);
             });
         });
+    </script>
+    <script>
+        // Dismiss alert automatically after 5 seconds
+        setTimeout(function() {
+            var alert = document.querySelector('.alert');
+            if (alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
     </script>
 }

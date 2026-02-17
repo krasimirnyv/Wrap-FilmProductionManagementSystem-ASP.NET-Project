@@ -1,0 +1,195 @@
+@using Wrap.ViewModels.Production;
+@using static Wrap.ViewModels.General.Helper.ProductionStatusAbstraction;
+
+@model IEnumerable<AllProductionsViewModel>
+
+@{
+    ViewData["Title"] = "Productions";
+}
+
+<link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+
+<div class="production-wrapper">
+    <div class="container">
+
+        @* ── Alerts ── *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>@TempData["SuccessMessage"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>@TempData["Error"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @* ── Page Header ── *@
+        <div class="production-header-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold mb-1" style="color: var(--wrap-dark-blue);">
+                    <i class="bi bi-camera-reels me-2" style="color: var(--wrap-blue);"></i>All Productions
+                </h1>
+                <p class="text-muted mb-0">Browse and manage your film productions</p>
+            </div>
+            <a asp-action="Create" class="btn btn-production">
+                <i class="bi bi-plus-circle me-2"></i>New Production
+            </a>
+        </div>
+
+        @* ── Search / Filter Bar ── *@
+        <div class="section-card py-3 px-4">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"
+                              style="border-color: var(--wrap-blue); color: var(--wrap-blue);">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control"
+                               placeholder="Search by title…" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="statusFilter" class="form-select">
+                        <option value="">All Phases</option>
+                        <option value="Pre-production">Pre-production</option>
+                        <option value="Production">Production</option>
+                        <option value="Post-production">Post-production</option>
+                        <option value="Distribution">Distribution</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end">
+                    <span class="text-muted" id="resultsCount">@Model.Count() production(s)</span>
+                </div>
+            </div>
+        </div>
+
+        @* ── Grid ── *@
+        @if (!Model.Any())
+        {
+            <div class="section-card mt-4">
+                <div class="empty-state">
+                    <i class="bi bi-film"></i>
+                    <p class="mt-2">No productions yet. Create your first one!</p>
+                    <a asp-action="Create" class="btn btn-production mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>Create Production
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row mt-4" id="productionsGrid">
+                @foreach (AllProductionsViewModel production in Model)
+                {
+                    <div class="col-md-4 col-sm-6 mb-4 prod-grid-item"
+                         data-title="@production.Title.ToLower()"
+                         data-status="@production.StatusType">
+                        <div class="prod-card">
+                            <img src="@production.Thumbnail"
+                                 class="prod-card-img"
+                                 alt="@production.Title">
+
+                            <div class="prod-card-body">
+                                <h5 class="prod-card-title">@production.Title</h5>
+                                <span class="status-badge @production.StatusAbstractClass">
+                                    @GetDisplayName(production.StatusType)
+                                </span>
+                            </div>
+
+                            <div class="prod-card-footer justify-content-end">
+                                <a asp-action="Details" asp-route-productionId="@production.Id"
+                                   class="btn-icon-sm btn-icon-view" title="View"> Details
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-productionId="@production.Id"
+                                   class="btn-icon-sm btn-icon-edit" title="Edit">
+                                    <i class="bi bi-pencil-fill"></i> Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center py-4 d-none" id="noResults">
+                <div class="section-card d-inline-block px-5">
+                    <div class="empty-state">
+                        <i class="bi bi-search"></i>
+                        <p>No productions match your search.</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(a => new bootstrap.Alert(a).close());
+        }, 5000);
+
+        // ── Live search + phase filter ──────────────────────────────────────
+        // Phase-to-enum-values map mirrors ProductionStatusAbstraction on the client
+        // so the filter dropdown matches exactly what the service categorises.
+        const phaseMembers = {
+            'Pre-production':  ['Concept','Development','Preproduction','Financing',
+                                'Casting','LocationScouting','Rehearsals'],
+            'Production':      ['Production','OnHold','Reshoots'],
+            'Post-production': ['PostProduction','PictureLock','SoundDesign',
+                                'ColorGrading','VisualEffects','MusicComposition'],
+            'Distribution':    ['Marketing','Distribution','FestivalCircuit',
+                                'Released','Completed','Cancelled'],
+        };
+
+        const searchInput  = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const items        = document.querySelectorAll('.prod-grid-item');
+        const countEl      = document.getElementById('resultsCount');
+        const noResults    = document.getElementById('noResults');
+
+        function applyFilters() {
+            const q     = searchInput?.value.toLowerCase() ?? '';
+            const phase = statusFilter?.value ?? '';
+            let visible = 0;
+
+            items.forEach(item => {
+                const titleMatch = item.dataset.title.includes(q);
+                const phaseMatch = !phase ||
+                    (phaseMembers[phase] ?? []).includes(item.dataset.status);
+                const show = titleMatch && phaseMatch;
+                item.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+
+            if (countEl)   countEl.textContent = `${visible} production(s)`;
+            if (noResults) noResults.classList.toggle('d-none', visible > 0);
+        }
+
+        searchInput?.addEventListener('input',   applyFilters);
+        statusFilter?.addEventListener('change', applyFilters);
+
+        // ── Staggered entrance animation ────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.prod-grid-item').forEach((el, i) => {
+                el.style.opacity    = '0';
+                el.style.transform  = 'translateY(20px)';
+                el.style.transition = 'all 0.4s ease';
+                setTimeout(() => {
+                    el.style.opacity   = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 80 * i);
+            });
+        });
+    </script>
+}

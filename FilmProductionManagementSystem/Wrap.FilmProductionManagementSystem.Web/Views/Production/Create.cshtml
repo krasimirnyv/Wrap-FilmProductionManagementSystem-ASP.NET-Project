@@ -1,0 +1,269 @@
+@using Wrap.ViewModels.Production;
+
+@using static Wrap.ViewModels.General.Helper.ProductionStatusAbstraction;
+
+@model CreateProductionInputModel
+
+@{
+    ViewData["Title"] = "Create Production";
+
+    // Build grouped status data server-side for both the Razor optgroups and the JS map
+    IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusGroups = GetStatusTypeByAbstraction();
+}
+
+<link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+
+<div class="production-wrapper">
+    <div class="container">
+
+        @* ── Page Header ── *@
+        <div class="production-header-card text-center">
+            <i class="bi bi-plus-circle-fill" style="font-size: 2.5rem; color: var(--wrap-blue);"></i>
+            <h2 class="fw-bold mt-3 mb-1" style="color: var(--wrap-dark-blue);">Create New Production</h2>
+            <p class="text-muted mb-0">Fill in the details to start your next film project</p>
+        </div>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data" id="createProductionForm">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+            @* ── Thumbnail Upload ── *@
+            <div class="section-card">
+                <div class="section-header">
+                    <i class="bi bi-image me-2"></i>
+                    <h3>Production Thumbnail</h3>
+                </div>
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-5">
+                        <label for="thumbnailInput" class="thumbnail-upload-box w-100 d-block"
+                               id="uploadLabel">
+                            <i class="bi bi-cloud-upload"
+                               style="font-size: 2.5rem; color: var(--wrap-blue);"></i>
+                            <p class="mb-1 mt-2 fw-semibold"
+                               style="color: var(--wrap-dark-blue);">Click to upload image</p>
+                            <small class="text-muted"> .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif · max 10 MB</small>
+                        </label>
+                        <input type="file" asp-for="Thumbnail" class="d-none"
+                               accept="image/*" id="thumbnailInput">
+                        <span asp-validation-for="Thumbnail" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-7" id="thumbnailPreview" style="display: none;">
+                        <img id="thumbnailImage" src="#" alt="Preview"
+                             class="thumbnail-preview-img w-100">
+                        <button type="button"
+                                class="btn btn-sm btn-production-secondary mt-2"
+                                id="clearThumbnail">
+                            <i class="bi bi-x-circle me-1"></i>Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @* ── Production Details ── *@
+            <div class="section-card">
+                <div class="section-header">
+                    <i class="bi bi-film me-2"></i>
+                    <h3>Production Details</h3>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Title" class="form-label">
+                        <i class="bi bi-cursor-text me-1"></i>Production Title *
+                    </label>
+                    <input asp-for="Title" class="form-control form-control-lg"
+                           placeholder="e.g. Midnight Dreams" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label">
+                        <i class="bi bi-text-paragraph me-1"></i>Description
+                        <small class="text-muted fw-normal ms-1">(optional)</small>
+                    </label>
+                    <textarea asp-for="Description" class="form-control" rows="5"
+                              placeholder="Share the story behind your production…"
+                              id="descriptionTextarea" maxlength="2000"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                    <div class="form-text text-end">
+                        <span id="descriptionCounter">0</span> / 2000 characters
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Budget" class="form-label">
+                        <i class="bi bi-cash-coin me-1"></i>Budget *
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text"
+                              style="border-color: var(--wrap-blue); color: var(--wrap-blue);">$</span>
+                        <input asp-for="Budget" class="form-control" type="number"
+                               step="0.01" min="0" placeholder="0.00" />
+                    </div>
+                    <span asp-validation-for="Budget" class="text-danger small"></span>
+                </div>
+            </div>
+
+            @* ── Status & Timeline ── *@
+            <div class="section-card">
+                <div class="section-header">
+                    <i class="bi bi-gear me-2"></i>
+                    <h3>Status & Timeline</h3>
+                </div>
+
+                <div class="row g-4">
+
+                    @* Step 1 – abstract phase *@
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            <i class="bi bi-layers me-1"></i>Phase *
+                        </label>
+                        <select id="phaseSelect" class="form-select">
+                            <option value="">— Select Phase —</option>
+                            @foreach (KeyValuePair<string, IReadOnlyCollection<ProductionStatusType>> group in statusGroups)
+                            {
+                                <option value="@group.Key">@group.Key</option>
+                            }
+                        </select>
+                        <div class="form-text">Choose the broad production stage first.</div>
+                    </div>
+
+                    @* Step 2 – specific enum status (bound to model) *@
+                    <div class="col-md-4">
+                        <label asp-for="StatusType" class="form-label">
+                            <i class="bi bi-tag me-1"></i>Specific Status *
+                        </label>
+                        <select asp-for="StatusType" class="form-select" id="statusTypeSelect"
+                                disabled>
+                            <option value="">— Select Phase first —</option>
+                            @* All options rendered as optgroups; JS shows/hides groups *@
+                            @foreach (KeyValuePair<string, IReadOnlyCollection<ProductionStatusType>> group in statusGroups)
+                            {
+                                <optgroup label="@group.Key"
+                                          class="status-optgroup"
+                                          data-phase="@group.Key"
+                                          style="display: none;">
+                                    @foreach (ProductionStatusType status in group.Value)
+                                    {
+                                        <option value="@((int)status)">
+                                            @GetDisplayName(status.ToString())
+                                        </option>
+                                    }
+                                </optgroup>
+                            }
+                        </select>
+                        <span asp-validation-for="StatusType" class="text-danger small"></span>
+                    </div>
+
+                    @* Dates *@
+                    <div class="col-md-4">
+                        <label asp-for="StatusStartDate" class="form-label">
+                            <i class="bi bi-calendar-check me-1"></i>Start Date *
+                        </label>
+                        <input asp-for="StatusStartDate" type="date" class="form-control" />
+                        <span asp-validation-for="StatusStartDate" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="StatusEndDate" class="form-label">
+                            <i class="bi bi-calendar-x me-1"></i>End Date
+                            <small class="text-muted fw-normal">(optional)</small>
+                        </label>
+                        <input asp-for="StatusEndDate" type="date" class="form-control" />
+                        <span asp-validation-for="StatusEndDate" class="text-danger small"></span>
+                    </div>
+
+                </div>
+            </div>
+
+            @* ── Actions ── *@
+            <div class="text-center mb-5">
+                <button type="submit" class="btn btn-production btn-lg me-2">
+                    <i class="bi bi-check-circle me-2"></i>Create Production
+                </button>
+                <a asp-action="Index" class="btn btn-production-secondary btn-lg">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ── Thumbnail preview ─────────────────────────────────────────
+            const thumbInput   = document.getElementById('thumbnailInput');
+            const thumbPreview = document.getElementById('thumbnailPreview');
+            const thumbImg     = document.getElementById('thumbnailImage');
+            const uploadLabel  = document.getElementById('uploadLabel');
+            const clearBtn     = document.getElementById('clearThumbnail');
+
+            thumbInput?.addEventListener('change', e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/'))  { alert('Please select an image file.'); thumbInput.value = ''; return; }
+                if (file.size > 10 * 1024 * 1024)     { alert('Max file size is 10 MB.');      thumbInput.value = ''; return; }
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    thumbImg.src = ev.target.result;
+                    thumbPreview.style.display = '';
+                    uploadLabel.style.display  = 'none';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            clearBtn?.addEventListener('click', () => {
+                thumbInput.value           = '';
+                thumbPreview.style.display = 'none';
+                uploadLabel.style.display  = '';
+            });
+
+            // ── Description counter ───────────────────────────────────────
+            const descField   = document.getElementById('descriptionTextarea');
+            const descCounter = document.getElementById('descriptionCounter');
+            descField?.addEventListener('input', () =>
+                descCounter.textContent = descField.value.length);
+
+            // ── Default start date ────────────────────────────────────────
+            const startDate = document.querySelector('[name="StatusStartDate"]');
+            if (startDate && !startDate.value)
+                startDate.value = new Date().toISOString().split('T')[0];
+
+            // ── Cascading phase → status select ───────────────────────────
+            const phaseSelect  = document.getElementById('phaseSelect');
+            const statusSelect = document.getElementById('statusTypeSelect');
+            const optgroups    = statusSelect.querySelectorAll('optgroup[data-phase]');
+
+            phaseSelect?.addEventListener('change', () => {
+                const chosen = phaseSelect.value;
+
+                // Show only the matching optgroup; hide all others
+                optgroups.forEach(og => {
+                    const match = og.dataset.phase === chosen;
+                    // Note: hiding <optgroup> via style works in all modern browsers
+                    og.style.display = match ? '' : 'none';
+                });
+
+                if (!chosen) {
+                    // No phase chosen → disable status select and clear its value
+                    statusSelect.value   = '';
+                    statusSelect.disabled = true;
+                    statusSelect.querySelector('option[value=""]').textContent = '— Select Phase first —';
+                } else {
+                    statusSelect.disabled = false;
+                    statusSelect.value   = '';   // reset to "please choose" state
+                    statusSelect.querySelector('option[value=""]').textContent = '— Select Status —';
+                }
+            });
+
+            // ── Unsaved changes warning ───────────────────────────────────
+            let dirty = false;
+            document.querySelectorAll('#createProductionForm input, #createProductionForm textarea, #createProductionForm select')
+                .forEach(el => el.addEventListener('change', () => dirty = true));
+            window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+            document.getElementById('createProductionForm')
+                ?.addEventListener('submit', () => dirty = false);
+        });
+    </script>
+}

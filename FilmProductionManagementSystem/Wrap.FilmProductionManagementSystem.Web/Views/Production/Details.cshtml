@@ -1,0 +1,314 @@
+@using Wrap.ViewModels.Production;
+@using Wrap.ViewModels.Production.HelperViewModels;
+
+@using static Wrap.ViewModels.General.Helper.ProductionStatusAbstraction;
+
+@model DetailsProductionViewModel
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+
+<div class="production-wrapper">
+    <div class="container">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong>@TempData["SuccessMessage"]</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @* ── Hero Header Card ── *@
+        <div class="production-header-card">
+            <div class="row align-items-center g-4">
+
+                <div class="col-md-4 text-center">
+                    <img src="@Model.Thumbnail"
+                         alt="@Model.Title"
+                         class="production-thumbnail">
+                </div>
+
+                <div class="col-md-8">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                        <div>
+                            <h1 class="fw-bold mb-2" style="color: var(--wrap-dark-blue);">
+                                @Model.Title
+                            </h1>
+                            <span class="status-badge @Model.StatusAbstractClass">@GetDisplayName(Model.StatusType)</span>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a asp-action="Edit" asp-route-productionId="@Model.Id"
+                               class="btn btn-production">
+                                <i class="bi bi-pencil-fill me-1"></i>Edit
+                            </a>
+                            <a asp-action="Delete" asp-route-productionId="@Model.Id"
+                               class="btn btn-production-danger">
+                                <i class="bi bi-trash-fill me-1"></i>Delete
+                            </a>
+                            <a asp-action="Index"
+                               class="btn btn-production-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-cash me-1"></i>Budget</div>
+                                <div class="info-value">@Model.Budget</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="bi bi-calendar-check me-1"></i>Start Date
+                                </div>
+                                <div class="info-value">@Model.StatusStartDate</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="bi bi-calendar-x me-1"></i>End Date
+                                </div>
+                                <div class="info-value">@Model.StatusEndDate</div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.ScriptId))
+                            {
+                                <div class="info-item">
+                                    <div class="info-label">
+                                        <i class="bi bi-file-text me-1"></i>Script
+                                    </div>
+                                    <div class="info-value">
+                                        <a asp-controller="Scripts" asp-action="Details"
+                                           asp-route-id="@Model.ScriptId"
+                                           class="btn btn-production-outline btn-sm">
+                                            <i class="bi bi-file-earmark-text me-1"></i>View Script
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* ── Description ── *@
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <div class="section-card">
+                <div class="section-header">
+                    <i class="bi bi-text-paragraph me-2"></i>
+                    <h3>Description</h3>
+                </div>
+                <div class="biography-content">@Model.Description</div>
+            </div>
+        }
+
+        @* ── Tabs ── *@
+        <div class="section-card">
+            <ul class="nav prod-tabs flex-wrap gap-2 mb-4" id="prodTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" data-bs-toggle="tab"
+                            data-bs-target="#tabCrew" type="button">
+                        <i class="bi bi-people me-1"></i>Crew
+                        <span class="badge bg-secondary ms-1">@Model.ProductionCrewMembers.Count</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab"
+                            data-bs-target="#tabCast" type="button">
+                        <i class="bi bi-person-video3 me-1"></i>Cast
+                        <span class="badge bg-secondary ms-1">@Model.ProductionCastMembers.Count</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab"
+                            data-bs-target="#tabScenes" type="button">
+                        <i class="bi bi-camera-video me-1"></i>Scenes
+                        <span class="badge bg-secondary ms-1">@Model.Scenes.Count</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab"
+                            data-bs-target="#tabAssets" type="button">
+                        <i class="bi bi-folder me-1"></i>Assets
+                        <span class="badge bg-secondary ms-1">@Model.ProductionAssets.Count</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" data-bs-toggle="tab"
+                            data-bs-target="#tabSchedule" type="button">
+                        <i class="bi bi-calendar-event me-1"></i>Schedule
+                        <span class="badge bg-secondary ms-1">@Model.ShootingDays.Count</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content prod-tab-content">
+
+                @* ── Crew ── *@
+                <div class="tab-pane fade show active" id="tabCrew">
+                    @if (!Model.ProductionCrewMembers.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-people"></i>
+                            <p>No crew members assigned yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                            @foreach (var crew in Model.ProductionCrewMembers)
+                            {
+                                <div class="col-6 col-md-4 col-lg-3">
+                                    <div class="member-card">
+                                        <img src="@crew.ProfileImagePath"
+                                             alt="@crew.FirstName @crew.LastName"
+                                             class="member-avatar">
+                                        <div class="member-name">@crew.FirstName @crew.LastName</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* ── Cast ── *@
+                <div class="tab-pane fade" id="tabCast">
+                    @if (!Model.ProductionCastMembers.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-person-video3"></i>
+                            <p>No cast members assigned yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row g-3">
+                            @foreach (ProductionCastViewModel cast in Model.ProductionCastMembers)
+                            {
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-3 member-card text-start">
+                                        <img src="@cast.ProfileImagePath"
+                                             alt="@cast.FirstName @cast.LastName"
+                                             class="member-avatar" style="min-width: 70px;">
+                                        <div>
+                                            <div class="member-name">@cast.FirstName @cast.LastName</div>
+                                            <div class="member-role">
+                                                @cast.Role · Age @cast.Age · @cast.Gender
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @* ── Scenes ── *@
+                <div class="tab-pane fade" id="tabScenes">
+                    @if (!Model.Scenes.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-camera-video"></i>
+                            <p>No scenes created yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (ProductionSceneViewModel scene in Model.Scenes)
+                        {
+                            <div class="scene-row">
+                                <div class="scene-number">@scene.SceneNumber</div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold" style="color: var(--wrap-dark-blue);">
+                                        @scene.SceneName
+                                    </div>
+                                    <small class="text-muted">@scene.Location</small>
+                                </div>
+                                <span class="badge bg-secondary">@scene.SceneType</span>
+                            </div>
+                        }
+                    }
+                </div>
+
+                @* ── Assets ── *@
+                <div class="tab-pane fade" id="tabAssets">
+                    @if (!Model.ProductionAssets.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-folder"></i>
+                            <p>No assets uploaded yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (ProductionAssetViewModel asset in Model.ProductionAssets)
+                        {
+                            <div class="asset-item">
+                                <div class="asset-icon"><i class="bi bi-file-earmark"></i></div>
+                                <div>
+                                    <div class="fw-semibold" style="color: var(--wrap-dark-blue);">
+                                        @asset.Title
+                                    </div>
+                                    <small class="text-muted">@asset.AssetType</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                @* ── Schedule ── *@
+                <div class="tab-pane fade" id="tabSchedule">
+                    @if (!Model.ShootingDays.Any())
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-calendar-event"></i>
+                            <p>No shooting days scheduled yet.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (ProductionShootingDayViewModel day in Model.ShootingDays)
+                        {
+                            <div class="schedule-item">
+                                <i class="bi bi-calendar-check" style="color: #11998e; font-size: 1.3rem;"></i>
+                                <span class="fw-semibold" style="color: var(--wrap-dark-blue);">
+                                    @day.Date
+                                </span>
+                            </div>
+                        }
+                    }
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(a => new bootstrap.Alert(a).close());
+        }, 5000);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.production-header-card, .section-card').forEach((el, i) => {
+                el.style.opacity    = '0';
+                el.style.transform  = 'translateY(20px)';
+                el.style.transition = 'all 0.45s ease';
+                setTimeout(() => {
+                    el.style.opacity   = '1';
+                    el.style.transform = 'translateY(0)';
+                }, i * 120);
+            });
+        });
+    </script>
+}

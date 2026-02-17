@@ -1,0 +1,184 @@
+@using Wrap.ViewModels.LoginAndRegistration.Helpers
+
+@model EditSkillsViewModel
+
+
+<link rel="stylesheet" href="~/css/registration.css" asp-append-version="true" />
+
+<section class="home-hero">
+    <div class="registration-container">
+        <div class="registration-card skills-selection">
+            <!-- Header -->
+            <div class="registration-header">
+                <h2 class="text-center">⚡ Edit Your <span class="text-wrap-red">Skills</span></h2>
+                <p class="text-center text-muted">Add or remove the roles you're capable of</p>
+            </div>
+
+            <!-- Selected Skills Count -->
+            <div class="selected-count mb-3">
+                <span id="selectedCount">@Model.CurrentSkills.Count</span> skills selected
+            </div>
+
+            <!-- Form -->
+            <form asp-controller="Profile" asp-action="EditSkills" method="post" id="skillsForm">
+                <input type="hidden" 
+                       asp-for="SelectedSkills" 
+                       id="hiddenSelectedSkills" 
+                       value="@string.Join(",", Model.CurrentSkills.Select(s => (int)s))" />
+                
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Accordion -->
+                <div class="accordion" id="departmentsAccordion">
+                    @{
+                        int index = 0;
+                        foreach (KeyValuePair<string, IReadOnlyCollection<CrewRoleType>> department in Model.AllDepartments)
+                        {
+                            string departmentId = $"department{index}";
+                            bool isFirstDepartment = index == 0;
+                            
+                            // Count how many skills user currently has in this department
+                            int currentSkillsInDept = department.Value.Count(role => Model.CurrentSkills.Contains(role));
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button @(isFirstDepartment ? "" : "collapsed")"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@departmentId"
+                                            aria-expanded="@(isFirstDepartment ? "true" : "false")">
+                                        <span class="department-name">@department.Key</span>
+                                        <span class="department-count" id="count-@departmentId">@currentSkillsInDept</span>
+                                    </button>
+                                </h2>
+                                <div id="@departmentId"
+                                     class="accordion-collapse collapse @(isFirstDepartment ? "show" : "")"
+                                     data-bs-parent="#departmentsAccordion">
+                                    <div class="accordion-body">
+                                        <div class="skills-grid">
+                                            @foreach (CrewRoleType skill in department.Value)
+                                            {
+                                                string skillName = CrewRolesDepartments.GetDisplayName(skill);
+                                                string skillValue = ((int)skill).ToString();
+                                                
+                                                bool isSelected = Model.CurrentSkills.Contains(skill);
+                                                <button type="button"
+                                                        class="skill-bubble @(isSelected ? "selected" : "")"
+                                                        data-skill="@skillValue"
+                                                        data-department="@departmentId">
+                                                    @skillName
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            index++;
+                        }
+                    }
+                </div>
+
+                <div asp-validation-summary="All" class="text-danger mt-3"></div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-controller="Profile" asp-action="FilmmakerProfile" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-wrap-primary" id="submitBtn">
+                        <i class="bi bi-check-circle me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+
+    <script>
+        $(document).ready(function() {
+            const selectedSkills = new Set();
+            const hiddenInput = $('#hiddenSelectedSkills');
+            
+            // ✅ FIX: Initialize with current skills from hidden input
+            const initialSkills = hiddenInput.val().split(',').filter(s => s);
+            initialSkills.forEach(skill => selectedSkills.add(skill));
+            
+            // Update UI
+            updateSelectedCount();
+            updateAllDepartmentCounts();
+
+            // ========================================
+            // Skill bubble click handler
+            // ========================================
+            $('.skill-bubble').on('click', function() {
+                const $bubble = $(this);
+                // ✅ FIX: Convert to string for consistency
+                const skillValue = String($bubble.data('skill'));
+                const departmentId = $bubble.data('department');
+
+                // Toggle selection
+                if (selectedSkills.has(skillValue)) {
+                    // Remove skill
+                    selectedSkills.delete(skillValue);
+                    $bubble.removeClass('selected');
+                } else {
+                    // Add skill
+                    selectedSkills.add(skillValue);
+                    $bubble.addClass('selected');
+                }
+
+                // Update UI
+                updateSelectedCount();
+                updateDepartmentCount(departmentId);
+                updateHiddenInput();
+            });
+
+            // ========================================
+            // Update total count
+            // ========================================
+            function updateSelectedCount() {
+                $('#selectedCount').text(selectedSkills.size);
+            }
+
+            // ========================================
+            // Update department badge count
+            // ========================================
+            function updateDepartmentCount(departmentId) {
+                const count = $(`#${departmentId} .skill-bubble.selected`).length;
+                $(`#count-${departmentId}`).text(count);
+            }
+
+            // ========================================
+            // Update all department counts
+            // ========================================
+            function updateAllDepartmentCounts() {
+                $('.accordion-item').each(function() {
+                    const departmentId = $(this).find('.accordion-collapse').attr('id');
+                    updateDepartmentCount(departmentId);
+                });
+            }
+
+            // ========================================
+            // Update hidden input for form submission
+            // ========================================
+            function updateHiddenInput() {
+                hiddenInput.val(Array.from(selectedSkills).join(','));
+            }
+
+            // ========================================
+            // Prevent form submission if no skills selected
+            // ========================================
+            $('#skillsForm').on('submit', function(e) {
+                if (selectedSkills.size === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one skill!');
+                    return false;
+                }
+            });
+        });
+    </script>
+}

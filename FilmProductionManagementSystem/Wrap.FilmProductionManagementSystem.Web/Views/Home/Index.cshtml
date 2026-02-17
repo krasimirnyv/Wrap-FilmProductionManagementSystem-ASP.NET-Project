@@ -4,6 +4,16 @@
 
 <link rel="stylesheet" href="~/css/registration.css" asp-append-version="true"/>
 
+<!-- Error Message -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <strong>@TempData["Error"]</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <section class="container-fluid home-hero" xmlns="http://www.w3.org/1999/html">
     <div class="hero-overlay"></div>
 
@@ -48,3 +58,14 @@
         </div>
     </div>
 </section>
+
+<script>
+        // Dismiss alert automatically after 5 seconds
+        setTimeout(function() {
+            var alert = document.querySelector('.alert');
+            if (alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    </script>
