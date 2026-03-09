@@ -1,12 +1,10 @@
-using Wrap.ViewModels.NavBar;
-
 namespace FilmProductionManagementSystem.Web.ViewComponents;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 using Wrap.Data.Models.Infrastructure;
-
+using Wrap.ViewModels.NavBar;
 using Wrap.Services.Core.Interface;
 
 public class NavBarUserComponent(UserManager<ApplicationUser> userManager,
@@ -16,11 +14,11 @@ public class NavBarUserComponent(UserManager<ApplicationUser> userManager,
     {
         ApplicationUser? user = await userManager.GetUserAsync(HttpContext.User);
         if (user is null)
-            return View("BadRequestNavBar");
+            return View("BadRequestNavBar", "UserNull");
         
         NavBarUserViewModel? model = await navBarService.GetNavBarUserAsync(user.Id);
         if (model is null)
-            return View("BadRequestNavBar");
+            return View("BadRequestNavBar", "ModelNull");
         
         return View(model);
     }

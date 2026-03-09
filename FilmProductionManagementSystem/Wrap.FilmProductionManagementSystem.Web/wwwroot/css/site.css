@@ -76,6 +76,34 @@ body {
 
         transform: translateY(-1px);
     }
+
+    /* refresh link */
+    .nav-refresh{
+        display: inline-flex;
+        align-items: center;      /* вертикално центриране */
+        justify-content: center;  /* хоризонтално центриране */
+        padding: 0;               /* махаме default nav-link padding */
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;     /* перфектен кръг */
+        line-height: 1;           /* да не влияе baseline */
+        color: rgba(255,255,255,.85);
+        text-decoration: none;
+    }
+
+    /* icon */
+    .nav-refresh i{
+        font-size: 1.2rem;
+        line-height: 0;
+        display: block;           /* избягва baseline “подскачане” */
+    }
+
+    /* hover/focus */
+    .nav-refresh:hover,
+    .nav-refresh:focus{
+        background: rgba(255,255,255,.08);
+        color: #fff;
+    }
     
     /* Footer Vibe */
     .wrap-footer {

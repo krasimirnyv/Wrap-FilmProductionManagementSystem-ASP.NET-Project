@@ -1,1 +1,38 @@
-<partial name="BadRequest"/>
+@model string?
+
+@* Minimal navbar fallback: show only Register, Login and Refresh controls when user/profile data can't be loaded.
+   If a string is passed, show a tiny contextual message for diagnostics: "UserNull" or "ModelNull". *@
+
+<ul class="navbar-nav ms-auto flex-row align-items-center gap-2">
+    <li class="nav-item">
+        <span class="small text-muted" style="white-space:nowrap;">
+            @if (Model == "UserNull")
+            {
+                <span title="No authenticated user">You are not signed in</span>
+            }
+            else if (Model == "ModelNull")
+            {
+                <span title="Profile record not found">Your profile is missing</span>
+            }
+        </span>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Register</a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" asp-area="" asp-controller="Register" asp-action="Login">Log in</a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link nav-refresh"
+           href="#"
+           role="button"
+           aria-label="Refresh"
+           title="Refresh"
+           onclick="location.reload(); return false;">
+            <i class="bi bi-arrow-clockwise"></i>
+        </a>
+    </li>
+</ul>
