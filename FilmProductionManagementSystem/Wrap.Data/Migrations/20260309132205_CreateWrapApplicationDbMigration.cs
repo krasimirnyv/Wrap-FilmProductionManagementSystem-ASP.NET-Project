@@ -1,12 +1,14 @@
-﻿#nullable disable
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace Wrap.Data.Migrations
 {
-    using System;
-    using Microsoft.EntityFrameworkCore.Migrations;
-    
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class CreateWrapApplicationDbMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -182,13 +184,11 @@ namespace Wrap.Data.Migrations
                     ProfileImagePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Nickname = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
+                    Nickname = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     BirthDate = table.Column<DateTime>(type: "DATETIME2", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     Biography = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
-                    PaymentType = table.Column<int>(type: "int", nullable: false),
-                    PaymentAmount = table.Column<decimal>(type: "DECIMAL(18,2)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
@@ -209,14 +209,11 @@ namespace Wrap.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProfileImagePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ProfileImagePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Nickname = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
-                    RoleType = table.Column<int>(type: "int", nullable: false),
+                    Nickname = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Biography = table.Column<string>(type: "nvarchar(4000)", maxLength: 4000, nullable: true),
-                    PaymentType = table.Column<int>(type: "int", nullable: false),
-                    PaymentAmount = table.Column<decimal>(type: "DECIMAL(18,2)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
@@ -345,6 +342,25 @@ namespace Wrap.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CrewSkills",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleType = table.Column<int>(type: "int", nullable: false),
+                    CrewMemberId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CrewSkills", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CrewSkills_CrewMembers_CrewMemberId",
+                        column: x => x.CrewMemberId,
+                        principalTable: "CrewMembers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductionsCrewMembers",
                 columns: table => new
                 {
@@ -417,6 +433,30 @@ namespace Wrap.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ScriptBlocks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderIndex = table.Column<int>(type: "int", nullable: false),
+                    BlockType = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
+                    Metadata = table.Column<string>(type: "NVARCHAR(MAX)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "DATETIME2", nullable: false),
+                    LastModifiedAt = table.Column<DateTime>(type: "DATETIME2", nullable: false),
+                    ScriptId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ScriptBlocks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ScriptBlocks_Scripts_ScriptId",
+                        column: x => x.ScriptId,
+                        principalTable: "Scripts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ShootingDaysScenes",
                 columns: table => new
                 {
@@ -439,6 +479,27 @@ namespace Wrap.Data.Migrations
                         principalTable: "ShootingDays",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Productions",
+                columns: new[] { "Id", "Budget", "Description", "StatusEndDate", "StatusStartDate", "StatusType", "Thumbnail", "Title" },
+                values: new object[] { new Guid("809f7100-5b1d-4eee-8b82-8e4084ef0928"), 1000.00m, "This is a test", new DateTime(2026, 3, 14, 13, 22, 5, 305, DateTimeKind.Utc).AddTicks(4620), new DateTime(2026, 3, 9, 13, 22, 5, 305, DateTimeKind.Utc).AddTicks(4620), 1, null, "Test Film" });
+
+            migrationBuilder.InsertData(
+                table: "Scripts",
+                columns: new[] { "Id", "Content", "LastEditedAt", "ProductionId", "Title" },
+                values: new object[] { new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d"), null, new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(5040), new Guid("809f7100-5b1d-4eee-8b82-8e4084ef0928"), "Test Screenplay" });
+
+            migrationBuilder.InsertData(
+                table: "ScriptBlocks",
+                columns: new[] { "Id", "BlockType", "Content", "CreatedAt", "LastModifiedAt", "Metadata", "OrderIndex", "ScriptId" },
+                values: new object[,]
+                {
+                    { new Guid("3bed994a-cbee-4d60-b22f-a922b82eb841"), 7, "I'll have a double espresso. Make it strong.", new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(4180), new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(4180), null, 3, new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d") },
+                    { new Guid("65a5a61f-204d-4274-be48-bf4b440ff6a1"), 1, "INT. COFFEE SHOP - DAY", new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(4170), new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(4180), null, 0, new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d") },
+                    { new Guid("befd3f37-d237-4e46-8a21-e08704c6ef00"), 4, "JOHN", new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(4180), new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(4180), null, 2, new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d") },
+                    { new Guid("c5cc8272-c35d-4b4b-bb31-137df7fe86d5"), 3, "A bustling morning crowd. Steam rises from espresso machines.", new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(4180), new DateTime(2026, 3, 9, 13, 22, 5, 306, DateTimeKind.Utc).AddTicks(4180), null, 1, new Guid("36ca9b58-d902-4195-bf80-2e6518ad3c6d") }
                 });
 
             migrationBuilder.CreateIndex(
@@ -491,6 +552,11 @@ namespace Wrap.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CrewSkills_CrewMemberId",
+                table: "CrewSkills",
+                column: "CrewMemberId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProductionsAssets_ProductionId",
                 table: "ProductionsAssets",
                 column: "ProductionId");
@@ -519,6 +585,11 @@ namespace Wrap.Data.Migrations
                 name: "IX_ScenesCrewMembers_CrewMemberId",
                 table: "ScenesCrewMembers",
                 column: "CrewMemberId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ScriptBlocks_ScriptId_OrderIndex",
+                table: "ScriptBlocks",
+                columns: new[] { "ScriptId", "OrderIndex" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Scripts_ProductionId",
@@ -561,6 +632,9 @@ namespace Wrap.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "CrewSkills");
+
+            migrationBuilder.DropTable(
                 name: "ProductionsAssets");
 
             migrationBuilder.DropTable(
@@ -576,7 +650,7 @@ namespace Wrap.Data.Migrations
                 name: "ScenesCrewMembers");
 
             migrationBuilder.DropTable(
-                name: "Scripts");
+                name: "ScriptBlocks");
 
             migrationBuilder.DropTable(
                 name: "ShootingDaysScenes");
@@ -589,6 +663,9 @@ namespace Wrap.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "CrewMembers");
+
+            migrationBuilder.DropTable(
+                name: "Scripts");
 
             migrationBuilder.DropTable(
                 name: "Scenes");

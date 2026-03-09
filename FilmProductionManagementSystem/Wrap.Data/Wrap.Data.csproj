@@ -20,5 +20,9 @@
     <ItemGroup>
         <ProjectReference Include="..\Wrap.Data.Models\Wrap.Data.Models.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
     
 </Project>
