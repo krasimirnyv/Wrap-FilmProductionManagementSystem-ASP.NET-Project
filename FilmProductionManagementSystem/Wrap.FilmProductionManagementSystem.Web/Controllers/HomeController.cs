@@ -10,8 +10,7 @@ using Wrap.ViewModels.General;
 
 using Wrap.Services.Core.Interface;
 
-[Authorize]
-public class HomeController(IHomeService homeService) : Controller
+public class HomeController(IHomeService homeService) : BaseController
 { 
     [HttpGet]
     [AllowAnonymous]
@@ -29,23 +28,17 @@ public class HomeController(IHomeService homeService) : Controller
 
     [HttpGet]
     [AllowAnonymous]
+    [Route("/Home/Error/{statusCode:int}")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
-    
-    [HttpGet]
-    [AllowAnonymous]
-    [Route("Error/{statusCode:int}")]
-    public IActionResult StatusCodeError(int statusCode)
+    public IActionResult Error(int statusCode)
     {
         return statusCode switch
         {
-            404 => View("NotFound"),
-            400 => View("BadRequest"),
-            405 => View("Index"),
-            _ => View("Error")
-        };
+            StatusCodes.Status400BadRequest => View("BadRequest"),
+            StatusCodes.Status404NotFound => View("NotFound"),
+            StatusCodes.Status500InternalServerError => View("InternalServerError"),
+            StatusCodes.Status405MethodNotAllowed => RedirectToAction("Index", "Home"),
+            _ => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier })
+        }; 
     }
 }

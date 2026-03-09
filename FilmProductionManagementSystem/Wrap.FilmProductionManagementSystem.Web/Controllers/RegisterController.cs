@@ -144,13 +144,6 @@ public class RegisterController(ILoginRegisterService registerService,
         
         try 
         {
-            bool isCorrect = await registerService.IsUsernameAndPasswordCorrectAsync(model);
-            if (!isCorrect)
-            {
-                ModelState.AddModelError(string.Empty, "Invalid username or password.");
-                return View(model);
-            }
-
             (bool, string) loginStatus = await registerService.LoginStatusAsync(model);
 
             if (loginStatus.Item1)
@@ -170,11 +163,17 @@ public class RegisterController(ILoginRegisterService registerService,
                 case (false, "Cast"):
                     ModelState.AddModelError(string.Empty, "This account is not registered as Cast.");
                     break;
+                case (false, ""):
+                    ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                    break;
                 default:
                     ModelState.AddModelError(string.Empty, "Please select a role.");
                     break;
             }
                 
+            await registerService.LogoutAsync();
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            
             return View(model);
         }
         catch (Exception e)
@@ -190,7 +189,9 @@ public class RegisterController(ILoginRegisterService registerService,
     [Authorize]
     public async Task<IActionResult> Logout()
     {
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         await registerService.LogoutAsync();
+
         return RedirectToAction("Index", "Home");
     }
     

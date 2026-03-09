@@ -2,7 +2,6 @@ namespace Wrap.Services.Core;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 
@@ -85,8 +84,9 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
 
         await context.CrewMembers.AddAsync(newCrew);
 
-        foreach (CrewRoleType skill in skills)
+        foreach (int skillId in skills)
         {
+            CrewRoleType skill = (CrewRoleType)skillId;
             await context.CrewSkills.AddAsync(new CrewSkill
             {
                 Id = Guid.NewGuid(),
@@ -138,16 +138,10 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
         
         return IdentityResult.Success;
     }
-
-    public async Task<bool> IsUsernameAndPasswordCorrectAsync(AccountLogInInputModel model)
-    {
-        ApplicationUser? user = await GetValueAsync(model);
-        return user is not null;
-    }
-
+    
     public async Task<(bool, string)> LoginStatusAsync(AccountLogInInputModel model)
     {
-        ApplicationUser? user = await GetValueAsync(model);
+        ApplicationUser? user = await userManager.FindByNameAsync(model.UserName);
 
         if (user is null)
             return (false, string.Empty);
@@ -156,27 +150,27 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
         {
             case "Crew":
             {
-                bool crewExist = await context.CrewMembers
-                    .AnyAsync(c => c.UserId == user.Id);
-
-                if (crewExist) 
+                bool crewExist = await context.CrewMembers.AnyAsync(c => c.UserId == user.Id);
+                if (crewExist)
+                { 
+                    await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
                     return (true, model.Role);
+                }
                 
                 await signInManager.SignOutAsync();
                 return (false, "Crew");
-
             }
             case "Cast":
             {
-                bool castExist = await context.CastMembers
-                    .AnyAsync(c => c.UserId == user.Id);
-
+                bool castExist = await context.CastMembers.AnyAsync(c => c.UserId == user.Id);
                 if (castExist) 
+                {
+                    await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
                     return (true, model.Role);
+                }
                 
                 await signInManager.SignOutAsync();
                 return (false, "Cast");
-
             }
             default:
                 await signInManager.SignOutAsync();
@@ -187,23 +181,5 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
     public async Task LogoutAsync()
     {
         await signInManager.SignOutAsync();
-    }
-
-    /// <summary>
-    /// Gets the user based on the provided username and password in the login form.
-    /// </summary>
-    /// <param name="model">AccountLogInInputModel</param>
-    /// <returns>ApplicationUser -> if succeeded returns user, else - null</returns>
-    private async Task<ApplicationUser?> GetValueAsync(AccountLogInInputModel model)
-    {
-        ApplicationUser? user = await userManager.FindByNameAsync(model.UserName);
-        
-        if (user is null)
-            return null;
-        
-        SignInResult signInResult = await signInManager
-            .PasswordSignInAsync(user, model.Password, model.RememberMe, false);
-
-        return signInResult.Succeeded ? user : null;
     }
 }

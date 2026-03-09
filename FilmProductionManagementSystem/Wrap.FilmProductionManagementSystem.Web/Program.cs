@@ -71,10 +71,13 @@ public class Program
 
         WebApplication app = builder.Build();
 
+        app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.UseMigrationsEndPoint();
+            app.UseDeveloperExceptionPage();
         }
         else
         {
@@ -84,16 +87,14 @@ public class Program
         }
         
         app.UseHttpsRedirection();
-        app.UseStaticFiles();
-
         app.UseRouting();
-        
+
+        app.UseCookiePolicy();
+        app.UseStaticFiles();
         app.UseSession();
 
         app.UseAuthentication();
         app.UseAuthorization();
-        
-        app.UseStatusCodePagesWithReExecute("/Error/{0}");
         
         app.MapControllerRoute(
             name: "default",

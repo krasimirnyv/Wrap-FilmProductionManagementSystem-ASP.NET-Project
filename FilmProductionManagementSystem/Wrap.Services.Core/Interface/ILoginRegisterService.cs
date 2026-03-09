@@ -43,13 +43,6 @@ public interface ILoginRegisterService
     /// <param name="model">CastRegistrationInputModel</param>
     /// <returns>IdentityResult -> Success or not </returns>
     Task<IdentityResult> CompleteCastRegistrationAsync(CastRegistrationInputModel model);
-
-    /// <summary>
-    /// In Login process, checks if the provided username and password are correct.
-    /// </summary>
-    /// <param name="model">AccountLogInInputModel</param>
-    /// <returns>bool -> user is not null</returns>
-    Task<bool> IsUsernameAndPasswordCorrectAsync(AccountLogInInputModel model);
     
     /// <summary>
     /// Checks the Login status and role in the application (cast or crew)

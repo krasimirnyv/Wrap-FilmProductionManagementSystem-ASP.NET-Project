@@ -15,5 +15,5 @@ public class AccountLogInInputModel
     [Required]
     public string Role { get; set; } = null!; // "Crew" or "Cast"
 
-    public bool RememberMe { get; set; } = false;
+    public bool RememberMe { get; set; }
 }
