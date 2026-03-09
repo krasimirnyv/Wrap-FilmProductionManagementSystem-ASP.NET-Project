@@ -1,12 +1,23 @@
 namespace Wrap.Data.Configuration;
 
-using Models;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using Models;
+
 public class ScriptConfiguration : IEntityTypeConfiguration<Script>
 {
+    public void Configure(EntityTypeBuilder<Script> entity)
+    {
+        entity
+            .HasMany(s => s.ScriptBlocks)
+            .WithOne(sb => sb.Script)
+            .HasForeignKey(sb => sb.ScriptId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasData(scripts);
+    }
+    
     private readonly Script[] scripts =
     [
         new()
@@ -17,9 +28,4 @@ public class ScriptConfiguration : IEntityTypeConfiguration<Script>
             ProductionId = Guid.Parse("809f7100-5b1d-4eee-8b82-8e4084ef0928")
         }
     ];
-    
-    public void Configure(EntityTypeBuilder<Script> entity)
-    {
-        entity.HasData(scripts);
-    }
 }

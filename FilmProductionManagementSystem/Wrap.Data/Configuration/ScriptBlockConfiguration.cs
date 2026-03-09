@@ -1,14 +1,20 @@
 namespace Wrap.Data.Configuration;
 
-using Models;
-using GCommon.Enums;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using Models;
+using GCommon.Enums;
+
 public class ScriptBlockConfiguration : IEntityTypeConfiguration<ScriptBlock>
 {
-    // In Program.cs or a seeder
+    public void Configure(EntityTypeBuilder<ScriptBlock> entity)
+    {
+        entity.HasIndex(sb => new { sb.ScriptId, sb.OrderIndex });
+        
+        entity.HasData(scriptBlocks);
+    }
+    
     private readonly ScriptBlock[] scriptBlocks =
     [
         new()
@@ -52,9 +58,4 @@ public class ScriptBlockConfiguration : IEntityTypeConfiguration<ScriptBlock>
             ScriptId = Guid.Parse("36ca9b58-d902-4195-bf80-2e6518ad3c6d")
         }
     ];
-
-    public void Configure(EntityTypeBuilder<ScriptBlock> entity)
-    {
-        entity.HasData(scriptBlocks);
-    }
 }

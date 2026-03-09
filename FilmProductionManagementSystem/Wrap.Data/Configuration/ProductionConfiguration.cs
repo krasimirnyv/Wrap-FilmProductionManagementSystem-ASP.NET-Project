@@ -1,16 +1,27 @@
 namespace Wrap.Data.Configuration;
 
-using Models;
-using GCommon.Enums;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using Models;
+using GCommon.Enums;
+
 public class ProductionConfiguration : IEntityTypeConfiguration<Production>
 {
+    public void Configure(EntityTypeBuilder<Production> entity)
+    {
+        entity
+            .HasOne(p => p.Script)
+            .WithOne(s => s.Production)
+            .HasForeignKey<Script>(s => s.ProductionId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasData(productions);
+    }
+    
     private readonly Production[] productions =
     [
-        new Production
+        new()
         {
             Id = Guid.Parse("809f7100-5b1d-4eee-8b82-8e4084ef0928"),
             Title = "Test Film",
@@ -21,9 +32,4 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             StatusEndDate = DateTime.UtcNow + TimeSpan.FromDays(5)
         }
     ];
-    
-    public void Configure(EntityTypeBuilder<Production> entity)
-    {
-        entity.HasData(productions);
-    }
 }
