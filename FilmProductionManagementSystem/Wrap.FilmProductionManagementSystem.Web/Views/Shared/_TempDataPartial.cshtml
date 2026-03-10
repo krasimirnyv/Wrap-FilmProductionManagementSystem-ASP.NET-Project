@@ -1,0 +1,39 @@
+<!-- Success Message -->
+@if (TempData[SuccessTempDataKey] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <strong>@TempData[SuccessTempDataKey]</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+        
+<!-- Error Message -->
+@if (TempData[ErrorTempDateKey] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <strong>@TempData[ErrorTempDateKey]</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Warning Message -->
+@if (TempData[WarningTempDataKey] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>@TempData[WarningTempDataKey]</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Info Message -->
+@if (TempData[InfoTempDataKey] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        <strong>@TempData[InfoTempDataKey]</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}

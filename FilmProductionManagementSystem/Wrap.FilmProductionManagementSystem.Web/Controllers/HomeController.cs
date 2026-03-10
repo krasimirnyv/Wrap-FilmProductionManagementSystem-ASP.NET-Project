@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 
 using Wrap.ViewModels;
 using Wrap.ViewModels.General;
-
 using Wrap.Services.Core.Interface;
 
 public class HomeController(IHomeService homeService) : BaseController
@@ -34,10 +33,10 @@ public class HomeController(IHomeService homeService) : BaseController
     {
         return statusCode switch
         {
-            StatusCodes.Status400BadRequest => View("BadRequest"),
-            StatusCodes.Status404NotFound => View("NotFound"),
+            StatusCodes.Status400BadRequest => View(nameof(BadRequest)),
+            StatusCodes.Status404NotFound => View(nameof(NotFound)),
             StatusCodes.Status500InternalServerError => View("InternalServerError"),
-            StatusCodes.Status405MethodNotAllowed => RedirectToAction("Index", "Home"),
+            StatusCodes.Status405MethodNotAllowed => RedirectToAction(nameof(Index)),
             _ => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier })
         }; 
     }

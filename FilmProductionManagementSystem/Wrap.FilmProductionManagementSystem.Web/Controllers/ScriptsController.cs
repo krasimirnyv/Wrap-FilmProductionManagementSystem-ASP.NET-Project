@@ -2,10 +2,7 @@ namespace FilmProductionManagementSystem.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 
-using Microsoft.AspNetCore.Authorization;
-
-[Authorize]
-public class ScriptsController : Controller
+public class ScriptsController : BaseController
 {
     public IActionResult Index()
     {

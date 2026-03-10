@@ -3,6 +3,7 @@ namespace Wrap.ViewModels.General.Helper;
 using System.Text.RegularExpressions;
 
 using GCommon.Enums;
+using static GCommon.ApplicationConstants;
 
 /// <summary>
 /// Groups ProductionStatusTypes enum values by abstract status
@@ -18,7 +19,7 @@ public static class ProductionStatusAbstraction
     {
         return new Dictionary<string, IReadOnlyCollection<ProductionStatusType>>
         {
-            ["Pre-production"] =
+            [PreProductionKey] =
             [
                 ProductionStatusType.Concept,
                 ProductionStatusType.Development,
@@ -29,14 +30,14 @@ public static class ProductionStatusAbstraction
                 ProductionStatusType.Rehearsals
             ],
 
-            ["Production"] =
+            [ProductionKey] =
             [
                 ProductionStatusType.Production,
                 ProductionStatusType.OnHold,
                 ProductionStatusType.Reshoots
             ],
 
-            ["Post-production"] =
+            [PostProductionKey] =
             [
                 ProductionStatusType.PostProduction,
                 ProductionStatusType.PictureLock,
@@ -46,7 +47,7 @@ public static class ProductionStatusAbstraction
                 ProductionStatusType.MusicComposition
             ],
 
-            ["Distribution"] =
+            [DistributionKey] =
             [
                 ProductionStatusType.Marketing,
                 ProductionStatusType.Distribution,
@@ -57,13 +58,11 @@ public static class ProductionStatusAbstraction
             ]
         };
     }
-    
+
     /// <summary>
     /// Get friendly display name for ProductionStatusType
     /// Converts PascalCase to "Spaced Case"
     /// </summary>
     public static string GetDisplayName(string status)
-    {
-        return Regex.Replace(status, "([A-Z])", " $1").Trim();
-    }
+        => Regex.Replace(status, DisplayNameRegEx, DisplayNameReplacement).Trim();
 }

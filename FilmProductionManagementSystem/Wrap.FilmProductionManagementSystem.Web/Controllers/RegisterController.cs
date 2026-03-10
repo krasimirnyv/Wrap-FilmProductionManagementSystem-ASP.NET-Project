@@ -7,16 +7,16 @@ using Microsoft.AspNetCore.Authorization;
 
 using Wrap.Services.Core.Interface;
 using Wrap.Services.Core.Utilities;
-
 using Wrap.ViewModels.LoginAndRegistration;
+
+using static Wrap.GCommon.ApplicationConstants;
+using static Wrap.GCommon.OutputMessages;
+using static Wrap.GCommon.OutputMessages.Register;
 
 [AllowAnonymous]
 public class RegisterController(ILoginRegisterService registerService, 
                                 ILogger<RegisterController> logger) : Controller
 {
-    private const string CrewDraftKey = "CrewDraft";
-    private const string SuccessMessage = "Registration successful! Welcome to Wrap!";
-
     [HttpGet]
     public IActionResult RegisterCrewStepOne()
         => View(new CrewRegistrationStepOneInputModel());
@@ -35,8 +35,9 @@ public class RegisterController(ILoginRegisterService registerService,
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception occured while trying to build the crew draft");
-            ModelState.AddModelError(string.Empty, e.Message);
+            logger.LogError(e, string.Format(ErrorBuildingCrewDraft, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(ErrorBuildingCrewDraft, e.Message));
+            return View(model);
         }
         
         return RedirectToAction(nameof(RegisterCrewStepTwo));
@@ -47,11 +48,15 @@ public class RegisterController(ILoginRegisterService registerService,
     {
         CrewRegistrationStepOneDraft? draft = SessionJsonExtensions
             .GetJson<CrewRegistrationStepOneDraft>(HttpContext.Session, CrewDraftKey);
-        
+
         if (draft is null)
+        {
+            TempData[ErrorTempDateKey] = ErrorFoundingCrewDraft;
             return RedirectToAction(nameof(RegisterCrewStepOne));
-        
-        return View(registerService.GetNewModelWithSkills());
+        }
+
+        CrewRegistrationStepTwoInputModel inputModel = registerService.GetNewModelWithSkills();
+        return View(inputModel);
     }
 
     [HttpPost]
@@ -80,16 +85,15 @@ public class RegisterController(ILoginRegisterService registerService,
             }
         
             HttpContext.Session.Remove(CrewDraftKey);
-            TempData["SuccessMessage"] = SuccessMessage;
+            TempData[SuccessTempDataKey] = SuccessMessage;
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception occured while trying to complete the crew registration");
-            ModelState.AddModelError(string.Empty, e.Message);
+            logger.LogError(e, string.Format(ExceptionCompleteRegistrationOfCrewMessage, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(ExceptionCompleteRegistrationOfCrewMessage, e.Message));
             return View(model);
         }
-        
-        return RedirectToAction("Dashboard", "Home");
     }
 
     [HttpGet]
@@ -114,20 +118,19 @@ public class RegisterController(ILoginRegisterService registerService,
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = SuccessMessage;
+            TempData[SuccessTempDataKey] = SuccessMessage;
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception occured while trying to complete the cast registration");
-            ModelState.AddModelError(string.Empty, e.Message);
+            logger.LogError(e, string.Format(ExceptionCompleteRegistrationOfCastMessage, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(ExceptionCompleteRegistrationOfCastMessage, e.Message));
             return View(model);
         }
-        
-        return RedirectToAction("Dashboard", "Home");
     }
 
     [HttpGet]
-    public async Task<IActionResult> Login(string? returnUrl = null)
+    public async Task<IActionResult> Login(string? returnUrl)
     {
         // Clear the existing external cookie to ensure a clean login process
         await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -137,7 +140,7 @@ public class RegisterController(ILoginRegisterService registerService,
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(AccountLogInInputModel model, string? returnUrl = null)
+    public async Task<IActionResult> Login(AccountLogInInputModel model, string? returnUrl)
     {
         if (!ModelState.IsValid)
             return View(model);
@@ -154,20 +157,20 @@ public class RegisterController(ILoginRegisterService registerService,
 
             switch (loginStatus)
             {
-                case (true, "Crew"):
-                case (true, "Cast"):
+                case (true, CrewString):
+                case (true, CastString):
                     return RedirectToAction("Dashboard", "Home");
-                case (false, "Crew"):
-                    ModelState.AddModelError(string.Empty, "This account is not registered as Crew.");
+                case (false, CrewString):
+                    ModelState.AddModelError(string.Empty, NotRegisteredAsCrew);
                     break;
-                case (false, "Cast"):
-                    ModelState.AddModelError(string.Empty, "This account is not registered as Cast.");
+                case (false, CastString):
+                    ModelState.AddModelError(string.Empty, NotRegisteredAsCast);
                     break;
-                case (false, ""):
-                    ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                case (false, EmptyString):
+                    ModelState.AddModelError(string.Empty, InvalidUsernameOrPassword);
                     break;
                 default:
-                    ModelState.AddModelError(string.Empty, "Please select a role.");
+                    ModelState.AddModelError(string.Empty, NotSelectedRole);
                     break;
             }
                 
@@ -178,8 +181,8 @@ public class RegisterController(ILoginRegisterService registerService,
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception occured while trying to login.");
-            ModelState.AddModelError(string.Empty, $"Login failed: {e.Message}");
+            logger.LogError(e, string.Format(ExceptionLogin, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(ExceptionLogin, e.Message));
             return View(model);
         }
     }
@@ -192,7 +195,7 @@ public class RegisterController(ILoginRegisterService registerService,
         await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         await registerService.LogoutAsync();
 
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction(nameof(Index), "Home");
     }
     
     private bool IsSkillSelected(CrewRegistrationStepTwoInputModel model)
@@ -200,7 +203,7 @@ public class RegisterController(ILoginRegisterService registerService,
         if (model.SelectedSkills.Count > 0)
             return false;
         
-        ModelState.AddModelError(string.Empty, "Please select at least one skill.");
+        ModelState.AddModelError(string.Empty, NoSelectedSkills);
         registerService.GetSkills(model);
         return true;
     }

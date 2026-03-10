@@ -1,7 +1,7 @@
 @model ScriptEditorViewModel
 
 @{
-    ViewData["Title"] = $"Script Editor - {Model.ScriptTitle}";
+    ViewData[TitleDataKey] = $"Script Editor - {Model.ScriptTitle}";
 }
 
 <link rel="stylesheet" href="~/css/script-editor.css" asp-append-version="true" />
@@ -95,9 +95,9 @@
                 <div class="script-block @block.BlockType.ToString().ToLower()" 
                      contenteditable="@(!Model.IsReadOnly ? "true" : "false")" 
                      data-block-type="@block.BlockType"
-                     data-block-id="@(block.Id?.ToString() ?? "")"
+                     data-block-id="@(block.Id?.ToString() ?? string.Empty)"
                      data-order-index="@block.OrderIndex">
-                    @Html.Raw(block.Content ?? "")
+                    @Html.Raw(block.Content ?? string.Empty)
                 </div>
             }
         }

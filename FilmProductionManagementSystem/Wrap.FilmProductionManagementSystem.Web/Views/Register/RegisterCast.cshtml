@@ -1,10 +1,9 @@
 @using Wrap.ViewModels.LoginAndRegistration
-@using static Wrap.GCommon.ApplicationConstants;
 
 @model CastRegistrationInputModel
 
 @{
-    ViewData["Title"] = "Join as Actor";
+    ViewData[TitleDataKey] = "Join as Actor";
 }
 
 <link rel="stylesheet" href="~/css/registration.css" asp-append-version="true" />
@@ -27,7 +26,7 @@
             </div>
 
             <!-- Form -->
-            <form asp-controller="Register" asp-action="RegisterCast" method="post" enctype="multipart/form-data" class="registration-form">
+            <form asp-area="" asp-controller="Register" asp-action="RegisterCast" method="post" enctype="multipart/form-data" class="registration-form">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                 
                 <!-- Profile Image Upload -->
@@ -155,7 +154,7 @@
 
                 <!-- Actions -->
                 <div class="d-flex justify-content-between">
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
                         ← Back to Home
                     </a>
                     <button type="submit" class="btn btn-wrap-primary" id="submitBtn" value="Upload">

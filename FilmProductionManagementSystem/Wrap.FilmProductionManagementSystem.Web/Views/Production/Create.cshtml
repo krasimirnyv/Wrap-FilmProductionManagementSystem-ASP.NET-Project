@@ -1,11 +1,10 @@
 @using Wrap.ViewModels.Production;
-
 @using static Wrap.ViewModels.General.Helper.ProductionStatusAbstraction;
 
 @model CreateProductionInputModel
 
 @{
-    ViewData["Title"] = "Create Production";
+    ViewData[TitleDataKey] = "Create Production";
 
     // Build grouped status data server-side for both the Razor optgroups and the JS map
     IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusGroups = GetStatusTypeByAbstraction();
@@ -23,7 +22,7 @@
             <p class="text-muted mb-0">Fill in the details to start your next film project</p>
         </div>
 
-        <form asp-action="Create" method="post" enctype="multipart/form-data" id="createProductionForm">
+        <form asp-area="" asp-controller="Production" asp-action="Create" method="post" enctype="multipart/form-data" id="createProductionForm">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
             @* ── Thumbnail Upload ── *@
@@ -178,7 +177,7 @@
                 <button type="submit" class="btn btn-production btn-lg me-2">
                     <i class="bi bi-check-circle me-2"></i>Create Production
                 </button>
-                <a asp-action="Index" class="btn btn-production-secondary btn-lg">
+                <a asp-area="" asp-controller="Production" asp-action="Index" class="btn btn-production-secondary btn-lg">
                     <i class="bi bi-x-circle me-2"></i>Cancel
                 </a>
             </div>

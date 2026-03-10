@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
 using GCommon.Enums;
-
 using static GCommon.EntityConstants.Production;
 
 public class CreateProductionInputModel

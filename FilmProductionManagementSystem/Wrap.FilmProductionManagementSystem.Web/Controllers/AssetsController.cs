@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
 namespace FilmProductionManagementSystem.Web.Controllers;
 
-[Authorize]
-public class AssetsController : Controller
+using Microsoft.AspNetCore.Mvc;
+
+public class AssetsController : BaseController
 {
     public IActionResult Index()
     {

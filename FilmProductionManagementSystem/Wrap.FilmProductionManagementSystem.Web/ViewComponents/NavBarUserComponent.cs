@@ -7,6 +7,8 @@ using Wrap.Data.Models.Infrastructure;
 using Wrap.ViewModels.NavBar;
 using Wrap.Services.Core.Interface;
 
+using static Wrap.GCommon.OutputMessages.NavBar;
+
 public class NavBarUserComponent(UserManager<ApplicationUser> userManager,
                                 INavBarService navBarService) : ViewComponent
 {
@@ -14,11 +16,11 @@ public class NavBarUserComponent(UserManager<ApplicationUser> userManager,
     {
         ApplicationUser? user = await userManager.GetUserAsync(HttpContext.User);
         if (user is null)
-            return View("BadRequestNavBar", "UserNull");
+            return View("BadRequestNavBar", UserIsNull);
         
         NavBarUserViewModel? model = await navBarService.GetNavBarUserAsync(user.Id);
         if (model is null)
-            return View("BadRequestNavBar", "ModelNull");
+            return View("BadRequestNavBar", ModelIsNull);
         
         return View(model);
     }

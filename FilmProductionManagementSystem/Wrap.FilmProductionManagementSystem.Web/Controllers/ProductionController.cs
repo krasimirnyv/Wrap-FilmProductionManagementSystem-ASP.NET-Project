@@ -1,24 +1,18 @@
 namespace FilmProductionManagementSystem.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 using Wrap.Services.Core.Interface;
-
 using Wrap.ViewModels.Production;
 
-[Authorize]
+using static Wrap.GCommon.OutputMessages;
+using static Wrap.GCommon.OutputMessages.Production;
+using static Wrap.GCommon.ApplicationConstants;
+
 public class ProductionController(IProductionService productionService,
-                                  ILogger<ProductionController> logger) : Controller
+                                  ILogger<ProductionController> logger) : BaseController
 {
-    private const string CreateSuccessMessage = "Production created successfully!";
-    private const string UpdateSuccessMessage = "Production updated successfully!";
-    private const string DeleteSuccessMessage = "Production deleted successfully!";
     
-    private const string NotFoundMessage = "Production's ID is not found!";
-    private const string IdIsNullOrEmptyMessage = "Production's ID is null or empty.";
-
-
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -30,8 +24,8 @@ public class ProductionController(IProductionService productionService,
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error loading productions. {ExMessage}", e.Message);
-            TempData["Error"] = "Error loading productions.";
+            logger.LogError(e, string.Format(LoadingManyProductionsErrorMessageWithException, e.Message));
+            TempData[ErrorTempDateKey] = LoadingManyProductionsErrorMessage;
             return RedirectToAction("Dashboard", "Home");
         }
     }
@@ -41,22 +35,19 @@ public class ProductionController(IProductionService productionService,
     {
         try
         {
-            if (string.IsNullOrEmpty(productionId))
-            {
-                logger.LogWarning(IdIsNullOrEmptyMessage);
-                return View("NotFound", NotFoundMessage);
-            }
-            
             DetailsProductionViewModel? model = await productionService.GetProductionDetailsAsync(productionId);
             if (model is null)
-                return View("NotFound", NotFoundMessage);
+            {
+                logger.LogWarning(string.Format(IdIsNullOrEmptyMessage, productionId));
+                return View(nameof(NotFound), string.Format(NotFoundMessage, productionId));
+            }
             
             return View(model);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception occured while trying to visualize the details of the project with ID {productionId}. {ExMessage}", productionId, e.Message);
-            return View("NotFound", NotFoundMessage);
+            logger.LogError(e, string.Format(CrudFailureMessage, DetailsMessage, e.Message));
+            return View(nameof(NotFound), string.Format(IdIsNullOrEmptyMessage, productionId));
         }
     }
 
@@ -74,13 +65,13 @@ public class ProductionController(IProductionService productionService,
         try
         {
             string productionId = await productionService.CreateProductionInputModelAsync(model);
-            TempData["SuccessMessage"] = CreateSuccessMessage;
-            return RedirectToAction("Details", new { productionId });
+            TempData[SuccessTempDataKey] = string.Format(CrudSuccessMessage, CreatedMessage);
+            return RedirectToAction(nameof(Details), new { productionId });
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception occured while trying to create a production with the provided data. {ExMessage}", e.Message);
-            ModelState.AddModelError(string.Empty, $"Error: {e.Message}");
+            logger.LogError(e, string.Format(CrudFailureMessage, CreatingMessage, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(CrudFailureMessage, CreatingMessage, e.Message));
             return View(model);
         }
     }
@@ -90,23 +81,17 @@ public class ProductionController(IProductionService productionService,
     {
         try
         {
-            if (string.IsNullOrEmpty(productionId))
-            {
-                logger.LogWarning(IdIsNullOrEmptyMessage);
-                return View("NotFound", NotFoundMessage);
-            }
-            
             EditProductionInputModel? model = await productionService.GetEditProductionAsync(productionId);
             
             if (model is null)
-                return View("NotFound", NotFoundMessage);
+                return View(nameof(NotFound), string.Format(IdIsNullOrEmptyMessage, productionId));
             
             return View(model);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error loading production for edit. {ExMessage}", e.Message);
-            return View("BadRequest");
+            logger.LogError(e, string.Format(LoadingProductionErrorMessageWithException, productionId, e.Message));
+            return View(nameof(BadRequest), string.Format(LoadingProductionErrorMessage, productionId));
         }
     }
 
@@ -120,13 +105,13 @@ public class ProductionController(IProductionService productionService,
         try
         {
             await productionService.UpdateProductionAsync(productionId, model);
-            TempData["SuccessMessage"] = UpdateSuccessMessage;
-            return RedirectToAction("Details", new { productionId });
+            TempData[SuccessTempDataKey] = string.Format(CrudSuccessMessage, UpdatedMessage);
+            return RedirectToAction(nameof(Details), new { productionId });
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Exception occured while trying to create a production with the provided data, {ExMessage}", e.Message);
-            ModelState.AddModelError(string.Empty, e.Message);
+            logger.LogError(e, string.Format(CrudFailureMessage, UpdatingMessage, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(CrudFailureMessage, UpdatingMessage, e.Message));
             return View(model);
         }
     }
@@ -136,41 +121,35 @@ public class ProductionController(IProductionService productionService,
     {
         try
         {
-            if (string.IsNullOrEmpty(productionId))
-            {
-                logger.LogWarning(IdIsNullOrEmptyMessage);
-                return View("NotFound", NotFoundMessage);
-            }
-            
             DeleteProductionViewModel? model = await productionService.GetDeleteProductionAsync(productionId);
-            if (model == null)
-                return View("NotFound", NotFoundMessage);
+            if (model is null)
+                return View(nameof(NotFound), string.Format(IdIsNullOrEmptyMessage, productionId));
             
             return View(model);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error loading production for delete. {ExMessage}", e.Message);
-            return View("BadRequest");
+            logger.LogError(e, string.Format(CrudFailureMessage, DeletingMessage, e.Message));
+            return View(nameof(BadRequest), string.Format(LoadingProductionErrorMessage, productionId));
         }
     }
     
     [HttpPost] 
-    [ActionName("Delete")]
+    [ActionName(nameof(Delete))]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(string productionId)
+    public async Task<IActionResult> DeleteConfirmed(string? productionId)
     {
         try
         {
             await productionService.DeleteProductionAsync(productionId);
-            TempData["SuccessMessage"] = DeleteSuccessMessage;
-            return RedirectToAction("Index");
+            TempData[SuccessTempDataKey] = string.Format(CrudSuccessMessage, DeletedMessage);
+            return RedirectToAction(nameof(Index));
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error deleting production. {ExMessage}", e.Message);
-            TempData["Error"] = $"Error deleting production: {e.Message}";
-            return RedirectToAction("Details", new { productionId });
+            logger.LogError(e, string.Format(CrudFailureMessage, DeletingMessage, e.Message));
+            TempData[ErrorTempDateKey] = string.Format(CrudFailureMessage, DeletingMessage, e.Message);
+            return RedirectToAction(nameof(Details), new { productionId });
         }
     }
     

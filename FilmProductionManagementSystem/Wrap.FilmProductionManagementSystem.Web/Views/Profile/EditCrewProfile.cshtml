@@ -1,7 +1,7 @@
 @model EditCrewProfileViewModel
 
 @{
-    ViewData["Title"] = "Edit Filmmaker Profile";
+    ViewData[TitleDataKey] = "Edit Filmmaker Profile";
 }
 
 <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
@@ -19,7 +19,7 @@
                 <p class="text-muted">Update your profile information</p>
             </div>
 
-            <form asp-controller="Profile" asp-action="EditFilmmaker" method="post" enctype="multipart/form-data">
+            <form asp-area="" asp-controller="Profile" asp-action="EditFilmmaker" method="post" enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <!-- Profile Image Upload -->
@@ -125,7 +125,7 @@
                     <button type="submit" class="btn btn-custom btn-lg me-2">
                         <i class="bi bi-check-circle me-2"></i>Save Changes
                     </button>
-                    <a asp-controller="Profile" asp-action="FilmmakerProfile" class="btn btn-outline-secondary btn-lg">
+                    <a asp-area="" asp-controller="Profile" asp-action="FilmmakerProfile" class="btn btn-outline-secondary btn-lg">
                         <i class="bi bi-x-circle me-2"></i>Cancel
                     </a>
                 </div>

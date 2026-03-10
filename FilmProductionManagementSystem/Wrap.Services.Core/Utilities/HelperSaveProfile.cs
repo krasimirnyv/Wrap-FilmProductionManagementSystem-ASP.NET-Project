@@ -3,6 +3,8 @@ namespace Wrap.Services.Core.Utilities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 
+using static GCommon.DataFormat;
+using static GCommon.OutputMessages;
 using static GCommon.ApplicationConstants;
 
 internal static class  HelperSaveProfile
@@ -19,26 +21,25 @@ internal static class  HelperSaveProfile
     internal static async Task<string> SaveProfileImageAsync(IWebHostEnvironment environment, IFormFile? photo)
     {
         if (photo is null || photo.Length <= 0)
-            return "/img/profile/default-profile.png";
+            return DefaultProfilePath;
 
-        string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heif", ".heic", ".hif"];
         string fileExtension = Path.GetExtension(photo.FileName).ToLowerInvariant();
 
-        if (!allowedExtensions.Contains(fileExtension))
-            throw new NotSupportedException($"The file extension {fileExtension} is not supported.");
+        if (!AllowedExtensions.Contains(fileExtension))
+            throw new NotSupportedException(string.Format(NotSupportedFileExtension, fileExtension));
 
         if (photo.Length > MaxFileSize)
-            throw new NotSupportedException($"The file size limit {MaxFileSize} exceeded.");
+            throw new NotSupportedException(string.Format(ExceededFileSizeLimit, MaxFileSize));
         
         string fileName = $"{Guid.NewGuid()}{fileExtension}";
         
         string wwwrootPath = environment.WebRootPath;
-        string uploadsFolder = Path.Combine(wwwrootPath, "img", "profile");
+        string uploadsFolder = Path.Combine(wwwrootPath, ImageFolderName, ProfileFolderName);
 
         Directory.CreateDirectory(uploadsFolder);
         
         string physicalPath = Path.Combine(uploadsFolder, fileName);
-        string webPath = $"/img/profile/{fileName}";
+        string webPath = $"/{ImageFolderName}/{ProfileFolderName}/{fileName}";
         
         await using (FileStream fileStream = new FileStream(physicalPath, FileMode.Create))
         {

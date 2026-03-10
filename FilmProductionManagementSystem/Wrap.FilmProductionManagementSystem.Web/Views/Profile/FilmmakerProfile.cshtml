@@ -4,7 +4,7 @@
 @model CrewProfileViewModel
 
 @{
-    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Filmmaker Profile";
+    ViewData[TitleDataKey] = $"{Model.FirstName} {Model.LastName} - Filmmaker Profile";
 }
 
 <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true"/>
@@ -12,15 +12,7 @@
 <div class="profile-wrapper">
     <div class="container">
     
-        <!-- Success Message -->
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>@TempData["SuccessMessage"]</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
+        <partial name="_TempDataPartial"></partial>
         
         <!-- Profile Header Card -->
         <div class="profile-header-card">
@@ -32,7 +24,7 @@
                              alt="@Model.FirstName @Model.LastName"
                              class="profile-image">
                         <div class="edit-icon-overlay" title="Edit Profile">
-                            <a asp-controller="Profile" asp-action="EditFilmmaker" class="text-white" style="text-decoration: none;">
+                            <a asp-area="" asp-controller="Profile" asp-action="EditFilmmaker" class="text-white" style="text-decoration: none;">
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
                         </div>
@@ -92,8 +84,8 @@
                                 <div class="info-item">
                                     <div class="info-label">Status:</div>
                                     <div class="info-value">
-                                        <span class="badge @(Model.IsActive ? "bg-success" : "bg-secondary") badge-custom">
-                                            @(Model.IsActive ? "Active" : "Inactive")
+                                        <span class="badge @(Model.IsActive ? ActiveStyle : InactiveStyle) badge-custom">
+                                            @(Model.IsActive ? Active : Inactive)
                                         </span>
                                     </div>
                                 </div>
@@ -154,13 +146,13 @@
                 <div class="text-center py-4 text-muted">
                     <i class="bi bi-tools" style="font-size: 3rem;"></i>
                     <p class="mt-2">No skills added yet</p>
-                    <a asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
+                    <a asp-area="" asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
                         <i class="bi bi-plus-circle me-2"></i>Edit Skills
                     </a>
                 </div>
             }
             <div class="text-center py-4 text-muted">
-                <a asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
+                <a asp-area="" asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
                     <i class="bi bi-plus-circle me-2"></i>Edit Skills
                 </a>
             </div>
@@ -189,7 +181,8 @@
                                         </p>
                                         <small class="text-muted">Project status: @productionCrew.ProjectStatus</small>
                                     </div>
-                                    <a asp-controller="Production"
+                                    <a asp-area="" 
+                                       asp-controller="Production"
                                        asp-action="Details"
                                        asp-route-id="@productionCrew.ProductionId"
                                        class="btn btn-sm btn-outline-primary">
@@ -239,7 +232,8 @@
                                     <span class="badge bg-info badge-custom">@sceneCrew.RoleType</span>
                                 </td>
                                 <td>
-                                    <a asp-controller="Scene"
+                                    <a asp-area="" 
+                                       asp-controller="Scene"
                                        asp-action="Details"
                                        asp-route-id="@sceneCrew.SceneId"
                                        class="btn btn-sm btn-link">
@@ -275,15 +269,5 @@
                 }, index * 100);
             });
         });
-    </script>
-    <script>
-        // Dismiss alert automatically after 5 seconds
-        setTimeout(function() {
-            var alert = document.querySelector('.alert');
-            if (alert) {
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            }
-        }, 5000);
     </script>
 }

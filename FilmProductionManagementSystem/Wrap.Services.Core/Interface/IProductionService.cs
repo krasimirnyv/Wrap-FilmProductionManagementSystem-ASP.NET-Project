@@ -15,7 +15,7 @@ public interface IProductionService
     /// </summary>
     /// <param name="id">string</param>
     /// <returns>DetailsProductionViewModel</returns>
-    Task<DetailsProductionViewModel?> GetProductionDetailsAsync(string id);
+    Task<DetailsProductionViewModel?> GetProductionDetailsAsync(string? id);
     
     /// <summary>
     /// Creates a new production based on the provided input model
@@ -30,7 +30,7 @@ public interface IProductionService
     /// </summary>
     /// <param name="id">string</param>
     /// <returns>EditProductionInputModel</returns>
-    Task<EditProductionInputModel?> GetEditProductionAsync(string id);
+    Task<EditProductionInputModel?> GetEditProductionAsync(string? id);
     
     /// <summary>
     /// Updates an existing production with new details provided in the input model, based on its ID
@@ -44,11 +44,11 @@ public interface IProductionService
     /// </summary>
     /// <param name="id">string</param>
     /// <returns>DeleteProductionViewModel</returns>
-    Task<DeleteProductionViewModel?> GetDeleteProductionAsync(string id);
+    Task<DeleteProductionViewModel?> GetDeleteProductionAsync(string? id);
     
     /// <summary>
     /// Deletes a production from the system based on its ID after confirmation
     /// </summary>
     /// <param name="id">string</param>
-    Task DeleteProductionAsync(string id);
+    Task DeleteProductionAsync(string? id);
 }

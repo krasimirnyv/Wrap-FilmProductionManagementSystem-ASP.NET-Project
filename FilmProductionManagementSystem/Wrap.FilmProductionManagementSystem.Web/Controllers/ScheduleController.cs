@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace FilmProductionManagementSystem.Web.Controllers;
 
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-[Authorize]
-public class ScheduleController : Controller
+public class ScheduleController : BaseController
 {
     public IActionResult Index()
     {

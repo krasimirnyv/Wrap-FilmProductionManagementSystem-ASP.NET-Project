@@ -6,30 +6,28 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 
 using Interface;
-
 using Data;
 using Data.Models;
-
 using ViewModels.Production;
 using ViewModels.Production.HelperViewModels;
-
 using GCommon.Enums;
 
 using static Utilities.HelperSaveThumbnail;
 using static ViewModels.General.Helper.ProductionStatusAbstraction;
 using static GCommon.DataFormat;
+using static GCommon.ApplicationConstants;
+using static GCommon.OutputMessages.Production;
 
 public class ProductionService(FilmProductionDbContext context,
                                IWebHostEnvironment environment) : IProductionService
 {
-    private const string InvalidIdMessage = "Invalid Production ID (wrong format, null or empty): {0}";
-    private const string NotFoundMessage = "Production with ID {0} not found.";
+    
     
     private static readonly IReadOnlyDictionary<ProductionStatusType, string> StatusAbstractMap =
         BuildStatusCssMap();
 
     private static string GetStatusAbstractClass(ProductionStatusType statusType)
-        => StatusAbstractMap.GetValueOrDefault(statusType, "status-default");
+        => StatusAbstractMap.GetValueOrDefault(statusType, DefaultStatus);
     
     public async Task<IEnumerable<AllProductionsViewModel>> GetAllProductionsAsync()
     {
@@ -59,7 +57,7 @@ public class ProductionService(FilmProductionDbContext context,
         return productions;
     }
 
-    public async Task<DetailsProductionViewModel?> GetProductionDetailsAsync(string id)
+    public async Task<DetailsProductionViewModel?> GetProductionDetailsAsync(string? id)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
@@ -80,7 +78,7 @@ public class ProductionService(FilmProductionDbContext context,
                 p.StatusType,
                 p.StatusStartDate,
                 p.StatusEndDate,
-                ScriptId = (Guid?)p.Script.Id
+                ScriptId = (Guid?)p.Script!.Id
             })
             .SingleOrDefaultAsync();
 
@@ -197,7 +195,7 @@ public class ProductionService(FilmProductionDbContext context,
         return production.Id.ToString();
     }
 
-    public async Task<EditProductionInputModel?> GetEditProductionAsync(string id)
+    public async Task<EditProductionInputModel?> GetEditProductionAsync(string? id)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
@@ -229,7 +227,7 @@ public class ProductionService(FilmProductionDbContext context,
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
-            throw new ArgumentException(string.Format(InvalidIdMessage, id));
+            throw new ArgumentException(string.Format(IdIsNullOrEmptyMessage, id));
 
         Production? production = await context
             .Productions
@@ -251,7 +249,7 @@ public class ProductionService(FilmProductionDbContext context,
         await context.SaveChangesAsync();
     }
 
-    public async Task<DeleteProductionViewModel?> GetDeleteProductionAsync(string id)
+    public async Task<DeleteProductionViewModel?> GetDeleteProductionAsync(string? id)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
@@ -294,11 +292,11 @@ public class ProductionService(FilmProductionDbContext context,
         return model;
     }
 
-    public async Task DeleteProductionAsync(string id)
+    public async Task DeleteProductionAsync(string? id)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
-            throw new ArgumentException(string.Format(InvalidIdMessage, id));
+            throw new ArgumentException(string.Format(IdIsNullOrEmptyMessage, id));
 
         Production? production = await context
             .Productions
@@ -311,7 +309,7 @@ public class ProductionService(FilmProductionDbContext context,
         await context.SaveChangesAsync();
     }
     
-    private static Guid? ValidateGuid(string id)
+    private static Guid? ValidateGuid(string? id)
     {
         if (string.IsNullOrEmpty(id))
             return null;
@@ -327,17 +325,17 @@ public class ProductionService(FilmProductionDbContext context,
     {
         Dictionary<string, string> abstractNames = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["Pre-production"]  = "status-pre-production",
-            ["Production"]      = "status-production",
-            ["Post-production"] = "status-post-production",
-            ["Distribution"]    = "status-distribution",
+            [PreProductionKey] = PreProductionStatus,
+            [ProductionKey] = ProductionStatus,
+            [PostProductionKey] = PostProductionStatus,
+            [DistributionKey] = DistributionStatus
         };
 
         Dictionary<ProductionStatusType, string> map = new Dictionary<ProductionStatusType, string>();
 
         foreach ((string abstractName, IReadOnlyCollection<ProductionStatusType> statuses) in GetStatusTypeByAbstraction())
         {
-            string cssClass = abstractNames.GetValueOrDefault(abstractName, "status-default");
+            string cssClass = abstractNames.GetValueOrDefault(abstractName, DefaultStatus);
             foreach (ProductionStatusType status in statuses)
                 map[status] = cssClass;
         }

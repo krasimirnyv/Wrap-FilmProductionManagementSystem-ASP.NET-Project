@@ -2,6 +2,8 @@ namespace Wrap.ViewModels.Production;
 
 using HelperViewModels;
 
+using static GCommon.ApplicationConstants;
+
 public class DetailsProductionViewModel
 {
     public string Id { get; set; } = null!;
@@ -16,7 +18,7 @@ public class DetailsProductionViewModel
 
     public string StatusType { get; set; } = null!;
     
-    public string StatusAbstractClass { get; set; } = "status-default";
+    public string StatusAbstractClass { get; set; } = DefaultStatus;
 
     public string StatusStartDate { get; set; } = null!;
 

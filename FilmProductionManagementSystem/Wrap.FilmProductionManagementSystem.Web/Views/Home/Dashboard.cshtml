@@ -1,31 +1,13 @@
 @model DashboardViewModel
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData[TitleDataKey] = "Dashboard";
 }
 
 <div class="dashboard-wrapper">
     <div class="container">
         
-        <!-- Success Message -->
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>@TempData["SuccessMessage"]</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-        
-        <!-- Error Message -->
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i>
-                <strong>@TempData["Error"]</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
+        <partial name="_TempDataPartial"></partial>
 
         <!-- Welcome Banner -->
         <div class="welcome-banner">
@@ -37,7 +19,7 @@
         <h3 class="section-title">Overview</h3>
         <div class="row">
             <div class="col-md-3 col-sm-6">
-                <a class="text-decoration-none text-reset" asp-controller="Production" asp-action="AllActiveProjects" >
+                <a class="text-decoration-none text-reset" asp-area="" asp-controller="Production" asp-action="AllActiveProjects" >
                     <div class="stat-card">
                         <div class="stat-icon primary">
                             <i class="bi bi-camera-reels"></i>
@@ -48,7 +30,7 @@
                     </a>
             </div>
             <div class="col-md-3 col-sm-6">
-                <a class="text-decoration-none text-reset" asp-controller="Search" asp-action="FindFilmmakers" >
+                <a class="text-decoration-none text-reset" asp-area="" asp-controller="Search" asp-action="FindFilmmakers" >
                 <div class="stat-card">
                     <div class="stat-icon success">
                         <i class="bi bi-people"></i>
@@ -59,7 +41,7 @@
                 </a>
             </div>
             <div class="col-md-3 col-sm-6">
-                <a class="text-decoration-none text-reset" asp-controller="Search" asp-action="FindActors" >
+                <a class="text-decoration-none text-reset" asp-area="" asp-controller="Search" asp-action="FindActors" >
                 <div class="stat-card">
                     <div class="stat-icon success">
                         <i class="bi bi-people"></i>
@@ -70,7 +52,7 @@
                 </a>
             </div>
             <div class="col-md-3 col-sm-6">
-                <a class="text-decoration-none text-reset" asp-controller="Schedule" asp-action="UpcomingShoots" >
+                <a class="text-decoration-none text-reset" asp-area="" asp-controller="Schedule" asp-action="UpcomingShoots" >
                 <div class="stat-card">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
                         <i class="bi bi-calendar-check"></i>
@@ -96,7 +78,7 @@
         <h3 class="section-title mt-4">Quick Actions</h3>
         <div  class="row">
             <div class="col-md-4" >
-                <a asp-controller="Production" asp-action="Create" class="action-card" >
+                <a asp-area="" asp-controller="Production" asp-action="Create" class="action-card" >
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                         <i class="bi bi-plus-circle"></i>
                     </div>
@@ -105,7 +87,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a asp-controller="Production" asp-action="AddMember" class="action-card">
+                <a asp-area="" asp-controller="Production" asp-action="AddMember" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
                         <i class="bi bi-person-plus"></i>
                     </div>
@@ -114,7 +96,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a asp-controller="Schedule" asp-action="Index" class="action-card">
+                <a asp-area="" asp-controller="Schedule" asp-action="Index" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
                         <i class="bi bi-calendar-event"></i>
                     </div>
@@ -173,16 +155,16 @@
                                </div>
                                @switch (production.AbstractStatus)
                                {
-                                   case "Pre-production":
+                                   case PreProductionKey:
                                        <span class="badge bg-warning badge-custom text-dark">@production.Status</span>
                                        break;
-                                   case "Production":
+                                   case ProductionKey:
                                        <span class="badge bg-success badge-custom">@production.Status</span>
                                        break;
-                                   case "Post-production":
+                                   case PostProductionKey:
                                        <span class="badge bg-info badge-custom">@production.Status</span>
                                        break;
-                                   case "Distribution":
+                                   case DistributionKey:
                                        <span class="badge bg-end badge-custom">@production.Status</span>
                                        break;
                                }
@@ -191,7 +173,7 @@
                     }
                     
                     <div class="text-center mt-4">
-                        <a asp-controller="Production" asp-action="Index" class="btn btn-custom-1 me-2">
+                        <a asp-area="" asp-controller="Production" asp-action="Index" class="btn btn-custom-1 me-2">
                             <i class="bi bi-eye me-2"></i>View All Projects
                         </a>
                     </div>
@@ -203,7 +185,7 @@
         <h3 class="section-title mt-4">Resources & Tools</h3>
         <div class="row">
             <div class="col-md-4">
-                <a asp-controller="Scripts" asp-action="Index" class="action-card">
+                <a asp-area="" asp-controller="Scripts" asp-action="Index" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
                         <i class="bi bi-plus-circle"></i>
                     </div>
@@ -212,7 +194,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a asp-controller="Assets" asp-action="Index" class="action-card">
+                <a asp-area="" asp-controller="Assets" asp-action="Index" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
                         <i class="bi bi-plus-circle"></i>
                     </div>
@@ -221,7 +203,7 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <a asp-controller="Production" asp-action="Budget" class="action-card">
+                <a asp-area="" asp-controller="Production" asp-action="Budget" class="action-card">
                     <div class="action-card-icon" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); color: white;">
                         <i class="bi bi-plus-circle"></i>
                     </div>
@@ -234,16 +216,3 @@
 
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        // Dismiss alert automatically after 5 seconds
-        setTimeout(function() {
-            var alert = document.querySelector('.alert');
-            if (alert) {
-                var bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            }
-        }, 5000);
-    </script>
-}

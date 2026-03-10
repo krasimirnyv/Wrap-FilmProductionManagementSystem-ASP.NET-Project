@@ -4,7 +4,7 @@
 @model CrewRegistrationStepTwoInputModel
 
 @{
-    ViewData["Title"] = "Join as Filmmaker";
+    ViewData[TitleDataKey] = "Join as Filmmaker";
 }
 
 <link rel="stylesheet" href="~/css/registration.css" asp-append-version="true" />
@@ -37,7 +37,7 @@
             </div>
 
             <!-- Form -->
-            <form asp-controller="Register" asp-action="RegisterCrewStepTwo" method="post" id="skillsForm">
+            <form asp-area="" asp-controller="Register" asp-action="RegisterCrewStepTwo" method="post" id="skillsForm">
                 <input type="hidden" name="SelectedSkills" id="hiddenSelectedSkills" />
 
                 <!-- Accordion -->
@@ -51,7 +51,7 @@
 
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button @(isFirstDepartment ? "" : "collapsed")"
+                                    <button class="accordion-button @(isFirstDepartment ? string.Empty : "collapsed")"
                                             type="button"
                                             data-bs-toggle="collapse"
                                             data-bs-target="#@departmentId"
@@ -61,7 +61,7 @@
                                     </button>
                                 </h2>
                                 <div id="@departmentId"
-                                     class="accordion-collapse collapse @(isFirstDepartment ? "show" : "")"
+                                     class="accordion-collapse collapse @(isFirstDepartment ? "show" : string.Empty)"
                                      data-bs-parent="#departmentsAccordion">
                                     <div class="accordion-body">
                                         <div class="skills-grid">
@@ -91,7 +91,7 @@
 
                 <!-- Actions -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a asp-controller="Register" asp-action="RegisterCrewStepOne" class="btn btn-outline-secondary">
+                    <a asp-area="" asp-controller="Register" asp-action="RegisterCrewStepOne" class="btn btn-outline-secondary">
                         ← Back
                     </a>
                     <button type="submit" class="btn btn-wrap-primary" id="submitBtn">

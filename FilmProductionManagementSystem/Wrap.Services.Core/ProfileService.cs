@@ -4,25 +4,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 
 using Interface;
-
 using Data;
 using Data.Models;
-
 using ViewModels.Profile;
 using ViewModels.Profile.HelperViewModels;
 using ViewModels.LoginAndRegistration.Helpers;
-
 using GCommon.Enums;
 
 using static Utilities.HelperSaveProfile;
+using static GCommon.OutputMessages.Profile;
+using static GCommon.DataFormat;
 
 public class ProfileService(FilmProductionDbContext context,
                             IWebHostEnvironment environment) : IProfileService
 {
-    private const string CrewNotFoundMessage = "Crew member with username '{0}' not found.";
-    private const string CastNotFoundMessage = "Cast member with username '{0}' not found.";
-
-    
     public async Task<bool> IsUserCrewAsync(string username)
     {
         Crew? crewMembers = await GetCrewMemberAsync(username);
@@ -88,7 +83,7 @@ public class ProfileService(FilmProductionDbContext context,
             FirstName = crew.FirstName,
             LastName = crew.LastName,
             ProfileImagePath = crew.ProfileImagePath,
-            Nickname = crew.Nickname ?? " - ",
+            Nickname = crew.Nickname ?? EmptyNickname,
             UserName = crew.User.UserName!,
             Email = crew.User.Email!,
             PhoneNumber = crew.User.PhoneNumber!,
@@ -144,7 +139,7 @@ public class ProfileService(FilmProductionDbContext context,
             FirstName = cast.FirstName,
             LastName = cast.LastName,
             ProfileImagePath = cast.ProfileImagePath,
-            Nickname = cast.Nickname ?? " - ",
+            Nickname = cast.Nickname ?? EmptyNickname,
             UserName = cast.User.UserName!,
             Email = cast.User.Email!,
             PhoneNumber = cast.User.PhoneNumber!,
@@ -294,7 +289,7 @@ public class ProfileService(FilmProductionDbContext context,
         
         ICollection<CrewRoleType> newSkills = ParseSelectedSkills(model.SelectedSkills);
         if (newSkills.Count == 0)
-            throw new ArgumentException("At least one skill must be selected.");
+            throw new ArgumentException(NoSkillsSelected);
         
         ICollection<CrewSkill> skillsToRemove = currentSkills
             .Where(s => !newSkills.Contains(s.RoleType))
@@ -348,7 +343,7 @@ public class ProfileService(FilmProductionDbContext context,
             return new List<CrewRoleType>();
     
         ICollection<CrewRoleType> listSelectedSkills = selectedSkillsString
-            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Split(CommaSplitter, StringSplitOptions.RemoveEmptyEntries)
             .Select(s => (CrewRoleType)int.Parse(s.Trim()))
             .ToList();
 

@@ -3,6 +3,7 @@ namespace Wrap.ViewModels.LoginAndRegistration.Helpers;
 using System.Text.RegularExpressions;
 
 using GCommon.Enums;
+using static GCommon.ApplicationConstants;
 
 /// <summary>
 /// Groups CrewRoleType enum values by department
@@ -18,7 +19,7 @@ public static class CrewRolesDepartments
     {
         return new Dictionary<string, IReadOnlyCollection<CrewRoleType>>
         {
-            ["Direction & Production"] =
+            [DirectionAndProduction] =
             [
                 CrewRoleType.Director,
                 CrewRoleType.FirstAssistantDirector,
@@ -31,7 +32,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.ProductionSupervisor
             ],
 
-            ["Writing & Development"] =
+            [WritingAndDevelopment] =
             [
                 CrewRoleType.Screenwriter,
                 CrewRoleType.ScriptEditor,
@@ -39,7 +40,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.DialogueCoach
             ],
 
-            ["Camera Department"] =
+            [CameraDepartment] =
             [
                 CrewRoleType.DirectorOfPhotography,
                 CrewRoleType.CameraOperator,
@@ -51,7 +52,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.VideoAssistOperator
             ],
 
-            ["Lighting Department"] =
+            [LightingDepartment] =
             [
                 CrewRoleType.Gaffer,
                 CrewRoleType.BestBoyElectric,
@@ -64,7 +65,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.LightingDesigner
             ],
 
-            ["Grip Department"] =
+            [GripDepartment] =
             [
                 CrewRoleType.KeyGrip,
                 CrewRoleType.BestBoyGrip,
@@ -75,7 +76,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.SteadicamGrip
             ],
 
-            ["Art Department"] =
+            [ArtDepartment] =
             [
                 CrewRoleType.ProductionDesigner,
                 CrewRoleType.ArtDirector,
@@ -89,7 +90,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.Carpenter
             ],
 
-            ["Costume & Makeup"] =
+            [CostumeAndMakeup] =
             [
                 CrewRoleType.CostumeDesigner,
                 CrewRoleType.WardrobeSupervisor,
@@ -102,7 +103,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.SpecialEffectsMakeupArtist
             ],
 
-            ["Sound Department"] =
+            [SoundDepartment] =
             [
                 CrewRoleType.ProductionSoundMixer,
                 CrewRoleType.BoomOperator,
@@ -115,7 +116,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.SoundEngineer
             ],
 
-            ["Post-Production"] =
+            [PostProductionDepartment] =
             [
                 CrewRoleType.Editor,
                 CrewRoleType.AssistantEditor,
@@ -126,7 +127,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.TitlesDesigner
             ],
 
-            ["Music Department"] =
+            [MusicDepartment] =
             [
                 CrewRoleType.Composer,
                 CrewRoleType.MusicSupervisor,
@@ -138,7 +139,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.SoundtrackCoordinator
             ],
 
-            ["Locations"] =
+            [LocationsDepartment] =
             [
                 CrewRoleType.LocationManager,
                 CrewRoleType.AssistantLocationManager,
@@ -146,7 +147,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.LocationCoordinator
             ],
 
-            ["Logistics & Transportation"] =
+            [LogisticsAndTransportationDepartment] =
             [
                 CrewRoleType.LogisticsManager,
                 CrewRoleType.TransportCoordinator,
@@ -158,7 +159,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.InventoryClerk
             ],
 
-            ["Set Operations & Support"] =
+            [SetOperationsAndSupportDepartment] =
             [
                 CrewRoleType.ProductionAssistant,
                 CrewRoleType.CateringManager,
@@ -172,7 +173,7 @@ public static class CrewRolesDepartments
                 CrewRoleType.ExtrasCoordinator
             ],
 
-            ["Other"] = [CrewRoleType.Other]
+            [OtherDepartment] = [CrewRoleType.Other]
         };
     }
 
@@ -181,7 +182,5 @@ public static class CrewRolesDepartments
     /// Converts PascalCase to "Spaced Case"
     /// </summary>
     public static string GetDisplayName(CrewRoleType role)
-    {
-        return Regex.Replace(role.ToString(), "([A-Z])", " $1").Trim();
-    }
+        => Regex.Replace(role.ToString(), DisplayNameRegEx, DisplayNameReplacement).Trim();
 }

@@ -4,13 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 using Microsoft.EntityFrameworkCore;
-
-using GCommon.Enums;
 using Infrastructure;
 using MappingEntities;
 
 using static GCommon.EntityConstants.Crew;
-using static GCommon.DataFormat;
 
 /// <summary>
 /// Entity представящо човек от снимачен екип

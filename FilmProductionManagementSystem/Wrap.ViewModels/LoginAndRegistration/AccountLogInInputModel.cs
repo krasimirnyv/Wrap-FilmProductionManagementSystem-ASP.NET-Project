@@ -2,14 +2,16 @@ namespace Wrap.ViewModels.LoginAndRegistration;
 
 using System.ComponentModel.DataAnnotations;
 
+using static GCommon.DataFormat;
+
 public class AccountLogInInputModel
 {
     [Required]
-    [Display(Name = "username")]
+    [Display(Name = DisplayUsername)]
     public string UserName { get; set; } = null!;
     
     [Required]
-    [Display(Name = "Password")]
+    [Display(Name = DisplayPassword)]
     public string Password { get; set; } = null!;
     
     [Required]

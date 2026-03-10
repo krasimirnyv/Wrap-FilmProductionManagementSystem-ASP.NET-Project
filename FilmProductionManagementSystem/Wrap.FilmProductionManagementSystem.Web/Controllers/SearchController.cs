@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace FilmProductionManagementSystem.Web.Controllers;
 
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-[Authorize]
-public class SearchController : Controller
+public class SearchController : BaseController
 {
     public IActionResult Index()
     {

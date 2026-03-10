@@ -11,6 +11,9 @@ public class BaseController : Controller
     protected string? GetUserId()
         => User?.FindFirstValue(ClaimTypes.NameIdentifier);
     
+    protected string? GetUsername()
+        => User.Identity?.Name;
+    
     protected bool IsAuthenticated()
         => User.Identity?.IsAuthenticated ?? false;
 }

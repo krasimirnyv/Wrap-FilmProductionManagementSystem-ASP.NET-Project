@@ -8,14 +8,13 @@ using Microsoft.AspNetCore.Hosting;
 using Data;
 using Data.Models;
 using Data.Models.Infrastructure;
-
 using ViewModels.LoginAndRegistration;
 using ViewModels.LoginAndRegistration.Helpers;
-
 using Interface;
 using GCommon.Enums;
 
 using static Utilities.HelperSaveProfile;
+using static GCommon.OutputMessages;
 
 public class LoginRegisterService(UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
@@ -148,7 +147,7 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
         
         switch (model.Role)
         {
-            case "Crew":
+            case CrewString:
             {
                 bool crewExist = await context.CrewMembers.AnyAsync(c => c.UserId == user.Id);
                 if (crewExist)
@@ -158,9 +157,9 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
                 }
                 
                 await signInManager.SignOutAsync();
-                return (false, "Crew");
+                return (false, CrewString);
             }
-            case "Cast":
+            case CastString:
             {
                 bool castExist = await context.CastMembers.AnyAsync(c => c.UserId == user.Id);
                 if (castExist) 
@@ -170,11 +169,11 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
                 }
                 
                 await signInManager.SignOutAsync();
-                return (false, "Cast");
+                return (false, CastString);
             }
             default:
                 await signInManager.SignOutAsync();
-                return (false, model.Role);
+                return (false, EmptyString);
         }
     }
 

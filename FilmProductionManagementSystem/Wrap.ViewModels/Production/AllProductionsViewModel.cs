@@ -1,5 +1,7 @@
 namespace Wrap.ViewModels.Production;
 
+using static GCommon.ApplicationConstants;
+
 public class AllProductionsViewModel
 {
     public string Id { get; set; } = null!;
@@ -10,5 +12,5 @@ public class AllProductionsViewModel
 
     public string StatusType { get; set; } = null!;
     
-    public string StatusAbstractClass { get; set; } = "status-default";
+    public string StatusAbstractClass { get; set; } = DefaultStatus;
 }

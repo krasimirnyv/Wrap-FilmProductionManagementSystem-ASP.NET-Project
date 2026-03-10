@@ -2,6 +2,9 @@
 
 @model EditSkillsViewModel
 
+@{
+    ViewData[TitleDataKey] = "Edit Filmmaker's Skills";
+}
 
 <link rel="stylesheet" href="~/css/registration.css" asp-append-version="true" />
 
@@ -42,7 +45,7 @@
 
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button @(isFirstDepartment ? "" : "collapsed")"
+                                    <button class="accordion-button @(isFirstDepartment ? string.Empty : "collapsed")"
                                             type="button"
                                             data-bs-toggle="collapse"
                                             data-bs-target="#@departmentId"
@@ -52,7 +55,7 @@
                                     </button>
                                 </h2>
                                 <div id="@departmentId"
-                                     class="accordion-collapse collapse @(isFirstDepartment ? "show" : "")"
+                                     class="accordion-collapse collapse @(isFirstDepartment ? "show" : string.Empty)"
                                      data-bs-parent="#departmentsAccordion">
                                     <div class="accordion-body">
                                         <div class="skills-grid">
@@ -63,7 +66,7 @@
                                                 
                                                 bool isSelected = Model.CurrentSkills.Contains(skill);
                                                 <button type="button"
-                                                        class="skill-bubble @(isSelected ? "selected" : "")"
+                                                        class="skill-bubble @(isSelected ? "selected" : string.Empty)"
                                                         data-skill="@skillValue"
                                                         data-department="@departmentId">
                                                     @skillName
@@ -83,7 +86,7 @@
 
                 <!-- Actions -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a asp-controller="Profile" asp-action="FilmmakerProfile" class="btn btn-outline-secondary">
+                    <a asp-area="" asp-controller="Profile" asp-action="FilmmakerProfile" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Cancel
                     </a>
                     <button type="submit" class="btn btn-wrap-primary" id="submitBtn">

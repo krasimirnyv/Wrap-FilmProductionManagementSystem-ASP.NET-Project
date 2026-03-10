@@ -5,7 +5,7 @@
 @model DeleteProductionViewModel
 
 @{
-    ViewData["Title"] = "Delete Production";
+    ViewData[TitleDataKey] = "Delete Production";
 }
 
 <link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
@@ -119,11 +119,11 @@
                                autocomplete="off" />
                     </div>
 
-                    <form asp-action="Delete" asp-route-productionId="@Model.Id" method="post">
+                    <form asp-area="" asp-controller="Production" asp-action="Delete" asp-route-productionId="@Model.Id" method="post">
                         @Html.AntiForgeryToken()
 
                         <div class="d-flex justify-content-between flex-wrap gap-3">
-                            <a asp-action="Details" asp-route-productionId="@Model.Id"
+                            <a asp-area="" asp-controller="Production" asp-action="Details" asp-route-productionId="@Model.Id"
                                class="btn btn-production-secondary btn-lg">
                                 <i class="bi bi-arrow-left me-2"></i>Cancel, Keep It
                             </a>

@@ -1,14 +1,13 @@
 namespace FilmProductionManagementSystem.Web;
 
-using Wrap.Data;
-using Wrap.Data.Models.Infrastructure;
-
-using Wrap.Services.Core;
-using Wrap.Services.Core.Interface;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http.Features;
+
+using Wrap.Data;
+using Wrap.Data.Models.Infrastructure;
+using Wrap.Services.Core;
+using Wrap.Services.Core.Interface;
 
 using static Wrap.GCommon.ApplicationConstants;
 
@@ -71,7 +70,7 @@ public class Program
 
         WebApplication app = builder.Build();
 
-        app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+        app.UseStatusCodePagesWithReExecute(StatusCodeErrorPath);
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -81,7 +80,7 @@ public class Program
         }
         else
         {
-            app.UseExceptionHandler("/Home/Error");
+            app.UseExceptionHandler(ExceptionHandlerPath);
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }

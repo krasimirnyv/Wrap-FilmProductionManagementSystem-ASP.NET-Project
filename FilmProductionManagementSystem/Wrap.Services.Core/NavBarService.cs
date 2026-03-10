@@ -3,11 +3,12 @@ namespace Wrap.Services.Core;
 using Microsoft.EntityFrameworkCore;
 
 using Interface;
-
 using Data;
-
 using ViewModels.NavBar;
 
+using static GCommon.OutputMessages;
+using static GCommon.OutputMessages.NavBar;
+    
 public class NavBarService(FilmProductionDbContext context) : INavBarService
 {
     public async Task<NavBarUserViewModel?> GetNavBarUserAsync(string userId)
@@ -20,7 +21,7 @@ public class NavBarService(FilmProductionDbContext context) : INavBarService
             {
                 UserName = c.User.UserName!,
                 ProfileImagePath = c.ProfileImagePath!,
-                Role = "Crew"
+                Role = CrewString
             })
             .FirstOrDefaultAsync();
 
@@ -35,13 +36,13 @@ public class NavBarService(FilmProductionDbContext context) : INavBarService
             {
                 UserName = c.User.UserName!,
                 ProfileImagePath = c.ProfileImagePath,
-                Role = "Cast"
+                Role = CastString
             })
             .FirstOrDefaultAsync();
         
         if (cast is not null)
             return cast;
         
-        throw new Exception($"Unable to find user with ID: {userId}");
+        throw new Exception(string.Format(UserNotFoundMessage, userId));
     }
 }

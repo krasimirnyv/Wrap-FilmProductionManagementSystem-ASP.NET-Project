@@ -15,6 +15,10 @@ public static class ApplicationConstants
     /* Constants for image file size */
     public const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
 
+    /* Error Paths */
+    public const string StatusCodeErrorPath = "/Home/Error/{0}";
+    public const string ExceptionHandlerPath = "/Home/Error";
+    
     /* Constants for Application user's identity options */
     public const string SignInRequireConfirmedAccount = "IdentityOptions:SignIn:RequireConfirmedAccount";
     public const string SignInRequireConfirmedEmail = "IdentityOptions:SignIn:RequireConfirmedEmail";
@@ -36,5 +40,66 @@ public static class ApplicationConstants
     
     /* Constants for Application Cookie options */
     public const string LoginPath = "/Register/Login";
-    public const string LogoutPath = "/Register/Logout"; 
+    public const string LogoutPath = "/Register/Logout";
+    
+    /* TempData and ViewData Keys */
+    public const string ErrorTempDateKey = "ErrorMessage";
+    public const string WarningTempDataKey = "WarningMessage";
+    public const string InfoTempDataKey = "InfoMessage";
+    public const string SuccessTempDataKey = "SuccessMessage";
+
+    public const string TitleDataKey = "Title";
+
+    public const string RequestQueryReturnUrl = "ReturnUrl";
+    public const string RequestQueryProductionKey = "productionId";
+    
+    /* Production Status strings */
+    public const string DefaultStatus = "status-default";
+    public const string PreProductionStatus = "status-pre-production";
+    public const string ProductionStatus = "status-production";
+    public const string PostProductionStatus = "status-post-production";
+    public const string DistributionStatus = "status-distribution";
+    
+    public const string PreProductionKey = "Pre-production";
+    public const string ProductionKey = "Production";
+    public const string PostProductionKey = "Post-production";
+    public const string DistributionKey = "Distribution";
+    
+    /* Department name / Abstract Roles strings */
+    public const string DirectionAndProduction = "Direction & Production";
+    public const string WritingAndDevelopment = "Writing & Development";
+    public const string CameraDepartment = "Camera Department";
+    public const string LightingDepartment = "Lighting Department";
+    public const string GripDepartment = "Grip Department";
+    public const string ArtDepartment = "Art Department";
+    public const string CostumeAndMakeup = "Costume & Makeup";
+    public const string SoundDepartment = "Sound Department";
+    public const string PostProductionDepartment = "Post-Production";
+    public const string MusicDepartment = "Music Department";
+    public const string LocationsDepartment = "Locations";
+    public const string LogisticsAndTransportationDepartment = "Logistics & Transportation";
+    public const string SetOperationsAndSupportDepartment = "Set Operations & Support";
+    public const string OtherDepartment = "Other";
+    
+    /* Profile status badge */
+    public const string ActiveStyle = "bg-success";
+    public const string InactiveStyle = "bg-secondary";
+
+    public const string Active = "Active";
+    public const string Inactive = "Inactive";
+    
+    /* Regular Expression */
+    public const string DisplayNameRegEx = @"([A-Z])";
+    public const string DisplayNameReplacement = @" $1";
+    
+    /* Images */
+    public const string NullImageStyle = "col-12";
+    public const string ImageStyle = "col-md-8";
+    public const string ClickToUploadMessage = "Click to upload image";
+    public const string ClickToReplaceMessage = "Click to replace thumbnail";
+    
+    /* Selector items */
+    public const string SelectPhase = "— Select Phase first —";
+    public const string SelectStatus = "— Select Status —";
+
 }

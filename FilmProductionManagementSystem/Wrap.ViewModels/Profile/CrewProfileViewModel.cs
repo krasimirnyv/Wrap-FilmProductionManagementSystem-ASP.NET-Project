@@ -1,7 +1,6 @@
 namespace Wrap.ViewModels.Profile;
 
 using HelperViewModels;
-
 using GCommon.Enums;
 
 public class CrewProfileViewModel

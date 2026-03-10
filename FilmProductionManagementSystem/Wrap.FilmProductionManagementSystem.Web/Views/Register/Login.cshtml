@@ -3,7 +3,7 @@
 @model AccountLogInInputModel
 
 @{
-    ViewData["Title"] = "Log In";
+    ViewData[TitleDataKey] = "Log In";
 }
 
 <link rel="stylesheet" href="~/css/registration.css" asp-append-version="true" />
@@ -23,9 +23,10 @@
         </div>
 
         <!-- Form -->
-        <form asp-controller="Register"
+        <form asp-area="" 
+              asp-controller="Register"
               asp-action="Login"
-              asp-route-returnUrl="@Context.Request.Query["ReturnUrl"]"
+              asp-route-returnUrl="@Context.Request.Query[RequestQueryReturnUrl]"
               method="post"
               class="registration-form">
 
@@ -95,7 +96,8 @@
 
             <!-- Actions -->
             <div class="d-flex justify-content-between align-items-center">
-                <a asp-controller="Home"
+                <a asp-area="" 
+                   asp-controller="Home"
                    asp-action="Index"
                    class="btn btn-outline-secondary">
                     ← Back to Home
