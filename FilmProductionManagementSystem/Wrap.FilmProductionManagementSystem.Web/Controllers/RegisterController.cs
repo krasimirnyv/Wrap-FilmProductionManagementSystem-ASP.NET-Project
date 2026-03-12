@@ -22,7 +22,6 @@ public class RegisterController(ILoginRegisterService registerService,
         => View(new CrewRegistrationStepOneInputModel());
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RegisterCrewStepOne(CrewRegistrationStepOneInputModel model)
     {
         if (!ModelState.IsValid)
@@ -60,7 +59,6 @@ public class RegisterController(ILoginRegisterService registerService,
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RegisterCrewStepTwo(CrewRegistrationStepTwoInputModel model)
     {
         if (IsSkillSelected(model)) // bool method
@@ -101,7 +99,6 @@ public class RegisterController(ILoginRegisterService registerService,
         => View(new CastRegistrationInputModel());
     
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RegisterCast(CastRegistrationInputModel model)
     {
         if (!ModelState.IsValid)
@@ -139,7 +136,6 @@ public class RegisterController(ILoginRegisterService registerService,
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(AccountLogInInputModel model, string? returnUrl)
     {
         if (!ModelState.IsValid)
@@ -188,7 +184,6 @@ public class RegisterController(ILoginRegisterService registerService,
     }
     
     [HttpPost]
-    [ValidateAntiForgeryToken]
     [Authorize]
     public async Task<IActionResult> Logout()
     {

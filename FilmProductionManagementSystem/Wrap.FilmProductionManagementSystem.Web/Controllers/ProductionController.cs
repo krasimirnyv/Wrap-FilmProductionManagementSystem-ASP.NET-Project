@@ -56,7 +56,6 @@ public class ProductionController(IProductionService productionService,
         => View(new CreateProductionInputModel());
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateProductionInputModel model)
     {
         if (!ModelState.IsValid)
@@ -96,7 +95,6 @@ public class ProductionController(IProductionService productionService,
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(string productionId, EditProductionInputModel model)
     {
         if (!ModelState.IsValid)
@@ -136,7 +134,6 @@ public class ProductionController(IProductionService productionService,
     
     [HttpPost] 
     [ActionName(nameof(Delete))]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(string? productionId)
     {
         try

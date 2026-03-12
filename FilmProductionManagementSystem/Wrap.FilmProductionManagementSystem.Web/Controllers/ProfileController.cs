@@ -141,7 +141,6 @@ public class ProfileController(IProfileService profileService,
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditFilmmaker(EditCrewProfileViewModel model)
     {
         if (!ModelState.IsValid)
@@ -193,7 +192,6 @@ public class ProfileController(IProfileService profileService,
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditActor(EditCastProfileViewModel model)
     {
         if (!ModelState.IsValid)
@@ -245,7 +243,6 @@ public class ProfileController(IProfileService profileService,
     }
 
     [HttpPost]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditSkills(EditSkillsViewModel model)
     {
         string? username = GetUsername();

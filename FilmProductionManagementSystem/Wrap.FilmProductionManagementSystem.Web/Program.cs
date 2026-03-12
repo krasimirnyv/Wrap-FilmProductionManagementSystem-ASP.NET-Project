@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 namespace FilmProductionManagementSystem.Web;
 
 using Microsoft.EntityFrameworkCore;
@@ -65,7 +67,10 @@ public class Program
         });
         
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-        builder.Services.AddControllersWithViews();
+        
+        builder.Services.AddControllersWithViews()
+            .AddMvcOptions(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+        
         builder.Services.AddRazorPages();
 
         WebApplication app = builder.Build();
