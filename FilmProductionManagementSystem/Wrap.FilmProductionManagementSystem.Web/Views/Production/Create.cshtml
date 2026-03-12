@@ -10,7 +10,10 @@
     IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusGroups = GetStatusTypeByAbstraction();
 }
 
-<link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+@section Styles
+{
+    <link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+}
 
 <div class="production-wrapper">
     <div class="container">
