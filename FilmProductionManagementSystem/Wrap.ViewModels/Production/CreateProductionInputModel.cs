@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
 using GCommon.Enums;
+using GCommon.ValidationAttributes;
 using static GCommon.EntityConstants.Production;
 
 public class CreateProductionInputModel
@@ -27,5 +28,6 @@ public class CreateProductionInputModel
     [Required]
     public DateTime StatusStartDate { get; set; }
 
+    [IsAfter(nameof(StatusStartDate))]
     public DateTime? StatusEndDate { get; set; }
 }

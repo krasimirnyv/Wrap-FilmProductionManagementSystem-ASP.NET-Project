@@ -26,6 +26,8 @@ public static class OutputMessages
     public const string NotSupportedFileExtension = "The file extension {0} is not supported.";
     public const string ExceededFileSizeLimit = "The file size limit {0} exceeded.";
     
+    // validation attribute messages
+    public const string IsAfterExceptionMessage = "The date must be after {0}";
     public static class Assets
     {
         
