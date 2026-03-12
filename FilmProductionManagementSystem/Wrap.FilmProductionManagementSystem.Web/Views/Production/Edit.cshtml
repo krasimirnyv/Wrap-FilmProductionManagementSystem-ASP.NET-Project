@@ -259,31 +259,40 @@
             const statusSelect = document.getElementById('statusTypeSelect');
             const optgroups    = statusSelect.querySelectorAll('optgroup[data-phase]');
 
-            phaseSelect?.addEventListener('change', () => {
-                const chosen = phaseSelect.value;
+            // Apply showing/hiding by manipulating option.hidden & option.disabled for cross-browser reliability
+            function applyPhaseSelection(chosen) {
+                const placeholder = statusSelect.querySelector('option[value=""]');
 
                 optgroups.forEach(og => {
-                    og.style.display = (og.dataset.phase === chosen) ? '' : 'none';
+                    const match = og.dataset.phase === chosen;
+                    og.querySelectorAll('option').forEach(opt => {
+                        if (opt.value === '') return; // keep placeholder
+                        opt.hidden = !match;
+                        opt.disabled = !match;
+                    });
                 });
 
                 if (!chosen) {
-                    statusSelect.value    = '';
+                    statusSelect.value = '';
                     statusSelect.disabled = true;
-                    statusSelect.querySelector('option[value=""]').textContent =
-                        '— Select Phase first —';
+                    if (placeholder) placeholder.textContent = '— Select Phase first —';
                 } else {
                     statusSelect.disabled = false;
-                    statusSelect.querySelector('option[value=""]').textContent =
-                        '— Select Status —';
-                    // Clear the selection only if the current value belongs to a different phase
-                    const currentOptgroup = statusSelect
-                        .querySelector(`option[value="${statusSelect.value}"]`)
-                        ?.closest('optgroup');
-                    if (!currentOptgroup || currentOptgroup.dataset.phase !== chosen) {
+                    // Only reset selection if it doesn't belong to the chosen phase
+                    const currentOpt = statusSelect.querySelector(`option[value="${statusSelect.value}"]`);
+                    const currentPhaseOfOpt = currentOpt?.closest('optgroup')?.dataset.phase;
+                    if (!currentOpt || currentPhaseOfOpt !== chosen) {
                         statusSelect.value = '';
                     }
+                    if (placeholder) placeholder.textContent = '— Select Status —';
                 }
-            });
+            }
+
+            // Listen for user changes
+            phaseSelect?.addEventListener('change', () => applyPhaseSelection(phaseSelect.value));
+
+            // Run once on load to enforce the initial pre-selected phase/status state
+            applyPhaseSelection(phaseSelect?.value || '');
 
             // ── Unsaved changes warning ───────────────────────────────────
             let dirty = false;

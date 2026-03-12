@@ -15,8 +15,6 @@ public class IsAfter : ValidationAttribute
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     { 
-        base.IsValid(value, validationContext);
-
         object? comparisonValue = validationContext.ObjectType.GetProperty(comparisonProperty)?.GetValue(validationContext.ObjectInstance);
 
         if (value is DateTime dateTimeValue && comparisonValue is DateTime comparisonDateTime)
