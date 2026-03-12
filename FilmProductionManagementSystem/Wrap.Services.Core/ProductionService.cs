@@ -147,7 +147,7 @@ public class ProductionService(FilmProductionDbContext context,
             .Where(sd => sd.ProductionId == productionId)
             .Select(sd => new ProductionShootingDayViewModel
             {
-                Date = sd.Date.ToString(DateFormat, CultureInfo.InvariantCulture)
+                Date = sd.Date.ToString(DateFormat, CultureInfo.CurrentCulture)
             })
             .ToArrayAsync();
 
@@ -161,8 +161,8 @@ public class ProductionService(FilmProductionDbContext context,
             Budget = productionData.Budget.ToString(CurrencyFormat, CultureInfo.CurrentCulture),
             StatusType = productionData.StatusType.ToString(),
             StatusAbstractClass = GetStatusAbstractClass(productionData.StatusType),
-            StatusStartDate = productionData.StatusStartDate.ToString(DateFormat, CultureInfo.InvariantCulture),
-            StatusEndDate = productionData.StatusEndDate?.ToString(DateFormat, CultureInfo.InvariantCulture) ?? NotAvailableFormat,
+            StatusStartDate = productionData.StatusStartDate.ToString(DateFormat, CultureInfo.CurrentCulture),
+            StatusEndDate = productionData.StatusEndDate?.ToString(DateFormat, CultureInfo.CurrentCulture) ?? NotAvailableFormat,
             ScriptId = productionData.ScriptId?.ToString(),
 
             ProductionCrewMembers = crewMembers,
@@ -283,7 +283,7 @@ public class ProductionService(FilmProductionDbContext context,
             Thumbnail = productionData.Thumbnail,
             Description = productionData.Description,
             StatusType = productionData.StatusType.ToString(),
-            Budget = productionData.Budget.ToString(CurrencyFormat, CultureInfo.InvariantCulture),
+            Budget = productionData.Budget.ToString(CurrencyFormat, CultureInfo.CurrentCulture),
             CrewMembersCount = productionData.CrewCount,
             CastMembersCount = productionData.CastCount,
             ScenesCount = productionData.ScenesCount

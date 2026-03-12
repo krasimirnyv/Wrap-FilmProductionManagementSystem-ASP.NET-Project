@@ -191,7 +191,7 @@ public class ProfileService(FilmProductionDbContext context,
         crew.Biography = model.Biography;
         crew.User.PhoneNumber = model.PhoneNumber;
         
-        if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+        if (model.ProfileImage is not null && model.ProfileImage.Length > 0)
         {
             string newImagePath = await SaveProfileImageAsync(environment, model.ProfileImage);
             crew.ProfileImagePath = newImagePath;
@@ -241,7 +241,7 @@ public class ProfileService(FilmProductionDbContext context,
         cast.Biography = model.Biography;
         cast.User.PhoneNumber = model.PhoneNumber;
         
-        if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+        if (model.ProfileImage is not null && model.ProfileImage.Length > 0)
         {
             string newImagePath = await SaveProfileImageAsync(environment, model.ProfileImage);
             cast.ProfileImagePath = newImagePath;
