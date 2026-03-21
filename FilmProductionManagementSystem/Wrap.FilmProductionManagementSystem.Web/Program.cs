@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace FilmProductionManagementSystem.Web;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 using Wrap.Data;
 using Wrap.Data.Models.Infrastructure;
@@ -31,22 +31,20 @@ public class Program
             : defaultConnection
             ?? throw new InvalidOperationException(MissingConnectionStringMessage);
 
-        builder.Services.AddDbContext<FilmProductionDbContext>(options =>
-        {
-            options
-                .UseSqlServer(connectionString);
-        });
-        
+        builder.Services.AddDbContext<FilmProductionDbContext>(options => 
+            options.UseSqlServer(connectionString));
+        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
         builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
             {
                 ConfigureIdentity(options, builder.Configuration);
             })
+            .AddRoles<ApplicationRole>()
             .AddEntityFrameworkStores<FilmProductionDbContext>();
         
         builder.Services.ConfigureApplicationCookie(options =>
         {
-            options.LoginPath = LoginPath;
-            options.LogoutPath = LogoutPath;
+            ConfigureCookie(options, builder.Configuration);
         });
         
         builder.Services.AddScoped<IHomeService, HomeService>();
@@ -57,16 +55,17 @@ public class Program
 
         // Using session + "draft" JSON for the two-step registration form for crew members.
         builder.Services.AddDistributedMemoryCache();
-        builder.Services.AddSession(ConfigureSession);
+        builder.Services.AddSession(options =>
+        {
+            ConfigureSession(options, builder.Configuration);
+        });
         builder.Services.AddHttpContextAccessor();
         
         // Configure file upload size.
         builder.Services.Configure<FormOptions>(options =>
         {
-            options.MultipartBodyLengthLimit = MaxFileSize;
+            options.MultipartBodyLengthLimit = builder.Configuration.GetValue<long>(MaxFileSizeOptions);
         });
-        
-        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
         
         builder.Services.AddControllersWithViews()
             .AddMvcOptions(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
@@ -104,30 +103,22 @@ public class Program
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
         
-        app.MapControllerRoute(
-            name: "area",
-            pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-        
         app.MapRazorPages();
         
         app.Run();
     }
-
+    
     private static void ConfigureIdentity(IdentityOptions options, ConfigurationManager configuration)
     {
-        /* SignIn settings - Account should not be confirmed fo dev purposes. */
         options.SignIn.RequireConfirmedAccount = configuration.GetValue<bool>(SignInRequireConfirmedAccount);
         options.SignIn.RequireConfirmedEmail = configuration.GetValue<bool>(SignInRequireConfirmedEmail);
         options.SignIn.RequireConfirmedPhoneNumber = configuration.GetValue<bool>(SignInRequireConfirmedPhoneNumber);
 
-        /* User settings - Email must be unique. */
         options.User.RequireUniqueEmail = configuration.GetValue<bool>(UserRequireUniqueEmail);
         
-        /* Lockout settings - After 255 failed attempts to login => Account is locked for 1 min. */
         options.Lockout.MaxFailedAccessAttempts = configuration.GetValue<int>(LockoutMaxFailedAccessAttempts);
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(configuration.GetValue<int>(LockoutDefaultLockoutTimeSpan));
                 
-        /* Password settings - Security is not required for development. */
         options.Password.RequireDigit = configuration.GetValue<bool>(PasswordRequireDigit);
         options.Password.RequireLowercase = configuration.GetValue<bool>(PasswordRequireLowercase);
         options.Password.RequireUppercase = configuration.GetValue<bool>(PasswordRequireUppercase);
@@ -135,14 +126,24 @@ public class Program
         options.Password.RequiredUniqueChars = configuration.GetValue<int>(PasswordRequiredUniqueChars);
         options.Password.RequiredLength = configuration.GetValue<int>(PasswordRequiredLength);
              
-        /* Stores settings - Protecting personal data is not required for dev. */
         options.Stores.ProtectPersonalData = configuration.GetValue<bool>(StoresProtectPersonalData);
     }
 
-    private static void ConfigureSession(SessionOptions options)
+    private static void ConfigureCookie(CookieAuthenticationOptions options, ConfigurationManager configuration)
     {
-        options.IdleTimeout = TimeSpan.FromMinutes(IdleTimeoutMinutes);
-        options.Cookie.HttpOnly = CookieHttpOnly;
-        options.Cookie.IsEssential = CookieIsEssential;
+        options.Cookie.HttpOnly = configuration.GetValue<bool>(CookieHttpOnly);
+        options.ExpireTimeSpan  = TimeSpan.FromMinutes(configuration.GetValue<int>(CookieExpireTimeSpan));
+        options.SlidingExpiration = configuration.GetValue<bool>(CookieSlidingExpiration);
+        
+        options.LoginPath = configuration.GetValue<string>(CookieLoginPath);
+        options.LogoutPath = configuration.GetValue<string>(CookieLogoutPath);;
+        options.AccessDeniedPath = configuration.GetValue<string>(CookieAccessDeniedPath);;
+    }
+    
+    private static void ConfigureSession(SessionOptions options, ConfigurationManager configuration)
+    {
+        options.IdleTimeout = TimeSpan.FromMinutes(configuration.GetValue<int>(IdleTimeoutMinutes));
+        options.Cookie.HttpOnly = configuration.GetValue<bool>(SessionCookieHttpOnly);
+        options.Cookie.IsEssential = configuration.GetValue<bool>(SessionCookieIsEssential);
     }
 }

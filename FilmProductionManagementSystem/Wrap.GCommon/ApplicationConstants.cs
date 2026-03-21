@@ -7,12 +7,8 @@ public static class ApplicationConstants
     public const string DefaultConnection = "DefaultConnection";
     public const string MissingConnectionStringMessage = "Connection string 'DefaultConnection' not found.";
     
-    /* Constants for Session */
-    public const int IdleTimeoutMinutes = 5; // 5 min
-    public const bool CookieHttpOnly = true;
-    public const bool CookieIsEssential = true;
-    
     /* Constants for image file size */
+    public const string MaxFileSizeOptions = "FormOptions:MultipartBodyLengthLimit"; // 10485760 = 10 * 1024 * 1024; 10 MB
     public const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
 
     /* Error Paths */
@@ -39,8 +35,17 @@ public static class ApplicationConstants
     public const string StoresProtectPersonalData = "IdentityOptions:Stores:ProtectPersonalData";
     
     /* Constants for Application Cookie options */
-    public const string LoginPath = "/Register/Login";
-    public const string LogoutPath = "/Register/Logout";
+    public const string CookieHttpOnly = "CookieOptions:HttpOnly";
+    public const string CookieExpireTimeSpan = "CookieOptions:ExpireTimeSpan";
+    public const string CookieSlidingExpiration = "CookieOptions:SlidingExpiration";
+    public const string CookieLoginPath = "CookieOptions:LoginPath";
+    public const string CookieLogoutPath = "CookieOptions:LogoutPath";
+    public const string CookieAccessDeniedPath = "CookieOptions:AccessDeniedPath";
+    
+    /* Constants for Session */
+    public const string IdleTimeoutMinutes = "SessionOptions:IdleTimeout"; // 5 min
+    public const string SessionCookieHttpOnly = "SessionOptions:HttpOnly";
+    public const string SessionCookieIsEssential = "SessionOptions:IsEssential";
     
     /* TempData and ViewData Keys */
     public const string ErrorTempDateKey = "ErrorMessage";
