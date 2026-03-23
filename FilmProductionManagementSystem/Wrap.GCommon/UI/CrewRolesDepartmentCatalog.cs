@@ -1,15 +1,14 @@
-namespace Wrap.ViewModels.LoginAndRegistration.Helpers;
+namespace Wrap.GCommon.UI;
 
-using System.Text.RegularExpressions;
-
-using GCommon.Enums;
-using static GCommon.ApplicationConstants;
+using Enums;
+using static ApplicationConstants;
+using static Text.DisplayNameFormatter;
 
 /// <summary>
 /// Groups CrewRoleType enum values by department
 /// Used for rendering accordion UI with bubble buttons
 /// </summary>
-public static class CrewRolesDepartments
+public static class CrewRolesDepartmentCatalog
 {
     /// <summary>
     /// Categorizing the roles by their department name for easily use in registration form.
@@ -177,10 +176,6 @@ public static class CrewRolesDepartments
         };
     }
 
-    /// <summary>
-    /// Get friendly display name for CrewRoleType
-    /// Converts PascalCase to "Spaced Case"
-    /// </summary>
     public static string GetDisplayName(CrewRoleType role)
-        => Regex.Replace(role.ToString(), DisplayNameRegEx, DisplayNameReplacement).Trim();
+        => ToDisplayName(role);
 }

@@ -1,15 +1,15 @@
-namespace Wrap.ViewModels.General.Helper;
+namespace Wrap.GCommon.UI;
 
-using System.Text.RegularExpressions;
+using Enums;
+using static ApplicationConstants;
 
-using GCommon.Enums;
-using static GCommon.ApplicationConstants;
+using static Text.DisplayNameFormatter;
 
 /// <summary>
 /// Groups ProductionStatusTypes enum values by abstract status
 /// Used for rendering UI
 /// </summary>
-public static class ProductionStatusAbstraction
+public static class ProductionStatusAbstractionCatalog
 {
     /// <summary>
     /// Categorizing the status types by their abstract version for easily visualize.
@@ -59,10 +59,6 @@ public static class ProductionStatusAbstraction
         };
     }
 
-    /// <summary>
-    /// Get friendly display name for ProductionStatusType
-    /// Converts PascalCase to "Spaced Case"
-    /// </summary>
     public static string GetDisplayName(string status)
-        => Regex.Replace(status, DisplayNameRegEx, DisplayNameReplacement).Trim();
+        => ToDisplayName(status);
 }

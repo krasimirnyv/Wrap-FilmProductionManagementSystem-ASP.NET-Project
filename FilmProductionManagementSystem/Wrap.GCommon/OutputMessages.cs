@@ -28,6 +28,7 @@ public static class OutputMessages
     
     // validation attribute messages
     public const string IsAfterExceptionMessage = "The date must be after {0}";
+    
     public static class Assets
     {
         
@@ -35,7 +36,7 @@ public static class OutputMessages
 
     public static class Home
     {
-        
+        public const string UnknownStatus = "Unknown status";
     }
     
     public static class Production

@@ -1,6 +1,6 @@
-namespace Wrap.Services.Core.Interface;
+namespace Wrap.Services.Core.Interfaces;
 
-using ViewModels.General;
+using Models.Home;
 
 public interface IHomeService
 {
@@ -8,7 +8,6 @@ public interface IHomeService
     /// Gets the data for the home page,
     /// including the number of crew members, cast members, and productions.
     /// </summary>
-    /// <returns>GeneralPageViewModel</returns>
-    Task<DashboardViewModel> GetGeneralInformation();
-    
+    /// <returns>DashboardDataDto</returns>
+    Task<DashboardDataDto> GetDashboardDataAsync();
 }

@@ -1,12 +1,12 @@
-namespace Wrap.ViewModels.General;
+namespace Wrap.Services.Models.Home;
 
-public class DashboardViewModel
+public class DashboardDataDto
 {
     public int CrewMembersCount { get; set; }
     
     public int CastMembersCount { get; set; }
     
     public int UpcomingScenesTotal { get; set; }
-    
-    public IEnumerable<ProductionViewModel> Productions { get; set; } = null!;
+
+    public IReadOnlyCollection<ProductionDashboardDto> Productions { get; set; } = [];
 }

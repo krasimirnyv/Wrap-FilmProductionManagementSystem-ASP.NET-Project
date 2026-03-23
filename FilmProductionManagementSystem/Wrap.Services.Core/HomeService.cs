@@ -1,61 +1,30 @@
 namespace Wrap.Services.Core;
 
-using Microsoft.EntityFrameworkCore;
+using Interfaces;
+using Models.Home;
+using Wrap.Data.Repository.Interfaces;
 
-using Data;
-using Interface;
-using ViewModels.General;
-using GCommon.Enums;
-
-using static ViewModels.General.Helper.ProductionStatusAbstraction;
-
-public class HomeService(FilmProductionDbContext context) : IHomeService
+public class HomeService(IHomeRepository repository) : IHomeService
 {
-    public async Task<DashboardViewModel> GetGeneralInformation()
+    public async Task<DashboardDataDto> GetDashboardDataAsync()
     {
-        IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap = GetStatusTypeByAbstraction();
         DateTime now = DateTime.Now;
-
-        var productionRaw = await context
-            .Productions
-            .AsNoTracking()
-            .Select(p => new
-            {
-                p.Title,
-                p.Description,
-                p.StatusType,
-                UpcomingScenesCount = p.Scenes
-                    .SelectMany(s => s.ShootingDayScenes)
-                    .Count(sds => sds.ShootingDay.Date > now)
-            })
-            .ToArrayAsync();
-
-        int crewCount = await context
-            .CrewMembers
-            .AsNoTracking()
-            .CountAsync();
         
-        int castCount = await context
-            .CastMembers
-            .AsNoTracking()
-            .CountAsync();
+        int crewCount = await repository.GetCrewCountAsync();
+        int castCount = await repository.GetCastCountAsync();
 
-        DashboardViewModel general = new DashboardViewModel()
+        IReadOnlyCollection<ProductionDashboardDto> productions = await repository.GetProductionSummaryAsync(now);
+        
+        int upcomingScenesTotal = productions.Sum(p => p.UpcomingScenesCount);
+
+        DashboardDataDto dashboardDataDto = new DashboardDataDto
         {
-            CrewMembers = crewCount,
-            CastMembers = castCount,
-            UpcomingScenes = productionRaw.Sum(p => p.UpcomingScenesCount),
-            Productions = productionRaw
-                .Select(p => new ProductionViewModel()
-                {
-                    Title = p.Title,
-                    Description = p.Description,
-                    Status = p.StatusType.ToString(),
-                    AbstractStatus = statusMap.First(kvp => kvp.Value.Contains(p.StatusType)).Key
-                })
-                .ToArray()
+            CrewMembersCount = crewCount,
+            CastMembersCount = castCount,
+            UpcomingScenesTotal = upcomingScenesTotal,
+            Productions = productions
         };
-
-        return general;
+        
+        return dashboardDataDto;
     }
 }

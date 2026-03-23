@@ -7,7 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 
 using Wrap.ViewModels;
 using Wrap.ViewModels.General;
-using Wrap.Services.Core.Interface;
+using Wrap.Services.Core.Interfaces;
+using Wrap.Services.Models.Home;
+using Wrap.GCommon.Enums;
+using Wrap.GCommon.UI;
+
+using static Wrap.GCommon.OutputMessages.Home;
 
 public class HomeController(IHomeService homeService) : BaseController
 { 
@@ -21,8 +26,28 @@ public class HomeController(IHomeService homeService) : BaseController
     [HttpGet]
     public async Task<IActionResult> Dashboard()
     {
-        DashboardViewModel general = await homeService.GetGeneralInformation();
-        return View(general);
+        DashboardDataDto dto = await homeService.GetDashboardDataAsync();
+
+        IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap = 
+            ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
+        
+        DashboardViewModel viewModel = new DashboardViewModel
+        {
+            CrewMembersCount = dto.CrewMembersCount,
+            CastMembersCount = dto.CastMembersCount,
+            UpcomingScenesTotal = dto.UpcomingScenesTotal,
+            Productions = dto.Productions
+                .Select(p => new ProductionViewModel
+                {
+                    Title = p.Title,
+                    Description = p.Description,
+                    StatusType = p.StatusType.ToString(),
+                    AbstractStatus = ResolveAbstractionStatus(statusMap, p.StatusType)
+                })
+                .ToArray()
+        };
+            
+        return View(viewModel);
     }
 
     [HttpGet]
@@ -39,5 +64,14 @@ public class HomeController(IHomeService homeService) : BaseController
             StatusCodes.Status405MethodNotAllowed => RedirectToAction(nameof(Index)),
             _ => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier })
         }; 
+    }
+    
+    private string ResolveAbstractionStatus(IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap, ProductionStatusType statusType)
+    {
+        string? key = statusMap
+            .FirstOrDefault(kvp => kvp.Value.Contains(statusType))
+            .Key;
+        
+        return string.IsNullOrWhiteSpace(key) ? UnknownStatus : key;
     }
 }

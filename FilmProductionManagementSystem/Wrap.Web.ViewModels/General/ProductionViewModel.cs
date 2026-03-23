@@ -8,5 +8,5 @@ public class ProductionViewModel
 
     public string AbstractStatus { get; set; } = null!;
 
-    public string Status { get; set; } = null!;
+    public string StatusType { get; set; } = null!;
 }

@@ -35,7 +35,7 @@
                     <div class="stat-icon success">
                         <i class="bi bi-people"></i>
                     </div>
-                    <h2 class="stat-number">@Model.CrewMembers</h2>
+                    <h2 class="stat-number">@Model.CrewMembersCount</h2>
                     <p class="stat-label">Find filmmakers</p>
                 </div>
                 </a>
@@ -46,7 +46,7 @@
                     <div class="stat-icon success">
                         <i class="bi bi-people"></i>
                     </div>
-                    <h2 class="stat-number">@Model.CastMembers</h2>
+                    <h2 class="stat-number">@Model.CastMembersCount</h2>
                     <p class="stat-label">Find actors</p>
                 </div>
                 </a>
@@ -57,7 +57,7 @@
                     <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
                         <i class="bi bi-calendar-check"></i>
                     </div>
-                    <h2 class="stat-number" >@Model.UpcomingScenes</h2>
+                    <h2 class="stat-number" >@Model.UpcomingScenesTotal</h2>
                     <p class="stat-label">Upcoming Scenes</p>
                 </div>
                 </a>
@@ -156,16 +156,16 @@
                                @switch (production.AbstractStatus)
                                {
                                    case PreProductionKey:
-                                       <span class="badge bg-warning badge-custom text-dark">@production.Status</span>
+                                       <span class="badge bg-warning badge-custom text-dark">@production.StatusType</span>
                                        break;
                                    case ProductionKey:
-                                       <span class="badge bg-success badge-custom">@production.Status</span>
+                                       <span class="badge bg-success badge-custom">@production.StatusType</span>
                                        break;
                                    case PostProductionKey:
-                                       <span class="badge bg-info badge-custom">@production.Status</span>
+                                       <span class="badge bg-info badge-custom">@production.StatusType</span>
                                        break;
                                    case DistributionKey:
-                                       <span class="badge bg-end badge-custom">@production.Status</span>
+                                       <span class="badge bg-end badge-custom">@production.StatusType</span>
                                        break;
                                }
                            </div>
