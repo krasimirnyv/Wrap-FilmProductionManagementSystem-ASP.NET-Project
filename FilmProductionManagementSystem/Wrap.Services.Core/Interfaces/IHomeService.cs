@@ -1,6 +1,6 @@
 namespace Wrap.Services.Core.Interfaces;
 
-using Models.Home;
+using Models.General;
 
 public interface IHomeService
 {

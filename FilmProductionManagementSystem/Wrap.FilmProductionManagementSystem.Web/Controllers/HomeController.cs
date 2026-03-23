@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Wrap.ViewModels;
 using Wrap.ViewModels.General;
 using Wrap.Services.Core.Interfaces;
-using Wrap.Services.Models.Home;
+using Wrap.Services.Models.General;
 using Wrap.GCommon.Enums;
 using Wrap.GCommon.UI;
 

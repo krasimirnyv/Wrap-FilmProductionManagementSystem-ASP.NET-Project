@@ -1,4 +1,4 @@
-namespace Wrap.Services.Models.Home;
+namespace Wrap.Services.Models.General;
 
 using GCommon.Enums;
 

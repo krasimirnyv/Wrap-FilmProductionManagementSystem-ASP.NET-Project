@@ -2,7 +2,7 @@ namespace Wrap.Services.Core.Interfaces;
 
 using Microsoft.AspNetCore.Identity;
 
-using Models.LoginRegister;
+using Models.LoginAndRegistration;
 using ViewModels.LoginAndRegistration;
 
 public interface ILoginRegisterService

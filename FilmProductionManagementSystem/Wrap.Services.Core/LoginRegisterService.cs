@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Interfaces;
-using Models.LoginRegister;
+using Models.LoginAndRegistration;
 using Data.Models;
 using Data.Models.Infrastructure;
 using Data.Repository.Interfaces;

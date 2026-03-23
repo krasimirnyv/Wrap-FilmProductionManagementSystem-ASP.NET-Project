@@ -3,7 +3,7 @@ namespace Wrap.Data.Repository;
 using Microsoft.EntityFrameworkCore;
 
 using Interfaces;
-using Wrap.Services.Models.Home;
+using Wrap.Services.Models.General;
 
 public class HomeRepository(FilmProductionDbContext dbContext)
     : BaseRepository(dbContext), IHomeRepository

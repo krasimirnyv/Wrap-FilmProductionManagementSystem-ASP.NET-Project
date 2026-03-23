@@ -1,4 +1,4 @@
-namespace Wrap.Services.Models.LoginRegister;
+namespace Wrap.Services.Models.LoginAndRegistration;
 
 using Microsoft.AspNetCore.Http;
 

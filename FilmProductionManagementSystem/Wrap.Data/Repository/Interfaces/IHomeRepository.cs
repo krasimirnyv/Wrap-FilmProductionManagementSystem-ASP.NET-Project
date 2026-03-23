@@ -1,6 +1,6 @@
 namespace Wrap.Data.Repository.Interfaces;
 
-using Wrap.Services.Models.Home;
+using Wrap.Services.Models.General;
 
 public interface IHomeRepository
 {

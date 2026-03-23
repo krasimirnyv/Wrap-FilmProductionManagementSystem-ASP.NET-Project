@@ -1,7 +1,7 @@
 namespace Wrap.Services.Core;
 
 using Interfaces;
-using Models.Home;
+using Models.General;
 using Wrap.Data.Repository.Interfaces;
 
 public class HomeService(IHomeRepository repository) : IHomeService
