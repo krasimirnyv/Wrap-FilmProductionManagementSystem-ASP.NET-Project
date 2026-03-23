@@ -5,15 +5,15 @@ using System.Globalization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 
-using Interface;
+using Interfaces;
 using Data;
 using Data.Models;
 using ViewModels.Production;
 using ViewModels.Production.HelperViewModels;
 using GCommon.Enums;
+using GCommon.UI;
 
 using static Utilities.HelperSaveThumbnail;
-using static ViewModels.General.Helper.ProductionStatusAbstraction;
 using static GCommon.DataFormat;
 using static GCommon.ApplicationConstants;
 using static GCommon.OutputMessages.Production;
@@ -333,9 +333,11 @@ public class ProductionService(FilmProductionDbContext context,
 
         Dictionary<ProductionStatusType, string> map = new Dictionary<ProductionStatusType, string>();
 
-        foreach ((string abstractName, IReadOnlyCollection<ProductionStatusType> statuses) in GetStatusTypeByAbstraction())
+        foreach ((string abstractName, IReadOnlyCollection<ProductionStatusType> statuses) in
+                 ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction())
         {
             string cssClass = abstractNames.GetValueOrDefault(abstractName, DefaultStatus);
+            
             foreach (ProductionStatusType status in statuses)
                 map[status] = cssClass;
         }

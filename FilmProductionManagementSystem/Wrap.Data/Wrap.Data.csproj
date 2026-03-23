@@ -19,6 +19,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Wrap.Data.Models\Wrap.Data.Models.csproj" />
+        <ProjectReference Include="..\Wrap.Services.Models\Wrap.Services.Models.csproj" />
     </ItemGroup>
 
     <ItemGroup>

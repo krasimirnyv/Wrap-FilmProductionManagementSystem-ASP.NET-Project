@@ -2,7 +2,7 @@ namespace FilmProductionManagementSystem.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 
-using Wrap.Services.Core.Interface;
+using Wrap.Services.Core.Interfaces;
 using Wrap.ViewModels.Profile;
 
 using static Wrap.GCommon.OutputMessages.Profile;

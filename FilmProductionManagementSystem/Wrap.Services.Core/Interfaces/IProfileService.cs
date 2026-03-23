@@ -1,4 +1,4 @@
-namespace Wrap.Services.Core.Interface;
+namespace Wrap.Services.Core.Interfaces;
 
 using ViewModels.Profile;
 

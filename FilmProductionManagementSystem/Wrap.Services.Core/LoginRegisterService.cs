@@ -11,7 +11,7 @@ using Data.Models;
 using Data.Models.Infrastructure;
 using Data.Repository.Interfaces;
 using ViewModels.LoginAndRegistration;
-using ViewModels.LoginAndRegistration.Helpers;
+using GCommon.UI;
 
 using static Utilities.HelperSaveProfile;
 using static GCommon.OutputMessages;
@@ -54,7 +54,7 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
 
     public void GetSkills(CrewRegistrationStepTwoInputModel inputModel)
     {
-        inputModel.SkillsByDepartment = CrewRolesDepartments.GetRolesByDepartment();
+        inputModel.SkillsByDepartment = CrewRolesDepartmentCatalog.GetRolesByDepartment();
     }
 
     public async Task<IdentityResult> CompleteCrewRegistrationAsync(CrewRegistrationCompleteDto? registrationDto)

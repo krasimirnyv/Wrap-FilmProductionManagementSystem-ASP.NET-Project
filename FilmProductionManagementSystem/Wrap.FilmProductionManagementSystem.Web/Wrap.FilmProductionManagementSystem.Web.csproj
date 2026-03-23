@@ -26,8 +26,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Wrap.GCommon\Wrap.GCommon.csproj" />
+        <ProjectReference Include="..\Wrap.Services.Models\Wrap.Services.Models.csproj" />
+        <ProjectReference Include="..\Wrap.Web.Infrastructure\Wrap.Web.Infrastructure.csproj" />
         <ProjectReference Include="..\Wrap.Services.Core\Wrap.Services.Core.csproj" />
-        <ProjectReference Include="..\Wrap.ViewModels\Wrap.ViewModels.csproj" />
+        <ProjectReference Include="..\Wrap.Web.ViewModels\Wrap.Web.ViewModels.csproj" />
     </ItemGroup>
 
 
@@ -41,6 +43,7 @@
       <Folder Include="Views\Production\" />
       <Folder Include="wwwroot\img\profile\" />
       <Folder Include="wwwroot\img\thumbnail\" />
+      <Folder Include="wwwroot\lib\qrcode\" />
     </ItemGroup>
 
 </Project>

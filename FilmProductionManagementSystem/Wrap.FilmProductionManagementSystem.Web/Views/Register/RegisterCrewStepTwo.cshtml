@@ -1,6 +1,3 @@
-@using Wrap.ViewModels.LoginAndRegistration;
-@using Wrap.ViewModels.LoginAndRegistration.Helpers;
-
 @model CrewRegistrationStepTwoInputModel
 
 @{
@@ -70,7 +67,7 @@
                                         <div class="skills-grid">
                                             @foreach (CrewRoleType skill in department.Value)
                                             {
-                                                string skillName = CrewRolesDepartments.GetDisplayName(skill);
+                                                string skillName = GetDisplayName(skill);
                                                 string skillValue = ((int)skill).ToString();
 
                                                 <button type="button"

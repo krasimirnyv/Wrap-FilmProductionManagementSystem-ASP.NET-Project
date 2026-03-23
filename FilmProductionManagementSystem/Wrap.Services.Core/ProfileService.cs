@@ -3,13 +3,13 @@ namespace Wrap.Services.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 
-using Interface;
+using Interfaces;
 using Data;
 using Data.Models;
 using ViewModels.Profile;
 using ViewModels.Profile.HelperViewModels;
-using ViewModels.LoginAndRegistration.Helpers;
 using GCommon.Enums;
+using GCommon.UI;
 
 using static Utilities.HelperSaveProfile;
 using static GCommon.OutputMessages.Profile;
@@ -266,7 +266,7 @@ public class ProfileService(FilmProductionDbContext context,
         EditSkillsViewModel viewModel = new EditSkillsViewModel
         {
             CurrentSkills = currentSkills,
-            AllDepartments = CrewRolesDepartments.GetRolesByDepartment()
+            AllDepartments = CrewRolesDepartmentCatalog.GetRolesByDepartment()
         };
 
         return viewModel;
@@ -359,7 +359,7 @@ public class ProfileService(FilmProductionDbContext context,
     private static IDictionary<string, ICollection<CrewRoleType>> GroupSkillsByDepartment(
         IEnumerable<CrewRoleType> userSkills)
     {
-        IReadOnlyDictionary<string, IReadOnlyCollection<CrewRoleType>> allDepartment = CrewRolesDepartments.GetRolesByDepartment();
+        IReadOnlyDictionary<string, IReadOnlyCollection<CrewRoleType>> allDepartment = CrewRolesDepartmentCatalog.GetRolesByDepartment();
 
         HashSet<CrewRoleType> userSkillsSet = userSkills.ToHashSet();
         
