@@ -46,20 +46,17 @@
             <a class="nav-link dropdown-toggle d-flex align-items-center"
                data-bs-toggle="dropdown" role="button" style="cursor:pointer;">
 
-                <span class="me-2">@User.Identity!.Name</span>
+                <span class="me-2">@Model.UserName</span>
 
-                @if (Model?.ProfileImagePath != null)
-                {
-                    <img src="@Model.ProfileImagePath"
-                         alt="Profile"
-                         class="rounded-circle"
-                         style="width:32px;height:32px;object-fit:cover"/>
-                }
+                <img src="@Model.ProfileImagePath"
+                     alt="Profile"
+                     class="rounded-circle"
+                     style="width:32px;height:32px;object-fit:cover"/>
             </a>
 
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                    <a class="dropdown-item" asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name" >
+                    <a class="dropdown-item" asp-controller="Profile" asp-action="Index" asp-route-username="@Model.UserName" >
                         <i class="bi bi-person me-2"></i>Profile
                     </a>
                 </li>

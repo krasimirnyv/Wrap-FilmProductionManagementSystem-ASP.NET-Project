@@ -1,45 +1,22 @@
 namespace Wrap.Services.Core;
 
-using Microsoft.EntityFrameworkCore;
-
-using Interface;
+using Models.NavBar;
+using Interfaces;
 using Data;
-using ViewModels.NavBar;
+using Wrap.Data.Repository.Interfaces;
 
-using static GCommon.OutputMessages;
 using static GCommon.OutputMessages.NavBar;
     
-public class NavBarService(FilmProductionDbContext context) : INavBarService
+public class NavBarService(FilmProductionDbContext context,
+                           INavBarRepository repository) : INavBarService
 {
-    public async Task<NavBarUserViewModel?> GetNavBarUserAsync(string userId)
+    public async Task<NavBarUserDto?> GetNavBarUserAsync(Guid userId)
     {
-        NavBarUserViewModel? crew = await context
-            .CrewMembers
-            .AsNoTracking()
-            .Where(c => c.UserId == userId)
-            .Select(c => new NavBarUserViewModel
-            {
-                UserName = c.User.UserName!,
-                ProfileImagePath = c.ProfileImagePath!,
-                Role = CrewString
-            })
-            .FirstOrDefaultAsync();
-
+        NavBarUserDto? crew = await repository.GetNavBarCrewUserAsync(userId);
         if (crew is not null)
             return crew;
 
-        NavBarUserViewModel? cast = await context
-            .CastMembers
-            .AsNoTracking()
-            .Where(c => c.UserId == userId)
-            .Select(c => new NavBarUserViewModel
-            {
-                UserName = c.User.UserName!,
-                ProfileImagePath = c.ProfileImagePath,
-                Role = CastString
-            })
-            .FirstOrDefaultAsync();
-        
+        NavBarUserDto? cast = await repository.GetNavBarCastUserAsync(userId);
         if (cast is not null)
             return cast;
         

@@ -1,6 +1,6 @@
-namespace Wrap.Services.Core.Interface;
+namespace Wrap.Services.Core.Interfaces;
 
-using ViewModels.NavBar;
+using Models.NavBar;
 
 public interface INavBarService
 {
@@ -9,6 +9,6 @@ public interface INavBarService
     /// such as username, profile image path and role (Crew or Cast).
     /// </summary>
     /// <param name="userId"></param>
-    /// <returns>NavBarUserViewModel</returns>
-    Task<NavBarUserViewModel?> GetNavBarUserAsync(Guid userId);
+    /// <returns>NavBarUserDto</returns>
+    Task<NavBarUserDto?> GetNavBarUserAsync(Guid userId);
 }
