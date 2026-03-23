@@ -10,7 +10,8 @@
     <ItemGroup>
         <ProjectReference Include="..\Wrap.Data.Models\Wrap.Data.Models.csproj" />
         <ProjectReference Include="..\Wrap.Data\Wrap.Data.csproj" />
-        <ProjectReference Include="..\Wrap.ViewModels\Wrap.ViewModels.csproj" />
+        <ProjectReference Include="..\Wrap.Services.Models\Wrap.Services.Models.csproj" />
+        <ProjectReference Include="..\Wrap.Web.ViewModels\Wrap.Web.ViewModels.csproj" />
         <ProjectReference Include="..\Wrap.GCommon\Wrap.GCommon.csproj" />
     </ItemGroup>
 

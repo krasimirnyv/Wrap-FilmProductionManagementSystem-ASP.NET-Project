@@ -10,5 +10,5 @@ public interface INavBarService
     /// </summary>
     /// <param name="userId"></param>
     /// <returns>NavBarUserViewModel</returns>
-    Task<NavBarUserViewModel?> GetNavBarUserAsync(string userId);
+    Task<NavBarUserViewModel?> GetNavBarUserAsync(Guid userId);
 }

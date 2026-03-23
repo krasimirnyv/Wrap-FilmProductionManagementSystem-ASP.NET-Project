@@ -43,7 +43,7 @@ public class CastRegistrationInputModel
     public GenderType Gender { get; set; }
 
     [Required]
-    public IFormFile ProfilePicturePath { get; set; } = null!;
+    public IFormFile ProfilePicture { get; set; } = null!;
     
     [StringLength(BiographyMaxLength)]
     [DataType(DataType.MultilineText)]

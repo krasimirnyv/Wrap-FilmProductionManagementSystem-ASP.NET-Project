@@ -80,12 +80,19 @@ public static class OutputMessages
     {
         public const string CrewDraftKey = "CrewDraft";
         public const string ErrorBuildingCrewDraft = "Exception occured while building the crew draft {0}";
-        public const string ErrorFoundingCrewDraft = "Exception occured while finding the crew draft.";
+        public const string ErrorFoundingCrewDraft = "Error occured while finding the crew draft.";
+        public const string ErrorCreatingCast = "Error occured while getting the cast data to create profile.";
 
         public const string ExceptionCompleteRegistrationOfCrewMessage = "Exception occured while trying to complete your registration as a filmmaker. {0}";
         public const string ExceptionCompleteRegistrationOfCastMessage = "Exception occured while trying to complete your registration as an actor. {0}";
         public const string ExceptionLogin = "Exception occured while trying to login. {0}";
 
+        public const string IdentityCreateFailed = "Identity CreateAsync failed: {0}";
+        public const string EffectedDbRowsFailure = "Expected >= {0}, got {1}.";
+        public const string UserNotFound = "User with username '{0}' not found.";
+        public const string LoginFailedRole = "Login failed due to wrong role!";
+        public const string LoginFailedPass = "Login failed: invalid password for '{0}'.";
+        public const string RegistrationTransactionFailure = "Registration failed while saving profile data.";
         public const string NotRegisteredAsCrew = "This account is not registered as Crew.";
         public const string NotRegisteredAsCast = "This account is not registered as Cast.";
         public const string InvalidUsernameOrPassword = "Invalid username or password.";

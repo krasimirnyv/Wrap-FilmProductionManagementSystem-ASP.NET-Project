@@ -33,7 +33,7 @@ public class CrewRegistrationStepOneInputModel
     [StringLength(NicknameMaxLength)]
     public string? Nickname { get; set; }
 
-    public IFormFile? ProfilePicturePath { get; set; }
+    public IFormFile? ProfilePicture { get; set; }
     
     [StringLength(BiographyMaxLength)]
     [DataType(DataType.MultilineText)]

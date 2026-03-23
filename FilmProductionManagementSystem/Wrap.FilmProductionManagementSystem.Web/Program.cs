@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 using Wrap.Data;
+using Wrap.Data.Repository;
 using Wrap.Data.Models.Infrastructure;
 using Wrap.Services.Core;
-using Wrap.Services.Core.Interface;
+using Wrap.Infrastructure.Utilities;
+using Wrap.Infrastructure.Utilities.Interfaces;
+using Wrap.Infrastructure.Extensions;
 
 using static Wrap.GCommon.ApplicationConstants;
 
@@ -35,6 +38,11 @@ public class Program
             options.UseSqlServer(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+        builder.Services.RegisterRepositories(typeof(LoginRegisterRepository));
+        builder.Services.RegisterUserServices(typeof(LoginRegisterService));
+        
+        builder.Services.AddSingleton<ISlugGenerator, SlugGenerator>();
+
         builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
             {
                 ConfigureIdentity(options, builder.Configuration);
@@ -46,12 +54,6 @@ public class Program
         {
             ConfigureCookie(options, builder.Configuration);
         });
-        
-        builder.Services.AddScoped<IHomeService, HomeService>();
-        builder.Services.AddScoped<ILoginRegisterService, LoginRegisterService>();
-        builder.Services.AddScoped<INavBarService, NavBarService>();
-        builder.Services.AddScoped<IProfileService, ProfileService>();
-        builder.Services.AddScoped<IProductionService, ProductionService>();
 
         // Using session + "draft" JSON for the two-step registration form for crew members.
         builder.Services.AddDistributedMemoryCache();
@@ -61,7 +63,6 @@ public class Program
         });
         builder.Services.AddHttpContextAccessor();
         
-        // Configure file upload size.
         builder.Services.Configure<FormOptions>(options =>
         {
             options.MultipartBodyLengthLimit = builder.Configuration.GetValue<long>(MaxFileSizeOptions);

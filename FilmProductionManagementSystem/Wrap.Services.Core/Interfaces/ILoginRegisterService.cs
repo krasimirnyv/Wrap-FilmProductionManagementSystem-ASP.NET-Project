@@ -1,7 +1,8 @@
-namespace Wrap.Services.Core.Interface;
+namespace Wrap.Services.Core.Interfaces;
 
 using Microsoft.AspNetCore.Identity;
 
+using Models.LoginRegister;
 using ViewModels.LoginAndRegistration;
 
 public interface ILoginRegisterService
@@ -13,7 +14,7 @@ public interface ILoginRegisterService
     /// </summary>
     /// <param name="model">CrewRegistrationStepOneInputModel</param>
     /// <returns>CrewRegistrationStepOneDraft</returns>
-    Task<CrewRegistrationStepOneDraft> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model);
+    Task<CrewRegistrationDraftDto> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model);
 
     /// <summary>
     /// Used for the second part of crew registration - get new model-view with skills for the dropdowns in the view.
@@ -29,28 +30,27 @@ public interface ILoginRegisterService
     void GetSkills(CrewRegistrationStepTwoInputModel inputModel);
 
     /// <summary>
-    /// Completes the crew registration process by taking the draft and the selected skills
-    /// and creating a new crew member in the system vie transaction.
+    /// Completes the crew registration process by taking the dto that contains
+    /// the draft and the selected skills for creating a new crew member in the system vie transaction.
     /// </summary>
-    /// <param name="draft">CrewRegistrationStepOneDraft</param>
-    /// <param name="skills">IReadOnlyCollection<int></param>
+    /// <param name="registrationDto">CrewRegistrationCompleteDto</param>
     /// <returns>IdentityResult -> Success or not </returns>
-    Task<IdentityResult> CompleteCrewRegistrationAsync(CrewRegistrationStepOneDraft draft, IReadOnlyCollection<int> skills);
+    Task<IdentityResult> CompleteCrewRegistrationAsync(CrewRegistrationCompleteDto registrationDto);
 
     /// <summary>
     /// Creates and completes a new cast member in the system based on the input model.
     /// </summary>
-    /// <param name="model">CastRegistrationInputModel</param>
+    /// <param name="registrationDto">CastRegistrationDto</param>
     /// <returns>IdentityResult -> Success or not </returns>
-    Task<IdentityResult> CompleteCastRegistrationAsync(CastRegistrationInputModel model);
-    
+    Task<IdentityResult> CompleteCastRegistrationAsync(CastRegistrationDto registrationDto);
+
     /// <summary>
     /// Checks the Login status and role in the application (cast or crew)
     /// and returns a tuple with the result and the role as string.
     /// </summary>
-    /// <param name="model">AccountLogInInputModel</param>
-    /// <returns>Tuple<bool, string></returns>
-    Task<(bool, string)> LoginStatusAsync(AccountLogInInputModel model);
+    /// <param name="loginDto">LoginRequestDto</param>
+    /// <returns>Tuple<bool Succeeded, string Role></returns>
+    Task<(bool Succeeded, string Role)> LoginStatusAsync(LoginRequestDto loginDto);
 
     /// <summary>
     /// Logout the current user from the system.

@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 
-using Wrap.Services.Core.Interface;
+using Wrap.Services.Core.Interfaces;
 using Wrap.Services.Core.Utilities;
+using Wrap.Services.Models.LoginRegister;
 using Wrap.ViewModels.LoginAndRegistration;
 
 using static Wrap.GCommon.ApplicationConstants;
@@ -29,8 +30,10 @@ public class RegisterController(ILoginRegisterService registerService,
 
         try
         {
-            CrewRegistrationStepOneDraft draft = await registerService.BuildCrewDraftAsync(model);
+            CrewRegistrationDraftDto draft = await registerService.BuildCrewDraftAsync(model);
             SessionJsonExtensions.SetJson(HttpContext.Session, CrewDraftKey, draft);
+            
+            return RedirectToAction(nameof(RegisterCrewStepTwo));
         }
         catch (Exception e)
         {
@@ -38,15 +41,13 @@ public class RegisterController(ILoginRegisterService registerService,
             ModelState.AddModelError(string.Empty, string.Format(ErrorBuildingCrewDraft, e.Message));
             return View(model);
         }
-        
-        return RedirectToAction(nameof(RegisterCrewStepTwo));
     }
 
     [HttpGet]
     public IActionResult RegisterCrewStepTwo()
     {
-        CrewRegistrationStepOneDraft? draft = SessionJsonExtensions
-            .GetJson<CrewRegistrationStepOneDraft>(HttpContext.Session, CrewDraftKey);
+        CrewRegistrationDraftDto? draft = SessionJsonExtensions
+            .GetJson<CrewRegistrationDraftDto>(HttpContext.Session, CrewDraftKey);
 
         if (draft is null)
         {
@@ -61,21 +62,30 @@ public class RegisterController(ILoginRegisterService registerService,
     [HttpPost]
     public async Task<IActionResult> RegisterCrewStepTwo(CrewRegistrationStepTwoInputModel model)
     {
-        if (IsSkillSelected(model)) // bool method
+        if (IsSkillSelected(model))
             return View(model);
+        
+        CrewRegistrationDraftDto? draft = SessionJsonExtensions
+            .GetJson<CrewRegistrationDraftDto>(HttpContext.Session, CrewDraftKey);
+        
+        if (draft is null)
+        {
+            TempData[ErrorTempDateKey] = ErrorFoundingCrewDraft;
+            return RedirectToAction(nameof(RegisterCrewStepOne));
+        }
+        
+        CrewRegistrationCompleteDto dto = new CrewRegistrationCompleteDto
+        {
+            Draft = draft,
+            SkillNumbers = model.SelectedSkills
+        };
         
         try
         {
-            CrewRegistrationStepOneDraft? draft = SessionJsonExtensions
-                .GetJson<CrewRegistrationStepOneDraft>(HttpContext.Session, CrewDraftKey);
-        
-            if (draft is null)
-                return RedirectToAction(nameof(RegisterCrewStepOne));
-            
-            IdentityResult identityResult = await registerService.CompleteCrewRegistrationAsync(draft, model.SelectedSkills);
-            if (!identityResult.Succeeded)
+            IdentityResult result = await registerService.CompleteCrewRegistrationAsync(dto);
+            if (!result.Succeeded)
             {
-                foreach (IdentityError error in identityResult.Errors)
+                foreach (IdentityError error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
 
                 registerService.GetSkills(model);
@@ -84,12 +94,14 @@ public class RegisterController(ILoginRegisterService registerService,
         
             HttpContext.Session.Remove(CrewDraftKey);
             TempData[SuccessTempDataKey] = SuccessMessage;
+            
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
             logger.LogError(e, string.Format(ExceptionCompleteRegistrationOfCrewMessage, e.Message));
             ModelState.AddModelError(string.Empty, string.Format(ExceptionCompleteRegistrationOfCrewMessage, e.Message));
+            registerService.GetSkills(model);
             return View(model);
         }
     }
@@ -104,12 +116,27 @@ public class RegisterController(ILoginRegisterService registerService,
         if (!ModelState.IsValid)
             return View(model);
 
+        CastRegistrationDto dto = new CastRegistrationDto
+        {
+            UserName = model.UserName,
+            Email = model.Email,
+            PhoneNumber = model.PhoneNumber,
+            Password = model.Password,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Nickname = model.Nickname,
+            BirthDate = model.BirthDate,
+            Gender = model.Gender,
+            ProfilePicture = model.ProfilePicture,
+            Biography = model.Biography,
+        };
+            
         try
         {
-            IdentityResult identityResult = await registerService.CompleteCastRegistrationAsync(model);
-            if (!identityResult.Succeeded)
+            IdentityResult result = await registerService.CompleteCastRegistrationAsync(dto);
+            if (!result.Succeeded)
             {
-                foreach (IdentityError error in identityResult.Errors)
+                foreach (IdentityError error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
             
                 return View(model);
@@ -129,7 +156,6 @@ public class RegisterController(ILoginRegisterService registerService,
     [HttpGet]
     public async Task<IActionResult> Login(string? returnUrl)
     {
-        // Clear the existing external cookie to ensure a clean login process
         await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         
         return View(new AccountLogInInputModel());
@@ -141,38 +167,34 @@ public class RegisterController(ILoginRegisterService registerService,
         if (!ModelState.IsValid)
             return View(model);
         
-        try 
+        LoginRequestDto dto = new LoginRequestDto
         {
-            (bool, string) loginStatus = await registerService.LoginStatusAsync(model);
-
-            if (loginStatus.Item1)
+            UserName = model.UserName,
+            Password = model.Password,
+            Role = model.Role,
+            RememberMe = model.RememberMe
+        };
+        
+        try
+        {
+            (bool Succeeded, string Role) loginStatus = await registerService.LoginStatusAsync(dto);
+            if (loginStatus == (true, CrewString) || loginStatus == (true, CastString))
             {
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
+                
+                return RedirectToAction("Dashboard", "Home");
             }
 
-            switch (loginStatus)
-            {
-                case (true, CrewString):
-                case (true, CastString):
-                    return RedirectToAction("Dashboard", "Home");
-                case (false, CrewString):
-                    ModelState.AddModelError(string.Empty, NotRegisteredAsCrew);
-                    break;
-                case (false, CastString):
-                    ModelState.AddModelError(string.Empty, NotRegisteredAsCast);
-                    break;
-                case (false, EmptyString):
-                    ModelState.AddModelError(string.Empty, InvalidUsernameOrPassword);
-                    break;
-                default:
-                    ModelState.AddModelError(string.Empty, NotSelectedRole);
-                    break;
-            }
-                
-            await registerService.LogoutAsync();
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            
+            if (loginStatus is (false, CrewString))
+                ModelState.AddModelError(string.Empty, NotRegisteredAsCrew);
+            else if (loginStatus is (false, CastString))
+                ModelState.AddModelError(string.Empty, NotRegisteredAsCast);
+            else if (loginStatus is (false, EmptyString))
+                ModelState.AddModelError(string.Empty, InvalidUsernameOrPassword);
+            else
+                ModelState.AddModelError(string.Empty, NotSelectedRole);
+
             return View(model);
         }
         catch (Exception e)

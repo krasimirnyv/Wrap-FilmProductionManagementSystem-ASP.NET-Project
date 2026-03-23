@@ -73,7 +73,7 @@ public class Cast
     
     [Required]
     [ForeignKey(nameof(User))]
-    public string UserId { get; set; } = null!;
+    public Guid UserId { get; set; }
     
     public virtual ApplicationUser User { get; set; } = null!;
 

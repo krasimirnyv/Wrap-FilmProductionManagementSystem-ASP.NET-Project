@@ -1,30 +1,34 @@
 namespace Wrap.Services.Core;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 
-using Data;
+using Interfaces;
+using Models.LoginRegister;
 using Data.Models;
 using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
 using ViewModels.LoginAndRegistration;
 using ViewModels.LoginAndRegistration.Helpers;
-using Interface;
-using GCommon.Enums;
 
 using static Utilities.HelperSaveProfile;
 using static GCommon.OutputMessages;
+using static GCommon.OutputMessages.Register;
 
 public class LoginRegisterService(UserManager<ApplicationUser> userManager,
-                                SignInManager<ApplicationUser> signInManager,
-                                FilmProductionDbContext context,
-                                IWebHostEnvironment environment) : ILoginRegisterService
+                                  SignInManager<ApplicationUser> signInManager,
+                                  IWebHostEnvironment environment,
+                                  ILoginRegisterRepository repository,
+                                  ILogger<LoginRegisterService> logger) : ILoginRegisterService
 {
  
-    public async Task<CrewRegistrationStepOneDraft> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model)
+    public async Task<CrewRegistrationDraftDto> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model)
     {
-        CrewRegistrationStepOneDraft draftModel = new CrewRegistrationStepOneDraft
+        string profilePath = await SaveProfileImageAsync(environment, model.ProfilePicture);
+        
+        CrewRegistrationDraftDto draft = new CrewRegistrationDraftDto
         {
             UserName = model.UserName,
             Email = model.Email,
@@ -34,10 +38,10 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
             LastName = model.LastName,
             Nickname = model.Nickname,
             Biography = model.Biography,
-            ProfilePicturePath = await SaveProfileImageAsync(environment, model.ProfilePicturePath)
+            ProfilePicturePath = profilePath
         };
 
-        return draftModel;
+        return draft;
     }
 
     public CrewRegistrationStepTwoInputModel GetNewModelWithSkills()
@@ -53,128 +57,223 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
         inputModel.SkillsByDepartment = CrewRolesDepartments.GetRolesByDepartment();
     }
 
-    public async Task<IdentityResult> CompleteCrewRegistrationAsync(CrewRegistrationStepOneDraft draft, IReadOnlyCollection<int> skills)
+    public async Task<IdentityResult> CompleteCrewRegistrationAsync(CrewRegistrationCompleteDto? registrationDto)
     {
+        if (registrationDto is null || registrationDto.Draft is null)
+        {
+            logger.LogError(ErrorFoundingCrewDraft);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = ErrorFoundingCrewDraft
+            });
+        }
+        
+        if (registrationDto.SkillNumbers is null || registrationDto.SkillNumbers.Count == 0)
+        {
+            logger.LogError(NoSelectedSkills);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = NoSelectedSkills
+            });
+        }
+        
+        CrewRegistrationDraftDto draft = registrationDto.Draft;
+        IReadOnlyCollection<int> skills = registrationDto.SkillNumbers;
+        
         ApplicationUser user = new ApplicationUser
         {
             UserName = draft.UserName,
             Email = draft.Email,
             PhoneNumber = draft.PhoneNumber
         };
-
-        IdentityResult result = await userManager.CreateAsync(user, draft.Password);
-        if (!result.Succeeded)
-            return result;
         
-        await using IDbContextTransaction transaction = await context.Database.BeginTransactionAsync();
-
-        Crew newCrew = new Crew
+        await using IDbContextTransaction transaction = await repository.BeginTransactionAsync();
+        try
         {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            ProfileImagePath = draft.ProfilePicturePath!,
-            FirstName = draft.FirstName,
-            LastName = draft.LastName,
-            Nickname = draft.Nickname,
-            Biography = draft.Biography,
-            IsActive = true,
-            IsDeleted = false
-        };
-
-        await context.CrewMembers.AddAsync(newCrew);
-
-        foreach (int skillId in skills)
-        {
-            CrewRoleType skill = (CrewRoleType)skillId;
-            await context.CrewSkills.AddAsync(new CrewSkill
+            IdentityResult result = await userManager.CreateAsync(user, draft.Password);
+            if (!result.Succeeded)
+            {
+                await repository.RollbackTransactionAsync(transaction);
+                
+                foreach (IdentityError error in result.Errors) 
+                    logger.LogError(string.Format(IdentityCreateFailed, error.Description));
+                
+                return result;
+            }
+            
+            Crew newCrew = new Crew
             {
                 Id = Guid.NewGuid(),
-                CrewMemberId = newCrew.Id,
-                RoleType = skill
+                UserId = user.Id,
+                ProfileImagePath = draft.ProfilePicturePath!,
+                FirstName = draft.FirstName,
+                LastName = draft.LastName,
+                Nickname = draft.Nickname,
+                Biography = draft.Biography,
+                IsActive = true,
+                IsDeleted = false
+            };
+            
+            await repository.CreateCrewAsync(newCrew);
+            await repository.AddCrewSkillsAsync(newCrew.Id, skills);
+            
+            int expectedRows = 1 + skills.Count;
+            int effectedRows = await repository.SaveAllChangesAsync();
+            if (effectedRows < expectedRows)
+            {
+                await repository.RollbackTransactionAsync(transaction);
+                await userManager.DeleteAsync(user);
+                
+                logger.LogError(RegistrationTransactionFailure + string.Format(EffectedDbRowsFailure, expectedRows, effectedRows));
+                return IdentityResult.Failed(new IdentityError
+                {
+                    Description = RegistrationTransactionFailure
+                });
+            }
+            
+            await repository.CommitTransactionAsync(transaction);
+            await signInManager.SignInAsync(user, isPersistent: false);
+        
+            return IdentityResult.Success;
+        }
+        catch (Exception e)
+        {
+            await repository.RollbackTransactionAsync(transaction);
+            try { await userManager.DeleteAsync(user); } catch { /* ignored */ }
+
+            logger.LogError(e, RegistrationTransactionFailure + e.Message);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = RegistrationTransactionFailure
             });
         }
-
-        await context.SaveChangesAsync();
-        await transaction.CommitAsync();
-
-        await signInManager.SignInAsync(user, false);
-        
-        return IdentityResult.Success;
     }
 
-    public async Task<IdentityResult> CompleteCastRegistrationAsync(CastRegistrationInputModel model)
+    public async Task<IdentityResult> CompleteCastRegistrationAsync(CastRegistrationDto? registrationDto)
     {
+        if (registrationDto is null)
+        {
+            logger.LogError(ErrorCreatingCast);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = ErrorCreatingCast
+            });
+        }
+        
         ApplicationUser user = new ApplicationUser
         {
-            UserName = model.UserName,
-            Email = model.Email,
-            PhoneNumber = model.PhoneNumber
+            UserName = registrationDto.UserName,
+            Email = registrationDto.Email,
+            PhoneNumber = registrationDto.PhoneNumber
         };
         
-        IdentityResult result = await userManager.CreateAsync(user, model.Password);
-        if (!result.Succeeded)
-            return result;
-
-        Cast newCast = new Cast
+        await using IDbContextTransaction transaction = await repository.BeginTransactionAsync();
+        try
         {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            ProfileImagePath = await SaveProfileImageAsync(environment, model.ProfilePicturePath),
-            FirstName = model.FirstName,
-            LastName = model.LastName,
-            Nickname = model.Nickname,
-            BirthDate = model.BirthDate,
-            Gender = model.Gender,
-            Biography = model.Biography,
-            IsActive = true,
-            IsDeleted = false
-        };
+            IdentityResult result = await userManager.CreateAsync(user, registrationDto.Password);
+            if (!result.Succeeded)
+            {
+                await repository.RollbackTransactionAsync(transaction);
+                
+                foreach (IdentityError error in result.Errors) 
+                    logger.LogError(string.Format(IdentityCreateFailed, error.Description));
+                
+                return result;
+            }
+            
+            string profilePath = await SaveProfileImageAsync(environment, registrationDto.ProfilePicture);
+            
+            Cast newCast = new Cast
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                ProfileImagePath = profilePath,
+                FirstName = registrationDto.FirstName,
+                LastName = registrationDto.LastName,
+                Nickname = registrationDto.Nickname,
+                BirthDate = registrationDto.BirthDate,
+                Gender = registrationDto.Gender,
+                Biography = registrationDto.Biography,
+                IsActive = true,
+                IsDeleted = false
+            };
+            
+            await repository.CreateCastAsync(newCast);
 
-        await context.CastMembers.AddAsync(newCast);
-        await context.SaveChangesAsync();
-        
-        await signInManager.SignInAsync(user, false);
-        
-        return IdentityResult.Success;
+            byte expectedRows = 1;
+            int effectedRows = await repository.SaveAllChangesAsync();
+            if (effectedRows < expectedRows)
+            {
+                await repository.RollbackTransactionAsync(transaction);
+                await userManager.DeleteAsync(user);
+                
+                logger.LogError(RegistrationTransactionFailure + string.Format(EffectedDbRowsFailure, expectedRows, effectedRows));
+                return IdentityResult.Failed(new IdentityError
+                {
+                    Description = RegistrationTransactionFailure
+                });
+            }
+            
+            await repository.CommitTransactionAsync(transaction);
+            await signInManager.SignInAsync(user, false);
+            
+            return IdentityResult.Success;
+        }
+        catch (Exception e)
+        {
+            await repository.RollbackTransactionAsync(transaction);
+            try { await userManager.DeleteAsync(user); } catch { /* ignored */ }
+            
+            logger.LogError(e, RegistrationTransactionFailure + e.Message);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = RegistrationTransactionFailure
+            });
+        }
     }
     
-    public async Task<(bool, string)> LoginStatusAsync(AccountLogInInputModel model)
+    public async Task<(bool Succeeded, string Role)> LoginStatusAsync(LoginRequestDto? loginDto)
     {
-        ApplicationUser? user = await userManager.FindByNameAsync(model.UserName);
-
-        if (user is null)
+        if (loginDto is null || loginDto.Role != CrewString && loginDto.Role != CastString)
             return (false, string.Empty);
-        
-        switch (model.Role)
+
+        ApplicationUser? user = await userManager.FindByNameAsync(loginDto.UserName);
+        if (user is null)
         {
-            case CrewString:
-            {
-                bool crewExist = await context.CrewMembers.AnyAsync(c => c.UserId == user.Id);
-                if (crewExist)
-                { 
-                    await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
-                    return (true, model.Role);
-                }
-                
-                await signInManager.SignOutAsync();
-                return (false, CrewString);
-            }
-            case CastString:
-            {
-                bool castExist = await context.CastMembers.AnyAsync(c => c.UserId == user.Id);
-                if (castExist) 
-                {
-                    await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
-                    return (true, model.Role);
-                }
-                
-                await signInManager.SignOutAsync();
-                return (false, CastString);
-            }
-            default:
-                await signInManager.SignOutAsync();
-                return (false, EmptyString);
+            logger.LogError(string.Format(UserNotFound, loginDto.UserName));
+            return (false, string.Empty);
         }
+
+        SignInResult result = await signInManager.PasswordSignInAsync(user, loginDto.Password, loginDto.RememberMe, false);
+        if (!result.Succeeded)
+        {
+            logger.LogError(string.Format(LoginFailedPass, loginDto.UserName));
+            return (false, string.Empty);
+        }
+
+        if (loginDto.Role == CrewString)
+        {
+            bool crewExist = await repository.CrewExistsByUserIdAsync(user.Id);
+            if (crewExist)
+                return (true, CrewString);
+
+            await signInManager.SignOutAsync();
+            return (false, CrewString);
+        }
+
+        if (loginDto.Role == CastString)
+        {
+            bool castExist = await repository.CastExistsByUserIdAsync(user.Id);
+            if (castExist)
+                return (true, CastString);
+
+            await signInManager.SignOutAsync();
+            return (false, CrewString);
+        }
+
+        await signInManager.SignOutAsync();
+        logger.LogError(LoginFailedRole);
+        return (false, string.Empty);
     }
 
     public async Task LogoutAsync()
