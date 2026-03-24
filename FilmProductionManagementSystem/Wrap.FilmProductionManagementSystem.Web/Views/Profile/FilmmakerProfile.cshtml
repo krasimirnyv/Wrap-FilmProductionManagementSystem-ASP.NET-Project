@@ -97,7 +97,7 @@
         </div>
 
         <!-- Biography Section -->
-        @if (!string.IsNullOrEmpty(Model.Biography))
+        @if (!string.IsNullOrWhiteSpace(Model.Biography))
         {
             <div class="section-card mt-4">
                 <div class="section-header">
