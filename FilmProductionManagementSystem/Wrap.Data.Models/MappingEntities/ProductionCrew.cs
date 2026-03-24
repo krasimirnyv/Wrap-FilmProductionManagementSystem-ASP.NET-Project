@@ -2,6 +2,8 @@ namespace Wrap.Data.Models.MappingEntities;
 
 using System.ComponentModel.DataAnnotations.Schema;
 
+using GCommon.Enums;
+
 /// <summary>
 /// Mapping Entity - една продукция може да има много хора в снимачения екип и един човек от снимачния екип може да е в много продукции
 /// </summary>
@@ -16,4 +18,6 @@ public class ProductionCrew
     public Guid CrewMemberId { get; set; }
 
     public virtual Crew CrewMember { get; set; } = null!;
+    
+    public CrewRoleType RoleType { get; set; }
 }

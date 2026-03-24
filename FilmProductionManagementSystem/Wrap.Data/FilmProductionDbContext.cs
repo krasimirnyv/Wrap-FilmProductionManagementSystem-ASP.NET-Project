@@ -7,13 +7,13 @@ using Models;
 using Models.MappingEntities;
 using Models.Infrastructure;
 
-public class FilmProductionDbContext : IdentityDbContext<ApplicationUser>
+public class FilmProductionDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public FilmProductionDbContext(DbContextOptions<FilmProductionDbContext> options)
         : base(options)
     {
     }
-
+    
     public virtual DbSet<Crew> CrewMembers { get; set; } = null!;
     public virtual DbSet<CrewSkill> CrewSkills { get; set; } = null!;
     public virtual DbSet<Cast> CastMembers { get; set; } = null!;

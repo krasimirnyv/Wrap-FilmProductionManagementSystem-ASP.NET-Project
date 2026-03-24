@@ -46,14 +46,6 @@ public class Cast
     
     [Required]
     public GenderType Gender { get; set; }
-
-    /// <summary>
-    /// Ролята на актьора няма общо с ролите на снимачния екип
-    /// </summary>
-    [Unicode]
-    [MaxLength(RoleMaxLength)]
-    public string? Role { get; set; }
-    // Example: "Detective Ivanov"
     
     [Unicode]
     [MaxLength(BiographyMaxLength)]

@@ -36,12 +36,6 @@ public class Crew
     [Unicode]
     [MaxLength(NicknameMaxLength)]
     public string? Nickname { get; set; }
-
-    /// <summary>
-    /// Роляата в дадена продукция на човек от екипа ще се имплементира по-нататък
-    /// </summary>
-    // [Required]
-    // public CrewRoleType RoleType { get; set; }
     
     [Unicode]
     [MaxLength(BiographyMaxLength)]
