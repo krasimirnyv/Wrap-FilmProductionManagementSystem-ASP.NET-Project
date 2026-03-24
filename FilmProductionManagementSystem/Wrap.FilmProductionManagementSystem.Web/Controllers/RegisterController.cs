@@ -56,6 +56,7 @@ public class RegisterController(ILoginRegisterService registerService,
         }
 
         CrewRegistrationStepTwoInputModel inputModel = registerService.GetNewModelWithSkills();
+        
         return View(inputModel);
     }
 
@@ -74,11 +75,7 @@ public class RegisterController(ILoginRegisterService registerService,
             return RedirectToAction(nameof(RegisterCrewStepOne));
         }
         
-        CrewRegistrationCompleteDto dto = new CrewRegistrationCompleteDto
-        {
-            Draft = draft,
-            SkillNumbers = model.SelectedSkills
-        };
+        CrewRegistrationCompleteDto dto = MapToCrewRegistrationCompleteDtoFromDraftAndModel(model, draft);
         
         try
         {
@@ -116,20 +113,7 @@ public class RegisterController(ILoginRegisterService registerService,
         if (!ModelState.IsValid)
             return View(model);
 
-        CastRegistrationDto dto = new CastRegistrationDto
-        {
-            UserName = model.UserName,
-            Email = model.Email,
-            PhoneNumber = model.PhoneNumber,
-            Password = model.Password,
-            FirstName = model.FirstName,
-            LastName = model.LastName,
-            Nickname = model.Nickname,
-            BirthDate = model.BirthDate,
-            Gender = model.Gender,
-            ProfilePicture = model.ProfilePicture,
-            Biography = model.Biography,
-        };
+        CastRegistrationDto dto = MapToCastRegistrationDtoFromInputModel(model);
             
         try
         {
@@ -167,13 +151,7 @@ public class RegisterController(ILoginRegisterService registerService,
         if (!ModelState.IsValid)
             return View(model);
         
-        LoginRequestDto dto = new LoginRequestDto
-        {
-            UserName = model.UserName,
-            Password = model.Password,
-            Role = model.Role,
-            RememberMe = model.RememberMe
-        };
+        LoginRequestDto dto = MapToLoginRequestDtoFromInputModel(model);
         
         try
         {
@@ -204,7 +182,7 @@ public class RegisterController(ILoginRegisterService registerService,
             return View(model);
         }
     }
-    
+
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Logout()
@@ -215,6 +193,50 @@ public class RegisterController(ILoginRegisterService registerService,
         return RedirectToAction(nameof(Index), "Home");
     }
     
+    private static CrewRegistrationCompleteDto MapToCrewRegistrationCompleteDtoFromDraftAndModel(CrewRegistrationStepTwoInputModel model, CrewRegistrationDraftDto draft)
+    {
+        CrewRegistrationCompleteDto dto = new CrewRegistrationCompleteDto
+        {
+            Draft = draft,
+            SkillNumbers = model.SelectedSkills
+        };
+        
+        return dto;
+    }
+    
+    private static CastRegistrationDto MapToCastRegistrationDtoFromInputModel(CastRegistrationInputModel model)
+    {
+        CastRegistrationDto dto = new CastRegistrationDto
+        {
+            UserName = model.UserName,
+            Email = model.Email,
+            PhoneNumber = model.PhoneNumber,
+            Password = model.Password,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Nickname = model.Nickname,
+            BirthDate = model.BirthDate,
+            Gender = model.Gender,
+            ProfilePicture = model.ProfilePicture,
+            Biography = model.Biography,
+        };
+        
+        return dto;
+    }
+    
+    private static LoginRequestDto MapToLoginRequestDtoFromInputModel(AccountLogInInputModel model)
+    {
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = model.UserName,
+            Password = model.Password,
+            Role = model.Role,
+            RememberMe = model.RememberMe
+        };
+        
+        return dto;
+    }
+    
     private bool IsSkillSelected(CrewRegistrationStepTwoInputModel model)
     {
         if (model.SelectedSkills.Count > 0)
@@ -222,6 +244,7 @@ public class RegisterController(ILoginRegisterService registerService,
         
         ModelState.AddModelError(string.Empty, NoSelectedSkills);
         registerService.GetSkills(model);
+        
         return true;
     }
 }

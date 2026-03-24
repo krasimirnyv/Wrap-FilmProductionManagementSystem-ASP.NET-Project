@@ -15,7 +15,8 @@ public class BaseRepository : IDisposable
 
     protected async Task<int> SaveChangesAsync()
     {
-        return await Context!.SaveChangesAsync();
+        int affectedRows = await Context!.SaveChangesAsync();
+        return affectedRows;
     }
 
     public void Dispose()

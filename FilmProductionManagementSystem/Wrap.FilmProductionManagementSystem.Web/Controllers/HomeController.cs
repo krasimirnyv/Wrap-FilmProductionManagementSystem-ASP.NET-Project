@@ -31,21 +31,7 @@ public class HomeController(IHomeService homeService) : BaseController
         IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap = 
             ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
         
-        DashboardViewModel viewModel = new DashboardViewModel
-        {
-            CrewMembersCount = dto.CrewMembersCount,
-            CastMembersCount = dto.CastMembersCount,
-            UpcomingScenesTotal = dto.UpcomingScenesTotal,
-            Productions = dto.Productions
-                .Select(p => new ProductionViewModel
-                {
-                    Title = p.Title,
-                    Description = p.Description,
-                    StatusType = p.StatusType.ToString(),
-                    AbstractStatus = ResolveAbstractionStatus(statusMap, p.StatusType)
-                })
-                .ToArray()
-        };
+        DashboardViewModel viewModel = MapToDashboardViewModelFromDto(dto, statusMap);
             
         return View(viewModel);
     }
@@ -64,6 +50,27 @@ public class HomeController(IHomeService homeService) : BaseController
             StatusCodes.Status405MethodNotAllowed => RedirectToAction(nameof(Index)),
             _ => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier })
         }; 
+    }
+    
+    private DashboardViewModel MapToDashboardViewModelFromDto(DashboardDataDto dto, IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap)
+    {
+        DashboardViewModel viewModel = new DashboardViewModel
+        {
+            CrewMembersCount = dto.CrewMembersCount,
+            CastMembersCount = dto.CastMembersCount,
+            UpcomingScenesTotal = dto.UpcomingScenesTotal,
+            Productions = dto.Productions
+                .Select(p => new ProductionViewModel
+                {
+                    Title = p.Title,
+                    Description = p.Description,
+                    StatusType = p.StatusType.ToString(),
+                    AbstractStatus = ResolveAbstractionStatus(statusMap, p.StatusType)
+                })
+                .ToArray()
+        };
+        
+        return viewModel;
     }
     
     private string ResolveAbstractionStatus(IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap, ProductionStatusType statusType)

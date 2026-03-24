@@ -2,13 +2,11 @@ namespace Wrap.Services.Core;
 
 using Models.NavBar;
 using Interfaces;
-using Data;
 using Wrap.Data.Repository.Interfaces;
 
 using static GCommon.OutputMessages.NavBar;
     
-public class NavBarService(FilmProductionDbContext context,
-                           INavBarRepository repository) : INavBarService
+public class NavBarService(INavBarRepository repository) : INavBarService
 {
     public async Task<NavBarUserDto?> GetNavBarUserAsync(Guid userId)
     {
