@@ -3,7 +3,9 @@ namespace FilmProductionManagementSystem.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
 using Wrap.Services.Core.Interfaces;
+using Wrap.Services.Models.Profile;
 using Wrap.ViewModels.Profile;
+using Wrap.ViewModels.Profile.NestedViewModels;
 
 using static Wrap.GCommon.OutputMessages.Profile;
 using static Wrap.GCommon.ApplicationConstants;
@@ -15,7 +17,7 @@ public class ProfileController(IProfileService profileService,
     public async Task<IActionResult> Index(string? username)
     {
         username ??= GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning(UsernameIsNullOrEmptyMessage);
             return View(nameof(NotFound), UserNotIdentifiedMessage);
@@ -23,12 +25,11 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            bool isCrew = await profileService.IsUserCrewAsync(username);
-            if (isCrew)
+            ProfileRoleDto roleDto = await profileService.GetRoleInfoAsync(username);
+            if (roleDto.IsCrew)
                 return RedirectToAction(nameof(FilmmakerProfile), new { username });
 
-            bool isCast = await profileService.IsUserCastAsync(username);
-            if (isCast)
+            if (roleDto.IsCast)
                 return RedirectToAction(nameof(ActorProfile), new { username });
 
             logger.LogWarning(string.Format(UserNotFoundMessage, username));
@@ -45,16 +46,24 @@ public class ProfileController(IProfileService profileService,
     public async Task<IActionResult> FilmmakerProfile(string? username)
     {
         username ??= GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning(UsernameIsNullOrEmptyMessage);
             return View(nameof(NotFound), UserNotIdentifiedMessage);
         }
-        
+
         try
         {
-            CrewProfileViewModel profile = await profileService.GetCrewProfileDataAsync(username);
-            return View(profile);
+            CrewProfileDto dto = await profileService.GetCrewProfileDataAsync(username);
+            CrewProfileViewModel viewModel = MapToCrewProfileViewModelFromDto(dto);
+
+            return View(viewModel);
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
@@ -68,7 +77,7 @@ public class ProfileController(IProfileService profileService,
     public async Task<IActionResult> ActorProfile(string? username)
     {
         username ??= GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning(UsernameIsNullOrEmptyMessage);
             return View(nameof(NotFound), UserNotIdentifiedMessage);
@@ -76,8 +85,16 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            CastProfileViewModel profile = await profileService.GetCastProfileDataAsync(username);
-            return View(profile);
+            CastProfileDto dto = await profileService.GetCastProfileDataAsync(username);
+            CastProfileViewModel viewModel = MapToCastProfileViewModelFromDto(dto);
+            
+            return View(viewModel);
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
@@ -91,7 +108,7 @@ public class ProfileController(IProfileService profileService,
     public async Task<IActionResult> Edit(string? username)
     {
         username ??= GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning(UsernameIsNullOrEmptyMessage);
             return View(nameof(NotFound), UserNotIdentifiedMessage);
@@ -99,12 +116,11 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            bool isCrew = await profileService.IsUserCrewAsync(username);
-            if (isCrew)
+            ProfileRoleDto roleDto = await profileService.GetRoleInfoAsync(username);
+            if (roleDto.IsCrew)
                 return RedirectToAction(nameof(EditFilmmaker), new { username });
 
-            bool isCast = await profileService.IsUserCastAsync(username);
-            if (isCast)
+            if (roleDto.IsCast)
                 return RedirectToAction(nameof(EditActor), new { username });
             
             logger.LogWarning(string.Format(UserNotFoundMessage, username));
@@ -121,7 +137,7 @@ public class ProfileController(IProfileService profileService,
     public async Task<IActionResult> EditFilmmaker(string? username)
     {
         username ??= GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning($"{nameof(EditFilmmaker)} GET: {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
@@ -129,8 +145,16 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            EditCrewProfileViewModel model = await profileService.GetEditCrewProfileAsync(username);
-            return View("EditCrewProfile", model);
+            EditCrewProfileDto dto = await profileService.GetEditCrewProfileAsync(username);
+            EditCrewProfileInputModel inputModel = MapToEditCrewProfileInputModelFromDto(dto);
+            
+            return View("EditCrewProfile", inputModel);
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
@@ -141,13 +165,13 @@ public class ProfileController(IProfileService profileService,
     }
 
     [HttpPost]
-    public async Task<IActionResult> EditFilmmaker(EditCrewProfileViewModel model)
+    public async Task<IActionResult> EditFilmmaker(EditCrewProfileInputModel model)
     {
         if (!ModelState.IsValid)
             return View("EditCrewProfile", model);
 
         string? username = GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning($"{nameof(EditFilmmaker)} POST: {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
@@ -155,10 +179,18 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            await profileService.UpdateCrewProfileAsync(username, model);
+            EditCrewProfileDto dto = MapToEditCrewProfileDtoFromInputModel(model);
+            
+            await profileService.UpdateCrewProfileAsync(username, dto);
 
             TempData[SuccessTempDataKey] = UpdateProfileSuccessMessage;
             return RedirectToAction(nameof(FilmmakerProfile));
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
@@ -172,7 +204,7 @@ public class ProfileController(IProfileService profileService,
     public async Task<IActionResult> EditActor(string? username)
     {
         username ??= GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning($"{nameof(EditActor)} GET: {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
@@ -180,8 +212,16 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            EditCastProfileViewModel model = await profileService.GetEditCastProfileAsync(username);
-            return View("EditCastProfile", model);
+            EditCastProfileDto dto = await profileService.GetEditCastProfileAsync(username);
+            EditCastProfileInputModel inputModel = MapToEditCastProfileInputModelFromDto(dto);
+            
+            return View("EditCastProfile", inputModel);
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
@@ -192,13 +232,13 @@ public class ProfileController(IProfileService profileService,
     }
 
     [HttpPost]
-    public async Task<IActionResult> EditActor(EditCastProfileViewModel model)
+    public async Task<IActionResult> EditActor(EditCastProfileInputModel model)
     {
         if (!ModelState.IsValid)
             return View("EditCastProfile", model);
 
         string? username = GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning($"{nameof(EditActor)} POST: {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
@@ -206,10 +246,18 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            await profileService.UpdateCastProfileAsync(username, model);
+            EditCastProfileDto dto = MapToEditCastProfileDtoFromInputModel(model);
+                
+            await profileService.UpdateCastProfileAsync(username, dto);
 
             TempData[SuccessTempDataKey] = UpdateProfileSuccessMessage;
             return RedirectToAction(nameof(ActorProfile));
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
@@ -218,12 +266,13 @@ public class ProfileController(IProfileService profileService,
             return View("EditCastProfile", model);
         }
     }
+    
 
     [HttpGet]
     public async Task<IActionResult> EditSkills(string? username)
     {
         username ??= GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning($"{nameof(EditSkills)} GET: {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
@@ -231,8 +280,16 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            EditSkillsViewModel model = await profileService.GetEditSkillsAsync(username);
-            return View(model);
+            EditSkillsDto dto = await profileService.GetEditSkillsAsync(username);
+            EditSkillsInputModel inputModel = MapEditSkillsInputModelFromDto(dto);
+            
+            return View(inputModel);
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
@@ -243,28 +300,37 @@ public class ProfileController(IProfileService profileService,
     }
 
     [HttpPost]
-    public async Task<IActionResult> EditSkills(EditSkillsViewModel model)
+    public async Task<IActionResult> EditSkills(EditSkillsInputModel model)
     {
         string? username = GetUsername();
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
         {
             logger.LogWarning($"{nameof(EditSkills)} POST: {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
         }
 
-        if (!ModelState.IsValid)
-        {
-            EditSkillsViewModel currentModel = await profileService.GetEditSkillsAsync(username);
-            model.CurrentSkills = currentModel.CurrentSkills;
-            return View(model);
-        }
-
         try
         {
-            await profileService.UpdateSkillsAsync(username, model);
+            if (!ModelState.IsValid)
+            {
+                EditSkillsDto dtoCurrentSkills = await profileService.GetEditSkillsAsync(username);
+                EditSkillsInputModel inputModel = MapEditSkillsInputModelFromDto(dtoCurrentSkills);
+            
+                return View(inputModel);
+            }
+            
+            UpdateSkillsDto dto = MapToUpdateSkillsDtoFromEditSkillsInputModel(model);
+            
+            await profileService.UpdateSkillsAsync(username, dto);
 
             TempData[SuccessTempDataKey] = UpdateSkillsSuccessMessage;
             return RedirectToAction(nameof(FilmmakerProfile));
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
         {
@@ -272,5 +338,172 @@ public class ProfileController(IProfileService profileService,
             ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, e.Message));
             return View(model);
         }
+    }
+    
+    
+    private static CrewProfileViewModel MapToCrewProfileViewModelFromDto(CrewProfileDto dto)
+    {
+        CrewProfileViewModel viewModel = new CrewProfileViewModel
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            ProfileImagePath = dto.ProfileImagePath,
+            Nickname = dto.Nickname,
+            UserName = dto.UserName,
+            Email = dto.Email,
+            PhoneNumber = dto.PhoneNumber,
+            IsActive = dto.IsActive,
+            Biography = dto.Biography,
+            DepartmentSkills = dto.DepartmentSkills,
+            CrewMemberProductions = dto.Productions
+                .Select(p => new CrewMemberProduction
+                {
+                    ProductionId = p.ProductionId,
+                    ProductionTitle = p.ProductionTitle,
+                    RoleType = p.RoleType.ToString(),
+                    ProjectStatus = p.ProjectStatus
+                })
+                .ToList(),
+            CrewMemberScenes = dto.Scenes.Select(s => new CrewMemberScene
+                {
+                    SceneId = s.SceneId,
+                    SceneName = s.SceneName,
+                    ProductionTitle = s.ProductionTitle,
+                    RoleType = s.RoleType.ToString()
+                })
+                .ToList()
+        };
+        
+        return viewModel;
+    }
+    
+    private static CastProfileViewModel MapToCastProfileViewModelFromDto(CastProfileDto dto)
+    {
+        CastProfileViewModel viewModel = new CastProfileViewModel
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            ProfileImagePath = dto.ProfileImagePath,
+            Nickname = dto.Nickname,
+            UserName = dto.UserName,
+            Email = dto.Email,
+            PhoneNumber = dto.PhoneNumber,
+            Age = dto.Age,
+            Gender = dto.Gender,
+            IsActive = dto.IsActive,
+            Biography = dto.Biography,
+            CastMemberProductions = dto.Productions
+                .Select(p => new CastMemberProduction
+                {
+                    ProductionId = p.ProductionId,
+                    ProductionTitle = p.ProductionTitle,
+                    CharacterName = p.CharacterName,
+                    ProjectStatus = p.ProjectStatus
+                })
+                .ToList(),
+            CastMemberScenes = dto.Scenes.Select(s => new CastMemberScene
+                {
+                    SceneId = s.SceneId,
+                    SceneName = s.SceneName,
+                    ProductionTitle = s.ProductionTitle,
+                    CharacterName = s.CharacterName
+                })
+                .ToList()
+        };
+        
+        return viewModel;
+    }
+    
+    private static EditCrewProfileInputModel MapToEditCrewProfileInputModelFromDto(EditCrewProfileDto dto)
+    {
+        EditCrewProfileInputModel inputModel = new EditCrewProfileInputModel
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            Nickname = dto.Nickname,
+            PhoneNumber = dto.PhoneNumber,
+            Biography = dto.Biography,
+            ProfileImage = dto.ProfileImage,
+            Email = dto.Email,
+            CurrentProfileImagePath = dto.CurrentProfileImagePath
+        };
+        
+        return inputModel;
+    }
+    
+    private static EditCrewProfileDto MapToEditCrewProfileDtoFromInputModel(EditCrewProfileInputModel inputModel)
+    {
+        EditCrewProfileDto dto = new EditCrewProfileDto
+        {
+            FirstName = inputModel.FirstName,
+            LastName = inputModel.LastName,
+            Nickname = inputModel.Nickname,
+            PhoneNumber = inputModel.PhoneNumber,
+            Biography = inputModel.Biography,
+            ProfileImage = inputModel.ProfileImage,
+            Email = inputModel.Email,
+            CurrentProfileImagePath = inputModel.CurrentProfileImagePath
+        };
+        
+        return dto;
+    }
+    
+    private static EditCastProfileInputModel MapToEditCastProfileInputModelFromDto(EditCastProfileDto dto)
+    {
+        EditCastProfileInputModel viewModel = new EditCastProfileInputModel
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            Nickname = dto.Nickname,
+            PhoneNumber = dto.PhoneNumber,
+            Biography = dto.Biography,
+            ProfileImage = dto.ProfileImage,
+            Email = dto.Email,
+            CurrentProfileImagePath = dto.CurrentProfileImagePath,
+            Age = dto.Age,
+            Gender = dto.Gender
+        };
+        
+        return viewModel;
+    }
+    
+    private static EditCastProfileDto MapToEditCastProfileDtoFromInputModel(EditCastProfileInputModel inputModel)
+    {
+        EditCastProfileDto dto = new EditCastProfileDto
+        {
+            FirstName = inputModel.FirstName,
+            LastName = inputModel.LastName,
+            Nickname = inputModel.Nickname,
+            PhoneNumber = inputModel.PhoneNumber,
+            Biography = inputModel.Biography,
+            ProfileImage = inputModel.ProfileImage,
+            Email = inputModel.Email,
+            CurrentProfileImagePath = inputModel.CurrentProfileImagePath,
+            Age = inputModel.Age,
+            Gender = inputModel.Gender
+        };
+        
+        return dto;
+    }
+    
+    private static EditSkillsInputModel MapEditSkillsInputModelFromDto(EditSkillsDto dto)
+    {
+        EditSkillsInputModel inputModel = new EditSkillsInputModel
+        {
+            CurrentSkills = dto.CurrentSkills,
+            AllDepartments = dto.AllDepartments
+        };
+        
+        return inputModel;
+    }
+    
+    private static UpdateSkillsDto MapToUpdateSkillsDtoFromEditSkillsInputModel(EditSkillsInputModel model)
+    {
+        UpdateSkillsDto dto = new UpdateSkillsDto
+        {
+            SelectedSkills = model.SelectedSkills
+        };
+        
+        return dto;
     }
 }

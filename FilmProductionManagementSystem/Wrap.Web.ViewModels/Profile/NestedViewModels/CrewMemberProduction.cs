@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.Profile.HelperViewModels;
+namespace Wrap.ViewModels.Profile.NestedViewModels;
 
 public class CrewMemberProduction
 {

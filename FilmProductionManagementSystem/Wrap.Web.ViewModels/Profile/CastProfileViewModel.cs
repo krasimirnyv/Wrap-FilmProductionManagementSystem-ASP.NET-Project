@@ -1,6 +1,6 @@
 namespace Wrap.ViewModels.Profile;
 
-using HelperViewModels;
+using NestedViewModels;
 
 public class CastProfileViewModel
 {
@@ -33,7 +33,15 @@ public class CastProfileViewModel
 
     public int CastMemberProductionsCount
         => CastMemberProductions?.Count() ?? 0;
-    
+
+    public string?[] Roles
+    {
+        get
+        {
+            return CastMemberProductions != null ? CastMemberProductions.Select(cp => cp.CharacterName).ToArray() : [];
+        }
+    }
+
     public IEnumerable<CastMemberScene>? CastMemberScenes { get; set; }
         = new HashSet<CastMemberScene>();
 

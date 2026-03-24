@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 using GCommon.Enums;
 
-public class EditSkillsViewModel
+public class EditSkillsInputModel
 {
-    public ICollection<CrewRoleType> CurrentSkills { get; set; }
+    public IReadOnlyCollection<CrewRoleType> CurrentSkills { get; set; }
         = new HashSet<CrewRoleType>();
     
     public IReadOnlyDictionary<string, IReadOnlyCollection<CrewRoleType>> AllDepartments { get; set; }

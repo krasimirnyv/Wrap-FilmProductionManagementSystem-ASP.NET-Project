@@ -57,7 +57,7 @@ public static class OutputMessages
     public static class Profile
     {
         public const string UserNotIdentifiedMessage = "Invalid user identifier.";
-        public const string UsernameIsNullOrEmptyMessage = "Username is null or empty.";
+        public const string UsernameIsNullOrEmptyMessage = "Username is null, empty or whitespace.";
         public const string UserNotFoundMessage = "User with username: {0} is NOT found as crew or cast";
         public const string ErrorFindingUserMessage = "Exception occured while trying to find your profile. {0}";
 
@@ -67,6 +67,7 @@ public static class OutputMessages
         public const string ErrorLoadingEditorMessage = "Error loading editor for profile: {0}";
         public const string ErrorLoadingSkillsMessage = "Error loading skills in editor: {0}";
         public const string ErrorUpdatingProfile = "Error updating profile: {0}";
+        public const string ErrorUpdatingSkills = "Error updating profile's skills: {0}";
 
         public const string NoSkillsSelected = "At least one skill must be selected.";
 

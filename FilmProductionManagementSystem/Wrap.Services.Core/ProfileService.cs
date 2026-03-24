@@ -1,13 +1,14 @@
 namespace Wrap.Services.Core;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 
 using Interfaces;
-using Data;
 using Data.Models;
-using ViewModels.Profile;
-using ViewModels.Profile.HelperViewModels;
+using Models.Profile;
+using Models.Profile.NestedDtos;
+using Wrap.Data.Repository.Interfaces;
 using GCommon.Enums;
 using GCommon.UI;
 
@@ -15,70 +16,57 @@ using static Utilities.HelperSaveProfile;
 using static GCommon.OutputMessages.Profile;
 using static GCommon.DataFormat;
 
-public class ProfileService(FilmProductionDbContext context,
-                            IWebHostEnvironment environment) : IProfileService
+public class ProfileService(IProfileRepository repository,
+                            IWebHostEnvironment environment,
+                            ILogger<ProfileService> logger) : IProfileService
 {
     public async Task<bool> IsUserCrewAsync(string username)
     {
-        Crew? crewMembers = await GetCrewMemberAsync(username);
+        Crew? crewMembers = await repository.GetCrewByUsernameAsync(username);
         return crewMembers is not null;
     }
     
     public async Task<bool> IsUserCastAsync(string username)
     {
-        Cast? castMember = await GetCastMemberAsync(username);
+        Cast? castMember = await repository.GetCastByUsernameAsync(username);
         return castMember is not null;
     }
 
-    public async Task<CrewProfileViewModel> GetCrewProfileDataAsync(string username)
+    public async Task<ProfileRoleDto> GetRoleInfoAsync(string username)
     {
-        Crew? crew = await GetCrewMemberAsync(username);
+        Crew? crew = await repository.GetCrewByUsernameAsync(username);
+        if (crew is not null)
+            return new ProfileRoleDto { IsCrew = true, IsCast = false };
+
+        Cast? cast = await repository.GetCastByUsernameAsync(username);
+        if (cast is not null)
+            return new ProfileRoleDto { IsCrew = false, IsCast = true };
+        
+        return new ProfileRoleDto { IsCrew = false, IsCast = false };
+    }
+
+    public async Task<CrewProfileDto> GetCrewProfileDataAsync(string username)
+    {
+        Crew? crew = await repository.GetCrewByUsernameAsync(username);
         if (crew is null)
-            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
         
         // Get user's skills with departments
-        IEnumerable<CrewRoleType> userSkills = await context
-            .CrewSkills
-            .AsNoTracking()
-            .Where(cs => cs.CrewMemberId == crew.Id)
-            .Select(cs => cs.RoleType)
-            .ToArrayAsync();
+        IReadOnlyCollection<CrewSkill> skills = await repository.GetCrewSkillsAsync(crew.Id);
+        IEnumerable<CrewRoleType> skillTypes = skills.Select(cs => cs.RoleType);
         
-        IDictionary<string, ICollection<CrewRoleType>> departmentSkills = GroupSkillsByDepartment(userSkills);
+        IDictionary<string, ICollection<CrewRoleType>> departmentSkills = GroupSkillsByDepartment(skillTypes);
     
         // Get production
-        ICollection<CrewMemberProduction>? productions = await context
-            .ProductionsCrewMembers
-            .Include(pc => pc.Production)
-            .AsNoTracking()
-            .Where(pc => pc.CrewMemberId == crew.Id)
-            .Select(pc => new CrewMemberProduction
-            {
-                ProductionId = pc.ProductionId.ToString(),
-                ProductionTitle = pc.Production.Title,
-                RoleType = null, //TODO: It's hardcoded for now because of simplifying the app - pc.CrewMember.RoleType
-                ProjectStatus = pc.Production.StatusType.ToString()
-            })
-            .ToListAsync();
+        IReadOnlyCollection<(Guid ProductionId, string Title, string? Description, string Status, CrewRoleType RoleType)> productions
+            = await repository.GetCrewProductionsAsync(crew.Id);
         
         // Get scenes
-        ICollection<CrewMemberScene> scenes = await context
-            .ScenesCrewMembers
-            .Include(scm => scm.Scene)
-            .ThenInclude(s => s.Production)
-            .AsNoTracking()
-            .Where(sc => sc.CrewMemberId == crew.Id)
-            .Select(sc => new CrewMemberScene
-            {
-                SceneId = sc.SceneId.ToString(),
-                SceneName = sc.Scene.SceneName,
-                ProductionTitle = sc.Scene.Production.Title,
-                RoleType = null //TODO: It's hardcoded for now because of simplifying the app - pc.CrewMember.RoleType
-            })
-            .ToListAsync();
+        IReadOnlyCollection<(Guid SceneId, string SceneName, string ProductionTitle, CrewRoleType RoleType)> scenes 
+            = await repository.GetCrewScenesAsync(crew.Id);
         
-        // Get CrewProfileViewModel
-        CrewProfileViewModel viewModel = new CrewProfileViewModel
+        // Create CrewProfileDto
+        CrewProfileDto crewProfile = new CrewProfileDto
         {
             FirstName = crew.FirstName,
             LastName = crew.LastName,
@@ -90,51 +78,45 @@ public class ProfileService(FilmProductionDbContext context,
             IsActive = crew.IsActive,
             Biography = crew.Biography,
             DepartmentSkills = departmentSkills,
-            CrewMemberProductions = productions,
-            CrewMemberScenes = scenes
+            Productions = productions
+                .Select(p => new CrewMemberProductionDto
+                {
+                    ProductionId = p.ProductionId.ToString(),
+                    ProductionTitle = p.Title,
+                    RoleType = p.RoleType,
+                    ProjectStatus = p.Status
+                })
+                .ToArray(),
+            Scenes = scenes
+                .Select(s => new CrewMemberSceneDto
+                {
+                    SceneId = s.SceneId.ToString(),
+                    SceneName = s.SceneName,
+                    ProductionTitle = s.ProductionTitle,
+                    RoleType = s.RoleType
+                })
+                .ToArray()
         };
         
-        return viewModel;
+        return crewProfile;
     }
 
-    public async Task<CastProfileViewModel> GetCastProfileDataAsync(string username)
+    public async Task<CastProfileDto> GetCastProfileDataAsync(string username)
     {
-        Cast? cast = await GetCastMemberAsync(username);
+        Cast? cast = await repository.GetCastByUsernameAsync(username);
         if (cast is null)
-            throw new ArgumentException(string.Format(CastNotFoundMessage, username));
+            throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
         
         // Get production
-        IEnumerable<CastMemberProduction> productions = await context
-            .ProductionsCastMembers
-            .Include(pc => pc.Production)
-            .AsNoTracking()
-            .Where(pc => pc.CastMemberId == cast.Id)
-            .Select(pc => new CastMemberProduction
-            {
-                ProductionId = pc.ProductionId.ToString(),
-                ProductionTitle = pc.Production.Title,
-                CharacterName = null, //TODO: It's hardcoded for now because of simplifying the app - pc.CrewMember.RoleType
-                ProjectStatus = pc.Production.StatusType.ToString()
-            })
-            .ToArrayAsync();
+       IReadOnlyCollection<(Guid ProductionId, string Title, string? Description, string Status, string? CharacterName)> productions 
+            = await repository.GetCastProductionsAsync(cast.Id);
         
         // Get scenes
-        IEnumerable<CastMemberScene> scenes = await context
-            .ScenesCastMembers
-            .Include(scm => scm.Scene)
-            .ThenInclude(s => s.Production)
-            .AsNoTracking()
-            .Where(sc => sc.CastMemberId == cast.Id)
-            .Select(sc => new CastMemberScene
-            {
-                SceneId = sc.SceneId.ToString(),
-                SceneName = sc.Scene.SceneName,
-                ProductionTitle = sc.Scene.Production.Title
-            })
-            .ToArrayAsync();
+        IReadOnlyCollection<(Guid SceneId, string SceneName, string ProductionTitle, string? CharacterName)> scenes 
+            = await repository.GetCastScenesAsync(cast.Id);
         
-        // Get CastProfileViewModel
-        CastProfileViewModel viewModel = new CastProfileViewModel
+        // Create CastProfileViewModel
+        CastProfileDto castProfile = new CastProfileDto
         {
             FirstName = cast.FirstName,
             LastName = cast.LastName,
@@ -145,202 +127,219 @@ public class ProfileService(FilmProductionDbContext context,
             PhoneNumber = cast.User.PhoneNumber!,
             Age = cast.Age.ToString(),
             Gender = cast.Gender.ToString(),
-            Role = cast.Role,
             IsActive = cast.IsActive,
             Biography = cast.Biography,
-            CastMemberProductions = productions,
-            CastMemberScenes = scenes
+            Productions = productions
+                .Select(p => new CastMemberProductionDto
+                {
+                    ProductionId = p.ProductionId.ToString(),
+                    ProductionTitle = p.Title,
+                    CharacterName = p.CharacterName,
+                    ProjectStatus = p.Status
+                })
+                .ToArray(),
+            Scenes = scenes
+                .Select(s => new CastMemberSceneDto
+                {
+                    SceneId = s.SceneId.ToString(),
+                    SceneName = s.SceneName,
+                    ProductionTitle = s.ProductionTitle,
+                    CharacterName = s.CharacterName
+                })
+                .ToArray()
         };
-
-        return viewModel;
+        
+        return castProfile;
     }
 
-    public async Task<EditCrewProfileViewModel> GetEditCrewProfileAsync(string username)
+    public async Task<EditCrewProfileDto> GetEditCrewProfileAsync(string username)
     {
-        Crew? crew = await GetCrewMemberAsync(username);
+        Crew? crew = await repository.GetCrewByUsernameAsync(username);
         if (crew is null)
-            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
-        
-        EditCrewProfileViewModel viewModel = new EditCrewProfileViewModel
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        EditCrewProfileDto editCrewDto = new EditCrewProfileDto
         {
             FirstName = crew.FirstName,
             LastName = crew.LastName,
             Nickname = crew.Nickname,
             PhoneNumber = crew.User.PhoneNumber!,
             Biography = crew.Biography,
-            Email = crew.User.Email!,
-            CurrentProfileImagePath = crew.ProfileImagePath
+            ProfileImage = null,
+            // Read-only properties
+            Email = crew.User.Email,
+            CurrentProfileImagePath = crew.ProfileImagePath,
         };
-
-        return viewModel;
+        
+        return editCrewDto;
     }
 
-    public async Task UpdateCrewProfileAsync(string username, EditCrewProfileViewModel model)
+    public async Task<EditCastProfileDto> GetEditCastProfileAsync(string username)
     {
-        Crew? crew = await context
-            .CrewMembers
-            .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
-
-        if (crew is null)
-            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
-        
-        crew.FirstName = model.FirstName;
-        crew.LastName = model.LastName;
-        crew.Nickname = model.Nickname;
-        crew.Biography = model.Biography;
-        crew.User.PhoneNumber = model.PhoneNumber;
-        
-        if (model.ProfileImage is not null && model.ProfileImage.Length > 0)
-        {
-            string newImagePath = await SaveProfileImageAsync(environment, model.ProfileImage);
-            crew.ProfileImagePath = newImagePath;
-        }
-        
-        await context.SaveChangesAsync();
-    }
-
-    public async Task<EditCastProfileViewModel> GetEditCastProfileAsync(string username)
-    {
-        Cast? cast = await GetCastMemberAsync(username);
-
+        Cast? cast = await repository.GetCastByUsernameAsync(username);
         if (cast is null)
-            throw new ArgumentException(string.Format(CastNotFoundMessage, username));
+            throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
 
-        EditCastProfileViewModel viewModel = new EditCastProfileViewModel
+        EditCastProfileDto editCastDto = new EditCastProfileDto
         {
             FirstName = cast.FirstName,
             LastName = cast.LastName,
             Nickname = cast.Nickname,
             PhoneNumber = cast.User.PhoneNumber!,
-            CurrentRole = cast.Role,
             Biography = cast.Biography,
-            Email = cast.User.Email!,
+            ProfileImage = null,
+            // Read-only properties
+            Email = cast.User.Email,
             CurrentProfileImagePath = cast.ProfileImagePath,
             Age = cast.Age.ToString(),
-            Gender = cast.Gender.ToString()
+            Gender = cast.Gender.ToString(),
         };
 
-        return viewModel;
+        return editCastDto;
     }
 
-    public async Task UpdateCastProfileAsync(string username, EditCastProfileViewModel model)
+    public async Task UpdateCrewProfileAsync(string username, EditCrewProfileDto crewDto)
     {
-        Cast? cast = await context
-            .CastMembers
-            .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
-
-        if (cast is null)
-            throw new ArgumentException(string.Format(CastNotFoundMessage, username));
-        
-        cast.FirstName = model.FirstName;
-        cast.LastName = model.LastName;
-        cast.Nickname = model.Nickname;
-        cast.Role = model.CurrentRole;
-        cast.Biography = model.Biography;
-        cast.User.PhoneNumber = model.PhoneNumber;
-        
-        if (model.ProfileImage is not null && model.ProfileImage.Length > 0)
+        await using IDbContextTransaction transaction = await repository.BeginTransactionAsync();
+        try
         {
-            string newImagePath = await SaveProfileImageAsync(environment, model.ProfileImage);
-            cast.ProfileImagePath = newImagePath;
-        }
+            Crew? crew = await repository.GetCrewForUpdateAsync(username);
+            if (crew is null)
+                throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+            
+            crew.FirstName = crewDto.FirstName;
+            crew.LastName = crewDto.LastName;
+            crew.Nickname = crewDto.Nickname;
+            crew.Biography = crewDto.Biography;
+            crew.User.PhoneNumber = crewDto.PhoneNumber;
         
-        await context.SaveChangesAsync();
+            if (crewDto.ProfileImage is not null && crewDto.ProfileImage.Length > 0)
+            {
+                string newImagePath = await SaveProfileImageAsync(environment, crewDto.ProfileImage);
+                crew.ProfileImagePath = newImagePath;
+            }
+
+            await repository.SaveAllChangesAsync();
+            await repository.CommitTransactionAsync(transaction);
+        }
+        catch (Exception e)
+        {
+            await repository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + e.Message);
+            throw new Exception(e.Message);
+        }
+    }
+    
+    public async Task UpdateCastProfileAsync(string username, EditCastProfileDto castDto)
+    {
+        await using IDbContextTransaction transaction = await repository.BeginTransactionAsync();
+        try
+        {
+            Cast? cast = await repository.GetCastForUpdateAsync(username);
+            if (cast is null)
+                throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
+        
+            cast.FirstName = castDto.FirstName;
+            cast.LastName = castDto.LastName;
+            cast.Nickname = castDto.Nickname;
+            cast.Biography = castDto.Biography;
+            cast.User.PhoneNumber = castDto.PhoneNumber;
+        
+            if (castDto.ProfileImage is not null && castDto.ProfileImage.Length > 0)
+            {
+                string newImagePath = await SaveProfileImageAsync(environment, castDto.ProfileImage);
+                cast.ProfileImagePath = newImagePath;
+            }
+        
+            await repository.SaveAllChangesAsync();
+            await repository.CommitTransactionAsync(transaction);
+        }
+        catch (Exception e)
+        {
+            await repository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + e.Message);
+            throw new Exception(e.Message);
+        }
     }
 
-    public async Task<EditSkillsViewModel> GetEditSkillsAsync(string username)
+    public async Task<EditSkillsDto> GetEditSkillsAsync(string username)
     {
-        Crew? crew = await GetCrewMemberAsync(username);
+        Crew? crew = await repository.GetCrewByUsernameAsync(username);
         if (crew is null)
-            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
 
-        ICollection<CrewRoleType> currentSkills = await context
-            .CrewSkills
-            .AsNoTracking()
-            .Where(cs => cs.CrewMemberId == crew.Id)
+        IReadOnlyCollection<CrewSkill> crewSkills = await repository.GetCrewSkillsAsync(crew.Id);
+        
+        IReadOnlyCollection<CrewRoleType> currentSkills = crewSkills
             .Select(cs => cs.RoleType)
-            .ToArrayAsync();
+            .ToArray()
+            .AsReadOnly();
+        
+        IReadOnlyDictionary<string, IReadOnlyCollection<CrewRoleType>> allSkillsCatalog = CrewRolesDepartmentCatalog.GetRolesByDepartment();
 
-        EditSkillsViewModel viewModel = new EditSkillsViewModel
+        EditSkillsDto skillsDto = new EditSkillsDto
         {
             CurrentSkills = currentSkills,
-            AllDepartments = CrewRolesDepartmentCatalog.GetRolesByDepartment()
+            AllDepartments = allSkillsCatalog
         };
-
-        return viewModel;
+        
+        return skillsDto;
     }
 
-    public async Task UpdateSkillsAsync(string username, EditSkillsViewModel model)
+    public async Task UpdateSkillsAsync(string username, UpdateSkillsDto skillsDto)
     {
-        Crew? crew = await GetCrewMemberAsync(username);
+        Crew? crew = await repository.GetCrewByUsernameAsync(username);
         if (crew is null)
-            throw new ArgumentException(string.Format(CrewNotFoundMessage, username));
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
 
-        IList<CrewSkill> currentSkills = await context
-            .CrewSkills
-            .Where(cs => cs.CrewMemberId == crew.Id)
-            .ToListAsync();
+        IReadOnlyCollection<CrewSkill> currentSkills = await repository.GetCrewSkillsForUpdateAsync(crew.Id);
         
-        HashSet<CrewRoleType> currentSkillTypes = currentSkills
-            .Select(s => s.RoleType)
-            .ToHashSet();
-        
-        ICollection<CrewRoleType> newSkills = ParseSelectedSkills(model.SelectedSkills);
+        ICollection<CrewRoleType> newSkills = ParseSelectedSkills(skillsDto.SelectedSkills);
         if (newSkills.Count == 0)
             throw new ArgumentException(NoSkillsSelected);
         
+        HashSet<CrewRoleType> currentSkillSet = currentSkills.Select(cs => cs.RoleType).ToHashSet();
+        HashSet<CrewRoleType> newSkillSet = newSkills.ToHashSet();
+        
         ICollection<CrewSkill> skillsToRemove = currentSkills
-            .Where(s => !newSkills.Contains(s.RoleType))
+            .Where(cs => !newSkillSet.Contains(cs.RoleType))
             .ToList();
         
-        IEnumerable<CrewRoleType> skillsToAdd = newSkills
-            .Where(s => !currentSkillTypes.Contains(s))
-            .ToList();
-
-        if (skillsToRemove.Count > 0)
-            context.CrewSkills.RemoveRange(skillsToRemove);
-        
-        foreach (CrewRoleType skill in skillsToAdd)
-        {
-            context.CrewSkills.Add(new CrewSkill
+        ICollection<CrewSkill> skillsToAdd = newSkillSet
+            .Where(crt => !currentSkillSet.Contains(crt))
+            .Select(roleType => new CrewSkill
             {
                 Id = Guid.NewGuid(),
-                RoleType = skill,
-                CrewMemberId = crew.Id
-            });
-        }
+                CrewMemberId = crew.Id,
+                RoleType = roleType
+            })
+            .ToList();
         
-        await context.SaveChangesAsync();
+        await using IDbContextTransaction transaction = await repository.BeginTransactionAsync();
+        try
+        {
+            if (skillsToRemove.Count > 0)
+                await repository.RemoveCrewSkillsAsync(skillsToRemove);
+        
+            if (skillsToAdd.Count > 0)
+                await repository.AddCrewSkillsAsync(skillsToAdd);
+
+            await repository.SaveAllChangesAsync();
+            await repository.CommitTransactionAsync(transaction);
+        }
+        catch (Exception e)
+        {
+            await repository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingSkills,  username) + e.Message);
+            throw new Exception(e.Message);
+        }
     }
     
-    private async Task<Crew?> GetCrewMemberAsync(string username)
-    {
-        Crew? crewMembers = await context
-            .CrewMembers
-            .Include(cm => cm.User)
-            .AsNoTracking()
-            .SingleOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
-        
-        return crewMembers;
-    }
-
-    private async Task<Cast?> GetCastMemberAsync(string username)
-    {
-        Cast? castMember = await context
-            .CastMembers
-            .Include(cm => cm.User)
-            .AsNoTracking()
-            .SingleOrDefaultAsync(c => c.User.UserName!.ToLower() == username.ToLower());
-        
-        return castMember;
-    }
     
     private static ICollection<CrewRoleType> ParseSelectedSkills(string selectedSkillsString)
     {
         if (string.IsNullOrWhiteSpace(selectedSkillsString))
-            return new List<CrewRoleType>();
+            return new HashSet<CrewRoleType>();
     
         ICollection<CrewRoleType> listSelectedSkills = selectedSkillsString
             .Split(CommaSplitter, StringSplitOptions.RemoveEmptyEntries)
@@ -356,8 +355,7 @@ public class ProfileService(FilmProductionDbContext context,
     /// <param name="userSkills">Already selected user's skills</param>
     /// <returns>IDictionary<string, ICollection<CrewRoleType>> map with collection
     /// where the Key is the name of the department and the Values are the roles/skills</returns>
-    private static IDictionary<string, ICollection<CrewRoleType>> GroupSkillsByDepartment(
-        IEnumerable<CrewRoleType> userSkills)
+    private static IDictionary<string, ICollection<CrewRoleType>> GroupSkillsByDepartment(IEnumerable<CrewRoleType> userSkills)
     {
         IReadOnlyDictionary<string, IReadOnlyCollection<CrewRoleType>> allDepartment = CrewRolesDepartmentCatalog.GetRolesByDepartment();
 
@@ -370,7 +368,7 @@ public class ProfileService(FilmProductionDbContext context,
         
         IDictionary<string, ICollection<CrewRoleType>> departmentSkills = new Dictionary<string, ICollection<CrewRoleType>>();
         
-        foreach (var department in userDepartments)
+        foreach (KeyValuePair<string, IReadOnlyCollection<CrewRoleType>> department in userDepartments)
         {
             ICollection<CrewRoleType> userSkillsInDept = department.Value
                 .Where(role => userSkillsSet.Contains(role))

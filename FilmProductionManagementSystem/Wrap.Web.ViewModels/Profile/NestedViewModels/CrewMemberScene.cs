@@ -1,8 +1,8 @@
-namespace Wrap.ViewModels.Profile.HelperViewModels;
+namespace Wrap.ViewModels.Profile.NestedViewModels;
 
 public class CrewMemberScene
 {
-    public string SceneId { get; set; } = null!;
+    public string? SceneId { get; set; }
 
     public string? SceneName { get; set; }
 

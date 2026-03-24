@@ -15,9 +15,5 @@
             <HintPath>..\..\..\..\..\..\usr\local\share\dotnet\shared\Microsoft.AspNetCore.App\8.0.16\Microsoft.AspNetCore.Http.Features.dll</HintPath>
         </Reference>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Profile\" />
-    </ItemGroup>
     
 </Project>

@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations;
 
 using Microsoft.AspNetCore.Http;
 
-using static GCommon.EntityConstants.Crew;
+using static GCommon.EntityConstants.Cast;
 
-public class EditCrewProfileViewModel
+public class EditCastProfileInputModel
 {
     [Required]
-    [StringLength(FirstNameMaxLength, MinimumLength = FirstNameMinLength)]
+    [StringLength(FirstNameMaxLength, MinimumLength = LastNameMinLength)]
     public string FirstName { get; set; } = null!;
 
     [Required]
@@ -28,8 +28,12 @@ public class EditCrewProfileViewModel
 
     public IFormFile? ProfileImage { get; set; }
 
-    // Read-only fields for displaying data to UI (cannot be edited)
+    // Read-only properties for displaying data to UI (cannot be edited)
     public string? Email { get; set; }
     
     public string? CurrentProfileImagePath { get; set; }
+    
+    public string? Age { get; set; }
+    
+    public string? Gender { get; set; }
 }
