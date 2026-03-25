@@ -41,7 +41,7 @@
 
                 <div class="row g-4 align-items-center">
 
-                    @if (!string.IsNullOrEmpty(Model.CurrentThumbnail))
+                    @if (!string.IsNullOrWhiteSpace(Model.CurrentThumbnail))
                     {
                         <div class="col-md-4 text-center">
                             <p class="info-label mb-2">Current Thumbnail</p>
@@ -52,14 +52,14 @@
                         </div>
                     }
 
-                    <div class="@(string.IsNullOrEmpty(Model.CurrentThumbnail) ? NullImageStyle : ImageStyle)">
+                    <div class="@(string.IsNullOrWhiteSpace(Model.CurrentThumbnail) ? NullImageStyle : ImageStyle)">
 
                         <label for="thumbnailInput"
                                class="thumbnail-upload-box d-block"
                                id="uploadLabel">
                             <i class="bi bi-cloud-upload" style="font-size: 2rem; color: var(--wrap-blue);"></i>
                             <p class="mb-1 mt-2 fw-semibold" style="color: var(--wrap-dark-blue);">
-                                @(string.IsNullOrEmpty(Model.CurrentThumbnail)
+                                @(string.IsNullOrWhiteSpace(Model.CurrentThumbnail)
                                     ? ClickToUploadMessage
                                     : ClickToReplaceMessage)
                             </p>
@@ -69,12 +69,12 @@
                         </label>
 
                         <input type="file"
-                               asp-for="Thumbnail"
+                               asp-for="ThumbnailImage"
                                class="d-none"
                                accept="image/*"
                                id="thumbnailInput" />
 
-                        <span asp-validation-for="Thumbnail" class="text-danger small"></span>
+                        <span asp-validation-for="ThumbnailImage" class="text-danger small"></span>
 
                         <div id="newPreviewWrap" class="mt-3" style="display:none;">
                             <p class="info-label mb-1">New Thumbnail Preview</p>
@@ -164,9 +164,9 @@
                             <i class="bi bi-tag me-1"></i>Specific Status *
                         </label>
                         <select asp-for="StatusType" class="form-select" id="statusTypeSelect"
-                                disabled="@(string.IsNullOrEmpty(currentPhase))">
+                                disabled="@(string.IsNullOrWhiteSpace(currentPhase))">
                             <option value="">
-                                @(string.IsNullOrEmpty(currentPhase) ? SelectPhase : SelectStatus)
+                                @(string.IsNullOrWhiteSpace(currentPhase) ? SelectPhase : SelectStatus)
                             </option>
                             @foreach (KeyValuePair<string, IReadOnlyCollection<ProductionStatusType>> group in statusGroups)
                             {

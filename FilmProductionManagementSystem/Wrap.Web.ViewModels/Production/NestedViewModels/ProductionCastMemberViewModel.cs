@@ -1,6 +1,6 @@
-namespace Wrap.ViewModels.Production.HelperViewModels;
+namespace Wrap.ViewModels.Production.NestedViewModels;
 
-public class ProductionCastViewModel
+public class ProductionCastMemberViewModel
 {
     public string ProfileImagePath { get; set; } = null!;
 
@@ -8,7 +8,7 @@ public class ProductionCastViewModel
 
     public string LastName { get; set; } = null!;
 
-    public string? Role { get; set; }
+    public string Role { get; set; } = null!;
 
     public string Age { get; set; } = null!;
 

@@ -1,24 +1,19 @@
 namespace Wrap.Services.Core;
 
-using System.Globalization;
-
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 
 using Interfaces;
-using Data;
+using Models.Production;
 using Data.Models;
-using ViewModels.Production;
-using ViewModels.Production.HelperViewModels;
+using Wrap.Data.Repository.Interfaces;
 using GCommon.Enums;
 using GCommon.UI;
 
 using static Utilities.HelperSaveThumbnail;
-using static GCommon.DataFormat;
 using static GCommon.ApplicationConstants;
 using static GCommon.OutputMessages.Production;
 
-public class ProductionService(FilmProductionDbContext context,
+public class ProductionService(IProductionRepository repository,
                                IWebHostEnvironment environment) : IProductionService
 {
     
@@ -29,187 +24,62 @@ public class ProductionService(FilmProductionDbContext context,
     private static string GetStatusAbstractClass(ProductionStatusType statusType)
         => StatusAbstractMap.GetValueOrDefault(statusType, DefaultStatus);
     
-    public async Task<IEnumerable<AllProductionsViewModel>> GetAllProductionsAsync()
+    public async Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync()
     {
-        var productionData = await context
-            .Productions
-            .AsNoTracking()
-            .Select(p => new
-            {
-                p.Id,
-                p.Title,
-                p.Thumbnail,
-                p.StatusType
-            })
-            .ToArrayAsync();
+        IReadOnlyCollection<ProductionDto> data = await repository.GetAllAsync();
 
-        IEnumerable<AllProductionsViewModel> productions = productionData
-            .Select(p => new AllProductionsViewModel
-            {
-                Id = p.Id.ToString(),
-                Title = p.Title,
-                Thumbnail = p.Thumbnail,
-                StatusType = p.StatusType.ToString(),
-                StatusAbstractClass = GetStatusAbstractClass(p.StatusType)
-            })
-            .ToArray();
+        foreach (ProductionDto productionDto in data)
+            productionDto.StatusAbstractClass = GetStatusAbstractClass(productionDto.StatusType);
 
-        return productions;
+        return data;
     }
 
-    public async Task<DetailsProductionViewModel?> GetProductionDetailsAsync(string? id)
+    public async Task<DetailsProductionDto?> GetProductionDetailsAsync(string? id)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
             return null;
 
-        // Get production data
-        var productionData = await context
-            .Productions
-            .AsNoTracking()
-            .Where(p => p.Id == productionId)
-            .Select(p => new
-            {
-                p.Id,
-                p.Thumbnail,
-                p.Title,
-                p.Description,
-                p.Budget,
-                p.StatusType,
-                p.StatusStartDate,
-                p.StatusEndDate,
-                ScriptId = (Guid?)p.Script!.Id
-            })
-            .SingleOrDefaultAsync();
-
-        if (productionData is null)
-            return null; 
+        DetailsProductionDto? dto = await repository.GetDetailsAsync(productionId.Value);
+        if (dto is null)
+            return null;
         
-        // Get crew members data
-        IReadOnlyCollection<ProductionCrewViewModel> crewMembers = await context.
-            ProductionsCrewMembers
-            .AsNoTracking()
-            .Where(pc => pc.ProductionId == productionId)
-            .Select(pc => new ProductionCrewViewModel
-            {
-                ProfileImagePath = pc.CrewMember.ProfileImagePath,
-                FirstName = pc.CrewMember.FirstName,
-                LastName = pc.CrewMember.LastName
-            })
-            .ToArrayAsync();
-
-        // Get cast members data
-        IReadOnlyCollection<ProductionCastViewModel> castMembers = await context
-            .ProductionsCastMembers
-            .AsNoTracking()
-            .Where(pm => pm.ProductionId == productionId)
-            .Select(pm => new ProductionCastViewModel
-            {
-                ProfileImagePath = pm.CastMember.ProfileImagePath,
-                FirstName = pm.CastMember.FirstName,
-                LastName = pm.CastMember.LastName,
-                Role = pm.CastMember.Role,
-                Age = pm.CastMember.Age.ToString(),
-                Gender = pm.CastMember.Gender.ToString()
-            })
-            .ToArrayAsync();
-
-        // Get scenes data
-        IReadOnlyCollection<ProductionSceneViewModel> scenes = await context
-            .Scenes
-            .AsNoTracking()
-            .Where(s => s.ProductionId == productionId)
-            .Select(s => new ProductionSceneViewModel
-            {
-                SceneNumber = s.SceneNumber.ToString(),
-                SceneType = s.SceneType.ToString(),
-                SceneName = s.SceneName,
-                Location = s.Location
-            })
-            .ToArrayAsync();
-
-        // Get production's assets data
-        IReadOnlyCollection<ProductionAssetViewModel> assets = await context
-            .ProductionsAssets
-            .AsNoTracking()
-            .Where(a => a.ProductionId == productionId)
-            .Select(a => new ProductionAssetViewModel
-            {
-                AssetType = a.AssetType.ToString(),
-                Title = a.Title
-            })
-            .ToArrayAsync();
-
-        // Get shooting days data
-        IReadOnlyCollection<ProductionShootingDayViewModel> shootingDays = await context
-            .ShootingDays
-            .AsNoTracking()
-            .Where(sd => sd.ProductionId == productionId)
-            .Select(sd => new ProductionShootingDayViewModel
-            {
-                Date = sd.Date.ToString(DateFormat, CultureInfo.CurrentCulture)
-            })
-            .ToArrayAsync();
-
-        // Assemble the details production view model
-        DetailsProductionViewModel? production = new DetailsProductionViewModel
-        {
-            Id = productionData.Id.ToString(),
-            Thumbnail = productionData.Thumbnail!,
-            Title = productionData.Title,
-            Description = productionData.Description,
-            Budget = productionData.Budget.ToString(CurrencyFormat, CultureInfo.CurrentCulture),
-            StatusType = productionData.StatusType.ToString(),
-            StatusAbstractClass = GetStatusAbstractClass(productionData.StatusType),
-            StatusStartDate = productionData.StatusStartDate.ToString(DateFormat, CultureInfo.CurrentCulture),
-            StatusEndDate = productionData.StatusEndDate?.ToString(DateFormat, CultureInfo.CurrentCulture) ?? NotAvailableFormat,
-            ScriptId = productionData.ScriptId?.ToString(),
-
-            ProductionCrewMembers = crewMembers,
-            ProductionCastMembers = castMembers,
-            Scenes = scenes,
-            ProductionAssets = assets,
-            ShootingDays = shootingDays
-        };
+        dto.StatusAbstractClass = GetStatusAbstractClass(dto.StatusType);
         
-        return production;
+        return dto;
     }
     
-    public async Task<string> CreateProductionInputModelAsync(CreateProductionInputModel inputModel)
+    public async Task<string> CreateProductionAsync(CreateProductionDto dto)
     {
         Production production = new Production
         {
             Id = Guid.NewGuid(),
-            Title = inputModel.Title,
-            Description = inputModel.Description,
-            Budget = inputModel.Budget,
-            StatusType = inputModel.StatusType,
-            StatusStartDate = inputModel.StatusStartDate,
-            StatusEndDate = inputModel.StatusEndDate,
-            Thumbnail = await SaveThumbnailAsync(environment, inputModel.Thumbnail)
+            Title = dto.Title,
+            Description = dto.Description,
+            Budget = dto.Budget,
+            StatusType = dto.StatusType,
+            StatusStartDate = dto.StatusStartDate,
+            StatusEndDate = dto.StatusEndDate,
+            Thumbnail = await SaveThumbnailAsync(environment, dto.ThumbnailImage)
         };
 
-        await context.Productions.AddAsync(production);
-        await context.SaveChangesAsync();
+        await repository.AddAsync(production);
+        await repository.SaveAllChangesAsync();
 
         return production.Id.ToString();
     }
 
-    public async Task<EditProductionInputModel?> GetEditProductionAsync(string? id)
+    public async Task<EditProductionDto?> GetEditProductionAsync(string? id)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
             return null;
 
-        Production? production = await context
-            .Productions
-            .AsNoTracking()
-            .SingleOrDefaultAsync(p => p.Id == productionId);
-
+        Production? production = await repository.GetByIdAsNoTrackingAsync(productionId.Value);
         if (production is null)
             return null;
 
-        EditProductionInputModel model = new EditProductionInputModel
+        EditProductionDto dto = new EditProductionDto
         {
             Title = production.Title,
             Description = production.Description,
@@ -217,101 +87,68 @@ public class ProductionService(FilmProductionDbContext context,
             StatusType = production.StatusType,
             StatusStartDate = production.StatusStartDate,
             StatusEndDate = production.StatusEndDate,
-            CurrentThumbnail = production.Thumbnail
+            CurrentThumbnail = production.Thumbnail,
+            ThumbnailImage = null
         };
 
-        return model;
+        return dto;
     }
 
-    public async Task UpdateProductionAsync(string id, EditProductionInputModel inputModel)
+    public async Task<bool> UpdateProductionAsync(string? id, EditProductionDto dto)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
             throw new ArgumentException(string.Format(IdIsNullOrEmptyMessage, id));
 
-        Production? production = await context
-            .Productions
-            .SingleOrDefaultAsync(p => p.Id == productionId);
-        
+        Production? production = await repository.GetByIdAsync(productionId.Value);
         if (production is null)
-            throw new InvalidOperationException(string.Format(NotFoundMessage, id));
+            return false;
 
-        production.Title = inputModel.Title;
-        production.Description = inputModel.Description;
-        production.Budget = inputModel.Budget;
-        production.StatusType = inputModel.StatusType;
-        production.StatusStartDate = inputModel.StatusStartDate;
-        production.StatusEndDate = inputModel.StatusEndDate;
+        production.Title = dto.Title;
+        production.Description = dto.Description;
+        production.Budget = dto.Budget;
+        production.StatusType = dto.StatusType;
+        production.StatusStartDate = dto.StatusStartDate;
+        production.StatusEndDate = dto.StatusEndDate;
 
-        if (inputModel.Thumbnail is not null)
-            production.Thumbnail = await SaveThumbnailAsync(environment, inputModel.Thumbnail);
+        if (dto.ThumbnailImage is not null)
+            production.Thumbnail = await SaveThumbnailAsync(environment, dto.ThumbnailImage);
+
+        await repository.SaveAllChangesAsync();
         
-        await context.SaveChangesAsync();
+        return true;
     }
 
-    public async Task<DeleteProductionViewModel?> GetDeleteProductionAsync(string? id)
+    public async Task<DeleteProductionDto?> GetDeleteProductionAsync(string? id)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
             return null;
 
-        var productionData = await context
-            .Productions
-            .AsNoTracking()
-            .Where(p => p.Id == productionId)
-            .Select(p => new
-            {
-                p.Id,
-                p.Title,
-                p.Thumbnail,
-                p.Description,
-                p.StatusType,
-                p.Budget,
-                CrewCount = p.ProductionCrewMembers.Count,
-                CastCount = p.ProductionCastMembers.Count,
-                ScenesCount = p.Scenes.Count
-            })
-            .SingleOrDefaultAsync();
+        DeleteProductionDto? dto = await repository.GetDeleteAsync(productionId.Value);
         
-        if (productionData is null)
-            return null;
-
-        DeleteProductionViewModel model = new DeleteProductionViewModel
-        {
-            Id = productionData.Id.ToString(),
-            Title = productionData.Title,
-            Thumbnail = productionData.Thumbnail,
-            Description = productionData.Description,
-            StatusType = productionData.StatusType.ToString(),
-            Budget = productionData.Budget.ToString(CurrencyFormat, CultureInfo.CurrentCulture),
-            CrewMembersCount = productionData.CrewCount,
-            CastMembersCount = productionData.CastCount,
-            ScenesCount = productionData.ScenesCount
-        };
-        
-        return model;
+        return dto;
     }
 
-    public async Task DeleteProductionAsync(string? id)
+    public async Task<bool> DeleteProductionAsync(string? id)
     {
         Guid? productionId = ValidateGuid(id);
         if (productionId is null)
             throw new ArgumentException(string.Format(IdIsNullOrEmptyMessage, id));
 
-        Production? production = await context
-            .Productions
-            .SingleOrDefaultAsync(p => p.Id == productionId);
-        
+        Production? production = await repository.GetByIdAsync(productionId.Value);
         if (production is null)
-            throw new InvalidOperationException(string.Format(NotFoundMessage, id));
+            return false;
         
-        context.Productions.Remove(production);
-        await context.SaveChangesAsync();
+        await repository.DeleteAsync(production);
+        await repository.SaveAllChangesAsync();
+        
+        return true;
     }
     
     private static Guid? ValidateGuid(string? id)
     {
-        if (string.IsNullOrEmpty(id))
+        if (string.IsNullOrWhiteSpace(id))
             return null;
 
         bool isValidId = Guid.TryParse(id, out Guid productionId);
@@ -333,9 +170,12 @@ public class ProductionService(FilmProductionDbContext context,
 
         Dictionary<ProductionStatusType, string> map = new Dictionary<ProductionStatusType, string>();
 
-        foreach ((string abstractName, IReadOnlyCollection<ProductionStatusType> statuses) in
+        foreach (KeyValuePair<string, IReadOnlyCollection<ProductionStatusType>> kvp in
                  ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction())
         {
+            string abstractName = kvp.Key;
+            IReadOnlyCollection<ProductionStatusType> statuses = kvp.Value;
+            
             string cssClass = abstractNames.GetValueOrDefault(abstractName, DefaultStatus);
             
             foreach (ProductionStatusType status in statuses)

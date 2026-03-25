@@ -10,7 +10,7 @@ using static GCommon.EntityConstants.Production;
 
 public class CreateProductionInputModel
 {
-    public IFormFile? Thumbnail { get; set; }
+    public IFormFile? ThumbnailImage { get; set; }
     
     [Required]
     [StringLength(TitleMaxLength, MinimumLength = TitleMinLength)]

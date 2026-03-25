@@ -41,9 +41,9 @@
                                style="color: var(--wrap-dark-blue);">Click to upload image</p>
                             <small class="text-muted"> .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif · max 10 MB</small>
                         </label>
-                        <input type="file" asp-for="Thumbnail" class="d-none"
+                        <input type="file" asp-for="ThumbnailImage" class="d-none"
                                accept="image/*" id="thumbnailInput">
-                        <span asp-validation-for="Thumbnail" class="text-danger small"></span>
+                        <span asp-validation-for="ThumbnailImage" class="text-danger small"></span>
                     </div>
                     <div class="col-md-7" id="thumbnailPreview" style="display: none;">
                         <img id="thumbnailImage" src="#" alt="Preview"

@@ -1,6 +1,6 @@
 namespace Wrap.ViewModels.Production;
 
-using HelperViewModels;
+using NestedViewModels;
 
 using static GCommon.ApplicationConstants;
 
@@ -26,18 +26,18 @@ public class DetailsProductionViewModel
     
     public string? ScriptId { get; set; }
     
-    public IReadOnlyCollection<ProductionCrewViewModel> ProductionCrewMembers { get; set; }
-        = new List<ProductionCrewViewModel>();
+    public IReadOnlyCollection<ProductionCrewMemberViewModel> ProductionCrewMembers { get; set; }
+        = new List<ProductionCrewMemberViewModel>();
 
-    public IReadOnlyCollection<ProductionCastViewModel> ProductionCastMembers { get; set; }
-        = new List<ProductionCastViewModel>();
+    public IReadOnlyCollection<ProductionCastMemberViewModel> ProductionCastMembers { get; set; }
+        = new List<ProductionCastMemberViewModel>();
 
-    public IReadOnlyCollection<ProductionSceneViewModel> Scenes { get; set; }
+    public IReadOnlyCollection<ProductionSceneViewModel> ProductionScenes { get; set; }
         = new List<ProductionSceneViewModel>();
     
     public IReadOnlyCollection<ProductionAssetViewModel> ProductionAssets { get; set; }
         = new List<ProductionAssetViewModel>();
     
-    public IReadOnlyCollection<ProductionShootingDayViewModel> ShootingDays { get; set; }
+    public IReadOnlyCollection<ProductionShootingDayViewModel> ProductionShootingDays { get; set; }
         = new List<ProductionShootingDayViewModel>();
 }

@@ -68,7 +68,7 @@
                                 </div>
                                 <div class="info-value">@Model.StatusEndDate</div>
                             </div>
-                            @if (!string.IsNullOrEmpty(Model.ScriptId))
+                            @if (!string.IsNullOrWhiteSpace(Model.ScriptId))
                             {
                                 <div class="info-item">
                                     <div class="info-label">
@@ -90,7 +90,7 @@
         </div>
 
         @* ── Description ── *@
-        @if (!string.IsNullOrEmpty(Model.Description))
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
         {
             <div class="section-card">
                 <div class="section-header">
@@ -122,7 +122,7 @@
                     <button class="nav-link" data-bs-toggle="tab"
                             data-bs-target="#tabScenes" type="button">
                         <i class="bi bi-camera-video me-1"></i>Scenes
-                        <span class="badge bg-secondary ms-1">@Model.Scenes.Count</span>
+                        <span class="badge bg-secondary ms-1">@Model.ProductionScenes.Count</span>
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -136,7 +136,7 @@
                     <button class="nav-link" data-bs-toggle="tab"
                             data-bs-target="#tabSchedule" type="button">
                         <i class="bi bi-calendar-event me-1"></i>Schedule
-                        <span class="badge bg-secondary ms-1">@Model.ShootingDays.Count</span>
+                        <span class="badge bg-secondary ms-1">@Model.ProductionShootingDays.Count</span>
                     </button>
                 </li>
             </ul>
@@ -149,20 +149,25 @@
                     {
                         <div class="empty-state">
                             <i class="bi bi-people"></i>
-                            <p>No crew members assigned yet.</p>
+                            <p>No filmmakers assigned yet.</p>
                         </div>
                     }
                     else
                     {
                         <div class="row g-3">
-                            @foreach (var crew in Model.ProductionCrewMembers)
+                            @foreach (ProductionCrewMemberViewModel crew in Model.ProductionCrewMembers)
                             {
                                 <div class="col-6 col-md-4 col-lg-3">
                                     <div class="member-card">
                                         <img src="@crew.ProfileImagePath"
                                              alt="@crew.FirstName @crew.LastName"
                                              class="member-avatar">
-                                        <div class="member-name">@crew.FirstName @crew.LastName</div>
+                                        <div>
+                                            <div class="member-name">@crew.FirstName @crew.LastName</div>
+                                            <div class="member-role">
+                                                @crew.Role
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             }
@@ -176,13 +181,13 @@
                     {
                         <div class="empty-state">
                             <i class="bi bi-person-video3"></i>
-                            <p>No cast members assigned yet.</p>
+                            <p>No actors assigned yet.</p>
                         </div>
                     }
                     else
                     {
                         <div class="row g-3">
-                            @foreach (ProductionCastViewModel cast in Model.ProductionCastMembers)
+                            @foreach (ProductionCastMemberViewModel cast in Model.ProductionCastMembers)
                             {
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center gap-3 member-card text-start">
@@ -204,7 +209,7 @@
 
                 @* ── Scenes ── *@
                 <div class="tab-pane fade" id="tabScenes">
-                    @if (!Model.Scenes.Any())
+                    @if (!Model.ProductionScenes.Any())
                     {
                         <div class="empty-state">
                             <i class="bi bi-camera-video"></i>
@@ -213,7 +218,7 @@
                     }
                     else
                     {
-                        @foreach (ProductionSceneViewModel scene in Model.Scenes)
+                        @foreach (ProductionSceneViewModel scene in Model.ProductionScenes)
                         {
                             <div class="scene-row">
                                 <div class="scene-number">@scene.SceneNumber</div>
@@ -257,7 +262,7 @@
 
                 @* ── Schedule ── *@
                 <div class="tab-pane fade" id="tabSchedule">
-                    @if (!Model.ShootingDays.Any())
+                    @if (!Model.ProductionShootingDays.Any())
                     {
                         <div class="empty-state">
                             <i class="bi bi-calendar-event"></i>
@@ -266,7 +271,7 @@
                     }
                     else
                     {
-                        @foreach (ProductionShootingDayViewModel day in Model.ShootingDays)
+                        @foreach (ProductionShootingDayViewModel day in Model.ProductionShootingDays)
                         {
                             <div class="schedule-item">
                                 <i class="bi bi-calendar-check" style="color: #11998e; font-size: 1.3rem;"></i>

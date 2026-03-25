@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.Production.HelperViewModels;
+namespace Wrap.ViewModels.Production.NestedViewModels;
 
 public class ProductionShootingDayViewModel
 {

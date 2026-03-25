@@ -21,12 +21,13 @@ public class ProductionCast
     public Guid CastMemberId { get; set; }
 
     public virtual Cast CastMember { get; set; } = null!;
-    
+
     /// <summary>
     /// Ролята на актьора няма общо с ролите на снимачния екип
     /// </summary>
+    [Required]
     [Unicode]
     [MaxLength(RoleMaxLength)]
-    public string? Role { get; set; }
+    public string Role { get; set; } = null!;
     // Example: "Detective Ivanov"
 }

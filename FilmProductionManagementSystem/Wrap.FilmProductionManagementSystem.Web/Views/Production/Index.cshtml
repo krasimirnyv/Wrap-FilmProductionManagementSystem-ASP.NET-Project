@@ -1,4 +1,4 @@
-@model IEnumerable<AllProductionsViewModel>
+@model IReadOnlyCollection<ProductionViewModel>
 
 @{
     ViewData[TitleDataKey] = "Productions";
@@ -71,13 +71,13 @@
         else
         {
             <div class="row mt-4" id="productionsGrid">
-                @foreach (AllProductionsViewModel production in Model)
+                @foreach (ProductionViewModel production in Model)
                 {
                     <div class="col-md-4 col-sm-6 mb-4 prod-grid-item"
                          data-title="@production.Title.ToLower()"
                          data-status="@production.StatusType">
                         <div class="prod-card">
-                            <img src="@production.Thumbnail"
+                            <img src="@production.ThumbnailPath"
                                  class="prod-card-img"
                                  alt="@production.Title">
 

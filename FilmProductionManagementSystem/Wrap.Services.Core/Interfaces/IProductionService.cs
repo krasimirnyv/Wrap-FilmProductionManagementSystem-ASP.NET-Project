@@ -1,54 +1,56 @@
 namespace Wrap.Services.Core.Interfaces;
 
-using ViewModels.Production;
+using Models.Production;
+
+// using ViewModels.Production;
 
 public interface IProductionService
 {
     /// <summary>
     /// Gets all productions with basic info for display in a list/overview page
     /// </summary>
-    /// <returns>IEnumerable<AllProductionsViewModel> collection of productions</returns>
-    Task<IEnumerable<AllProductionsViewModel>> GetAllProductionsAsync();
+    /// <returns>IReadOnlyCollection<ProductionDto> collection of productions</returns>
+    Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync();
     
     /// <summary>
     /// Gets detailed information about a specific production by its ID
     /// </summary>
     /// <param name="id">string</param>
-    /// <returns>DetailsProductionViewModel</returns>
-    Task<DetailsProductionViewModel?> GetProductionDetailsAsync(string? id);
+    /// <returns>DetailsProductionDto?</returns>
+    Task<DetailsProductionDto?> GetProductionDetailsAsync(string? id);
     
     /// <summary>
-    /// Creates a new production based on the provided input model
+    /// Creates a new production based on the provided dto
     /// and returns the ID of the newly created production
     /// </summary>
-    /// <param name="inputModel">CreateProductionInputModel</param>
+    /// <param name="dto">CreateProductionDto</param>
     /// <returns>string: production's ID</returns>
-    Task<string> CreateProductionInputModelAsync(CreateProductionInputModel inputModel);
+    Task<string> CreateProductionAsync(CreateProductionDto dto);
     
     /// <summary>
     /// Gets the current details of a production for editing purposes, based on its ID
     /// </summary>
     /// <param name="id">string</param>
-    /// <returns>EditProductionInputModel</returns>
-    Task<EditProductionInputModel?> GetEditProductionAsync(string? id);
+    /// <returns>EditProductionDto?</returns>
+    Task<EditProductionDto?> GetEditProductionAsync(string? id);
     
     /// <summary>
-    /// Updates an existing production with new details provided in the input model, based on its ID
+    /// Updates an existing production with new details provided in the dto, based on its ID
     /// </summary>
     /// <param name="id">string</param>
-    /// <param name="inputModel">EditProductionInputModel</param>
-    Task UpdateProductionAsync(string id, EditProductionInputModel inputModel);
+    /// <param name="dto">EditProductionDto</param>
+    Task<bool> UpdateProductionAsync(string? id, EditProductionDto dto);
     
     /// <summary>
     /// Gets the details of a production for confirmation before deletion, based on its ID
     /// </summary>
     /// <param name="id">string</param>
-    /// <returns>DeleteProductionViewModel</returns>
-    Task<DeleteProductionViewModel?> GetDeleteProductionAsync(string? id);
+    /// <returns>DeleteProductionDto?</returns>
+    Task<DeleteProductionDto?> GetDeleteProductionAsync(string? id);
     
     /// <summary>
     /// Deletes a production from the system based on its ID after confirmation
     /// </summary>
     /// <param name="id">string</param>
-    Task DeleteProductionAsync(string? id);
+    Task<bool> DeleteProductionAsync(string? id);
 }

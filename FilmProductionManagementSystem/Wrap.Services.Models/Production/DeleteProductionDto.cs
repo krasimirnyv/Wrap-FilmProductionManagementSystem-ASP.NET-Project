@@ -1,8 +1,10 @@
-namespace Wrap.ViewModels.Production;
+namespace Wrap.Services.Models.Production;
 
-public class DeleteProductionViewModel
+using GCommon.Enums;
+
+public class DeleteProductionDto
 {
-    public string Id { get; set; } = null!;
+    public Guid Id { get; set; }
     
     public string Title { get; set; } = null!;
 
@@ -10,9 +12,9 @@ public class DeleteProductionViewModel
     
     public string? Description { get; set; }
     
-    public string StatusType { get; set; } = null!;
+    public ProductionStatusType StatusType { get; set; }
     
-    public string Budget { get; set; } = null!;
+    public decimal Budget { get; set; }
     
     public int CrewMembersCount { get; set; }
     

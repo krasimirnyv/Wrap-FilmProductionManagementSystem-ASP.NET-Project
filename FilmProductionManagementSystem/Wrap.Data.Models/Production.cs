@@ -31,9 +31,10 @@ public class Production
     [Column(TypeName = DecimalTypeFormat)]
     public decimal Budget { get; set; }
 
+    [Required]
     [Unicode]
     [MaxLength(ThumbnailMaxLength)]
-    public string? Thumbnail { get; set; }
+    public string Thumbnail { get; set; } = null!;
     // Example with image path: "/images/productions/production-1.png"
 
     [Required]

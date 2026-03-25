@@ -47,7 +47,7 @@
                         <div class="info-value">@Model.Budget</div>
                     </div>
 
-                    @if (!string.IsNullOrEmpty(Model.Description))
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
                     {
                         <div class="info-item">
                             <div class="info-label">Description</div>

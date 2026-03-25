@@ -2,13 +2,13 @@ namespace Wrap.ViewModels.Production;
 
 using static GCommon.ApplicationConstants;
 
-public class AllProductionsViewModel
+public class ProductionViewModel
 {
     public string Id { get; set; } = null!;
     
     public string Title { get; set; } = null!;
 
-    public string? Thumbnail { get; set; }
+    public string ThumbnailPath { get; set; } = null!;
 
     public string StatusType { get; set; } = null!;
     
