@@ -1,6 +1,6 @@
 namespace Wrap.ViewModels.General;
 
-public class ProductionViewModel
+public class ProductionInfoViewModel
 {
     public string Title { get; set; } = null!;
     

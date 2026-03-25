@@ -60,7 +60,7 @@ public class HomeController(IHomeService homeService) : BaseController
             CastMembersCount = dto.CastMembersCount,
             UpcomingScenesTotal = dto.UpcomingScenesTotal,
             Productions = dto.Productions
-                .Select(p => new ProductionViewModel
+                .Select(p => new ProductionInfoViewModel
                 {
                     Title = p.Title,
                     Description = p.Description,

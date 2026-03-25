@@ -4,11 +4,11 @@ using GCommon.Enums;
 
 public class CrewMemberSceneDto
 {
-    public string? SceneId { get; set; }
+    public string SceneId { get; set; } = null!;
 
-    public string? SceneName { get; set; }
+    public string SceneName { get; set; } = null!;
 
-    public string? ProductionTitle { get; set; }
+    public string ProductionTitle { get; set; } = null!;
     
-    public CrewRoleType? RoleType { get; set; }
+    public CrewRoleType RoleType { get; set; }
 }

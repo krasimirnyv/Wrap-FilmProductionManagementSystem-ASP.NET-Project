@@ -8,5 +8,5 @@ public class DashboardViewModel
     
     public int UpcomingScenesTotal { get; set; }
     
-    public IEnumerable<ProductionViewModel> Productions { get; set; } = null!;
+    public IEnumerable<ProductionInfoViewModel> Productions { get; set; } = null!;
 }

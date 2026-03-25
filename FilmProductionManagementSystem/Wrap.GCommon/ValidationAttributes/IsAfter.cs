@@ -21,7 +21,7 @@ public class IsAfter : ValidationAttribute
         {
             if (dateTimeValue <= comparisonDateTime)
             {
-                return new ValidationResult(ErrorMessage ?? string.Format(string.Format(IsAfterExceptionMessage, comparisonValue)));
+                return new ValidationResult(ErrorMessage ?? string.Format(IsAfterExceptionMessage, comparisonValue));
             }
         }
         
