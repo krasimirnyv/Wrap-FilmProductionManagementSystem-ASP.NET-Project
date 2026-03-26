@@ -2,5 +2,7 @@ namespace Wrap.Services.Models.Production;
 
 public class EditProductionDto : CreateProductionDto
 {
-    public string CurrentThumbnail { get; set; } = null!;
+    public Guid ProductionId { get; set; }
+    
+    public string? CurrentThumbnailPath { get; set; }
 }

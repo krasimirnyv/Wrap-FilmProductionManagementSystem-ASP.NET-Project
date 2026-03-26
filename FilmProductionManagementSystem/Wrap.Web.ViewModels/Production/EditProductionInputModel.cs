@@ -1,6 +1,11 @@
 namespace Wrap.ViewModels.Production;
 
+using System.ComponentModel.DataAnnotations;
+
 public class EditProductionInputModel : CreateProductionInputModel
 {
-    public string CurrentThumbnail { get; set; } = null!;
+    [Required]
+    public string ProductionId { get; set; } = null!;
+    
+    public string? CurrentThumbnailPath { get; set; }
 }

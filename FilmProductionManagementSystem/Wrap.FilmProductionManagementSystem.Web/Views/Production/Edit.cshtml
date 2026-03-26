@@ -1,9 +1,10 @@
+@using static Wrap.GCommon.DataFormat;
+
 @model EditProductionInputModel
 
 @{
     ViewData[TitleDataKey] = "Edit Production";
     
-    string productionId = Context.Request.Query[RequestQueryProductionKey].ToString();
     IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusGroups = GetStatusTypeByAbstraction();
 
     // Resolve which abstract phase the model's current StatusType belongs to,
@@ -11,6 +12,9 @@
     string currentPhase = statusGroups
         .FirstOrDefault(kvp => kvp.Value.Contains(Model.StatusType))
         .Key ?? string.Empty;
+    
+    string allowedExtensions = string.Join(", ", AllowedExtensions);
+
 }
 
 @section Styles
@@ -28,7 +32,10 @@
             <p class="text-muted mb-0">Update the details for your film project</p>
         </div>
 
-        <form asp-area="" asp-controller="Production" asp-action="Edit" asp-route-productionId="@productionId"
+        <input type="hidden" asp-for="ProductionId" />
+        <input type="hidden" asp-for="CurrentThumbnailPath" />
+        
+        <form asp-area="" asp-controller="Production" asp-action="Edit" asp-route-productionId="@Model.ProductionId"
               method="post" enctype="multipart/form-data" id="editProductionForm">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
@@ -41,38 +48,35 @@
 
                 <div class="row g-4 align-items-center">
 
-                    @if (!string.IsNullOrWhiteSpace(Model.CurrentThumbnail))
-                    {
-                        <div class="col-md-4 text-center">
-                            <p class="info-label mb-2">Current Thumbnail</p>
-                            <img src="@Model.CurrentThumbnail"
-                                 alt="Current Thumbnail"
-                                 class="thumbnail-preview-img"
-                                 id="currentThumb" />
-                        </div>
-                    }
+                    <div class="col-md-4 text-center">
+                        <p class="info-label mb-2">Current Thumbnail</p>
+                        <img src="@Model.CurrentThumbnailPath"
+                             alt="Current Thumbnail of @Model.Title movie"
+                             class="thumbnail-preview-img"
+                             id="currentThumb" />
+                    </div>
 
-                    <div class="@(string.IsNullOrWhiteSpace(Model.CurrentThumbnail) ? NullImageStyle : ImageStyle)">
+                    <div class="@(Model.CurrentThumbnailPath == DefaultThumbnailPath ? NullImageStyle : ImageStyle)">
 
                         <label for="thumbnailInput"
                                class="thumbnail-upload-box d-block"
                                id="uploadLabel">
                             <i class="bi bi-cloud-upload" style="font-size: 2rem; color: var(--wrap-blue);"></i>
                             <p class="mb-1 mt-2 fw-semibold" style="color: var(--wrap-dark-blue);">
-                                @(string.IsNullOrWhiteSpace(Model.CurrentThumbnail)
-                                    ? ClickToUploadMessage
-                                    : ClickToReplaceMessage)
+                                @(Model.CurrentThumbnailPath == DefaultThumbnailPath
+                                    ? ClickToReplaceMessage
+                                    : ClickToUploadMessage)
                             </p>
                             <small class="text-muted">
-                                .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif · max 10 MB · leave empty to keep current
+                                @allowedExtensions · max 10MB · leave empty to keep current thumbnail
                             </small>
                         </label>
 
                         <input type="file"
                                asp-for="ThumbnailImage"
+                               id="thumbnailInput"
                                class="d-none"
-                               accept="image/*"
-                               id="thumbnailInput" />
+                               accept="image/*"/>
 
                         <span asp-validation-for="ThumbnailImage" class="text-danger small"></span>
 
@@ -209,7 +213,7 @@
                 <button type="submit" class="btn btn-production btn-lg me-2">
                     <i class="bi bi-save me-2"></i>Save Changes
                 </button>
-                <a asp-area="" asp-controller="Production" asp-action="Details" asp-route-productionId="@productionId"
+                <a asp-area="" asp-controller="Production" asp-action="Details" asp-route-productionId="@Model.ProductionId"
                    class="btn btn-production-secondary btn-lg">
                     <i class="bi bi-x-circle me-2"></i>Cancel
                 </a>
