@@ -10,6 +10,7 @@ public static class ApplicationConstants
     /* Constants for image file size */
     public const string MaxFileSizeOptions = "FormOptions:MultipartBodyLengthLimit"; // 10485760 = 10 * 1024 * 1024; 10 MB
     public const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
+    public const int StreamBufferSize = 81920;
 
     /* Error Paths */
     public const string StatusCodeErrorPath = "/Home/Error/{0}";

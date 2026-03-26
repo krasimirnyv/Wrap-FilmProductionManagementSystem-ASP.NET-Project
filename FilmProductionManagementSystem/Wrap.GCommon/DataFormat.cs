@@ -21,5 +21,17 @@ public static class DataFormat
     public const string ThumbnailFolderName = "thumbnail";
     public const string DefaultProfilePath = "/img/profile/default-profile.png";
     public const string DefaultThumbnailPath = "/img/thumbnail/default-thumbnail.png";
-    public static readonly string[] AllowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heif", ".heic", ".hif"];
+
+    public const ushort MaxPixelDimension = 6000;
+    public const ushort OutputSizeProfileImage = 512;
+    public const ushort OutputSizeThumbnailHeight = 512;
+    public const ushort OutputSizeThumbnailWidth = 910;
+
+    public const ushort WebpQuality = 80;
+
+    public static readonly HashSet<string> AllowedExtensions
+        = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png", ".webp", ".gif", ".heif", ".heic", ".hif"
+        };
 }

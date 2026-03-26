@@ -24,7 +24,11 @@ public static class OutputMessages
     
     // photo file extension and size limit
     public const string NotSupportedFileExtension = "The file extension {0} is not supported.";
-    public const string ExceededFileSizeLimit = "The file size limit {0} exceeded.";
+    public const string ExceededFileSizeLimit = "The file size limit {0} bytes exceeded.";
+    public const string UnsupportedOrCorruptedFormat = "Unsupported or corrupted image format. {0}";
+    public const string FailedToReadImage = "Failed to read image: {0}";
+    public const string InvalidImageDimensions = "Invalid image dimensions: height: {0}px, width: {1}px.";
+    public const string ImageTooLarge = "Image size is too large. Max allowed dimension is {0}px both height and width. Your current image size is with height: {1}px, width: {2}px.";
     
     // validation attribute messages
     public const string IsAfterExceptionMessage = "The date must be after {0}";
@@ -81,9 +85,11 @@ public static class OutputMessages
     public static class Register
     {
         public const string CrewDraftKey = "CrewDraft";
-        public const string ErrorBuildingCrewDraft = "Exception occured while building the crew draft {0}";
+        public const string ExceptionBuildingCrewDraft = "Exception occured while building the crew draft {0}";
+        public const string ErrorBuildingCrewDraft = "Error occured while building the crew draft. Try again later.";
         public const string ErrorFoundingCrewDraft = "Error occured while finding the crew draft.";
         public const string ErrorCreatingCast = "Error occured while getting the cast data to create profile.";
+        public const string ErrorSavingTheImage = "Error occured while saving the image data when {0} your profile. {1}";
 
         public const string ExceptionCompleteRegistrationOfCrewMessage = "Exception occured while trying to complete your registration as a filmmaker. {0}";
         public const string ExceptionCompleteRegistrationOfCastMessage = "Exception occured while trying to complete your registration as an actor. {0}";
