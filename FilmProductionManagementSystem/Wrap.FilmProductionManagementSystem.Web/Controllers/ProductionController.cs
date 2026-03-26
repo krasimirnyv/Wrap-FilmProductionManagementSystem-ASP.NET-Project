@@ -105,27 +105,27 @@ public class ProductionController(IProductionService productionService,
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(string productionId, EditProductionInputModel inputModel)
+    public async Task<IActionResult> Edit(EditProductionInputModel inputModel)
     {
         if (!ModelState.IsValid)
             return View(inputModel);
-
+        
         try
         {
             EditProductionDto dto = MapToEditProductionDtoFromInputModel(inputModel);
             
-            bool isUpdated = await productionService.UpdateProductionAsync(productionId, dto);
+            bool isUpdated = await productionService.UpdateProductionAsync(dto);
             if (!isUpdated)
-                return View(nameof(NotFound), string.Format(NotFoundMessage, productionId));
+                return View(nameof(NotFound), string.Format(NotFoundMessage, dto.ProductionId));
             
             TempData[SuccessTempDataKey] = string.Format(CrudSuccessMessage, UpdatedMessage);
-            return RedirectToAction(nameof(Details), new { productionId });
+            return RedirectToAction(nameof(Details), new { dto.ProductionId });
         }
         catch (ArgumentException ae)
         {
             logger.LogError(ae, string.Format(CrudFailureMessage, UpdatingMessage, ae.Message));
             TempData[ErrorTempDateKey] = string.Format(CrudFailureMessage, UpdatingMessage, ae.Message);
-            return View(nameof(NotFound), string.Format(NotFoundMessage, productionId));
+            return View(nameof(NotFound), string.Format(NotFoundMessage, inputModel.ProductionId));
         }
         catch (Exception e)
         {
@@ -307,6 +307,7 @@ public class ProductionController(IProductionService productionService,
     {
         EditProductionInputModel inputModel = new EditProductionInputModel
         {
+            ProductionId = dto.ProductionId.ToString(),
             ThumbnailImage = dto.ThumbnailImage,
             Title = dto.Title,
             Description = dto.Description,
@@ -314,7 +315,7 @@ public class ProductionController(IProductionService productionService,
             StatusType = dto.StatusType,
             StatusStartDate = dto.StatusStartDate,
             StatusEndDate = dto.StatusEndDate,
-            CurrentThumbnail = dto.CurrentThumbnail
+            CurrentThumbnailPath = dto.CurrentThumbnailPath
         };
         
         return inputModel;
@@ -324,6 +325,7 @@ public class ProductionController(IProductionService productionService,
     {
         EditProductionDto dto = new EditProductionDto
         {
+            ProductionId = Guid.Parse(inputModel.ProductionId),
             ThumbnailImage = inputModel.ThumbnailImage,
             Title = inputModel.Title,
             Description = inputModel.Description,
@@ -331,7 +333,7 @@ public class ProductionController(IProductionService productionService,
             StatusType = inputModel.StatusType,
             StatusStartDate = inputModel.StatusStartDate,
             StatusEndDate = inputModel.StatusEndDate,
-            CurrentThumbnail = inputModel.CurrentThumbnail
+            CurrentThumbnailPath = inputModel.CurrentThumbnailPath
         };
         
         return dto;

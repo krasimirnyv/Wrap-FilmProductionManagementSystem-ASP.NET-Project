@@ -157,7 +157,7 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
                 Budget = p.Budget,
                 StatusStartDate = p.StatusStartDate,
                 StatusEndDate = p.StatusEndDate,
-                CurrentThumbnail = p.Thumbnail
+                CurrentThumbnailPath = p.Thumbnail
             })
             .SingleOrDefaultAsync();
         

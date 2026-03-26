@@ -14,7 +14,7 @@ public interface ILoginRegisterService
     /// </summary>
     /// <param name="model">CrewRegistrationStepOneInputModel</param>
     /// <returns>CrewRegistrationStepOneDraft</returns>
-    Task<CrewRegistrationDraftDto> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model);
+    Task<CrewRegistrationDraftDto?> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model);
 
     /// <summary>
     /// Used for the second part of crew registration - get new model-view with skills for the dropdowns in the view.

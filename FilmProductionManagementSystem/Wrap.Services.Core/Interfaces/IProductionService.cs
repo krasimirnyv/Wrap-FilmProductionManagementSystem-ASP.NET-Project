@@ -37,9 +37,8 @@ public interface IProductionService
     /// <summary>
     /// Updates an existing production with new details provided in the dto, based on its ID
     /// </summary>
-    /// <param name="id">string</param>
     /// <param name="dto">EditProductionDto</param>
-    Task<bool> UpdateProductionAsync(string? id, EditProductionDto dto);
+    Task<bool> UpdateProductionAsync(EditProductionDto dto);
     
     /// <summary>
     /// Gets the details of a production for confirmation before deletion, based on its ID

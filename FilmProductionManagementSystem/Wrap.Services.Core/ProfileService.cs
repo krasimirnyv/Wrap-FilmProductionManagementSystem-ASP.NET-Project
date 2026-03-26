@@ -214,13 +214,19 @@ public class ProfileService(IProfileRepository repository,
             crew.User.PhoneNumber = crewDto.PhoneNumber;
         
             if (crewDto.ProfileImage is not null && crewDto.ProfileImage.Length > 0)
-            {
-                string newImagePath = await SaveProfileImageAsync(environment, crewDto.ProfileImage);
+            { 
+                string newImagePath = await SaveProfileImageAsync(environment, crewDto.ProfileImage); 
                 crew.ProfileImagePath = newImagePath;
             }
 
             await repository.SaveAllChangesAsync();
             await repository.CommitTransactionAsync(transaction);
+        }
+        catch (NotSupportedException nse)
+        {
+            await repository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + nse.Message);
+            throw new NotSupportedException(nse.Message, nse);
         }
         catch (Exception e)
         {
@@ -253,6 +259,12 @@ public class ProfileService(IProfileRepository repository,
         
             await repository.SaveAllChangesAsync();
             await repository.CommitTransactionAsync(transaction);
+        }
+        catch (NotSupportedException nse)
+        {
+            await repository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + nse.Message);
+            throw new NotSupportedException(nse.Message, nse);
         }
         catch (Exception e)
         {

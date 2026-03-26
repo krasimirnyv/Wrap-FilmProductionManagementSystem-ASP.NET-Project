@@ -30,15 +30,24 @@ public class RegisterController(ILoginRegisterService registerService,
 
         try
         {
-            CrewRegistrationDraftDto draft = await registerService.BuildCrewDraftAsync(model);
+            CrewRegistrationDraftDto? draft = await registerService.BuildCrewDraftAsync(model);
+            if (draft is null)
+                return View(nameof(BadRequest), string.Format(ErrorBuildingCrewDraft));
+
             SessionJsonExtensions.SetJson(HttpContext.Session, CrewDraftKey, draft);
-            
+
             return RedirectToAction(nameof(RegisterCrewStepTwo));
+        }
+        catch (NotSupportedException nse)
+        {
+            logger.LogError(nse, string.Format(ErrorSavingTheImage, CreatingMessage, nse.Message));
+            ModelState.AddModelError(string.Empty, string.Format(ErrorSavingTheImage, CreatingMessage, nse.Message));
+            return View(model);
         }
         catch (Exception e)
         {
-            logger.LogError(e, string.Format(ErrorBuildingCrewDraft, e.Message));
-            ModelState.AddModelError(string.Empty, string.Format(ErrorBuildingCrewDraft, e.Message));
+            logger.LogError(e, string.Format(ExceptionBuildingCrewDraft, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(ExceptionBuildingCrewDraft, e.Message));
             return View(model);
         }
     }
@@ -129,6 +138,12 @@ public class RegisterController(ILoginRegisterService registerService,
             TempData[SuccessTempDataKey] = SuccessMessage;
             return RedirectToAction("Dashboard", "Home");
         }
+        catch (NotSupportedException nse)
+        {
+            logger.LogError(nse, string.Format(ErrorSavingTheImage, CreatingMessage, nse.Message));
+            ModelState.AddModelError(string.Empty, string.Format(ErrorSavingTheImage, CreatingMessage, nse.Message));
+            return View(model);
+        }
         catch (Exception e)
         {
             logger.LogError(e, string.Format(ExceptionCompleteRegistrationOfCastMessage, e.Message));
@@ -192,6 +207,7 @@ public class RegisterController(ILoginRegisterService registerService,
 
         return RedirectToAction(nameof(Index), "Home");
     }
+    
     
     private static CrewRegistrationCompleteDto MapToCrewRegistrationCompleteDtoFromDraftAndModel(CrewRegistrationStepTwoInputModel model, CrewRegistrationDraftDto draft)
     {

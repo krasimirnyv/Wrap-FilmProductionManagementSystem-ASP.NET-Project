@@ -24,24 +24,35 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
                                   ILogger<LoginRegisterService> logger) : ILoginRegisterService
 {
  
-    public async Task<CrewRegistrationDraftDto> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model)
+    public async Task<CrewRegistrationDraftDto?> BuildCrewDraftAsync(CrewRegistrationStepOneInputModel model)
     {
-        string profilePath = await SaveProfileImageAsync(environment, model.ProfilePicture);
-        
-        CrewRegistrationDraftDto draft = new CrewRegistrationDraftDto
+        try
         {
-            UserName = model.UserName,
-            Email = model.Email,
-            PhoneNumber = model.PhoneNumber,
-            Password = model.Password,
-            FirstName = model.FirstName,
-            LastName = model.LastName,
-            Nickname = model.Nickname,
-            Biography = model.Biography,
-            ProfilePicturePath = profilePath
-        };
+            string profilePath = await SaveProfileImageAsync(environment, model.ProfilePicture);
 
-        return draft;
+            CrewRegistrationDraftDto draft = new CrewRegistrationDraftDto
+            {
+                UserName = model.UserName,
+                Email = model.Email,
+                PhoneNumber = model.PhoneNumber,
+                Password = model.Password,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Nickname = model.Nickname,
+                Biography = model.Biography,
+                ProfilePicturePath = profilePath
+            };
+
+            return draft;
+        }
+        catch (NotSupportedException nse)
+        {
+            throw new NotSupportedException(nse.Message, nse);
+        }
+        catch (Exception e)
+        {
+            throw new Exception(ExceptionBuildingCrewDraft, e);
+        }
     }
 
     public CrewRegistrationStepTwoInputModel GetNewModelWithSkills()
@@ -218,6 +229,19 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
             await signInManager.SignInAsync(user, false);
             
             return IdentityResult.Success;
+        }
+        catch (NotSupportedException nse)
+        {
+            await repository.RollbackTransactionAsync(transaction);
+            try { await userManager.DeleteAsync(user); } catch { /* ignored */ }
+            
+            logger.LogError(nse, RegistrationTransactionFailure + nse.Message);
+            IdentityResult.Failed(new IdentityError
+            {
+                Description = RegistrationTransactionFailure
+            });
+            
+            throw new NotSupportedException(nse.Message, nse);
         }
         catch (Exception e)
         {

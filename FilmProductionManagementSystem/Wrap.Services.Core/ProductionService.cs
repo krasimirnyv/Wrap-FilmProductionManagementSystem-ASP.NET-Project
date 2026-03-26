@@ -81,26 +81,23 @@ public class ProductionService(IProductionRepository repository,
 
         EditProductionDto dto = new EditProductionDto
         {
+            ProductionId = production.Id,
             Title = production.Title,
             Description = production.Description,
             Budget = production.Budget,
             StatusType = production.StatusType,
             StatusStartDate = production.StatusStartDate,
             StatusEndDate = production.StatusEndDate,
-            CurrentThumbnail = production.Thumbnail,
+            CurrentThumbnailPath = production.Thumbnail,
             ThumbnailImage = null
         };
 
         return dto;
     }
 
-    public async Task<bool> UpdateProductionAsync(string? id, EditProductionDto dto)
+    public async Task<bool> UpdateProductionAsync(EditProductionDto dto)
     {
-        Guid? productionId = ValidateGuid(id);
-        if (productionId is null)
-            throw new ArgumentException(string.Format(IdIsNullOrEmptyMessage, id));
-
-        Production? production = await repository.GetByIdAsync(productionId.Value);
+        Production? production = await repository.GetByIdAsync(dto.ProductionId);
         if (production is null)
             return false;
 

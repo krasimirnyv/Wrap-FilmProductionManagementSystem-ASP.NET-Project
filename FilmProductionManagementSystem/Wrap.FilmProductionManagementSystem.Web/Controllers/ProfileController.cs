@@ -192,9 +192,15 @@ public class ProfileController(IProfileService profileService,
             TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
             return RedirectToAction("Dashboard", "Home");
         }
+        catch (NotSupportedException nse)
+        {
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + nse.Message);
+            ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, nse.Message));
+            return View("EditCrewProfile", model);
+        }
         catch (Exception e)
         {
-            logger.LogError(e, string.Format(ErrorUpdatingProfile, e.Message));
+            logger.LogError(e, string.Format(ErrorUpdatingProfile, username) + e.Message);
             ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, e.Message));
             return View("EditCrewProfile", model);
         }
@@ -259,9 +265,15 @@ public class ProfileController(IProfileService profileService,
             TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
             return RedirectToAction("Dashboard", "Home");
         }
+        catch (NotSupportedException nse)
+        {
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + nse.Message);
+            ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, nse.Message));
+            return View("EditCastProfile", model);
+        }
         catch (Exception e)
         {
-            logger.LogError(e, string.Format(ErrorUpdatingProfile, e.Message));
+            logger.LogError(e, string.Format(ErrorUpdatingProfile, username) + e.Message);
             ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, e.Message));
             return View("EditCastProfile", model);
         }
