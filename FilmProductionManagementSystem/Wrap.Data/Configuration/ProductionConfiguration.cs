@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Models;
 using GCommon.Enums;
 
+using static GCommon.DataFormat;
+
 public class ProductionConfiguration : IEntityTypeConfiguration<Production>
 {
     public void Configure(EntityTypeBuilder<Production> entity)
@@ -27,6 +29,7 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Title = "Test Film",
             Description = "This is a test",
             Budget = 1000.00M,
+            Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Concept,
             StatusStartDate = DateTime.UtcNow,
             StatusEndDate = DateTime.UtcNow + TimeSpan.FromDays(5)
