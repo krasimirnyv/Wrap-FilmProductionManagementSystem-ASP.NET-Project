@@ -1,7 +1,10 @@
+@using static Wrap.GCommon.DataFormat;
+
 @model EditCrewProfileInputModel
 
 @{
     ViewData[TitleDataKey] = "Edit Filmmaker Profile";
+    string allowedExtensions = string.Join(", ", AllowedExtensions);
 }
 
 @section Styles
@@ -28,22 +31,23 @@
                 <!-- Profile Image Upload -->
                 <div class="row mb-4">
                     <div class="col-md-4 text-center">
+                        
                         <div class="profile-image-container">
-                            <img src="@Model.CurrentProfileImagePath" 
+                            <img src="@Model.CurrentProfileImagePath"
                                  id="profilePreview"
-                                 alt="Profile Preview" 
+                                 alt="Profile Preview"
                                  class="profile-image">
                             <label for="profileImageInput" class="edit-icon-overlay" title="Change Profile Picture">
                                 <i class="bi bi-camera-fill"></i>
                             </label>
                         </div>
-                        
+
                         <input type="file"
                                asp-for="ProfileImage"
                                id="profileImageInput"
                                class="d-none"
-                               accept="image/*" />
-                        
+                               accept="image/*"/>
+
                         <small class="text-muted d-block mt-2">Click the camera icon to change photo</small>
                         <span asp-validation-for="ProfileImage" class="text-danger"></span>
                     </div>
@@ -55,7 +59,7 @@
                             <ul class="mb-0 mt-2">
                                 <li>Use a clear photo of you (optional)</li>
                                 <li>Maximum file size: 10MB</li>
-                                <li>Supported formats: .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif</li>
+                                <li>Supported formats: @allowedExtensions</li>
                             </ul>
                         </div>
                     </div>

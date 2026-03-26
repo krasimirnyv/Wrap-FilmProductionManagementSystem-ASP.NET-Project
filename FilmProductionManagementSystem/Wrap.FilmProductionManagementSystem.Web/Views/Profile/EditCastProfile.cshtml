@@ -1,7 +1,10 @@
+@using static Wrap.GCommon.DataFormat;
+
 @model EditCastProfileInputModel
 
 @{
     ViewData[TitleDataKey] = "Edit Actor Profile";
+    string allowedExtensions = string.Join(", ", AllowedExtensions);
 }
 
 @section Styles
@@ -55,7 +58,7 @@
                             <ul class="mb-0 mt-2">
                                 <li>Use a clear headshot or professional photo</li>
                                 <li>Maximum file size: 10MB</li>
-                                <li>Supported formats: .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif</li>
+                                <li>Supported formats: @allowedExtensions</li>
                             </ul>
                         </div>
                     </div>
