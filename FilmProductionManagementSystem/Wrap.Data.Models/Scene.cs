@@ -12,7 +12,6 @@ using static GCommon.EntityConstants.Scene;
 
 /// <summary>
 /// Това entity ще се изпозлва за по-нататък, когато се започне изграждането на план-график възможност в апликацията
-/// За момента ще бъде игнориран
 /// </summary>
 public class Scene
 {

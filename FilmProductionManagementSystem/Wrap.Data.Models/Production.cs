@@ -12,7 +12,8 @@ using static GCommon.EntityConstants.Production;
 using static GCommon.DataFormat;
 
 /// <summary>
-/// Това Entity представлява филмова продукцията, която съдържа 1 сценарий, колекция от екип и актьори, от сцени, инструменти и снимачни дни
+/// Това Entity представлява филмова продукцията, която съдържа 1 сценарий,
+/// колекция от екип и актьори, от сцени, инструменти и снимачни дни
 /// </summary>
 public class Production
 {

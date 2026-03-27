@@ -36,10 +36,6 @@ public class ProductionAsset
     [MaxLength(FilePathMaxLength)]
     public string FilePath { get; set; } = null!;
 
-    [Unicode(false)]
-    [MaxLength(FileTypeMaxLength)]
-    public string? FileType { get; set; }
-
     [Required]
     [Column(TypeName = DateTimeTypeFormat)]
     public DateTime UploadedAt { get; set; }
