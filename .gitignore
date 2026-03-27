@@ -143,3 +143,13 @@ $RECYCLE.BIN/
 
 # Environment
 .env
+
+# User uploads (do not track)
+FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/wwwroot/img/profile/*
+FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/wwwroot/img/thumbnail/*
+FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/wwwroot/img/assets/**/*
+
+# Keep default placeholders tracked
+!FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/wwwroot/img/profile/default-profile.png
+!FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/wwwroot/img/thumbnail/default-thumbnail.png
+!FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/wwwroot/img/assets/default-asset.png

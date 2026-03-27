@@ -39,9 +39,8 @@
 
 
     <ItemGroup>
-      <Folder Include="Areas\Identity\Pages\Account\" />
       <Folder Include="Views\Production\" />
-      <Folder Include="wwwroot\img\assets\colorWheel\" />
+      <Folder Include="wwwroot\img\assets\colorwheel\" />
       <Folder Include="wwwroot\img\assets\moodboard\" />
       <Folder Include="wwwroot\img\assets\other\" />
       <Folder Include="wwwroot\img\assets\references\" />
