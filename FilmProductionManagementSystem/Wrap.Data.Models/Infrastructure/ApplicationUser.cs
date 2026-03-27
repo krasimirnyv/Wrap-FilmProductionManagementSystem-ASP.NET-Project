@@ -9,7 +9,7 @@ using Models;
 /// <summary>
 /// Има разделение на снимачен екип и актьори като роли в апликацията
 /// </summary>
-public class ApplicationUser : IdentityUser<Guid>
+public class applicationUsers : IdentityUser<Guid>
 {
     public virtual ICollection<Crew> CrewMembers { get; set; } 
         = new HashSet<Crew>();

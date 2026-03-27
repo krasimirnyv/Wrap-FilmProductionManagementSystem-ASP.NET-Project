@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using Microsoft.EntityFrameworkCore;
 
+using GCommon.Enums;
+
 using static GCommon.EntityConstants.Script;
 using static GCommon.DataFormat;
 
@@ -20,13 +22,14 @@ public class Script
     [Unicode]
     [MaxLength(TitleMaxLength)]
     public string Title { get; set; } = null!;
-
-    [Unicode]
-    [Column(TypeName = TextTypeFormat)]
-    public string? Content { get; set; }
     
     [Column(TypeName = DateTimeTypeFormat)]
     public DateTime LastEditedAt { get; set; }
+    
+    [Required]
+    public ScriptStageType StageType { get; set; }
+    
+    public ScriptRevisionType?  RevisionType { get; set; }
     
     [Required]
     [ForeignKey(nameof(Production))]
