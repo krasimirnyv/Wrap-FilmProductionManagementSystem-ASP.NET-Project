@@ -1,4 +1,8 @@
+@using Wrap.Infrastructure.Utilities.Interfaces;
+
 @model IReadOnlyCollection<ProductionViewModel>
+
+@inject ISlugGenerator SlugGenerator;
 
 @{
     ViewData[TitleDataKey] = "Productions";
@@ -63,7 +67,7 @@
                     <i class="bi bi-film"></i>
                     <p class="mt-2">No productions yet. Create your first one!</p>
                     <a asp-area="" asp-controller="Production" asp-action="Create" class="btn btn-production mt-3">
-                        <i class="bi bi-plus-circle me-2"></i>Create Production
+                        <i class="bi bi-plus-circle me-2"></i>Create Your Production
                     </a>
                 </div>
             </div>
@@ -74,7 +78,7 @@
                 @foreach (ProductionViewModel production in Model)
                 {
                     <div class="col-md-4 col-sm-6 mb-4 prod-grid-item"
-                         data-title="@production.Title.ToLower()"
+                         data-title="@production.Title"
                          data-status="@production.StatusType">
                         <div class="prod-card">
                             <img src="@production.ThumbnailPath"
@@ -89,11 +93,13 @@
                             </div>
 
                             <div class="prod-card-footer justify-content-end">
-                                <a asp-area="" asp-controller="Production" asp-action="Details" asp-route-productionId="@production.Id"
+                                <a asp-area="" asp-controller="Production" asp-action="Details" asp-route-productionId="@production.Id" 
+                                   asp-route-slug="@SlugGenerator.GenerateSlug(production.Title)"
                                    class="btn-icon-sm btn-icon-view" title="View"> Details
                                     <i class="bi bi-eye-fill"></i>
                                 </a>
-                                <a asp-area="" asp-controller="Production" asp-action="Edit" asp-route-productionId="@production.Id"
+                                <a asp-area="" asp-controller="Production" asp-action="Edit" asp-route-productionId="@production.Id" 
+                                   asp-route-slug="@SlugGenerator.GenerateSlug(production.Title)"
                                    class="btn-icon-sm btn-icon-edit" title="Edit">
                                     <i class="bi bi-pencil-fill"></i> Edit
                                 </a>

@@ -1,7 +1,12 @@
+@using Wrap.Infrastructure.Utilities.Interfaces;
+
 @model CrewProfileViewModel
 
+@inject ISlugGenerator SlugGenerator;
+
 @{
-    ViewData[TitleDataKey] = $"{Model.FirstName} {Model.LastName} - Filmmaker Profile";
+    string fullName = $"{Model.FirstName} {Model.LastName}";
+    ViewData[TitleDataKey] = $"{fullName} - Filmmaker Profile";
 }
 
 @section Styles
@@ -24,7 +29,8 @@
                              alt="@Model.FirstName @Model.LastName"
                              class="profile-image">
                         <div class="edit-icon-overlay" title="Edit Profile">
-                            <a asp-area="" asp-controller="Profile" asp-action="EditFilmmaker" class="text-white" style="text-decoration: none;">
+                            <a asp-area="" asp-controller="Profile" asp-action="EditFilmmaker" asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+                               class="text-white" style="text-decoration: none;">
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
                         </div>
@@ -146,13 +152,15 @@
                 <div class="text-center py-4 text-muted">
                     <i class="bi bi-tools" style="font-size: 3rem;"></i>
                     <p class="mt-2">No skills added yet</p>
-                    <a asp-area="" asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
+                    <a asp-area="" asp-controller="Profile" asp-action="EditSkills" asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+                       class="btn btn-custom mt-2">
                         <i class="bi bi-plus-circle me-2"></i>Edit Skills
                     </a>
                 </div>
             }
             <div class="text-center py-4 text-muted">
-                <a asp-area="" asp-controller="Profile" asp-action="EditSkills" class="btn btn-custom mt-2">
+                <a asp-area="" asp-controller="Profile" asp-action="EditSkills" asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+                   class="btn btn-custom mt-2">
                     <i class="bi bi-plus-circle me-2"></i>Edit Skills
                 </a>
             </div>
@@ -185,6 +193,7 @@
                                        asp-controller="Production"
                                        asp-action="Details"
                                        asp-route-id="@productionCrew.ProductionId"
+                                       asp-route-slug="@SlugGenerator.GenerateSlug(productionCrew.ProductionTitle!)"
                                        class="btn btn-sm btn-outline-primary">
                                         View
                                     </a>
@@ -236,6 +245,7 @@
                                        asp-controller="Scene"
                                        asp-action="Details"
                                        asp-route-id="@sceneCrew.SceneId"
+                                       asp-route-slug="@SlugGenerator.GenerateSlug(sceneCrew.SceneName!)"
                                        class="btn btn-sm btn-link">
                                         View Details
                                     </a>

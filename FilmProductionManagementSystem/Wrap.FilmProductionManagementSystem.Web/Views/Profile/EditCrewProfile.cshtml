@@ -1,10 +1,18 @@
+@using static Wrap.GCommon.EntityConstants.Crew;
 @using static Wrap.GCommon.DataFormat;
 
+@using Wrap.Infrastructure.Utilities.Interfaces;
+
 @model EditCrewProfileInputModel
+
+@inject ISlugGenerator SlugGenerator;
 
 @{
     ViewData[TitleDataKey] = "Edit Filmmaker Profile";
     string allowedExtensions = string.Join(", ", AllowedExtensions);
+    
+    string fullName = $"{Model.FirstName} {Model.LastName}";
+
 }
 
 @section Styles
@@ -25,7 +33,8 @@
                 <p class="text-muted">Update your profile information</p>
             </div>
 
-            <form asp-area="" asp-controller="Profile" asp-action="EditFilmmaker" method="post" enctype="multipart/form-data">
+            <form asp-area="" asp-controller="Profile" asp-action="EditFilmmaker" asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+                  method="post" enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <!-- Profile Image Upload -->
@@ -58,7 +67,7 @@
                             <strong>Profile Picture Tips:</strong>
                             <ul class="mb-0 mt-2">
                                 <li>Use a clear photo of you (optional)</li>
-                                <li>Maximum file size: 10MB</li>
+                                <li>Maximum file size: @MegaBytesBase MB</li>
                                 <li>Supported formats: @allowedExtensions</li>
                             </ul>
                         </div>
@@ -122,7 +131,7 @@
                                   id="biographyField"></textarea>
                         <span asp-validation-for="Biography" class="text-danger"></span>
                         <small class="form-text text-muted">
-                            <span id="bioCharCount">0</span> / 4000 characters
+                            <span id="bioCharCount">0</span> / @BiographyMaxLength characters
                         </small>
                     </div>
                 </div>
@@ -132,7 +141,8 @@
                     <button type="submit" class="btn btn-custom btn-lg me-2">
                         <i class="bi bi-check-circle me-2"></i>Save Changes
                     </button>
-                    <a asp-area="" asp-controller="Profile" asp-action="FilmmakerProfile" class="btn btn-outline-secondary btn-lg">
+                    <a asp-area="" asp-controller="Profile" asp-action="FilmmakerProfile" asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+                       class="btn btn-outline-secondary btn-lg">
                         <i class="bi bi-x-circle me-2"></i>Cancel
                     </a>
                 </div>

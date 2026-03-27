@@ -9,7 +9,8 @@ public static class ApplicationConstants
     
     /* Constants for image file size */
     public const string MaxFileSizeOptions = "FormOptions:MultipartBodyLengthLimit"; // 10485760 = 10 * 1024 * 1024; 10 MB
-    public const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
+    public const byte MegaBytesBase = 10;
+    public const long MaxFileSize = MegaBytesBase * 1024 * 1024; // 10 MB
     public const int StreamBufferSize = 81920;
 
     /* Error Paths */
@@ -94,9 +95,11 @@ public static class ApplicationConstants
     public const string Active = "Active";
     public const string Inactive = "Inactive";
     
-    /* Regular Expression */
-    public const string DisplayNameRegEx = @"([A-Z])";
-    public const string DisplayNameReplacement = @" $1";
+    // Regular Expressions for splitting text accurately at:
+    // 1) Acronym -> word boundary: "ADR Supervisor" (R + Supervisor)
+    // 2) Lower -> upper boundary: "Director Of"  (r + O)
+    public const string DisplayNameRegEx = @"(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-z])(?=[A-Z])";
+    public const string DisplayNameReplacement = " ";
     
     /* Images */
     public const string NullImageStyle = "col-12";

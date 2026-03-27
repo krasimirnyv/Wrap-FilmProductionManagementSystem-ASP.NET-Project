@@ -101,6 +101,12 @@ public class Program
         app.UseAuthorization();
         
         app.MapControllerRoute(
+            name: "slugRouteWithId",
+            pattern: "{controller=Home}/{action=Index}/{id:required}/{slug:required}");
+        app.MapControllerRoute(
+            name: "slugRoute",
+            pattern: "{controller=Home}/{action=Index}/{slug:required}");
+        app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
         

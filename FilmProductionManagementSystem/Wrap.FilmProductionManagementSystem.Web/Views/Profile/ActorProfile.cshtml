@@ -1,7 +1,12 @@
+@using Wrap.Infrastructure.Utilities.Interfaces;
+
 @model CastProfileViewModel
 
+@inject ISlugGenerator SlugGenerator;
+
 @{
-    ViewData[TitleDataKey] = $"{Model.FirstName} {Model.LastName} - Actor Profile";
+    string fullName = $"{Model.FirstName} {Model.LastName}";
+    ViewData[TitleDataKey] = $"{fullName} - Actor Profile";
 }
 
 @section Styles
@@ -24,7 +29,8 @@
                              alt="@Model.FirstName @Model.LastName" 
                              class="profile-image">
                         <div class="edit-icon-overlay" title="Edit Profile">
-                            <a asp-area="" asp-controller="Profile" asp-action="EditActor" class="text-white" style="text-decoration: none;">
+                            <a asp-area="" asp-controller="Profile" asp-action="EditActor" asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+                               class="text-white" style="text-decoration: none;">
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
                         </div>
@@ -65,7 +71,7 @@
                                     </div>
                                 </div>
                                 
-                                @if (Model.CastMemberProductions == null || Model.Roles == null || Model.Roles.Length == 0)
+                                @if (Model.CastMemberProductions == null || Model.Roles.Length == 0)
                                 {
                                     <div class="info-value">No roles. You should join movie productions to get your roles here.</div>
                                 }
@@ -158,6 +164,7 @@
                                        asp-controller="Production"
                                        asp-action="Details"
                                        asp-route-id="@productionCast.ProductionId"
+                                       asp-route-slug="@SlugGenerator.GenerateSlug(productionCast.ProductionTitle!)"
                                        class="btn btn-sm btn-outline-primary">
                                         View
                                     </a>
@@ -206,6 +213,7 @@
                                            asp-controller="Scene"
                                            asp-action="Details"
                                            asp-route-id="@sceneCast.SceneId"
+                                           asp-route-slug="@SlugGenerator.GenerateSlug(sceneCast.SceneName!)"
                                            class="btn btn-sm btn-link">
                                             View Details
                                         </a>

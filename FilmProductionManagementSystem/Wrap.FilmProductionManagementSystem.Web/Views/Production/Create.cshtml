@@ -32,14 +32,14 @@
                     <h3>Production Thumbnail</h3>
                 </div>
                 <div class="row g-4 align-items-center">
-                    <div class="col-md-5">
+                    <div class="col-md-5" style="margin-left: 23rem; margin-right: 23rem;">
                         <label for="thumbnailInput" class="thumbnail-upload-box w-100 d-block"
                                id="uploadLabel">
                             <i class="bi bi-cloud-upload"
                                style="font-size: 2.5rem; color: var(--wrap-blue);"></i>
                             <p class="mb-1 mt-2 fw-semibold"
                                style="color: var(--wrap-dark-blue);">Click to upload image</p>
-                            <small class="text-muted"> .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif · max 10 MB</small>
+                            <small class="text-muted"> .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif · max @MegaBytesBase MB</small>
                         </label>
                         <input type="file" asp-for="ThumbnailImage" class="d-none"
                                accept="image/*" id="thumbnailInput">
@@ -47,7 +47,7 @@
                     </div>
                     <div class="col-md-7" id="thumbnailPreview" style="display: none;">
                         <img id="thumbnailImage" src="#" alt="Preview"
-                             class="thumbnail-preview-img w-100">
+                             class="thumbnail-preview-img" style="margin-left: 17rem; margin-right: 18rem"> 
                         <button type="button"
                                 class="btn btn-sm btn-production-secondary mt-2"
                                 id="clearThumbnail">
