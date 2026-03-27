@@ -33,16 +33,12 @@ public static class EntityConstants
         public const int DescriptionMaxLength = 500;
         
         public const int FilePathMaxLength = 500;
-        
-        public const int FileTypeMaxLength = 100;
     }
     
     public static class Crew
     {
         public const int ProfileImagePathMaxLength = 500;
         
-        public const string DefaultProfileImagePath = "/../../Wrap.FilmProductionManagementSystem.Web/wwwroot/img/profile/default-profile.png";
-
         public const int FirstNameMinLength = 2;
         public const int FirstNameMaxLength = 150;
         
@@ -57,8 +53,6 @@ public static class EntityConstants
     public static class Cast
     {
         public const int ProfileImagePathMaxLength = 500;
-
-        public const string DefaultProfileImagePath = "/../../Wrap.FilmProductionManagementSystem.Web/wwwroot/img/profile/default-profile.png";
         
         public const int FirstNameMinLength = 2;
         public const int FirstNameMaxLength = 150;

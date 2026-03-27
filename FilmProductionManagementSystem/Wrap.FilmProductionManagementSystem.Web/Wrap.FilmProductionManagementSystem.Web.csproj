@@ -41,6 +41,11 @@
     <ItemGroup>
       <Folder Include="Areas\Identity\Pages\Account\" />
       <Folder Include="Views\Production\" />
+      <Folder Include="wwwroot\img\assets\colorWheel\" />
+      <Folder Include="wwwroot\img\assets\moodboard\" />
+      <Folder Include="wwwroot\img\assets\other\" />
+      <Folder Include="wwwroot\img\assets\references\" />
+      <Folder Include="wwwroot\img\assets\storyboard\" />
       <Folder Include="wwwroot\img\profile\" />
       <Folder Include="wwwroot\img\thumbnail\" />
       <Folder Include="wwwroot\lib\qrcode\" />

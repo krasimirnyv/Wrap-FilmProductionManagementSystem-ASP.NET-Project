@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Models;
+using GCommon.Enums;
+
+using static Common.EntityIdentificationConstants;
 
 public class ScriptConfiguration : IEntityTypeConfiguration<Script>
 {
@@ -15,17 +18,66 @@ public class ScriptConfiguration : IEntityTypeConfiguration<Script>
             .HasForeignKey(sb => sb.ScriptId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        entity.HasData(scripts);
+        entity.HasData(Scripts);
     }
     
-    private readonly Script[] scripts =
+    private static readonly DateTime SeedLastEditedAtUtc = new(2026, 03, 26, 13, 22, 05, DateTimeKind.Utc);
+    
+    private static readonly Script[] Scripts =
     [
         new()
         {
-            Id = Guid.Parse("36ca9b58-d902-4195-bf80-2e6518ad3c6d"),
+            Id = ScriptId_01,
             Title = "Test Screenplay",
-            LastEditedAt = DateTime.UtcNow,
-            ProductionId = Guid.Parse("809f7100-5b1d-4eee-8b82-8e4084ef0928")
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.Draft,
+            RevisionType = null,
+            ProductionId = ProductionIdTestFilm
+        },
+        new()
+        {
+            Id = ScriptId_02,
+            Title = "Midnight Dreams — Draft",
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.Draft,
+            RevisionType = null,
+            ProductionId = ProductionIdMidnightDreams
+        },
+        new()
+        {
+            Id = ScriptId_03,
+            Title = "Paper Planes — Shooting Script",
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.ShootingScript,
+            RevisionType = ScriptRevisionType.PinkRevision,
+            ProductionId = ProductionIdPaperPlanes
+        },
+        new()
+        {
+            Id = ScriptId_04,
+            Title = "The Last Take — Blue Revision",
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.ProductionDraft,
+            RevisionType = ScriptRevisionType.BlueRevision,
+            ProductionId = ProductionIdTheLastTake
+        },
+        new()
+        {
+            Id = ScriptId_05,
+            Title = "Neon Skyline — Outline",
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.Outline,
+            RevisionType = null,
+            ProductionId = ProductionIdNeonSkyline
+        },
+        new()
+        {
+            Id = ScriptId_06,
+            Title = "Wild Tracks — Polish",
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.Polish,
+            RevisionType = ScriptRevisionType.YellowRevision,
+            ProductionId = ProductionIdWildTracks
         }
     ];
 }

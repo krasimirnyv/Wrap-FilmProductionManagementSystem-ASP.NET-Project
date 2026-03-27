@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Models.MappingEntities;
+using GCommon.Enums;
+
+using static Common.EntityIdentificationConstants;
 
 public class ProductionCrewConfiguration : IEntityTypeConfiguration<ProductionCrew>
 {
@@ -14,11 +17,29 @@ public class ProductionCrewConfiguration : IEntityTypeConfiguration<ProductionCr
         entity
             .HasOne(pc => pc.Production)
             .WithMany(p => p.ProductionCrewMembers)
-            .HasForeignKey(pc => pc.ProductionId);
+            .HasForeignKey(pc => pc.ProductionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         entity
             .HasOne(pc => pc.CrewMember)
             .WithMany(c => c.CrewMemberProductions)
-            .HasForeignKey(pc => pc.CrewMemberId);
+            .HasForeignKey(pc => pc.CrewMemberId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasData(ProductionCrewSeed);
     }
+
+    private static readonly ProductionCrew[] ProductionCrewSeed =
+    [
+        new() { ProductionId = ProductionIdFestivalRun, CrewMemberId = CrewId1, RoleType = CrewRoleType.Director },
+        new() { ProductionId = ProductionIdFestivalRun, CrewMemberId = CrewId2, RoleType = CrewRoleType.DirectorOfPhotography },
+        new() { ProductionId = ProductionIdFestivalRun, CrewMemberId = CrewId3, RoleType = CrewRoleType.ProductionSoundMixer },
+
+        new() { ProductionId = ProductionIdOnHold, CrewMemberId = CrewId1, RoleType = CrewRoleType.Director },
+
+        new() { ProductionId = ProductionIdWildTracks, CrewMemberId = CrewId2, RoleType = CrewRoleType.CameraOperator },
+
+        new() { ProductionId = ProductionIdTheLastTake, CrewMemberId = CrewId3, RoleType = CrewRoleType.BoomOperator },
+        new() { ProductionId = ProductionIdTheLastTake, CrewMemberId = CrewId2, RoleType = CrewRoleType.Colorist }
+    ];
 }

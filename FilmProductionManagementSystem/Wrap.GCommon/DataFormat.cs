@@ -21,7 +21,8 @@ public static class DataFormat
     public const string ThumbnailFolderName = "thumbnail";
     public const string DefaultProfilePath = "/img/profile/default-profile.png";
     public const string DefaultThumbnailPath = "/img/thumbnail/default-thumbnail.png";
-
+    public const string DefaultAssetPath = "/img/assets/default-asset.png";
+    
     public const ushort MaxPixelDimension = 6000;
     public const ushort OutputSizeProfileImage = 512;
     public const ushort OutputSizeThumbnailHeight = 512;
