@@ -9,8 +9,7 @@
     ViewData[TitleDataKey] = $"{fullName} - Filmmaker Profile";
 }
 
-@section Styles
-{
+@section Styles {
     <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true"/>
 }
 
@@ -262,22 +261,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        // Add smooth scroll animations
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.section-card, .profile-header-card');
-            cards.forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    card.style.transition = 'all 0.5s ease';
-                    
-                    setTimeout(() => {
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, 100);
-                }, index * 100);
-            });
-        });
-    </script>
+    <script src="~/js/profile/profile.js" asp-append-version="true"></script>
 }

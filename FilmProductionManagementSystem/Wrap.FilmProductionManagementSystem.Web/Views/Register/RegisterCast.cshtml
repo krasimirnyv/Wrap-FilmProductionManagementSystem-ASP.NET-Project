@@ -4,8 +4,7 @@
     ViewData[TitleDataKey] = "Join as Actor";
 }
 
-@section Styles
-{
+@section Styles {
     <link rel="stylesheet" href="~/css/registration.css" asp-append-version="true" />
 }
 
@@ -168,52 +167,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial"/>
-
-    <script>
-        // Character counter for biography
-        $(document).ready(function() {
-            const bioField = $('#Biography');
-            const counter = $('#bioCharCount');
-
-            bioField.on('input', function() {
-                counter.text($(this).val().length);
-            });
-
-            // Initialize
-            counter.text(bioField.val().length);
-        });
-    </script>
-
-    <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const input = document.getElementById("profileImageInput");
-  const img = document.getElementById("previewImg");
-  const preview = document.getElementById("imagePreview");
-  const placeholder = preview?.querySelector(".placeholder-text");
-
-  if (!input || !img || !preview) return;
-
-  input.addEventListener("change", () => {
-      const file = input.files && input.files[0];
-      if (!file) {
-          img.style.display = "none";
-          preview.classList.remove("has-image");
-          if (placeholder) placeholder.style.display = "";
-          return;
-      }
-
-      if (file.size > @MaxFileSize) {
-          alert("File size must be less than 5MB.");
-          input.value = "";
-          return;
-      }
-
-      const url = URL.createObjectURL(file);
-      img.src = url;
-      img.style.display = "block";
-      preview.classList.add("has-image");
-      if (placeholder) placeholder.style.display = "none";
-  });
-});
-    </script>
+    
+    <script src="~/js/registration/registration.js" asp-append-version="true"></script>
 }
