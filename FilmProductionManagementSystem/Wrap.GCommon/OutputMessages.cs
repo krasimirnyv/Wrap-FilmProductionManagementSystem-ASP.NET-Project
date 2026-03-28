@@ -138,5 +138,7 @@ public static class OutputMessages
 
         public const string UserIsNull = "User is null or empty.";
         public const string ModelIsNull = "ViewModel is null or empty. Please try again later.";
+        
+        public const string NavBarFailure = "Navbar unexpectadly failed to load data. Please try again later.";
     }
 }

@@ -1,10 +1,10 @@
 namespace Wrap.Data.Repository.Interfaces;
 
-using Wrap.Services.Models.NavBar;
+using Models;
 
 public interface INavBarRepository
 {
-    Task<NavBarUserDto?> GetNavBarCrewUserAsync(Guid userId);
+    Task<Crew?> GetCrewUserAsync(Guid userId);
     
-    Task<NavBarUserDto?> GetNavBarCastUserAsync(Guid userId);
+    Task<Cast?> GetCastUserAsync(Guid userId);
 }

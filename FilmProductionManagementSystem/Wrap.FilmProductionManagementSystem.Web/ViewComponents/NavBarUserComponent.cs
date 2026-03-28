@@ -11,7 +11,8 @@ using Wrap.Services.Models.NavBar;
 using static Wrap.GCommon.OutputMessages.NavBar;
 
 public class NavBarUserComponent(UserManager<ApplicationUser> userManager,
-                                INavBarService navBarService) : ViewComponent
+                                INavBarService navBarService,
+                                ILogger<NavBarUserComponent> logger) : ViewComponent
 {
     public async Task<IViewComponentResult> InvokeAsync()
     {
@@ -22,11 +23,32 @@ public class NavBarUserComponent(UserManager<ApplicationUser> userManager,
         bool isValidGuid = Guid.TryParse(userId, out Guid userGuid);
         if (!isValidGuid)
             return View("BadRequestNavBar", UserIsNull);
-        
-        NavBarUserDto? dto = await navBarService.GetNavBarUserAsync(userGuid);
-        if (dto is null)
-            return View("BadRequestNavBar", ModelIsNull);
 
+        try
+        {
+            NavBarUserDto? dto = await navBarService.GetNavBarUserAsync(userGuid);
+
+            if (dto is null)
+                return View("BadRequestNavBar", ModelIsNull);
+
+            NavBarUserViewModel viewModel = MapToNavBarUserViewModelFromDto(dto);
+
+            return View(viewModel);
+        }
+        catch (ArgumentNullException ane)
+        {
+            logger.LogError(string.Format(UserNotFoundMessage, userId) + ane.Message);
+            return View("BadRequestNavBar", UserIsNull + ane.Message);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(NavBarFailure + e.Message);
+            return View("BadRequestNavBar", NavBarFailure + e.Message);
+        }
+    }
+
+    private static NavBarUserViewModel MapToNavBarUserViewModelFromDto(NavBarUserDto dto)
+    {
         NavBarUserViewModel viewModel = new NavBarUserViewModel
         {
             UserName = dto.UserName,
@@ -34,6 +56,6 @@ public class NavBarUserComponent(UserManager<ApplicationUser> userManager,
             Role = dto.Role,
         };
         
-        return View(viewModel);
+        return viewModel;
     }
 }

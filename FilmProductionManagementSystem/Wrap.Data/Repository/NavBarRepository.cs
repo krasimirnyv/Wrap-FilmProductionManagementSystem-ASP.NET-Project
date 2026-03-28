@@ -3,43 +3,28 @@ namespace Wrap.Data.Repository;
 using Microsoft.EntityFrameworkCore;
 
 using Interfaces;
-using Wrap.Services.Models.NavBar;
-using static GCommon.OutputMessages;
+using Models;
 
 public class NavBarRepository(FilmProductionDbContext dbContext) 
     : BaseRepository(dbContext), INavBarRepository
 {
-    public async Task<NavBarUserDto?> GetNavBarCrewUserAsync(Guid userId)
+    public async Task<Crew?> GetCrewUserAsync(Guid userId)
     {
-        NavBarUserDto crewDto = await Context!
+        Crew? crew = await Context!
             .CrewMembers
             .AsNoTracking()
-            .Where(c => c.UserId == userId)
-            .Select(c => new NavBarUserDto
-            {
-                UserName = c.User.UserName!,
-                ProfileImagePath = c.ProfileImagePath!,
-                Role = CrewString
-            })
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(c => c.UserId == userId);
         
-        return crewDto;
+        return crew;
     }
 
-    public async Task<NavBarUserDto?> GetNavBarCastUserAsync(Guid userId)
+    public async Task<Cast?> GetCastUserAsync(Guid userId)
     {
-        NavBarUserDto castDto = await Context!
+        Cast? cast = await Context!
             .CastMembers
             .AsNoTracking()
-            .Where(c => c.UserId == userId)
-            .Select(c => new NavBarUserDto
-            {
-                UserName = c.User.UserName!,
-                ProfileImagePath = c.ProfileImagePath,
-                Role = CastString
-            })
-            .SingleOrDefaultAsync();
+            .SingleOrDefaultAsync(c => c.UserId == userId);
         
-        return castDto;
+        return cast;
     }
 }

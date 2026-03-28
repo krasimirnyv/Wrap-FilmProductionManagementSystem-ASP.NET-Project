@@ -1,23 +1,43 @@
 namespace Wrap.Services.Core;
 
-using Models.NavBar;
 using Interfaces;
 using Wrap.Data.Repository.Interfaces;
+using Wrap.Data.Models;
+using Models.NavBar;
 
+using static GCommon.OutputMessages;
 using static GCommon.OutputMessages.NavBar;
     
-public class NavBarService(INavBarRepository repository) : INavBarService
+public class NavBarService(INavBarRepository navBarRepository) : INavBarService
 {
     public async Task<NavBarUserDto?> GetNavBarUserAsync(Guid userId)
     {
-        NavBarUserDto? crew = await repository.GetNavBarCrewUserAsync(userId);
+        Crew? crew = await navBarRepository.GetCrewUserAsync(userId);
         if (crew is not null)
-            return crew;
-
-        NavBarUserDto? cast = await repository.GetNavBarCastUserAsync(userId);
-        if (cast is not null)
-            return cast;
+        {
+            NavBarUserDto navBarDto = new NavBarUserDto
+            {
+                UserName = crew.User.UserName!,
+                ProfileImagePath = crew.ProfileImagePath!,
+                Role = CrewString
+            };
+            
+            return navBarDto;
+        }
         
-        throw new Exception(string.Format(UserNotFoundMessage, userId));
+        Cast? cast = await navBarRepository.GetCastUserAsync(userId);
+        if (cast is not null)
+        {
+            NavBarUserDto navBarDto = new NavBarUserDto
+            {
+                UserName = cast.User.UserName!,
+                ProfileImagePath = cast.ProfileImagePath,
+                Role = CastString
+            };
+            
+            return navBarDto;
+        }
+        
+        throw new ArgumentNullException(string.Format(UserNotFoundMessage, userId));
     }
 }
