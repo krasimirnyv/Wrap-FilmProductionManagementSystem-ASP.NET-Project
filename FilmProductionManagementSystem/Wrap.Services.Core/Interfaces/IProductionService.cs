@@ -2,15 +2,23 @@ namespace Wrap.Services.Core.Interfaces;
 
 using Models.Production;
 
-// using ViewModels.Production;
+using static GCommon.ApplicationConstants;
 
 public interface IProductionService
 {
     /// <summary>
     /// Gets all productions with basic info for display in a list/overview page
+    /// <param name="pageNumber">int</param>
+    /// <param name="productionsPerPage">int</param>
     /// </summary>
     /// <returns>IReadOnlyCollection<ProductionDto> collection of productions</returns>
-    Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync();
+    Task<ICollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, int productionsPerPage = DefaultProductionsPerPage);
+
+    /// <summary>
+    /// Returns the count of the productions
+    /// </summary>
+    /// <returns>int count</returns>
+    Task<int> GetProductionsCountAsync();
     
     /// <summary>
     /// Gets detailed information about a specific production by its ID

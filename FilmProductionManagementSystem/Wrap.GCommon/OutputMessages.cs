@@ -45,6 +45,8 @@ public static class OutputMessages
     
     public static class Production
     {
+        public const string PaginationFailedMessage = "Error loading pagination. Please try again later.";
+        
         public const string NotFoundMessage = "Production's ID: {0} - is not found!";
         public const string IdIsNullOrEmptyMessage = "Production's ID: {0} is in wrong format, null or empty.";
 

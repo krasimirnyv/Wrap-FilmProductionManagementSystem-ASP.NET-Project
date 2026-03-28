@@ -10,11 +10,32 @@ using Wrap.Services.Models.Production.NestedDtos;
 public class ProductionRepository(FilmProductionDbContext dbContext) 
     : BaseRepository(dbContext), IProductionRepository
 {
-    public async Task<IReadOnlyCollection<ProductionDto>> GetAllAsync()
+    public async Task<ICollection<ProductionDto>> GetAllAsync(int? skipCount = null, int? takeCount = null)
     {
-        IReadOnlyCollection<ProductionDto> dto = await Context!
+        IQueryable<Production> productionsQuery = Context!
             .Productions
             .AsNoTracking()
+            .OrderBy(p => p.Title)
+            .ThenBy(p => p.Budget)
+            .ThenBy(p => p.Description)
+            .ThenBy(p => p.StatusType)
+            .ThenBy(p => p.Id);
+        
+        if (skipCount.HasValue && skipCount > 0)
+        {
+            productionsQuery = productionsQuery
+                .Skip(skipCount.Value)
+                .AsQueryable();
+        }
+
+        if (takeCount.HasValue && takeCount > 0)
+        {
+            productionsQuery = productionsQuery
+                .Take(takeCount.Value)
+                .AsQueryable();
+        }
+        
+        ICollection<ProductionDto> dto = await productionsQuery
             .Select(p => new ProductionDto
             {
                 Id = p.Id,
@@ -22,12 +43,21 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
                 ThumbnailPath = p.Thumbnail,
                 StatusType = p.StatusType
             })
-            .OrderBy(p => p.Title)
-            .ThenBy(p => p.StatusType)
-            .ThenBy(p => p.Id)
             .ToArrayAsync();
-
+        
         return dto;
+    }
+
+    public async Task<int> CountAsync()
+    {
+        IQueryable<Production> productionsQuery = Context!
+            .Productions
+            .AsNoTracking()
+            .AsQueryable();
+        
+        int productionsCount = await productionsQuery.CountAsync();
+        
+        return productionsCount;
     }
 
     public async Task<Production?> GetByIdAsNoTrackingAsync(Guid productionId)

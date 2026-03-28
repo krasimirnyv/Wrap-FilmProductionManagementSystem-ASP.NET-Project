@@ -24,14 +24,23 @@ public class ProductionService(IProductionRepository repository,
     private static string GetStatusAbstractClass(ProductionStatusType statusType)
         => StatusAbstractMap.GetValueOrDefault(statusType, DefaultStatus);
     
-    public async Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync()
+    public async Task<ICollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, int productionsPerPage = DefaultProductionsPerPage)
     {
-        IReadOnlyCollection<ProductionDto> data = await repository.GetAllAsync();
+        int skipCount = (pageNumber - 1) * productionsPerPage;
+        
+        ICollection<ProductionDto> data = await repository.GetAllAsync(skipCount, productionsPerPage);
 
         foreach (ProductionDto productionDto in data)
             productionDto.StatusAbstractClass = GetStatusAbstractClass(productionDto.StatusType);
 
         return data;
+    }
+
+    public async Task<int> GetProductionsCountAsync()
+    {
+        int productionsCount = await repository.CountAsync();
+        
+        return productionsCount;
     }
 
     public async Task<DetailsProductionDto?> GetProductionDetailsAsync(string? id)

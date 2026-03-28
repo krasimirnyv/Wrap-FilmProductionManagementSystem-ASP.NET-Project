@@ -111,4 +111,6 @@ public static class ApplicationConstants
     public const string SelectPhase = "— Select Phase first —";
     public const string SelectStatus = "— Select Status —";
 
+    /* Pagination */
+    public const int DefaultProductionsPerPage = 9;
 }

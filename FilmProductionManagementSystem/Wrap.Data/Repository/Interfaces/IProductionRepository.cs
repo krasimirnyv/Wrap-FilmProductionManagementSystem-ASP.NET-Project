@@ -5,7 +5,9 @@ using Wrap.Services.Models.Production;
 
 public interface IProductionRepository
 {
-    Task<IReadOnlyCollection<ProductionDto>> GetAllAsync();
+    Task<ICollection<ProductionDto>> GetAllAsync(int? skipCount = null, int? takeCount = null);
+
+    Task<int> CountAsync();
     
     Task<Production?> GetByIdAsNoTrackingAsync(Guid productionId);
     
