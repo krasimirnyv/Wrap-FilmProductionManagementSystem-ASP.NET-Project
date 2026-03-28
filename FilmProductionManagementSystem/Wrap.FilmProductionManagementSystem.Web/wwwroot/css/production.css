@@ -599,3 +599,21 @@
         font-size: 0.85rem;
     }
 }
+
+/* Production Index pagination – Bootstrap-like, but aligned to WRAP */
+.production-pagination {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: .5rem;
+    padding: .125rem;
+    box-shadow: 0 .25rem .75rem rgba(0,0,0,.06);
+}
+
+.production-pagination .page-item .page-link {
+    border: 0;
+    border-radius: .375rem;
+}
+
+.production-pagination .page-item.disabled .page-link {
+    opacity: .55;
+}

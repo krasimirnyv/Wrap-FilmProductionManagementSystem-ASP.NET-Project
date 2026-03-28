@@ -1,6 +1,6 @@
 @using Wrap.Infrastructure.Utilities.Interfaces;
 
-@model IReadOnlyCollection<ProductionViewModel>
+@model AllProductionsIndexViewModel
 
 @inject ISlugGenerator SlugGenerator;
 
@@ -30,7 +30,7 @@
             </a>
         </div>
 
-        @* ── Search / Filter Bar ── *@
+        @* ── Search Bar ── *@
         <div class="section-card py-3 px-4">
             <div class="row g-2 align-items-center">
                 <div class="col-md-6">
@@ -40,10 +40,12 @@
                             <i class="bi bi-search"></i>
                         </span>
                         <input type="text" id="searchInput" class="form-control"
-                               placeholder="Search by title…" />
+                               placeholder="Search by production's title…" />
                     </div>
                 </div>
-                <div class="col-md-3">
+                
+                @* ── Filter Bar ── *@
+                <div class="col-md-2">
                     <select id="statusFilter" class="form-select">
                         <option value="">All Phases</option>
                         <option value="Pre-production">Pre-production</option>
@@ -52,14 +54,103 @@
                         <option value="Distribution">Distribution</option>
                     </select>
                 </div>
-                <div class="col-md-3 text-end">
-                    <span class="text-muted" id="resultsCount">@Model.Count() production(s)</span>
+                
+                @* ── Pagination ── *@
+                <div class="col-md-4 d-flex justify-content-end align-items-center gap-3">
+
+                    <span class="text-muted small"
+                          id="resultsCount"
+                          data-total="@Model.TotalCount">
+                        @Model.Count of @Model.TotalCount @(Model.TotalCount == 1 ? "production" : "productions")
+                    </span>
+                    
+                    @{
+                        int page = Model.PageNumber;
+                        int total = Model.TotalPages;
+                        int chunkSize = Model.ShowingPages;
+
+                        // chunk start: 1,4,7,...
+                        int chunkStart = ((page - 1) / chunkSize) * chunkSize + 1;
+                        int chunkEnd = Math.Min(chunkStart + chunkSize - 1, total);
+
+                        bool showPrevious = page > 1;
+                        bool showNext = page < total;
+
+                        bool showEllipsis = total > chunkSize && chunkEnd < total;
+                        int ellipsisTarget = chunkStart + chunkSize; // next chunk start
+                    }
+
+                    <nav aria-label="Productions pagination" id="paginationWrap" >
+                        <ul class="pagination pagination-sm mb-0 production-pagination" id="productionsPagination">
+
+                            @* Previous (hidden on page 1) *@
+                            @if (showPrevious)
+                            {
+                                <li class="page-item" id="pagePrev">
+                                    <a asp-area=""
+                                       asp-controller="Production"
+                                       asp-action="Index"
+                                       asp-route-pageNumber="@(page - 1)"
+                                       class="page-link">
+                                        Previous
+                                    </a>
+                                </li>
+                            }
+
+                            @* Page numbers (chunk of 3) *@
+                            @for (int i = chunkStart; i <= chunkEnd; i++)
+                            {
+                                @if (i > 0)
+                                {
+                                    <li class="page-item @(page == i ? "active" : string.Empty)" aria-current="@(page == i ? "page" : null)">
+                                        <a asp-area=""
+                                           asp-controller="Production"
+                                           asp-action="Index"
+                                           asp-route-pageNumber="@i"
+                                           class="page-link">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+                            }
+
+                            @* Ellipsis (hidden if <= 3 pages OR no more chunks) *@
+                            @if (showEllipsis)
+                            {
+                                <li class="page-item">
+                                    <a asp-area=""
+                                       asp-controller="Production"
+                                       asp-action="Index"
+                                       asp-route-pageNumber="@ellipsisTarget"
+                                       class="page-link"
+                                       aria-label="Next pages">
+                                        ...
+                                    </a>
+                                </li>
+                            }
+
+                            @* Next (hidden on last page) *@
+                            @if (showNext)
+                            {
+                                <li class="page-item" id="pageNext">
+                                    <a asp-area=""
+                                       asp-controller="Production"
+                                       asp-action="Index"
+                                       asp-route-pageNumber="@(page + 1)"
+                                       class="page-link">
+                                        Next
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
                 </div>
+                
             </div>
         </div>
 
         @* ── Grid ── *@
-        @if (!Model.Any())
+        @if (!Model.Productions.Any())
         {
             <div class="section-card mt-4">
                 <div class="empty-state">
@@ -74,7 +165,7 @@
         else
         {
             <div class="row mt-4" id="productionsGrid">
-                @foreach (ProductionViewModel production in Model)
+                @foreach (ProductionViewModel production in Model.Productions)
                 {
                     <div class="col-md-4 col-sm-6 mb-4 prod-grid-item"
                          data-title="@production.Title"

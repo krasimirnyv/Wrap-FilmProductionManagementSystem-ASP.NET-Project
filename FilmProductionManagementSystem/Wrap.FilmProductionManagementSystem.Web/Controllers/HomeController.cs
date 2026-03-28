@@ -73,6 +73,18 @@ public class HomeController(IHomeService homeService) : BaseController
         return viewModel;
     }
     
+    [HttpGet]
+    public IActionResult FindFilmmakers()
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpGet]
+    public IActionResult FindActors()
+    {
+        throw new NotImplementedException();
+    }
+    
     private string ResolveAbstractionStatus(IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap, ProductionStatusType statusType)
     {
         string? key = statusMap

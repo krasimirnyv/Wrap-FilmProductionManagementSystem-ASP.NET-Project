@@ -18,14 +18,20 @@ public class ProductionController(IProductionService productionService,
                                   ILogger<ProductionController> logger) : BaseController
 {
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(AllProductionsIndexViewModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            TempData[ErrorTempDateKey] = PaginationFailedMessage;
+            return RedirectToAction("Dashboard", "Home");
+        }
+        
         try
         {
-            IReadOnlyCollection<ProductionDto> productionDtos = await productionService.GetAllProductionsAsync();
-            IReadOnlyCollection<ProductionViewModel> viewModels = MapToProductionViewModelsFromDtos(productionDtos);
-                
-            return View(viewModels);
+            ICollection<ProductionDto> productionDtos = await productionService.GetAllProductionsAsync(model.PageNumber);
+            AllProductionsIndexViewModel viewModel = await MapToAllProductionsIndexViewModelFromDto(model, productionDtos);
+            
+            return View(viewModel);
         }
         catch (Exception e)
         {
@@ -182,12 +188,12 @@ public class ProductionController(IProductionService productionService,
         }
     }
     
+    // TODO: Future functionality - not implemented yet but will be added in the future.
     public IActionResult AllActiveProjects()
     {
         throw new NotImplementedException();
     }
     
-    // TODO: Future functionality - not implemented yet but will be added in the future.
     public IActionResult AddMember()
     {
         throw new NotImplementedException();
@@ -198,8 +204,29 @@ public class ProductionController(IProductionService productionService,
         throw new NotImplementedException();
     }
     
+    private async Task<AllProductionsIndexViewModel> MapToAllProductionsIndexViewModelFromDto(AllProductionsIndexViewModel model, ICollection<ProductionDto> productionDtos)
+    {
+        int productionsTotalCount = await productionService.GetProductionsCountAsync();
+        IReadOnlyCollection<ProductionViewModel> productions = MapToProductionViewModelsFromDtos(productionDtos);
+        
+        AllProductionsIndexViewModel viewModel = new AllProductionsIndexViewModel
+        {
+            PageNumber = model.PageNumber,
+            TotalPages = (int)Math.Ceiling(productionsTotalCount / (double)DefaultProductionsPerPage),
+            ShowingPages = model.ShowingPages,
+            Productions = productions,
+            TotalCount = productionsTotalCount
+        };
+
+        if (viewModel.PageNumber > viewModel.TotalPages && viewModel.TotalPages != 0)
+            viewModel.PageNumber = viewModel.TotalPages;
+        else if (viewModel.PageNumber < 1)
+            viewModel.PageNumber = 1;
+        
+        return viewModel;
+    }
     
-    private static IReadOnlyCollection<ProductionViewModel> MapToProductionViewModelsFromDtos(IReadOnlyCollection<ProductionDto> productionDtos)
+    private static IReadOnlyCollection<ProductionViewModel> MapToProductionViewModelsFromDtos(ICollection<ProductionDto> productionDtos)
     {
         IReadOnlyCollection<ProductionViewModel> viewModels = productionDtos
             .Select(dto => new ProductionViewModel

@@ -22,19 +22,19 @@
 </li>
 </ul>
 
-<form class="wrap-search me-4" role="search" asp-controller="Search" asp-action="Index">
-    <div class="wrap-search__group">
-        <button type="submit" class="wrap-search__icon" aria-label="Search">
-            <i class="bi bi-search"></i>
-        </button>
-
-        <input class="wrap-search__input"
-               type="search"
-               name="query"
-               placeholder="Search projects, crew, scripts..."
-               aria-label="Search" />
-    </div>
-</form>
+@* <form class="wrap-search me-4" role="search" asp-controller="Search" asp-action="Index"> *@
+@*     <div class="wrap-search__group"> *@
+@*         <button type="submit" class="wrap-search__icon" aria-label="Search"> *@
+@*             <i class="bi bi-search"></i> *@
+@*         </button> *@
+@* *@
+@*         <input class="wrap-search__input" *@
+@*                type="search" *@
+@*                name="query" *@
+@*                placeholder="Search projects, crew, scripts..." *@
+@*                aria-label="Search" /> *@
+@*     </div> *@
+@* </form> *@
 
 @if (User.Identity is { IsAuthenticated: true })
 {
