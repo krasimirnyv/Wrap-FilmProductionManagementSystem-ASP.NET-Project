@@ -1,5 +1,6 @@
 namespace Wrap.Data.Models.MappingEntities;
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 using GCommon.Enums;
@@ -19,5 +20,6 @@ public class SceneCrew
 
     public virtual Crew CrewMember { get; set; } = null!;
     
+    [Required]
     public CrewRoleType RoleType { get; set; }
 }
