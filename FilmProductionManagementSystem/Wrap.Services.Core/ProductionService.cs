@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Hosting;
 
 using Interfaces;
 using Models.Production;
+using Models.Production.NestedDtos;
 using Data.Models;
+using Wrap.Data.Models.MappingEntities;
 using Wrap.Data.Repository.Interfaces;
 using GCommon.Enums;
 using GCommon.UI;
@@ -13,7 +15,7 @@ using static Utilities.HelperSaveThumbnail;
 using static GCommon.ApplicationConstants;
 using static GCommon.OutputMessages.Production;
 
-public class ProductionService(IProductionRepository repository,
+public class ProductionService(IProductionRepository productionRepository,
                                IWebHostEnvironment environment) : IProductionService
 {
     
@@ -24,21 +26,32 @@ public class ProductionService(IProductionRepository repository,
     private static string GetStatusAbstractClass(ProductionStatusType statusType)
         => StatusAbstractMap.GetValueOrDefault(statusType, DefaultStatus);
     
-    public async Task<ICollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, int productionsPerPage = DefaultProductionsPerPage)
+    public async Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, int productionsPerPage = DefaultProductionsPerPage)
     {
         int skipCount = (pageNumber - 1) * productionsPerPage;
         
-        ICollection<ProductionDto> data = await repository.GetAllAsync(skipCount, productionsPerPage);
+        IReadOnlyCollection<Production> production = await productionRepository.GetAllAsync(skipCount, productionsPerPage);
 
-        foreach (ProductionDto productionDto in data)
+        IReadOnlyCollection<ProductionDto> dto = production
+            .Select(p => new ProductionDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                ThumbnailPath = p.Thumbnail,
+                StatusType = p.StatusType
+            })
+            .ToArray()
+            .AsReadOnly();
+            
+        foreach (ProductionDto productionDto in dto)
             productionDto.StatusAbstractClass = GetStatusAbstractClass(productionDto.StatusType);
 
-        return data;
+        return dto;
     }
 
     public async Task<int> GetProductionsCountAsync()
     {
-        int productionsCount = await repository.CountAsync();
+        int productionsCount = await productionRepository.CountAsync();
         
         return productionsCount;
     }
@@ -49,13 +62,100 @@ public class ProductionService(IProductionRepository repository,
         if (productionId is null)
             return null;
 
-        DetailsProductionDto? dto = await repository.GetDetailsAsync(productionId.Value);
-        if (dto is null)
+        (Production?                              production, 
+            IReadOnlyCollection<ProductionCrew>?  productionCrews, 
+            IReadOnlyCollection<ProductionCast>?  productionCasts, 
+            IReadOnlyCollection<Scene>?           productionScenes, 
+            IReadOnlyCollection<ProductionAsset>? productionAssets, 
+            IReadOnlyCollection<ShootingDay>?     productionShootingDays) data = await productionRepository.GetDetailsAsync(productionId.Value);
+        
+        if (data is (production:             null,
+                     productionCrews:        null,
+                     productionCasts:        null, 
+                     productionScenes:       null,
+                     productionAssets:       null, 
+                     productionShootingDays: null))
             return null;
+
+        DetailsProductionDto baseDto = new DetailsProductionDto
+        {
+            Id = data.production!.Id,
+            Thumbnail = data.production.Thumbnail,
+            Title = data.production.Title,
+            Description = data.production.Description,
+            Budget = data.production.Budget,
+            StatusType = data.production.StatusType,
+            StatusStartDate = data.production.StatusStartDate,
+            StatusEndDate = data.production.StatusEndDate,
+            ScriptId = data.production.Script?.Id
+        };
+
+        IReadOnlyCollection<ProductionCrewMemberDto> crewDtos = data
+            .productionCrews!
+            .Select(pc => new ProductionCrewMemberDto
+            {
+                ProfileImagePath = pc.CrewMember.ProfileImagePath,
+                FirstName = pc.CrewMember.FirstName,
+                LastName = pc.CrewMember.LastName,
+                Role = pc.RoleType
+            })
+            .ToArray()
+            .AsReadOnly();
+
+        IReadOnlyCollection<ProductionCastMemberDto> castDtos = data
+            .productionCasts!
+            .Select(pc => new ProductionCastMemberDto
+            {
+                ProfileImagePath = pc.CastMember.ProfileImagePath,
+                FirstName = pc.CastMember.FirstName,
+                LastName = pc.CastMember.LastName,
+                Role = pc.Role,
+                Age = pc.CastMember.Age,
+                Gender = pc.CastMember.Gender
+            })
+            .ToArray()
+            .AsReadOnly();
+
+        IReadOnlyCollection<ProductionSceneDto> sceneDtos = data
+            .productionScenes!
+            .Select(s => new ProductionSceneDto
+            {
+                SceneNumber = s.SceneNumber,
+                SceneType = s.SceneType,
+                SceneName = s.SceneName,
+                Location = s.Location
+            })
+            .ToArray()
+            .AsReadOnly();
         
-        dto.StatusAbstractClass = GetStatusAbstractClass(dto.StatusType);
+        IReadOnlyCollection<ProductionAssetDto> assetDtos = data
+            .productionAssets!
+            .Select(pa => new ProductionAssetDto
+            {
+                Title = pa.Title,
+                AssetType = pa.AssetType
+            })
+            .ToArray()
+            .AsReadOnly();
+
+        IReadOnlyCollection<ProductionShootingDayDto> shootingDayDtos = data
+            .productionShootingDays!
+            .Select(sd => new ProductionShootingDayDto
+            {
+                Date = sd.Date
+            })
+            .ToArray()
+            .AsReadOnly();
+
+        baseDto.ProductionCrewMembers = crewDtos;
+        baseDto.ProductionCastMembers = castDtos;
+        baseDto.ProductionScenes = sceneDtos;
+        baseDto.ProductionAssets = assetDtos;
+        baseDto.ProductionShootingDays = shootingDayDtos;
         
-        return dto;
+        baseDto.StatusAbstractClass = GetStatusAbstractClass(baseDto.StatusType);
+
+        return baseDto;
     }
     
     public async Task<string> CreateProductionAsync(CreateProductionDto dto)
@@ -72,8 +172,8 @@ public class ProductionService(IProductionRepository repository,
             Thumbnail = await SaveThumbnailAsync(environment, dto.ThumbnailImage)
         };
 
-        await repository.AddAsync(production);
-        await repository.SaveAllChangesAsync();
+        await productionRepository.AddAsync(production);
+        await productionRepository.SaveAllChangesAsync();
 
         return production.Id.ToString();
     }
@@ -84,7 +184,7 @@ public class ProductionService(IProductionRepository repository,
         if (productionId is null)
             return null;
 
-        Production? production = await repository.GetByIdAsNoTrackingAsync(productionId.Value);
+        Production? production = await productionRepository.GetByIdAsNoTrackingAsync(productionId.Value);
         if (production is null)
             return null;
 
@@ -106,7 +206,7 @@ public class ProductionService(IProductionRepository repository,
 
     public async Task<bool> UpdateProductionAsync(EditProductionDto dto)
     {
-        Production? production = await repository.GetByIdAsync(dto.ProductionId);
+        Production? production = await productionRepository.GetByIdAsync(dto.ProductionId);
         if (production is null)
             return false;
 
@@ -120,7 +220,7 @@ public class ProductionService(IProductionRepository repository,
         if (dto.ThumbnailImage is not null)
             production.Thumbnail = await SaveThumbnailAsync(environment, dto.ThumbnailImage);
 
-        await repository.SaveAllChangesAsync();
+        await productionRepository.SaveAllChangesAsync();
         
         return true;
     }
@@ -131,7 +231,22 @@ public class ProductionService(IProductionRepository repository,
         if (productionId is null)
             return null;
 
-        DeleteProductionDto? dto = await repository.GetDeleteAsync(productionId.Value);
+        Production? production = await productionRepository.GetByIdAsync(productionId.Value);
+        if (production is null)
+            return null;
+
+        DeleteProductionDto dto = new DeleteProductionDto
+        {
+            Id = production.Id,
+            Title = production.Title,
+            Thumbnail = production.Thumbnail,
+            Description = production.Description,
+            StatusType = production.StatusType,
+            Budget = production.Budget,
+            CrewMembersCount = production.ProductionCrewMembers.Count,
+            CastMembersCount = production.ProductionCastMembers.Count,
+            ScenesCount = production.Scenes.Count
+        };
         
         return dto;
     }
@@ -142,12 +257,12 @@ public class ProductionService(IProductionRepository repository,
         if (productionId is null)
             throw new ArgumentException(string.Format(IdIsNullOrEmptyMessage, id));
 
-        Production? production = await repository.GetByIdAsync(productionId.Value);
+        Production? production = await productionRepository.GetByIdAsync(productionId.Value);
         if (production is null)
             return false;
         
-        await repository.DeleteAsync(production);
-        await repository.SaveAllChangesAsync();
+        await productionRepository.DeleteAsync(production);
+        await productionRepository.SaveAllChangesAsync();
         
         return true;
     }

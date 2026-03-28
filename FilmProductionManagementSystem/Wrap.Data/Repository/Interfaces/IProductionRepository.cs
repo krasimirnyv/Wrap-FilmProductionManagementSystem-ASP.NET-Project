@@ -1,11 +1,11 @@
 namespace Wrap.Data.Repository.Interfaces;
 
 using Models;
-using Wrap.Services.Models.Production;
+using Models.MappingEntities;
 
 public interface IProductionRepository
 {
-    Task<ICollection<ProductionDto>> GetAllAsync(int? skipCount = null, int? takeCount = null);
+    Task<IReadOnlyCollection<Production>> GetAllAsync(int? skipCount = null, int? takeCount = null);
 
     Task<int> CountAsync();
     
@@ -13,11 +13,13 @@ public interface IProductionRepository
     
     Task<Production?> GetByIdAsync(Guid productionId);
 
-    Task<DetailsProductionDto?> GetDetailsAsync(Guid productionId);
-
-    Task<EditProductionDto?> GetEditAsync(Guid productionId);
-
-    Task<DeleteProductionDto?> GetDeleteAsync(Guid productionId);
+              Task<(Production?       production,
+IReadOnlyCollection<ProductionCrew>?  productionCrews, 
+IReadOnlyCollection<ProductionCast>?  productionCasts, 
+IReadOnlyCollection<Scene>?           productionScenes, 
+IReadOnlyCollection<ProductionAsset>? productionAssets, 
+IReadOnlyCollection<ShootingDay>?     productionShootingDays)> 
+        GetDetailsAsync(Guid productionId);
     
     Task AddAsync(Production production);
 

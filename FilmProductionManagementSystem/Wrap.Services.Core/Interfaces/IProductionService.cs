@@ -12,7 +12,7 @@ public interface IProductionService
     /// <param name="productionsPerPage">int</param>
     /// </summary>
     /// <returns>IReadOnlyCollection<ProductionDto> collection of productions</returns>
-    Task<ICollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, int productionsPerPage = DefaultProductionsPerPage);
+    Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, int productionsPerPage = DefaultProductionsPerPage);
 
     /// <summary>
     /// Returns the count of the productions

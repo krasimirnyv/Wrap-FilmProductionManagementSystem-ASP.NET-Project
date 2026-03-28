@@ -28,7 +28,7 @@ public class ProductionController(IProductionService productionService,
         
         try
         {
-            ICollection<ProductionDto> productionDtos = await productionService.GetAllProductionsAsync(model.PageNumber);
+            IReadOnlyCollection<ProductionDto> productionDtos = await productionService.GetAllProductionsAsync(model.PageNumber);
             AllProductionsIndexViewModel viewModel = await MapToAllProductionsIndexViewModelFromDto(model, productionDtos);
             
             return View(viewModel);
@@ -204,7 +204,7 @@ public class ProductionController(IProductionService productionService,
         throw new NotImplementedException();
     }
     
-    private async Task<AllProductionsIndexViewModel> MapToAllProductionsIndexViewModelFromDto(AllProductionsIndexViewModel model, ICollection<ProductionDto> productionDtos)
+    private async Task<AllProductionsIndexViewModel> MapToAllProductionsIndexViewModelFromDto(AllProductionsIndexViewModel model, IReadOnlyCollection<ProductionDto> productionDtos)
     {
         int productionsTotalCount = await productionService.GetProductionsCountAsync();
         IReadOnlyCollection<ProductionViewModel> productions = MapToProductionViewModelsFromDtos(productionDtos);
@@ -226,7 +226,7 @@ public class ProductionController(IProductionService productionService,
         return viewModel;
     }
     
-    private static IReadOnlyCollection<ProductionViewModel> MapToProductionViewModelsFromDtos(ICollection<ProductionDto> productionDtos)
+    private static IReadOnlyCollection<ProductionViewModel> MapToProductionViewModelsFromDtos(IReadOnlyCollection<ProductionDto> productionDtos)
     {
         IReadOnlyCollection<ProductionViewModel> viewModels = productionDtos
             .Select(dto => new ProductionViewModel
