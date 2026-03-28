@@ -8,7 +8,7 @@ public class CrewMemberProductionDto
     
     public string ProductionTitle { get; set; } = null!;
     
-    public CrewRoleType RoleType { get; set; }
-    
     public string ProjectStatus { get; set; } = null!;
+    
+    public CrewRoleType RoleType { get; set; }
 }

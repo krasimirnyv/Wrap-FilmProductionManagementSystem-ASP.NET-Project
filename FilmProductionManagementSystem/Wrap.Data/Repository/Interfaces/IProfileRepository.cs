@@ -3,7 +3,7 @@ namespace Wrap.Data.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore.Storage;
 
 using Models;
-using GCommon.Enums;
+using Models.MappingEntities;
 
 public interface IProfileRepository
 {
@@ -13,13 +13,13 @@ public interface IProfileRepository
 
     Task<IReadOnlyCollection<CrewSkill>> GetCrewSkillsAsync(Guid crewId);
 
-    Task<IReadOnlyCollection<(Guid ProductionId, string Title, string? Description, string Status, CrewRoleType RoleType)>> GetCrewProductionsAsync(Guid crewId);
+    Task<IReadOnlyCollection<ProductionCrew>> GetCrewProductionsAsync(Guid crewId);
     
-    Task<IReadOnlyCollection<(Guid SceneId, string SceneName, string ProductionTitle, CrewRoleType RoleType)>> GetCrewScenesAsync(Guid crewId);
+    Task<IReadOnlyCollection<SceneCrew>> GetCrewScenesAsync(Guid crewId);
 
-    Task<IReadOnlyCollection<(Guid ProductionId, string Title, string? Description, string Status, string? CharacterName)>> GetCastProductionsAsync(Guid castId);
+    Task<IReadOnlyCollection<ProductionCast>> GetCastProductionsAsync(Guid castId);
     
-    Task<IReadOnlyCollection<(Guid SceneId, string SceneName, string ProductionTitle, string? CharacterName)>> GetCastScenesAsync(Guid castId);
+    Task<IReadOnlyCollection<SceneCast>> GetCastScenesAsync(Guid castId);
 
     Task<Crew?> GetCrewForUpdateAsync(string username);
     

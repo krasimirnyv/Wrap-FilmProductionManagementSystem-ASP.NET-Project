@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 using Interfaces;
 using Models;
-using GCommon.Enums;
+using Models.MappingEntities;
 
 public class ProfileRepository(FilmProductionDbContext dbContext)
     : BaseRepository(dbContext), IProfileRepository
@@ -44,78 +44,51 @@ public class ProfileRepository(FilmProductionDbContext dbContext)
         return skills;
     }
 
-    public async Task<IReadOnlyCollection<(Guid ProductionId, string Title, string? Description, string Status, CrewRoleType RoleType)>> GetCrewProductionsAsync(Guid crewId)
+    public async Task<IReadOnlyCollection<ProductionCrew>> GetCrewProductionsAsync(Guid crewId)
     {
-        IReadOnlyCollection<(Guid ProductionId, string Title, string? Description, string Status, CrewRoleType RoleType)> crewProductions =
-            await Context!
-                .ProductionsCrewMembers
-                .Include(pc => pc.Production)
-                .AsNoTracking()
-                .Where(pc => pc.CrewMemberId == crewId)
-                .Select(pc => new ValueTuple<Guid, string, string?, string, CrewRoleType>(
-                    pc.ProductionId,
-                    pc.Production.Title,
-                    pc.Production.Description,
-                    pc.Production.StatusType.ToString(),
-                    pc.RoleType
-                ))
-                .ToArrayAsync();
+        IReadOnlyCollection<ProductionCrew> crewProductions = await Context!
+            .ProductionsCrewMembers
+            .Include(c => c.Production)
+            .AsNoTracking()
+            .Where(pc => pc.CrewMemberId == crewId)
+            .ToArrayAsync();
         
         return crewProductions;
     }
 
-    public async Task<IReadOnlyCollection<(Guid SceneId, string SceneName, string ProductionTitle, CrewRoleType RoleType)>> GetCrewScenesAsync(Guid crewId)
+    public async Task<IReadOnlyCollection<SceneCrew>> GetCrewScenesAsync(Guid crewId)
     {
-        IReadOnlyCollection<(Guid SceneId, string SceneName, string ProductionTitle, CrewRoleType RoleType)> crewScenes = await Context!
+        IReadOnlyCollection<SceneCrew> crewScenes = await Context!
             .ScenesCrewMembers
             .Include(sc => sc.Scene)
             .ThenInclude(s => s.Production)
             .AsNoTracking()
             .Where(sc => sc.CrewMemberId == crewId)
-            .Select(sc => new ValueTuple<Guid, string, string, CrewRoleType>(
-                sc.SceneId,
-                sc.Scene.SceneName,
-                sc.Scene.Production.Title,
-                sc.RoleType
-            ))
             .ToArrayAsync();
         
         return crewScenes;
     }
 
-    public async Task<IReadOnlyCollection<(Guid ProductionId, string Title, string? Description, string Status, string? CharacterName)>> GetCastProductionsAsync(Guid castId)
+    public async Task<IReadOnlyCollection<ProductionCast>> GetCastProductionsAsync(Guid castId)
     {
-        IReadOnlyCollection<(Guid ProductionId, string Title, string? Description, string Status, string? CharacterName)> castProductions = await Context!
+        IReadOnlyCollection<ProductionCast> castProductions = await Context!
                 .ProductionsCastMembers
                 .Include(pc => pc.Production)
                 .AsNoTracking()
                 .Where(pc => pc.CastMemberId == castId)
-                .Select(pc => new ValueTuple<Guid, string, string?, string, string?>(
-                    pc.ProductionId,
-                    pc.Production.Title,
-                    pc.Production.Description,
-                    pc.Production.StatusType.ToString(),
-                    pc.Role
-                ))
                 .ToArrayAsync();
 
         return castProductions;
     }
 
-    public async Task<IReadOnlyCollection<(Guid SceneId, string SceneName, string ProductionTitle, string? CharacterName)>> GetCastScenesAsync(Guid castId)
+    public async Task<IReadOnlyCollection<SceneCast>> GetCastScenesAsync(Guid castId)
     {
-        IReadOnlyCollection<(Guid SceneId, string SceneName, string ProductionTitle, string? CharacterName)> castScenes = await Context!
+        IReadOnlyCollection<SceneCast> castScenes = await Context!
             .ScenesCastMembers
             .Include(sc => sc.Scene)
             .ThenInclude(s => s.Production)
             .AsNoTracking()
             .Where(sc => sc.CastMemberId == castId)
-            .Select(sc => new ValueTuple<Guid, string, string, string?>(
-                sc.SceneId,
-                sc.Scene.SceneName,
-                sc.Scene.Production.Title,
-                sc.Role
-            ))
             .ToArrayAsync();
         
         return castScenes;
