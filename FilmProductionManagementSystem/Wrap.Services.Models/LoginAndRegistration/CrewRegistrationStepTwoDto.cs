@@ -2,12 +2,10 @@ namespace Wrap.Services.Models.LoginAndRegistration;
 
 using GCommon.Enums;
 
-public class CrewRegistrationCompleteDto
+public class CrewRegistrationStepTwoDto
 {
-    public CrewRegistrationDraftDto? Draft { get; set; }
-
-    public IReadOnlyCollection<int>? SkillNumbers { get; set; }
-        = new List<int>();
+    public IReadOnlyCollection<int> SelectedSkills { get; set; } =
+        new List<int>();
     
     public IReadOnlyDictionary<string, IReadOnlyCollection<CrewRoleType>> SkillsByDepartment { get; set; }
         = new Dictionary<string, IReadOnlyCollection<CrewRoleType>>();

@@ -36,7 +36,7 @@
             </div>
 
             <!-- Form -->
-            <form asp-area="" asp-controller="Register" asp-action="RegisterCrewStepTwo" method="post" id="skillsForm">
+            <form asp-area="" asp-controller="LoginRegister" asp-action="RegisterCrewStepTwo" method="post" id="skillsForm">
                 <input type="hidden" name="SelectedSkills" id="hiddenSelectedSkills" />
 
                 <!-- Accordion -->
@@ -90,7 +90,7 @@
 
                 <!-- Actions -->
                 <div class="d-flex justify-content-between mt-4">
-                    <a asp-area="" asp-controller="Register" asp-action="RegisterCrewStepOne" class="btn btn-outline-secondary">
+                    <a asp-area="" asp-controller="LoginRegister" asp-action="RegisterCrewStepOne" class="btn btn-outline-secondary">
                         ← Back
                     </a>
                     <button type="submit" class="btn btn-wrap-primary" id="submitBtn">

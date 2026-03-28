@@ -1,7 +1,11 @@
+@using Microsoft.Extensions.Primitives
+
 @model AccountLogInInputModel
 
 @{
     ViewData[TitleDataKey] = "Log In";
+
+    StringValues returnUrl = Context.Request.Query[RequestQueryReturnUrl];
 }
 
 @section Styles {
@@ -24,9 +28,9 @@
 
         <!-- Form -->
         <form asp-area="" 
-              asp-controller="Register"
+              asp-controller="LoginRegister"
               asp-action="Login"
-              asp-route-returnUrl="@Context.Request.Query[RequestQueryReturnUrl]"
+              asp-route-returnUrl="@returnUrl"
               method="post"
               class="registration-form">
 
