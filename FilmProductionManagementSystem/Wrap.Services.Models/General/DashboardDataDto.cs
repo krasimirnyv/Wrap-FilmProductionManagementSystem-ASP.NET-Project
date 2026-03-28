@@ -8,5 +8,6 @@ public class DashboardDataDto
     
     public int UpcomingScenesTotal { get; set; }
 
-    public IReadOnlyCollection<ProductionDashboardDto> Productions { get; set; } = [];
+    public IReadOnlyCollection<ProductionDashboardDto> Productions { get; set; }
+        = new HashSet<ProductionDashboardDto>();
 }

@@ -3,7 +3,7 @@ namespace Wrap.Data.Repository;
 using Microsoft.EntityFrameworkCore;
 
 using Interfaces;
-using Wrap.Services.Models.General;
+using Models;
 
 public class HomeRepository(FilmProductionDbContext dbContext)
     : BaseRepository(dbContext), IHomeRepository
@@ -28,22 +28,13 @@ public class HomeRepository(FilmProductionDbContext dbContext)
         return castCount;
     }
 
-    public async Task<IReadOnlyCollection<ProductionDashboardDto>> GetProductionSummaryAsync(DateTime now)
+    public async Task<IReadOnlyCollection<Production>> GetProductionsAsync()
     {
-        ProductionDashboardDto[] data = await Context!
+        IReadOnlyCollection<Production> productions = await Context!
             .Productions
             .AsNoTracking()
-            .Select(p => new  ProductionDashboardDto
-            {
-                Title = p.Title,
-                Description = p.Description,
-                StatusType = p.StatusType,
-                UpcomingScenesCount = p.Scenes
-                    .SelectMany(s => s.ShootingDayScenes)
-                    .Count(sds => sds.ShootingDay.Date > now)
-            })
             .ToArrayAsync();
         
-        return data;
+        return productions;
     }
 }

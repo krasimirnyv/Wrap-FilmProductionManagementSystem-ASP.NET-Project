@@ -52,6 +52,18 @@ public class HomeController(IHomeService homeService) : BaseController
         }; 
     }
     
+    [HttpGet]
+    public IActionResult FindFilmmakers()
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpGet]
+    public IActionResult FindActors()
+    {
+        throw new NotImplementedException();
+    }
+    
     private DashboardViewModel MapToDashboardViewModelFromDto(DashboardDataDto dto, IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap)
     {
         DashboardViewModel viewModel = new DashboardViewModel
@@ -71,18 +83,6 @@ public class HomeController(IHomeService homeService) : BaseController
         };
         
         return viewModel;
-    }
-    
-    [HttpGet]
-    public IActionResult FindFilmmakers()
-    {
-        throw new NotImplementedException();
-    }
-
-    [HttpGet]
-    public IActionResult FindActors()
-    {
-        throw new NotImplementedException();
     }
     
     private string ResolveAbstractionStatus(IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap, ProductionStatusType statusType)

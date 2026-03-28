@@ -1,6 +1,6 @@
 namespace Wrap.Data.Repository.Interfaces;
 
-using Wrap.Services.Models.General;
+using Models;
 
 public interface IHomeRepository
 {
@@ -8,5 +8,5 @@ public interface IHomeRepository
     
     Task<int> GetCastCountAsync();
     
-    Task<IReadOnlyCollection<ProductionDashboardDto>> GetProductionSummaryAsync(DateTime now);
+    Task<IReadOnlyCollection<Production>> GetProductionsAsync();
 }
