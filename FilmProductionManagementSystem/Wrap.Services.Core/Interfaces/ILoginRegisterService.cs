@@ -34,21 +34,13 @@ public interface ILoginRegisterService
     /// </summary>
     /// <param name="dto">CrewRegistrationCompleteDto</param>
     void GetSkills(CrewRegistrationCompleteDto dto);
-    
-    /// <summary>
-    /// Completes the crew registration process by taking the dto that contains
-    /// the draft and the selected skills for creating a new crew member in the system vie transaction.
-    /// </summary>
-    /// <param name="registrationDto">CrewRegistrationCompleteDto</param>
-    /// <returns>IdentityResult -> Success or not </returns>
-    Task<IdentityResult> CompleteCrewRegistrationAsync(CrewRegistrationCompleteDto registrationDto);
 
     /// <summary>
-    /// Creates and completes a new cast member in the system based on the dto.
+    /// Creates and completes a new user in the system based on the dto.
     /// </summary>
-    /// <param name="registrationDto">CastRegistrationDto</param>
+    /// <param name="registrationDto">TRegistrationDto</param>
     /// <returns>IdentityResult -> Success or not </returns>
-    Task<IdentityResult> CompleteCastRegistrationAsync(CastRegistrationDto registrationDto);
+    Task<IdentityResult> CompleteRegistrationAsync<TRegistrationDto>(TRegistrationDto registrationDto);
 
     /// <summary>
     /// Checks the Login status and role in the application (cast or crew)

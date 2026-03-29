@@ -16,7 +16,7 @@ using static Wrap.GCommon.OutputMessages.Register;
 
 [AllowAnonymous]
 public class LoginRegisterController(ILoginRegisterService registerService, 
-                                ILogger<LoginRegisterController> logger) : Controller
+                                     ILogger<LoginRegisterController> logger) : Controller
 {
     [HttpGet]
     public IActionResult RegisterCrewStepOne()
@@ -92,7 +92,7 @@ public class LoginRegisterController(ILoginRegisterService registerService,
         
         try
         {
-            IdentityResult result = await registerService.CompleteCrewRegistrationAsync(registrationDto);
+            IdentityResult result = await registerService.CompleteRegistrationAsync(registrationDto);
             if (!result.Succeeded)
             {
                 foreach (IdentityError error in result.Errors)
@@ -129,7 +129,7 @@ public class LoginRegisterController(ILoginRegisterService registerService,
             
         try
         {
-            IdentityResult result = await registerService.CompleteCastRegistrationAsync(dto);
+            IdentityResult result = await registerService.CompleteRegistrationAsync(dto);
             if (!result.Succeeded)
             {
                 foreach (IdentityError error in result.Errors)
