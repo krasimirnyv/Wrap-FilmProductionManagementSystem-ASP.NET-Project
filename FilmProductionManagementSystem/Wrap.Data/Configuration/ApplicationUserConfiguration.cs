@@ -25,8 +25,8 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             Email = "alex.petrov@wrap.local",
             NormalizedEmail = "ALEX.PETROV@WRAP.LOCAL",
             EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString(),
-            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            SecurityStamp = "seed-crew-sec-1",
+            ConcurrencyStamp = "seed-crew-con-1",
             PhoneNumber = "+359888000001",
             PhoneNumberConfirmed = true,
             PasswordHash = null
@@ -39,8 +39,8 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             Email = "maria.georgieva@wrap.local",
             NormalizedEmail = "MARIA.GEORGIEVA@WRAP.LOCAL",
             EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString(),
-            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            SecurityStamp = "seed-crew-sec-2",
+            ConcurrencyStamp = "seed-crew-con-2",
             PhoneNumber = "+359888000002",
             PhoneNumberConfirmed = true,
             PasswordHash = null
@@ -53,8 +53,8 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             Email = "ivan.dimitrov@wrap.local",
             NormalizedEmail = "IVAN.DIMITROV@WRAP.LOCAL",
             EmailConfirmed = true,
-            SecurityStamp = Guid.NewGuid().ToString(),
-            ConcurrencyStamp = Guid.NewGuid().ToString(),
+            SecurityStamp = "seed-crew-sec-3",
+            ConcurrencyStamp = "seed-crew-con-3",
             PhoneNumber = "+359888000003",
             PhoneNumberConfirmed = true,
             PasswordHash = null

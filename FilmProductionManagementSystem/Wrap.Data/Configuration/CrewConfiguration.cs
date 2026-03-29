@@ -12,12 +12,6 @@ public class CrewConfiguration : IEntityTypeConfiguration<Crew>
 {
     public void Configure(EntityTypeBuilder<Crew> entity)
     {
-        entity
-            .HasOne(c => c.User)
-            .WithMany(au => au.CrewMembers)
-            .HasForeignKey(c => c.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         entity.HasData(CrewMembersSeed);
     }
     

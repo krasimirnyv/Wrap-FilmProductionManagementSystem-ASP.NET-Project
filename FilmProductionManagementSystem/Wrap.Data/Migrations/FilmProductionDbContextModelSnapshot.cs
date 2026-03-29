@@ -17,7 +17,7 @@ namespace Wrap.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.23")
+                .HasAnnotation("ProductVersion", "8.0.25")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -418,6 +418,11 @@ namespace Wrap.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -506,7 +511,7 @@ namespace Wrap.Data.Migrations
                         {
                             Id = new Guid("a1093e45-6993-4d59-8e3f-4fe0b29e7dc5"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "6b1c50ba-082c-4cbc-8ee7-d3bd02c4e9f4",
+                            ConcurrencyStamp = "seed-crew-con-1",
                             Email = "alex.petrov@wrap.local",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -514,7 +519,7 @@ namespace Wrap.Data.Migrations
                             NormalizedUserName = "ALEX.PETROV",
                             PhoneNumber = "+359888000001",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "14f95e4d-6736-44a6-85d5-d738a9d73d05",
+                            SecurityStamp = "seed-crew-sec-1",
                             TwoFactorEnabled = false,
                             UserName = "alex.petrov"
                         },
@@ -522,7 +527,7 @@ namespace Wrap.Data.Migrations
                         {
                             Id = new Guid("f704cf4b-b01a-4b5d-a052-7043caffd93e"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "34ec4d7d-af82-4427-a3bd-5f25d23b1bb4",
+                            ConcurrencyStamp = "seed-crew-con-2",
                             Email = "maria.georgieva@wrap.local",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -530,7 +535,7 @@ namespace Wrap.Data.Migrations
                             NormalizedUserName = "MARIA.GEORGIEVA",
                             PhoneNumber = "+359888000002",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "a4fa59d0-4b32-4461-b68d-8c45ceeb30ae",
+                            SecurityStamp = "seed-crew-sec-2",
                             TwoFactorEnabled = false,
                             UserName = "maria.georgieva"
                         },
@@ -538,7 +543,7 @@ namespace Wrap.Data.Migrations
                         {
                             Id = new Guid("5150238b-cd37-482d-ab11-ef66bae0128f"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "5d7bc8f4-07c2-4e69-831c-dabac71da1e9",
+                            ConcurrencyStamp = "seed-crew-con-3",
                             Email = "ivan.dimitrov@wrap.local",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -546,7 +551,7 @@ namespace Wrap.Data.Migrations
                             NormalizedUserName = "IVAN.DIMITROV",
                             PhoneNumber = "+359888000003",
                             PhoneNumberConfirmed = true,
-                            SecurityStamp = "1690ab1b-6f5d-4438-8213-62e5b8a5a55f",
+                            SecurityStamp = "seed-crew-sec-3",
                             TwoFactorEnabled = false,
                             UserName = "ivan.dimitrov"
                         },
@@ -730,6 +735,7 @@ namespace Wrap.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Role")
+                        .IsRequired()
                         .HasMaxLength(200)
                         .IsUnicode(true)
                         .HasColumnType("nvarchar(200)");
@@ -1817,7 +1823,7 @@ namespace Wrap.Data.Migrations
             modelBuilder.Entity("Wrap.Data.Models.Cast", b =>
                 {
                     b.HasOne("Wrap.Data.Models.Infrastructure.ApplicationUser", "User")
-                        .WithMany("CastMembers")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1828,7 +1834,7 @@ namespace Wrap.Data.Migrations
             modelBuilder.Entity("Wrap.Data.Models.Crew", b =>
                 {
                     b.HasOne("Wrap.Data.Models.Infrastructure.ApplicationUser", "User")
-                        .WithMany("CrewMembers")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2011,13 +2017,6 @@ namespace Wrap.Data.Migrations
                     b.Navigation("CrewMemberScenes");
 
                     b.Navigation("Skills");
-                });
-
-            modelBuilder.Entity("Wrap.Data.Models.Infrastructure.ApplicationUser", b =>
-                {
-                    b.Navigation("CastMembers");
-
-                    b.Navigation("CrewMembers");
                 });
 
             modelBuilder.Entity("Wrap.Data.Models.Production", b =>

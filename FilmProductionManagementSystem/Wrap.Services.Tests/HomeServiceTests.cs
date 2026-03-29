@@ -1,6 +1,6 @@
 namespace Wrap.Services.Tests;
 
-public class Tests
+public class HomeServiceTests
 {
     [SetUp]
     public void Setup()

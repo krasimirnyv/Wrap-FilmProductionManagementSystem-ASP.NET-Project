@@ -13,12 +13,6 @@ public class CastConfiguration : IEntityTypeConfiguration<Cast>
 {
     public void Configure(EntityTypeBuilder<Cast> entity)
     {
-        entity
-            .HasOne(c => c.User)
-            .WithMany(au => au.CastMembers)
-            .HasForeignKey(c => c.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         entity.HasData(CastMembersSeed);
     }
     
