@@ -7,11 +7,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 using Wrap.Data;
-using Wrap.Data.Repository;
 using Wrap.Data.Models.Infrastructure;
-using Wrap.Services.Core;
-using Wrap.Infrastructure.Utilities;
-using Wrap.Infrastructure.Utilities.Interfaces;
 using Wrap.Infrastructure.Extensions;
 
 using static Wrap.GCommon.ApplicationConstants;
@@ -38,11 +34,8 @@ public class Program
             options.UseSqlServer(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-        builder.Services.RegisterRepositories(typeof(LoginRegisterRepository));
-        builder.Services.RegisterUserServices(typeof(LoginRegisterService));
+        builder.Services.RegisterApplicationServices();
         
-        builder.Services.AddSingleton<ISlugGenerator, SlugGenerator>();
-
         builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
             {
                 ConfigureIdentity(options, builder.Configuration);
