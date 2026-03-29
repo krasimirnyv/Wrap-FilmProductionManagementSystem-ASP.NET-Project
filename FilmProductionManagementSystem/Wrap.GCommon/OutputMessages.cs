@@ -90,6 +90,7 @@ public static class OutputMessages
         public const string ExceptionBuildingCrewDraft = "Exception occured while building the crew draft {0}";
         public const string ErrorBuildingCrewDraft = "Error occured while building the crew draft. Try again later.";
         public const string ErrorFoundingCrewDraft = "Error occured while finding the crew draft.";
+        public const string ErrorCreatingCrew = "Error occured while getting the cast data to create profile.";
         public const string ErrorCreatingCast = "Error occured while getting the cast data to create profile.";
         public const string ErrorSavingTheImage = "Error occured while saving the image data when {0} your profile. {1}";
 
@@ -97,6 +98,7 @@ public static class OutputMessages
         public const string ExceptionCompleteRegistrationOfCastMessage = "Exception occured while trying to complete your registration as an actor. {0}";
         public const string ExceptionLogin = "Exception occured while trying to login. {0}";
 
+        public const string UnsupportedRegistrationType = "Unsupported registration type of {0}";
         public const string IdentityCreateFailed = "Identity CreateAsync failed: {0}";
         public const string EffectedDbRowsFailure = "Expected >= {0}, got {1}.";
         public const string UserNotFound = "User with username '{0}' not found.";
@@ -108,7 +110,7 @@ public static class OutputMessages
         public const string InvalidUsernameOrPassword = "Invalid username or password.";
         public const string NotSelectedRole = "Please select a role to continue.";
         public const string NoSelectedSkills = "Please select at least one skill.";
-
+        
         public const string SuccessMessage = "Registration successful! Welcome to Wrap!";
     }
     

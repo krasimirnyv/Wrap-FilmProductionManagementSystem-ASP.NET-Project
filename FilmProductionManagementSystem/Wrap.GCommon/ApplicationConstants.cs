@@ -45,7 +45,7 @@ public static class ApplicationConstants
     public const string CookieAccessDeniedPath = "CookieOptions:AccessDeniedPath";
     
     /* Constants for Session */
-    public const string IdleTimeoutMinutes = "SessionOptions:IdleTimeout"; // 5 min
+    public const string IdleTimeoutMinutes = "SessionOptions:IdleTimeout";
     public const string SessionCookieHttpOnly = "SessionOptions:HttpOnly";
     public const string SessionCookieIsEssential = "SessionOptions:IsEssential";
     

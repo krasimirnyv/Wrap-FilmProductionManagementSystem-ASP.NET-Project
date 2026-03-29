@@ -12,6 +12,7 @@ public class NavBarRepository(FilmProductionDbContext dbContext)
     {
         Crew? crew = await Context!
             .CrewMembers
+            .Include(cm => cm.User)
             .AsNoTracking()
             .SingleOrDefaultAsync(c => c.UserId == userId);
         
@@ -22,6 +23,7 @@ public class NavBarRepository(FilmProductionDbContext dbContext)
     {
         Cast? cast = await Context!
             .CastMembers
+            .Include(cm => cm.User)
             .AsNoTracking()
             .SingleOrDefaultAsync(c => c.UserId == userId);
         

@@ -2,6 +2,12 @@ namespace Wrap.GCommon;
 
 public static class EntityConstants
 {
+    public static class ApplicationRole
+    {
+        public const byte RoleMaxLenght = 27;
+
+    }
+    
     public static class Production
     {
         public const int TitleMinLength = 2;

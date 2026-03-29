@@ -22,10 +22,10 @@
         string? action = ViewContext.RouteData.Values["action"]?.ToString();
 
         bool isInRegisterModule =    (controller == "Home" && action == "Index")
-                                     || (controller == "Register" && action == "Login")
-                                     || (controller == "Register" && action == "RegisterCrewStepOne")
-                                     || (controller == "Register" && action == "RegisterCrewStepTwo")
-                                     || (controller == "Register" && action == "RegisterCast");
+                                     || (controller == "LoginRegister" && action == "Login")
+                                     || (controller == "LoginRegister" && action == "RegisterCrewStepOne")
+                                     || (controller == "LoginRegister" && action == "RegisterCrewStepTwo")
+                                     || (controller == "LoginRegister" && action == "RegisterCast");
     }
     
     @if (!isInRegisterModule)
@@ -36,7 +36,7 @@
 
 @if (!isInRegisterModule)
 {
-    <main role="main" class="pb-3">
+    <main role="main">
         @RenderBody()
     </main>
 }
