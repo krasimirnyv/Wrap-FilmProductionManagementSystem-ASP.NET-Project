@@ -11,6 +11,8 @@ using static Wrap.GCommon.OutputMessages.Profile;
 using static Wrap.GCommon.ApplicationConstants;
 
 public class ProfileController(IProfileService profileService, 
+                               ICrewProfileService crewProfileService, 
+                               ICastProfileService castProfileService,
                                ILogger<ProfileController> logger) : BaseController
 {
     [HttpGet]
@@ -54,7 +56,7 @@ public class ProfileController(IProfileService profileService,
 
         try
         {
-            CrewProfileDto dto = await profileService.GetCrewProfileDataAsync(username);
+            CrewProfileDto dto = await crewProfileService.GetCrewProfileDataAsync(username);
             CrewProfileViewModel viewModel = MapToCrewProfileViewModelFromDto(dto);
 
             return View(viewModel);
@@ -85,7 +87,7 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            CastProfileDto dto = await profileService.GetCastProfileDataAsync(username);
+            CastProfileDto dto = await castProfileService.GetCastProfileDataAsync(username);
             CastProfileViewModel viewModel = MapToCastProfileViewModelFromDto(dto);
             
             return View(viewModel);
@@ -145,7 +147,7 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            EditCrewProfileDto dto = await profileService.GetEditCrewProfileAsync(username);
+            EditCrewProfileDto dto = await crewProfileService.GetEditCrewProfileAsync(username);
             EditCrewProfileInputModel inputModel = MapToEditCrewProfileInputModelFromDto(dto);
             
             return View("EditCrewProfile", inputModel);
@@ -181,7 +183,7 @@ public class ProfileController(IProfileService profileService,
         {
             EditCrewProfileDto dto = MapToEditCrewProfileDtoFromInputModel(model);
             
-            await profileService.UpdateCrewProfileAsync(username, dto);
+            await crewProfileService.UpdateCrewProfileAsync(username, dto);
 
             TempData[SuccessTempDataKey] = UpdateProfileSuccessMessage;
             return RedirectToAction(nameof(FilmmakerProfile));
@@ -218,7 +220,7 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            EditCastProfileDto dto = await profileService.GetEditCastProfileAsync(username);
+            EditCastProfileDto dto = await castProfileService.GetEditCastProfileAsync(username);
             EditCastProfileInputModel inputModel = MapToEditCastProfileInputModelFromDto(dto);
             
             return View("EditCastProfile", inputModel);
@@ -254,7 +256,7 @@ public class ProfileController(IProfileService profileService,
         {
             EditCastProfileDto dto = MapToEditCastProfileDtoFromInputModel(model);
                 
-            await profileService.UpdateCastProfileAsync(username, dto);
+            await castProfileService.UpdateCastProfileAsync(username, dto);
 
             TempData[SuccessTempDataKey] = UpdateProfileSuccessMessage;
             return RedirectToAction(nameof(ActorProfile));
@@ -292,7 +294,7 @@ public class ProfileController(IProfileService profileService,
         
         try
         {
-            EditSkillsDto dto = await profileService.GetEditSkillsAsync(username);
+            EditSkillsDto dto = await crewProfileService.GetEditSkillsAsync(username);
             EditSkillsInputModel inputModel = MapEditSkillsInputModelFromDto(dto);
             
             return View(inputModel);
@@ -325,7 +327,7 @@ public class ProfileController(IProfileService profileService,
         {
             if (!ModelState.IsValid)
             {
-                EditSkillsDto dtoCurrentSkills = await profileService.GetEditSkillsAsync(username);
+                EditSkillsDto dtoCurrentSkills = await crewProfileService.GetEditSkillsAsync(username);
                 EditSkillsInputModel inputModel = MapEditSkillsInputModelFromDto(dtoCurrentSkills);
             
                 return View(inputModel);
@@ -333,7 +335,7 @@ public class ProfileController(IProfileService profileService,
             
             UpdateSkillsDto dto = MapToUpdateSkillsDtoFromEditSkillsInputModel(model);
             
-            await profileService.UpdateSkillsAsync(username, dto);
+            await crewProfileService.UpdateSkillsAsync(username, dto);
 
             TempData[SuccessTempDataKey] = UpdateSkillsSuccessMessage;
             return RedirectToAction(nameof(FilmmakerProfile));
