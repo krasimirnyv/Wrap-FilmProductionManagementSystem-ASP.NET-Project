@@ -24,6 +24,7 @@ public class HomeController(IHomeService homeService) : BaseController
     }
     
     [HttpGet]
+    [Route("/Home/Dashboard")]
     public async Task<IActionResult> Dashboard()
     {
         DashboardDataDto dto = await homeService.GetDashboardDataAsync();
