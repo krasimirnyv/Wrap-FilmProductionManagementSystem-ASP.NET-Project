@@ -22,7 +22,12 @@ public static class OutputMessages
     public const string CastString = "Cast";
     public const string EmptyString = "";
     
+    // Type of http
+    public const string HttpGetAction = "GET:";
+    public const string HttpPostAction = "POST:";
+    
     // photo file extension and size limit
+    public const string NoImageStrategyFound = "No image strategy is registered for key '{0}'.";
     public const string NotSupportedFileExtension = "The file extension {0} is not supported.";
     public const string ExceededFileSizeLimit = "The file size limit {0} bytes exceeded.";
     public const string UnsupportedOrCorruptedFormat = "Unsupported or corrupted image format. {0}";

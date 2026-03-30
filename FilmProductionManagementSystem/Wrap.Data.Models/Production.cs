@@ -20,8 +20,8 @@ public class Production
     [Key]
     public Guid Id { get; set; }
 
-    [Required]
     [Unicode]
+    [Required]
     [MaxLength(TitleMaxLength)]
     public string Title { get; set; } = null!;
 
@@ -32,10 +32,9 @@ public class Production
     [Column(TypeName = DecimalTypeFormat)]
     public decimal Budget { get; set; }
 
-    [Required]
     [Unicode]
     [MaxLength(ThumbnailMaxLength)]
-    public string Thumbnail { get; set; } = null!;
+    public string? Thumbnail { get; set; }
     // Example with image path: "/images/productions/production-1.png"
 
     [Required]

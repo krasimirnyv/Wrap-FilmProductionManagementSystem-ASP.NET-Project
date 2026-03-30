@@ -1,26 +1,29 @@
 namespace Wrap.Services.Core.Handlers;
 
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 
+using Utilities.ImageLogic.Interfaces;
 using Models.LoginAndRegistration;
 using Data.Models;
 using Data.Models.Infrastructure;
 using Data.Repository.Interfaces;
 
-using static Utilities.HelperSaveProfile;
 using static GCommon.OutputMessages.Register;
+using static GCommon.DataFormat;
 
 public class CastRegistrationHandler(UserManager<ApplicationUser> userManager,
                                      SignInManager<ApplicationUser> signInManager,
-                                     IWebHostEnvironment environment,
+                                     IImageService imageService,
+                                     IVariantImageStrategyResolver imageStrategyResolver,
                                      ILoginRegisterRepository loginRegisterRepository,
                                      ILogger<CastRegistrationHandler> logger) : RegistrationHandlerBase<CastRegistrationDto>(userManager,
                                                                                                                              signInManager,
                                                                                                                              loginRegisterRepository,
                                                                                                                              logger)
 {
+    private readonly ILoginRegisterRepository repository = loginRegisterRepository;
+    
     protected override IdentityResult ValidateDto(CastRegistrationDto? registrationDto)
     {
         if (registrationDto is null)
@@ -55,7 +58,8 @@ public class CastRegistrationHandler(UserManager<ApplicationUser> userManager,
 
     protected override async Task<int> PersistDomainDataAsync(CastRegistrationDto registrationDto, ApplicationUser user)
     {
-        string profilePath = await SaveProfileImageAsync(environment, registrationDto.ProfilePicture);
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+        string profilePath = await imageService.SaveImageAsync(registrationDto.ProfilePicture, strategy);
 
         Cast newCast = new Cast
         {
@@ -67,11 +71,12 @@ public class CastRegistrationHandler(UserManager<ApplicationUser> userManager,
             Nickname = registrationDto.Nickname,
             Biography = registrationDto.Biography,
             BirthDate = registrationDto.BirthDate,
+            Gender = registrationDto.Gender,
             IsActive = true,
             IsDeleted = false
         };
         
-        await loginRegisterRepository.CreateCastAsync(newCast);
+        await repository.CreateCastAsync(newCast);
 
         int expectedRows = 1;
         return expectedRows;

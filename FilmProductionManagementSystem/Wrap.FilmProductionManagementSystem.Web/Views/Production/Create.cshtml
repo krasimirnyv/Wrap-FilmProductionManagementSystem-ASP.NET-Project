@@ -1,3 +1,5 @@
+@using static Wrap.GCommon.DataFormat;
+
 @model CreateProductionInputModel
 
 @{
@@ -5,6 +7,8 @@
 
     // Build grouped status data server-side for both the Razor optgroups and the JS map
     IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusGroups = GetStatusTypeByAbstraction();
+    
+    string allowedExtensions = string.Join(", ", AllowedExtensions);
 }
 
 @section Styles {
@@ -30,25 +34,38 @@
                     <i class="bi bi-image me-2"></i>
                     <h3>Production Thumbnail</h3>
                 </div>
+                
                 <div class="row g-4 align-items-center">
-                    <div class="col-md-5" style="margin-left: 23rem; margin-right: 23rem;">
-                        <label for="thumbnailInput" class="thumbnail-upload-box w-100 d-block"
+                    <div class="col-lg-5 col-md-6 text-center">
+                        <label for="thumbnailInput"
+                               class="thumbnail-upload-box w-100 d-flex flex-column justify-content-center align-items-center text-center"
                                id="uploadLabel">
-                            <i class="bi bi-cloud-upload"
-                               style="font-size: 2.5rem; color: var(--wrap-blue);"></i>
-                            <p class="mb-1 mt-2 fw-semibold"
-                               style="color: var(--wrap-dark-blue);">Click to upload image</p>
-                            <small class="text-muted"> .jpg, .jpeg, .png, .webp, .gif, .heif, .heic, .hif · max @MegaBytesBase MB</small>
+                            <i class="bi bi-cloud-upload" style="font-size: 2.5rem; color: var(--wrap-blue);"></i>
+                            <p class="mb-1 mt-2 fw-semibold" style="color: var(--wrap-dark-blue);">
+                                Click to upload image
+                            </p>
+                            <small class="text-muted">
+                                @allowedExtensions · max @MegaBytesBase MB
+                            </small>
                         </label>
-                        <input type="file" asp-for="ThumbnailImage" class="d-none"
-                               accept="image/*" id="thumbnailInput">
+
+                        <input type="file"
+                               asp-for="ThumbnailImage"
+                               class="d-none"
+                               accept="image/*"
+                               id="thumbnailInput" />
+
                         <span asp-validation-for="ThumbnailImage" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-7" id="thumbnailPreview" style="display: none;">
-                        <img id="thumbnailImage" src="#" alt="Preview"
-                             class="thumbnail-preview-img" style="margin-left: 17rem; margin-right: 18rem"> 
+
+                    <div class="col-lg-7 col-md-6 text-center" id="thumbnailPreview" style="display: none;">
+                        <img id="thumbnailImage"
+                             src="#"
+                             alt="Preview"
+                             class="thumbnail-preview-img" />
+
                         <button type="button"
-                                class="btn btn-sm btn-production-secondary mt-2"
+                                class="btn btn-sm btn-production-secondary mt-3"
                                 id="clearThumbnail">
                             <i class="bi bi-x-circle me-1"></i>Remove
                         </button>

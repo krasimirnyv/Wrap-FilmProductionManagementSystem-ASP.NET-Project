@@ -18,6 +18,8 @@ public class CrewRegistrationHandler(UserManager<ApplicationUser> userManager,
                                                                                                                                      loginRegisterRepository,
                                                                                                                                      logger)
 {
+    private readonly ILoginRegisterRepository repository = loginRegisterRepository;
+
     protected override IdentityResult ValidateDto(CrewRegistrationCompleteDto? registrationDto)
     {
         if (registrationDto is null)
@@ -88,8 +90,8 @@ public class CrewRegistrationHandler(UserManager<ApplicationUser> userManager,
             IsDeleted = false
         };
         
-        await loginRegisterRepository.CreateCrewAsync(newCrew);
-        await loginRegisterRepository.AddCrewSkillsAsync(newCrew.Id, skills);
+        await repository.CreateCrewAsync(newCrew);
+        await repository.AddCrewSkillsAsync(newCrew.Id, skills);
         
         int expectedRows = 1 + skills.Count;
         return expectedRows;

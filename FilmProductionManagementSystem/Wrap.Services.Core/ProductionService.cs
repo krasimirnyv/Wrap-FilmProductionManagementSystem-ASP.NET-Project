@@ -1,8 +1,7 @@
 namespace Wrap.Services.Core;
 
-using Microsoft.AspNetCore.Hosting;
-
 using Interfaces;
+using Utilities.ImageLogic.Interfaces;
 using Models.Production;
 using Models.Production.NestedDtos;
 using Data.Models;
@@ -11,15 +10,14 @@ using Wrap.Data.Repository.Interfaces;
 using GCommon.Enums;
 using GCommon.UI;
 
-using static Utilities.HelperSaveThumbnail;
 using static GCommon.ApplicationConstants;
 using static GCommon.OutputMessages.Production;
+using static GCommon.DataFormat;
 
-public class ProductionService(IProductionRepository productionRepository,
-                               IWebHostEnvironment environment) : IProductionService
+public class ProductionService(IProductionRepository productionRepository, 
+                               IImageService imageService,
+                               IVariantImageStrategyResolver imageStrategyResolver) : IProductionService
 {
-    
-    
     private static readonly IReadOnlyDictionary<ProductionStatusType, string> StatusAbstractMap =
         BuildStatusCssMap();
 
@@ -37,7 +35,7 @@ public class ProductionService(IProductionRepository productionRepository,
             {
                 Id = p.Id,
                 Title = p.Title,
-                ThumbnailPath = p.Thumbnail,
+                ThumbnailPath = p.Thumbnail!,
                 StatusType = p.StatusType
             })
             .ToArray()
@@ -80,7 +78,7 @@ public class ProductionService(IProductionRepository productionRepository,
         DetailsProductionDto baseDto = new DetailsProductionDto
         {
             Id = data.production!.Id,
-            Thumbnail = data.production.Thumbnail,
+            Thumbnail = data.production.Thumbnail!,
             Title = data.production.Title,
             Description = data.production.Description,
             Budget = data.production.Budget,
@@ -94,7 +92,7 @@ public class ProductionService(IProductionRepository productionRepository,
             .productionCrews!
             .Select(pc => new ProductionCrewMemberDto
             {
-                ProfileImagePath = pc.CrewMember.ProfileImagePath,
+                ProfileImagePath = pc.CrewMember.ProfileImagePath!,
                 FirstName = pc.CrewMember.FirstName,
                 LastName = pc.CrewMember.LastName,
                 Role = pc.RoleType
@@ -106,7 +104,7 @@ public class ProductionService(IProductionRepository productionRepository,
             .productionCasts!
             .Select(pc => new ProductionCastMemberDto
             {
-                ProfileImagePath = pc.CastMember.ProfileImagePath,
+                ProfileImagePath = pc.CastMember.ProfileImagePath!,
                 FirstName = pc.CastMember.FirstName,
                 LastName = pc.CastMember.LastName,
                 Role = pc.Role,
@@ -160,6 +158,9 @@ public class ProductionService(IProductionRepository productionRepository,
     
     public async Task<string> CreateProductionAsync(CreateProductionDto dto)
     {
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ThumbnailFolderName);
+        string thumbnail = await imageService.SaveImageAsync(dto.ThumbnailImage, strategy);
+        
         Production production = new Production
         {
             Id = Guid.NewGuid(),
@@ -169,7 +170,7 @@ public class ProductionService(IProductionRepository productionRepository,
             StatusType = dto.StatusType,
             StatusStartDate = dto.StatusStartDate,
             StatusEndDate = dto.StatusEndDate,
-            Thumbnail = await SaveThumbnailAsync(environment, dto.ThumbnailImage)
+            Thumbnail = thumbnail
         };
 
         await productionRepository.AddAsync(production);
@@ -217,8 +218,11 @@ public class ProductionService(IProductionRepository productionRepository,
         production.StatusStartDate = dto.StatusStartDate;
         production.StatusEndDate = dto.StatusEndDate;
 
-        if (dto.ThumbnailImage is not null)
-            production.Thumbnail = await SaveThumbnailAsync(environment, dto.ThumbnailImage);
+        if (dto.ThumbnailImage is not null && dto.ThumbnailImage.Length > 0)
+        {
+            IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ThumbnailFolderName);
+            production.Thumbnail = await imageService.ReplaceAsync(dto.CurrentThumbnailPath, dto.ThumbnailImage, strategy);
+        }
 
         await productionRepository.SaveAllChangesAsync();
         
@@ -238,8 +242,8 @@ public class ProductionService(IProductionRepository productionRepository,
         DeleteProductionDto dto = new DeleteProductionDto
         {
             Id = production.Id,
-            Title = production.Title,
-            Thumbnail = production.Thumbnail,
+            Title = production.Title!,
+            Thumbnail = production.Thumbnail!,
             Description = production.Description,
             StatusType = production.StatusType,
             Budget = production.Budget,
@@ -261,6 +265,9 @@ public class ProductionService(IProductionRepository productionRepository,
         if (production is null)
             return false;
         
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ThumbnailFolderName);
+        
+        await imageService.DeleteAsync(production.Thumbnail, strategy);
         await productionRepository.DeleteAsync(production);
         await productionRepository.SaveAllChangesAsync();
         

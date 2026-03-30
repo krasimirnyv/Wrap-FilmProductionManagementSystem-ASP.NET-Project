@@ -1,24 +1,25 @@
 namespace Wrap.Services.Core;
 
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Interfaces;
+using Utilities.ImageLogic.Interfaces;
 using Handlers.Interfaces;
 using Models.LoginAndRegistration;
 using Data.Models.Infrastructure;
 using Data.Repository.Interfaces;
 using GCommon.UI;
 
-using static Utilities.HelperSaveProfile;
 using static GCommon.OutputMessages;
 using static GCommon.OutputMessages.Register;
+using static GCommon.DataFormat;
 
 public class LoginRegisterService(UserManager<ApplicationUser> userManager,
                                   SignInManager<ApplicationUser> signInManager,
-                                  IWebHostEnvironment environment,
                                   ILoginRegisterRepository loginRegisterRepository,
+                                  IImageService imageService,
+                                  IVariantImageStrategyResolver imageStrategyResolver,
                                   IRegistrationHandlerResolver registrationHandlerResolver,
                                   ILogger<LoginRegisterService> logger) : ILoginRegisterService
 {
@@ -27,8 +28,9 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
     {
         try
         {
-            string profilePath = await SaveProfileImageAsync(environment, dto.ProfilePicture);
-
+            IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+            string profilePath = await imageService.SaveImageAsync(dto.ProfilePicture, strategy);
+            
             CrewRegistrationDraftDto draft = new CrewRegistrationDraftDto
             {
                 UserName = dto.UserName,

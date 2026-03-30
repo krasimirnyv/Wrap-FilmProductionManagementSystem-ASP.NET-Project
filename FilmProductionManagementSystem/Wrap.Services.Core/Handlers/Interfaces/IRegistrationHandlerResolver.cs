@@ -5,7 +5,6 @@ public interface IRegistrationHandlerResolver
     /// <summary>
     /// Resolves current DTO that is used for registration.
     /// </summary>
-    /// <typeparam name="TRegistrationDto"></typeparam>
-    /// <returns></returns>
+    /// <returns>specified dto wrapped in IRegistrationHandler<TRegistrationDto></returns>
     IRegistrationHandler<TRegistrationDto> Resolve<TRegistrationDto>();
 }

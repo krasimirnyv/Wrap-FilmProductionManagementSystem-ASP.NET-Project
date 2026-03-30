@@ -18,9 +18,8 @@ public class Crew
     public Guid Id { get; set; }
 
     [Unicode]
-    [Required]
     [MaxLength(ProfileImagePathMaxLength)]
-    public string ProfileImagePath { get; set; } = null!;
+    public string? ProfileImagePath { get; set; }
     // Example: "/images/crew/john-doe.jpg"
 
     [Required]

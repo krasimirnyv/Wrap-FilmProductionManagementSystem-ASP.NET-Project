@@ -8,6 +8,8 @@ using Data.Repository;
 using Services.Core;
 using Services.Core.Handlers;
 using Services.Core.Handlers.Interfaces;
+using Wrap.Services.Core.Utilities.ImageLogic;
+using Wrap.Services.Core.Utilities.ImageLogic.Interfaces;
 using Utilities;
 
 public static class WebApplicationBuilderExtensions
@@ -18,8 +20,9 @@ public static class WebApplicationBuilderExtensions
         serviceCollection.RegisterUserServices(typeof(LoginRegisterService));
         
         serviceCollection.RegisterRegistrationHandlers(typeof(CrewRegistrationHandler));
+        serviceCollection.RegisterImageStrategies(typeof(ProfileImageStrategy));
         serviceCollection.RegisterResolvers(typeof(RegistrationHandlerResolver));
-        
+
         serviceCollection.RegisterGenerators(typeof(SlugGenerator));
 
         return serviceCollection;
@@ -71,9 +74,9 @@ public static class WebApplicationBuilderExtensions
         return serviceCollection;
     }
 
-    private static IServiceCollection RegisterRegistrationHandlers(this IServiceCollection serviceCollection, Type handlerType)
+    private static IServiceCollection RegisterRegistrationHandlers(this IServiceCollection serviceCollection, Type handlerRegistrationType)
     {
-        Assembly handlersAssembly = handlerType.Assembly;
+        Assembly handlersAssembly = handlerRegistrationType.Assembly;
 
         Type openGenericHandlerInterfaceType = typeof(IRegistrationHandler<>);
 
@@ -81,16 +84,16 @@ public static class WebApplicationBuilderExtensions
             .GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false } &&
                         t.GetInterfaces()
-                            .Any(i => i.IsGenericType &&
-                                      i.GetGenericTypeDefinition() == openGenericHandlerInterfaceType))
+                            .Any(type => type.IsGenericType &&
+                                      type.GetGenericTypeDefinition() == openGenericHandlerInterfaceType))
             .ToArray();
 
         foreach (Type implementationType in handlerImplementationTypes)
         {
             IEnumerable<Type> closedHandlerInterfaces = implementationType
                 .GetInterfaces()
-                .Where(i => i.IsGenericType &&
-                            i.GetGenericTypeDefinition() == openGenericHandlerInterfaceType)
+                .Where(t => t.IsGenericType &&
+                            t.GetGenericTypeDefinition() == openGenericHandlerInterfaceType)
                 .ToArray();
 
             foreach (Type closedInterface in closedHandlerInterfaces)
@@ -121,6 +124,22 @@ public static class WebApplicationBuilderExtensions
 
             serviceCollection.AddScoped(currentResolverType, implementationType);
         }
+
+        return serviceCollection;
+    }
+    
+    private static IServiceCollection RegisterImageStrategies(this IServiceCollection serviceCollection, Type imageStrategyType)
+    {
+        Assembly strategyAssembly = imageStrategyType.Assembly;
+
+        Type strategyInterfaceType = typeof(IVariantImageStrategy);
+        
+        IEnumerable<Type> implementationType = strategyAssembly
+            .GetTypes()
+            .Where(t => t is { IsClass: true, IsAbstract: false } && strategyInterfaceType.IsAssignableFrom(t));
+
+        foreach (Type implementation in implementationType)
+            serviceCollection.AddScoped(strategyInterfaceType, implementation);
 
         return serviceCollection;
     }

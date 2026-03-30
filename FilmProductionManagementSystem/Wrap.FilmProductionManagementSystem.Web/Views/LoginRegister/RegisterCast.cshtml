@@ -51,25 +51,25 @@
                 <div class="row">
                     <!-- Username -->
                     <div class="form-group mb-3">
-                        <label asp-for="UserName" class="form-label"></label>
+                        <label asp-for="UserName" class="form-label">Username</label>
                         <input asp-for="UserName" class="form-control" placeholder="john.doe" autofocus />
                         <span asp-validation-for="UserName" class="text-danger"></span>
                     </div>
                     <!-- Email -->
                     <div class="form-group mb-3">
-                        <label asp-for="Email" class="form-label"></label>
+                        <label asp-for="Email" class="form-label">Email address</label>
                         <input asp-for="Email" class="form-control" placeholder="john.doe@gmail.com" autofocus />
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
                     <!-- Phone number-->
                     <div class="form-group mb-3">
-                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <label asp-for="PhoneNumber" class="form-label">Phone number</label>
                         <input asp-for="PhoneNumber" class="form-control" placeholder="0878123456" autofocus />
                         <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                     </div>
                     <!-- Password -->
                     <div class="form-group mb-3">
-                        <label asp-for="Password" class="form-label"></label>
+                        <label asp-for="Password" class="form-label">Password</label>
                         <input type="password" asp-for="Password" class="form-control" placeholder="Strong password" autofocus />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
@@ -78,13 +78,13 @@
                 <div class="row">
                     <!-- First Name -->
                     <div class="form-group mb-3">
-                        <label asp-for="FirstName" class="form-label"></label>
+                        <label asp-for="FirstName" class="form-label">First name</label>
                         <input asp-for="FirstName" class="form-control" placeholder="John" autofocus />
                         <span asp-validation-for="FirstName" class="text-danger"></span>
                     </div>
                     <!-- Last Name -->
                     <div class="form-group mb-3">
-                        <label asp-for="LastName" class="form-label"></label>
+                        <label asp-for="LastName" class="form-label">Last name</label>
                         <input asp-for="LastName" class="form-control" placeholder="Doe" />
                         <span asp-validation-for="LastName" class="text-danger"></span>
                     </div>
@@ -92,7 +92,7 @@
             
                 <!-- Nickname -->
                 <div class="form-group mb-3">
-                    <label asp-for="Nickname" class="form-label"></label>
+                    <label asp-for="Nickname" class="form-label">Nickname</label>
                     <input asp-for="Nickname" class="form-control" placeholder="JD (Optional)" />
                     <span asp-validation-for="Nickname" class="text-danger"></span>
                 </div>
@@ -100,7 +100,7 @@
                 <div class="row">
                     <!-- Birth Date -->
                     <div class="col-md-6 mb-3">
-                        <label asp-for="BirthDate" class="form-label"></label>
+                        <label asp-for="BirthDate" class="form-label">Birthdate</label>
                         <input asp-for="BirthDate"
                                type="date"
                                value="@DateTime.Now"
@@ -110,7 +110,7 @@
 
                     <!-- Gender -->
                     <div class="col-md-6 mb-3">
-                        <label asp-for="Gender" class="form-label"></label>
+                        <label asp-for="Gender" class="form-label">Gender</label>
                         <div class="gender-selection">
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input"
@@ -139,7 +139,7 @@
             
                 <!-- Biography -->
                 <div class="form-group mb-4">
-                    <label asp-for="Biography" class="form-label"></label>
+                    <label asp-for="Biography" class="form-label">Biography</label>
                     <textarea asp-for="Biography"
                           class="form-control"
                           rows="5"

@@ -21,14 +21,7 @@ public class Program
         // Load user secrets.
         builder.Configuration.AddUserSecrets<Program>();
         
-        // Add services to the container.
-        string? secretConnection = builder.Configuration[SecretConnectionString];
-        string? defaultConnection = builder.Configuration.GetConnectionString(DefaultConnection);
-        
-        string connectionString = !string.IsNullOrWhiteSpace(secretConnection)
-            ? secretConnection
-            : defaultConnection
-            ?? throw new InvalidOperationException(MissingConnectionStringMessage);
+        string connectionString = ConnectionString(builder);
 
         builder.Services.AddDbContext<FilmProductionDbContext>(options => 
             options.UseSqlServer(connectionString));
@@ -107,7 +100,20 @@ public class Program
         
         app.Run();
     }
-    
+
+    private static string ConnectionString(WebApplicationBuilder builder)
+    {
+        string? secretConnection = builder.Configuration[SecretConnectionString];
+        string? defaultConnection = builder.Configuration.GetConnectionString(DefaultConnection);
+        
+        string connectionString = !string.IsNullOrWhiteSpace(secretConnection)
+            ? secretConnection
+            : defaultConnection
+              ?? throw new InvalidOperationException(MissingConnectionStringMessage);
+        
+        return connectionString;
+    }
+
     private static void ConfigureIdentity(IdentityOptions options, ConfigurationManager configuration)
     {
         options.SignIn.RequireConfirmedAccount = configuration.GetValue<bool>(SignInRequireConfirmedAccount);

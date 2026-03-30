@@ -7,6 +7,7 @@ using Wrap.Services.Models.Profile;
 using Wrap.ViewModels.Profile;
 using Wrap.ViewModels.Profile.NestedViewModels;
 
+using static Wrap.GCommon.OutputMessages;
 using static Wrap.GCommon.OutputMessages.Profile;
 using static Wrap.GCommon.ApplicationConstants;
 
@@ -141,7 +142,7 @@ public class ProfileController(IProfileService profileService,
         username ??= GetUsername();
         if (string.IsNullOrWhiteSpace(username))
         {
-            logger.LogWarning($"{nameof(EditFilmmaker)} GET: {UsernameIsNullOrEmptyMessage}");
+            logger.LogWarning($"{nameof(EditFilmmaker)} {HttpGetAction} {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
         }
         
@@ -167,21 +168,21 @@ public class ProfileController(IProfileService profileService,
     }
 
     [HttpPost]
-    public async Task<IActionResult> EditFilmmaker(EditCrewProfileInputModel model)
+    public async Task<IActionResult> EditFilmmaker(EditCrewProfileInputModel inputModel)
     {
         if (!ModelState.IsValid)
-            return View("EditCrewProfile", model);
+            return View("EditCrewProfile", inputModel);
 
         string? username = GetUsername();
         if (string.IsNullOrWhiteSpace(username))
         {
-            logger.LogWarning($"{nameof(EditFilmmaker)} POST: {UsernameIsNullOrEmptyMessage}");
+            logger.LogWarning($"{nameof(EditFilmmaker)} {HttpPostAction} {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
         }
         
         try
         {
-            EditCrewProfileDto dto = MapToEditCrewProfileDtoFromInputModel(model);
+            EditCrewProfileDto dto = MapToEditCrewProfileDtoFromInputModel(inputModel);
             
             await crewProfileService.UpdateCrewProfileAsync(username, dto);
 
@@ -198,13 +199,13 @@ public class ProfileController(IProfileService profileService,
         {
             logger.LogError(string.Format(ErrorUpdatingProfile,  username) + nse.Message);
             ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, nse.Message));
-            return View("EditCrewProfile", model);
+            return View("EditCrewProfile", inputModel);
         }
         catch (Exception e)
         {
             logger.LogError(e, string.Format(ErrorUpdatingProfile, username) + e.Message);
             ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, e.Message));
-            return View("EditCrewProfile", model);
+            return View("EditCrewProfile", inputModel);
         }
     }
 
@@ -214,7 +215,7 @@ public class ProfileController(IProfileService profileService,
         username ??= GetUsername();
         if (string.IsNullOrWhiteSpace(username))
         {
-            logger.LogWarning($"{nameof(EditActor)} GET: {UsernameIsNullOrEmptyMessage}");
+            logger.LogWarning($"{nameof(EditActor)} {HttpGetAction} {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
         }
         
@@ -240,21 +241,21 @@ public class ProfileController(IProfileService profileService,
     }
 
     [HttpPost]
-    public async Task<IActionResult> EditActor(EditCastProfileInputModel model)
+    public async Task<IActionResult> EditActor(EditCastProfileInputModel inputModel)
     {
         if (!ModelState.IsValid)
-            return View("EditCastProfile", model);
+            return View("EditCastProfile", inputModel);
 
         string? username = GetUsername();
         if (string.IsNullOrWhiteSpace(username))
         {
-            logger.LogWarning($"{nameof(EditActor)} POST: {UsernameIsNullOrEmptyMessage}");
+            logger.LogWarning($"{nameof(EditActor)} {HttpPostAction} {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
         }
         
         try
         {
-            EditCastProfileDto dto = MapToEditCastProfileDtoFromInputModel(model);
+            EditCastProfileDto dto = MapToEditCastProfileDtoFromInputModel(inputModel);
                 
             await castProfileService.UpdateCastProfileAsync(username, dto);
 
@@ -271,13 +272,13 @@ public class ProfileController(IProfileService profileService,
         {
             logger.LogError(string.Format(ErrorUpdatingProfile,  username) + nse.Message);
             ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, nse.Message));
-            return View("EditCastProfile", model);
+            return View("EditCastProfile", inputModel);
         }
         catch (Exception e)
         {
             logger.LogError(e, string.Format(ErrorUpdatingProfile, username) + e.Message);
             ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, e.Message));
-            return View("EditCastProfile", model);
+            return View("EditCastProfile", inputModel);
         }
     }
     
@@ -288,7 +289,7 @@ public class ProfileController(IProfileService profileService,
         username ??= GetUsername();
         if (string.IsNullOrWhiteSpace(username))
         {
-            logger.LogWarning($"{nameof(EditSkills)} GET: {UsernameIsNullOrEmptyMessage}");
+            logger.LogWarning($"{nameof(EditSkills)} {HttpGetAction} {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
         }
         
@@ -319,7 +320,7 @@ public class ProfileController(IProfileService profileService,
         string? username = GetUsername();
         if (string.IsNullOrWhiteSpace(username))
         {
-            logger.LogWarning($"{nameof(EditSkills)} POST: {UsernameIsNullOrEmptyMessage}");
+            logger.LogWarning($"{nameof(EditSkills)} {HttpPostAction} {UsernameIsNullOrEmptyMessage}");
             return View(nameof(NotFound), UserNotIdentifiedMessage);
         }
 

@@ -54,68 +54,55 @@
                             <!-- Left Column -->
                             <div class="col-md-6">
                                 <div class="info-item">
-                                    <div class="info-label">Name:</div>
+                                    <div class="info-label">Name</div>
                                     <div class="info-value">@Model.FirstName @Model.LastName</div>
                                 </div>
 
                                 <div class="info-item">
-                                    <div class="info-label">Age:</div>
-                                    <div class="info-value">@Model.Age</div>
+                                    <div class="info-label">Email address</div>
+                                    <div class="info-value">@Model.Email</div>
                                 </div>
 
                                 <div class="info-item">
-                                    <div class="info-label">Gender:</div>
-                                    <div class="info-value">
-                                        @Model.Gender
-                                    </div>
+                                    <div class="info-label">Phone number</div>
+                                    <div class="info-value">@Model.PhoneNumber</div>
                                 </div>
                                 
-                                @if (Model.CastMemberProductions == null || Model.Roles.Length == 0)
-                                {
-                                    <div class="info-value">No roles. You should join movie productions to get your roles here.</div>
-                                }
-                                else if (Model.CastMemberProductions != null && Model.Roles.Any())
-                                {
-                                    <div class="info-item">
-                                        <div class="info-label">Current Roles:</div>
-                                        @foreach (string? characterName in Model.Roles)
-                                        {
-                                            <div class="info-value">@characterName</div>
-                                        }
-                                    </div>
-                                }
+                                <div class="info-item">
+                                    <div class="info-label">Username</div>
+                                    <div class="info-value">@Model.UserName</div>
+                                </div>
                             </div>
 
                             <!-- Right Column -->
                             <div class="col-md-6">
                                 
                                 <div class="info-item">
-                                    <div class="info-label">Nickname:</div>
+                                    <div class="info-label">Nickname</div>
                                     <div class="info-value">@Model.Nickname</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Age</div>
+                                    <div class="info-value">@Model.Age</div>
+                                </div>
+
+                                <div class="info-item">
+                                    <div class="info-label">Gender</div>
+                                    <div class="info-value">
+                                        @Model.Gender
+                                    </div>
                                 </div>
                                 
                                 <div class="info-item">
-                                    <div class="info-label">Age:</div>
-                                    <div class="info-value">@Model.Age years old</div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Email:</div>
-                                    <div class="info-value">@Model.Email</div>
-                                </div>
-
-                                <div class="info-item">
-                                    <div class="info-label">Phone:</div>
-                                    <div class="info-value">@Model.PhoneNumber</div>
+                                    <div class="info-label">Status</div>
+                                    <div class="info-value">
+                                        <span class="badge @(Model.IsActive ? ActiveStyle : InactiveStyle) badge-custom">
+                                            @(Model.IsActive ? Active : Inactive)
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Status Badge -->
-                        <div class="mt-3">
-                            <span class="badge @(Model.IsActive ? ActiveStyle : InactiveStyle) badge-custom">
-                                Status: @(Model.IsActive ? Active : Inactive)
-                            </span>
                         </div>
                     </div>
                 </div>

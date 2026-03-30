@@ -54,40 +54,40 @@
                             <!-- Left Column -->
                             <div class="col-md-6">
                                 <div class="info-item">
-                                    <div class="info-label">Name:</div>
+                                    <div class="info-label">Name</div>
                                     <div class="info-value">@Model.FirstName @Model.LastName</div>
                                 </div>
 
                                 <div class="info-item">
-                                    <div class="info-label">Email:</div>
+                                    <div class="info-label">Email address</div>
                                     <div class="info-value">@Model.Email</div>
                                 </div>
 
                                 <div class="info-item">
-                                    <div class="info-label">Phone:</div>
+                                    <div class="info-label">Phone number</div>
                                     <div class="info-value">@Model.PhoneNumber</div>
                                 </div>
-
+                                
                                 <div class="info-item">
-                                    <div class="info-label">Total Skills:</div>
-                                    <div class="info-value">@Model.SkillsCount</div>
+                                    <div class="info-label">Username</div>
+                                    <div class="info-value">@Model.UserName</div>
                                 </div>
                             </div>
 
                             <!-- Right Column -->
                             <div class="col-md-6">
                                 <div class="info-item">
-                                    <div class="info-label">Nickname:</div>
+                                    <div class="info-label">Nickname</div>
                                     <div class="info-value">@Model.Nickname</div>
                                 </div>
 
                                 <div class="info-item">
-                                    <div class="info-label">Productions:</div>
-                                    <div class="info-value">@Model.CrewMemberProductionsCount</div>
+                                    <div class="info-label">Total Skills</div>
+                                    <div class="info-value">@Model.SkillsCount</div>
                                 </div>
 
                                 <div class="info-item">
-                                    <div class="info-label">Status:</div>
+                                    <div class="info-label">Status</div>
                                     <div class="info-value">
                                         <span class="badge @(Model.IsActive ? ActiveStyle : InactiveStyle) badge-custom">
                                             @(Model.IsActive ? Active : Inactive)

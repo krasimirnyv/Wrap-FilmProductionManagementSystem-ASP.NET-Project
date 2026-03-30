@@ -20,10 +20,9 @@ public class Cast
     [Key]
     public Guid Id { get; set; }
 
-    [Required]
     [Unicode]
     [MaxLength(ProfileImagePathMaxLength)]
-    public string ProfileImagePath { get; set; } = null!;
+    public string? ProfileImagePath { get; set; }
     // Example: "/images/cast/jane-doe.jpg"
 
     [Required]

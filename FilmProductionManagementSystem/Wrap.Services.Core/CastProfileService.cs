@@ -1,22 +1,22 @@
 namespace Wrap.Services.Core;
 
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
 using Interfaces;
+using Utilities.ImageLogic.Interfaces;
 using Data.Models;
 using Data.Models.MappingEntities;
 using Data.Repository.Interfaces;
 using Models.Profile;
 using Models.Profile.NestedDtos;
 
-using static Utilities.HelperSaveProfile;
 using static GCommon.OutputMessages.Profile;
 using static GCommon.DataFormat;
 
 public class CastProfileService(IProfileRepository profileRepository,
-                                IWebHostEnvironment environment,
+                                IImageService imageService,
+                                IVariantImageStrategyResolver imageStrategyResolver,
                                 ILogger<ProfileService> logger) : ICastProfileService
 {
     public async Task<CastProfileDto> GetCastProfileDataAsync(string username)
@@ -32,7 +32,7 @@ public class CastProfileService(IProfileRepository profileRepository,
         {
             FirstName = cast.FirstName,
             LastName = cast.LastName,
-            ProfileImagePath = cast.ProfileImagePath,
+            ProfileImagePath = cast.ProfileImagePath!,
             Nickname = cast.Nickname ?? EmptyNickname,
             UserName = cast.User.UserName!,
             Email = cast.User.Email!,
@@ -109,7 +109,8 @@ public class CastProfileService(IProfileRepository profileRepository,
         
             if (castDto.ProfileImage is not null && castDto.ProfileImage.Length > 0)
             {
-                string newImagePath = await SaveProfileImageAsync(environment, castDto.ProfileImage);
+                IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+                string newImagePath = await imageService.ReplaceAsync(castDto.CurrentProfileImagePath, castDto.ProfileImage, strategy);
                 cast.ProfileImagePath = newImagePath;
             }
         

@@ -1,10 +1,10 @@
 namespace Wrap.Services.Core;
 
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
 using Interfaces;
+using Utilities.ImageLogic.Interfaces;
 using Data.Models;
 using Data.Models.MappingEntities;
 using Data.Repository.Interfaces;
@@ -13,12 +13,12 @@ using Models.Profile.NestedDtos;
 using GCommon.Enums;
 using GCommon.UI;
 
-using static Utilities.HelperSaveProfile;
 using static GCommon.OutputMessages.Profile;
 using static GCommon.DataFormat;
 
 public class CrewProfileService(IProfileRepository profileRepository,
-                                IWebHostEnvironment environment,
+                                IImageService imageService,
+                                IVariantImageStrategyResolver imageStrategyResolver,
                                 ILogger<ProfileService> logger) : ICrewProfileService
 {
     public async Task<CrewProfileDto> GetCrewProfileDataAsync(string username)
@@ -39,7 +39,7 @@ public class CrewProfileService(IProfileRepository profileRepository,
         {
             FirstName = crew.FirstName,
             LastName = crew.LastName,
-            ProfileImagePath = crew.ProfileImagePath,
+            ProfileImagePath = crew.ProfileImagePath!,
             Nickname = crew.Nickname ?? EmptyNickname,
             UserName = crew.User.UserName!,
             Email = crew.User.Email!,
@@ -113,7 +113,8 @@ public class CrewProfileService(IProfileRepository profileRepository,
         
             if (crewDto.ProfileImage is not null && crewDto.ProfileImage.Length > 0)
             { 
-                string newImagePath = await SaveProfileImageAsync(environment, crewDto.ProfileImage); 
+                IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+                string newImagePath = await imageService.ReplaceAsync(crewDto.CurrentProfileImagePath, crewDto.ProfileImage, strategy);
                 crew.ProfileImagePath = newImagePath;
             }
 
