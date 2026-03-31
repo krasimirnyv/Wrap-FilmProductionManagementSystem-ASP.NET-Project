@@ -31,7 +31,7 @@ public class NavBarService(INavBarRepository navBarRepository) : INavBarService
             NavBarUserDto navBarDto = new NavBarUserDto
             {
                 UserName = cast.User.UserName!,
-                ProfileImagePath = cast.ProfileImagePath,
+                ProfileImagePath = cast.ProfileImagePath!,
                 Role = CastString
             };
             
