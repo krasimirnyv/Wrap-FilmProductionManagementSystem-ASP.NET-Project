@@ -1,0 +1,95 @@
+@model AllProductionsIndexViewModel
+
+@{
+    int page = Model.PageNumber;
+    int total = Model.TotalPages;
+    int chunkSize = Model.ShowingPages;
+
+    int chunkStart = ((page - 1) / chunkSize) * chunkSize + 1;
+    int chunkEnd = Math.Min(chunkStart + chunkSize - 1, total);
+
+    bool showPrevious = page > 1;
+    bool showNext = page < total;
+
+    bool showBackwardEllipsis = chunkStart > 1;
+    int backwardEllipsisTarget = Math.Max(1, chunkStart - chunkSize);
+
+    bool showForwardEllipsis = chunkEnd < total;
+    int forwardEllipsisTarget = chunkStart + chunkSize;
+}
+
+@if (total > 1)
+{
+    <nav aria-label="Productions pagination">
+        <ul class="pagination pagination-sm mb-0 production-pagination">
+
+            @if (showPrevious)
+            {
+                <li class="page-item">
+                    <a asp-area=""
+                       asp-controller="Production"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(page - 1)"
+                       class="page-link">
+                        Previous
+                    </a>
+                </li>
+            }
+
+            @if (showBackwardEllipsis)
+            {
+                <li class="page-item">
+                    <a asp-area=""
+                       asp-controller="Production"
+                       asp-action="Index"
+                       asp-route-pageNumber="@backwardEllipsisTarget"
+                       class="page-link"
+                       aria-label="Previous pages">
+                        ...
+                    </a>
+                </li>
+            }
+
+            @for (int i = chunkStart; i <= chunkEnd; i++)
+            {
+                <li class="page-item @(page == i ? "active" : string.Empty)"
+                    aria-current="@(page == i ? "page" : null)">
+                    <a asp-area=""
+                       asp-controller="Production"
+                       asp-action="Index"
+                       asp-route-pageNumber="@i"
+                       class="page-link">
+                        @i
+                    </a>
+                </li>
+            }
+
+            @if (showForwardEllipsis)
+            {
+                <li class="page-item">
+                    <a asp-area=""
+                       asp-controller="Production"
+                       asp-action="Index"
+                       asp-route-pageNumber="@forwardEllipsisTarget"
+                       class="page-link"
+                       aria-label="Next pages">
+                        ...
+                    </a>
+                </li>
+            }
+
+            @if (showNext)
+            {
+                <li class="page-item">
+                    <a asp-area=""
+                       asp-controller="Production"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(page + 1)"
+                       class="page-link">
+                        Next
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

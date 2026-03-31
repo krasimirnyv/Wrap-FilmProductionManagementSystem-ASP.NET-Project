@@ -41,6 +41,15 @@
     100% { background-position: 1% 50%; }
 }
 
+/* Pagination */
+#bottomPaginationWrap {
+    width: 100%;
+}
+
+#bottomPaginationWrap .pagination {
+    justify-content: center;
+}
+
 /* =========================
    MAIN CARDS
    ========================= */

@@ -57,95 +57,14 @@
                 
                 @* ── Pagination ── *@
                 <div class="col-md-4 d-flex justify-content-end align-items-center gap-3">
-
                     <span class="text-muted small"
                           id="resultsCount"
                           data-total="@Model.TotalCount">
                         @Model.Count of @Model.TotalCount @(Model.TotalCount == 1 ? "production" : "productions")
                     </span>
-                    
-                    @{
-                        int page = Model.PageNumber;
-                        int total = Model.TotalPages;
-                        int chunkSize = Model.ShowingPages;
 
-                        // chunk start: 1,4,7,...
-                        int chunkStart = ((page - 1) / chunkSize) * chunkSize + 1;
-                        int chunkEnd = Math.Min(chunkStart + chunkSize - 1, total);
-
-                        bool showPrevious = page > 1;
-                        bool showNext = page < total;
-
-                        bool showEllipsis = total > chunkSize && chunkEnd < total;
-                        int ellipsisTarget = chunkStart + chunkSize; // next chunk start
-                    }
-
-                    <nav aria-label="Productions pagination" id="paginationWrap" >
-                        <ul class="pagination pagination-sm mb-0 production-pagination" id="productionsPagination">
-
-                            @* Previous (hidden on page 1) *@
-                            @if (showPrevious)
-                            {
-                                <li class="page-item" id="pagePrev">
-                                    <a asp-area=""
-                                       asp-controller="Production"
-                                       asp-action="Index"
-                                       asp-route-pageNumber="@(page - 1)"
-                                       class="page-link">
-                                        Previous
-                                    </a>
-                                </li>
-                            }
-
-                            @* Page numbers (chunk of 3) *@
-                            @for (int i = chunkStart; i <= chunkEnd; i++)
-                            {
-                                @if (i > 0)
-                                {
-                                    <li class="page-item @(page == i ? "active" : string.Empty)" aria-current="@(page == i ? "page" : null)">
-                                        <a asp-area=""
-                                           asp-controller="Production"
-                                           asp-action="Index"
-                                           asp-route-pageNumber="@i"
-                                           class="page-link">
-                                            @i
-                                        </a>
-                                    </li>
-                                }
-                            }
-
-                            @* Ellipsis (hidden if <= 3 pages OR no more chunks) *@
-                            @if (showEllipsis)
-                            {
-                                <li class="page-item">
-                                    <a asp-area=""
-                                       asp-controller="Production"
-                                       asp-action="Index"
-                                       asp-route-pageNumber="@ellipsisTarget"
-                                       class="page-link"
-                                       aria-label="Next pages">
-                                        ...
-                                    </a>
-                                </li>
-                            }
-
-                            @* Next (hidden on last page) *@
-                            @if (showNext)
-                            {
-                                <li class="page-item" id="pageNext">
-                                    <a asp-area=""
-                                       asp-controller="Production"
-                                       asp-action="Index"
-                                       asp-route-pageNumber="@(page + 1)"
-                                       class="page-link">
-                                        Next
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    </nav>
+                    <partial name="_ProductionsPaginationPartial" model="Model" />
                 </div>
-                
             </div>
         </div>
 
@@ -206,6 +125,10 @@
                         <p>No productions match your search.</p>
                     </div>
                 </div>
+            </div>
+            
+            <div class="d-flex justify-content-center mt-2 mb-4" id="bottomPaginationWrap">
+                <partial name="_ProductionsPaginationPartial" model="Model" />
             </div>
         }
 
