@@ -17,9 +17,6 @@ public class Program
     public static void Main(string[] args)
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-        // Load user secrets.
-        builder.Configuration.AddUserSecrets<Program>();
         
         string connectionString = ConnectionString(builder);
 
@@ -100,15 +97,31 @@ public class Program
         
         app.Run();
     }
-
+    
     private static string ConnectionString(WebApplicationBuilder builder)
     {
-        string? secretConnection = builder.Configuration[SecretConnectionString];
         string? defaultConnection = builder.Configuration.GetConnectionString(DefaultConnection);
+        string? connectionString;
         
-        string connectionString = !string.IsNullOrWhiteSpace(secretConnection)
-            ? secretConnection
-            : defaultConnection
+        bool isRunningInContainer = string.Equals(Environment.GetEnvironmentVariable(ContainerEnvironment), "true", StringComparison.OrdinalIgnoreCase);
+        if (isRunningInContainer)
+        {
+            string? secretDockerConnection = builder.Configuration.GetConnectionString(DockerConnectionString);
+            
+            connectionString = !string.IsNullOrWhiteSpace(secretDockerConnection) 
+                ? secretDockerConnection
+                : defaultConnection 
+                  ?? throw new InvalidOperationException(MissingConnectionStringMessage);
+            
+            return connectionString;
+        }
+
+        builder.Configuration.AddUserSecrets<Program>();
+        string? secretConnection = builder.Configuration[SecretConnectionString];
+        
+        connectionString = !string.IsNullOrWhiteSpace(secretConnection) 
+            ? secretConnection 
+            : defaultConnection 
               ?? throw new InvalidOperationException(MissingConnectionStringMessage);
         
         return connectionString;

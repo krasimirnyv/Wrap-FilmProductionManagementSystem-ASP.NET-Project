@@ -2,8 +2,12 @@ namespace Wrap.GCommon;
 
 public static class ApplicationConstants
 {
+    /* Environment names */
+    public const string ContainerEnvironment = "DOTNET_RUNNING_IN_CONTAINER";
+    
     /* Constants for Connection strings */
     public const string SecretConnectionString = "ConnectionStrings:MyDevConnection";
+    public const string DockerConnectionString = "DockerConnection";
     public const string DefaultConnection = "DefaultConnection";
     public const string MissingConnectionStringMessage = "Connection string 'DefaultConnection' not found.";
     

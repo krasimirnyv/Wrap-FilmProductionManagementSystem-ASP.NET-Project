@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Wrap.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDatabase : Migration
+    public partial class InitialMigrationWithDataSeeding : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,7 @@ namespace Wrap.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Label = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(27)", maxLength: 27, nullable: true),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -61,7 +61,7 @@ namespace Wrap.Data.Migrations
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     Budget = table.Column<decimal>(type: "DECIMAL(18,2)", nullable: false),
-                    Thumbnail = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Thumbnail = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     StatusType = table.Column<int>(type: "int", nullable: false),
                     StatusStartDate = table.Column<DateTime>(type: "DATETIME2", nullable: false),
                     StatusEndDate = table.Column<DateTime>(type: "DATETIME2", nullable: true)
@@ -182,7 +182,7 @@ namespace Wrap.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProfileImagePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ProfileImagePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     FirstName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Nickname = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
@@ -209,7 +209,7 @@ namespace Wrap.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProfileImagePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ProfileImagePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     FirstName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Nickname = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
@@ -503,6 +503,9 @@ namespace Wrap.Data.Migrations
                 columns: new[] { "Id", "Budget", "Description", "StatusEndDate", "StatusStartDate", "StatusType", "Thumbnail", "Title" },
                 values: new object[,]
                 {
+                    { new Guid("019aa8c4-7b21-4b93-a1b4-18228fa10027"), 155000.00m, "An artist spirals into obsession while preparing the final exhibition of his career.", new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Utc), 21, "/img/thumbnail/default-thumbnail.png", "Burning Canvas" },
+                    { new Guid("12abb9d5-8c32-4ca4-b2c5-293390b20028"), 500000.00m, "A post-apocalyptic survival story abandoned after loss of primary financing.", new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc), 22, "/img/thumbnail/default-thumbnail.png", "No Signal Tomorrow" },
+                    { new Guid("1e57a6d4-7f88-41bb-a836-83bb97b89008"), 110000.00m, "A quiet character-driven story of renewal in a small coastal town.", new DateTime(2026, 6, 15, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 5, 18, 0, 0, 0, 0, DateTimeKind.Utc), 11, "/img/thumbnail/default-thumbnail.png", "After the Rain" },
                     { new Guid("2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01"), 250000.00m, "A neo-noir mystery unfolding over one sleepless night.", new DateTime(2026, 2, 15, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc), 2, "/img/thumbnail/default-thumbnail.png", "Midnight Dreams" },
                     { new Guid("2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02"), 120000.00m, "A coming-of-age drama about ambition, fear, and first love.", new DateTime(2026, 3, 20, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 20, 0, 0, 0, 0, DateTimeKind.Utc), 5, "/img/thumbnail/default-thumbnail.png", "Paper Planes" },
                     { new Guid("2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03"), 180000.00m, "A comedic behind-the-scenes story about a cursed film set.", new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc), 3, "/img/thumbnail/default-thumbnail.png", "The Last Take" },
@@ -512,7 +515,32 @@ namespace Wrap.Data.Migrations
                     { new Guid("2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d07"), 320000.00m, "A tense drama about fixing a film before the deadline.", new DateTime(2026, 4, 25, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc), 10, "/img/thumbnail/default-thumbnail.png", "Reshoot Season" },
                     { new Guid("2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d08"), 140000.00m, "An art-house film exploring memory through sound and color.", new DateTime(2026, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), 14, "/img/thumbnail/default-thumbnail.png", "Color & Noise" },
                     { new Guid("2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09"), 210000.00m, "A finished film preparing for its festival circuit debut.", new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc), 19, "/img/thumbnail/default-thumbnail.png", "Festival Run" },
-                    { new Guid("819f7100-5b1d-4eee-8b82-8e4084ef0928"), 1000.00m, "This is a test", new DateTime(2026, 3, 6, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1, "/img/thumbnail/default-thumbnail.png", "Test Film" }
+                    { new Guid("3e8a1c57-6d21-4bcb-8dc4-2f6b42a19002"), 540000.00m, "A visually driven sci-fi drama set on the edge of a collapsing city.", new DateTime(2026, 1, 28, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 8, 0, 0, 0, 0, DateTimeKind.Utc), 5, "/img/thumbnail/default-thumbnail.png", "Glass Horizon" },
+                    { new Guid("5b7f9e22-8a11-47c1-bf28-47db53d49004"), 280000.00m, "A stylish thriller following a late-night radio host drawn into a conspiracy.", new DateTime(2026, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc), 6, "/img/thumbnail/default-thumbnail.png", "Velvet Signal" },
+                    { new Guid("6d91c8f4-5e21-4b69-8a5d-61ed75f69006"), 410000.00m, "A crime thriller in which a photographer uncovers evidence hidden in old negatives.", new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc), 10, "/img/thumbnail/default-thumbnail.png", "Broken Frame" },
+                    { new Guid("7c5c7d63-1f42-4d89-9b91-1b5d1f3a9001"), 175000.00m, "A psychological drama about memory, guilt, and unresolved loss.", new DateTime(2026, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc), 4, "/img/thumbnail/default-thumbnail.png", "Silent Echo" },
+                    { new Guid("819f7100-5b1d-4eee-8b82-8e4084ef0928"), 1000.00m, "This is a test", new DateTime(2026, 3, 6, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1, "/img/thumbnail/default-thumbnail.png", "Test Film" },
+                    { new Guid("9f2d8a11-3c4e-4d7b-a2d4-38ce72c39003"), 130000.00m, "A nostalgic indie drama about friendship fractured by a long-buried secret.", new DateTime(2026, 3, 28, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), 22, "/img/thumbnail/default-thumbnail.png", "Ashes of Summer" },
+                    { new Guid("a13e4b90-2c74-4d3a-91c8-5cfc64e59005"), 95000.00m, "A bittersweet romance between two artists during the final week of summer.", new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc), 3, "/img/thumbnail/default-thumbnail.png", "Fading Lights" },
+                    { new Guid("a5d7ecf8-bf65-4fd7-d5e8-55b6c4e50015"), 150000.00m, "A winter mystery centered around a box of unsent letters discovered in an abandoned house.", new DateTime(2026, 2, 6, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 22, 0, 0, 0, 0, DateTimeKind.Utc), 6, "/img/thumbnail/default-thumbnail.png", "Frozen Letters" },
+                    { new Guid("ab34425e-15cb-453d-b45e-b21c2a4b0021"), 240000.00m, "A road thriller about a failed musician and a runaway chasing redemption.", new DateTime(2026, 6, 14, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc), 12, "/img/thumbnail/default-thumbnail.png", "Dust and Neon" },
+                    { new Guid("b6e8fd09-c076-40e8-e6f9-66c7d5f60016"), 980000.00m, "A historical war drama about espionage, sacrifice, and impossible choices.", new DateTime(2026, 3, 18, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), 7, "/img/thumbnail/default-thumbnail.png", "Iron Veil" },
+                    { new Guid("bc45536f-26dc-464e-c56f-c32d3b5c0022"), 185000.00m, "A suspense drama in which a photographer discovers incriminating details in developed film.", new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Utc), 13, "/img/thumbnail/default-thumbnail.png", "Second Exposure" },
+                    { new Guid("bc6f0d83-9a52-43de-bc71-72aa86a79007"), 160000.00m, "A road movie about estranged siblings forced to travel together across the country.", new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc), 6, "/img/thumbnail/default-thumbnail.png", "Northbound" },
+                    { new Guid("c1f3a8d4-7b21-4b93-91a4-11d2f0a10011"), 430000.00m, "A noir thriller about a detective uncovering corruption in a decaying port city.", new DateTime(2026, 2, 22, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 18, 0, 0, 0, 0, DateTimeKind.Utc), 2, "/img/thumbnail/default-thumbnail.png", "Crimson Harbor" },
+                    { new Guid("c7f90e1a-d187-41f9-f70a-77d8e6070017"), 120000.00m, "A light coming-of-age dramedy about three friends reliving their last summer together.", new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc), 8, "/img/thumbnail/default-thumbnail.png", "Summer Rewind" },
+                    { new Guid("cd566480-37ed-475f-d670-d43e4c6d0023"), 410000.00m, "A subtle sci-fi drama about loneliness, distance, and first contact.", new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 20, 0, 0, 0, 0, DateTimeKind.Utc), 15, "/img/thumbnail/default-thumbnail.png", "Quiet Signal" },
+                    { new Guid("d2a4b9e5-8c32-4ca4-a2b5-22e3f1b20012"), 275000.00m, "A courtroom drama about a musician fighting to reclaim her voice and reputation.", new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc), 4, "/img/thumbnail/default-thumbnail.png", "Shattered Silence" },
+                    { new Guid("d2c49f75-0b33-4a2f-96a1-94cc08c99009"), 145000.00m, "An experimental ensemble film weaving together intersecting monologues.", new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 5, 0, 0, 0, 0, DateTimeKind.Utc), 13, "/img/thumbnail/default-thumbnail.png", "Parallel Voices" },
+                    { new Guid("d8011f2b-e298-420a-812b-88e9f7180018"), 650000.00m, "A dystopian thriller about a journalist navigating a city emptied by fear and surveillance.", new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc), 9, "/img/thumbnail/default-thumbnail.png", "Hollow City" },
+                    { new Guid("de677591-48fe-4860-e781-e54f5d7e0024"), 105000.00m, "A chamber drama about neighbors whose lives intersect after a tragic accident.", new DateTime(2026, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc), 17, "/img/thumbnail/default-thumbnail.png", "The Open Window" },
+                    { new Guid("e3b5cad6-9d43-4db5-b3c6-33f4a2c30013"), 95000.00m, "A heartfelt drama following a family photographer confronting the passage of time.", new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc), 5, "/img/thumbnail/default-thumbnail.png", "Golden Hour" },
+                    { new Guid("e912203c-f3a9-431b-923c-99fa08290019"), 360000.00m, "A mystery-thriller where eerie radio transmissions begin predicting violent events.", new DateTime(2026, 5, 24, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Utc), 10, "/img/thumbnail/default-thumbnail.png", "Blue Static" },
+                    { new Guid("ef7886a2-590f-4971-f892-f6606e8f0025"), 195000.00m, "A tense airport-set drama about missed chances, final goodbyes, and unexpected reunions.", new DateTime(2026, 8, 20, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 7, 15, 0, 0, 0, 0, DateTimeKind.Utc), 18, "/img/thumbnail/default-thumbnail.png", "Last Departure" },
+                    { new Guid("f08997b3-6a10-4a82-90a3-07117f900026"), 70000.00m, "A minimalist drama about two strangers connected by a late-night emergency call.", new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc), 20, "/img/thumbnail/default-thumbnail.png", "Echo Line" },
+                    { new Guid("f4c6dbe7-ae54-4ec6-c4d7-44a5b3d40014"), 210000.00m, "An intimate psychological drama about fame, obsession, and self-destruction.", new DateTime(2026, 3, 25, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc), 3, "/img/thumbnail/default-thumbnail.png", "Velvet Ashes" },
+                    { new Guid("f84a72b1-6c95-45ad-b417-a5dd19da9010"), 85000.00m, "A chamber drama centered on family tension during the reading of a final will.", new DateTime(2026, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc), 18, "/img/thumbnail/default-thumbnail.png", "Final Arrangement" },
+                    { new Guid("fa23314d-04ba-442c-a34d-a10b193a0020"), 80000.00m, "A poetic indie romance unfolding over a single night in Sofia.", new DateTime(2026, 6, 12, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Utc), 11, "/img/thumbnail/default-thumbnail.png", "Paper Moonlight" }
                 });
 
             migrationBuilder.InsertData(

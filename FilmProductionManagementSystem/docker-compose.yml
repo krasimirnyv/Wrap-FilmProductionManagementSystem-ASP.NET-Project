@@ -2,53 +2,55 @@
 #  Wrap – FilmProductionManagementSystem
 #  docker-compose.yml
 #
-#  Start SQL Server in Docker:
-#    1. Copy .env.example → .env and write the password
-#    2. docker compose up -d
+#  Start:
+#    1. Copy .env.example -> .env
+#    2. Put your SA password in .env
+#    3. docker compose up -d --build
 #
-#  Stop it:
-#    1. docker compose down
+#  Stop:
+#    docker compose down
 #
 #  Stop + delete data (fresh DB):
-#    1. docker compose down -v
+#    docker compose down -v
 # ═══════════════════════════════════════════════════════════════
 
-# Optional:
-# version: "3.9"
-
 services:
-
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: wrap-sqlserver
+  wrap_db:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: wrap_db
     restart: unless-stopped
-
-    # Starts only if user selecets:
-    # docker compose --profile db up -d
-
-    profiles: ["db"]
-
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_PID: "Developer"                     # Free Developer edition
-      MSSQL_SA_PASSWORD: "${MSSQ_SA_PASSWORD}"   # It comes from .env file
-
-      # Optional:
-      # MSSQL_COLLATION: "SQL_Latin1_General_CP1_CI_AS"
-
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
     ports:
-      - "${MSSQL_PORT:-1433}:1433"               # Local app connects localhost,1434
-
+      - "${MSSQL_PORT:-1434}:1433"
     volumes:
-      - sqlserver_data:/var/opt/mssql
+      - wrap_db_data:/var/opt/mssql
+      - /Users/krasi/docker-project/backup:/var/opt/mssql/backup
+      - /Users/krasi/docker-project/media:/var/opt/mssql/media
+    networks:
+      - wrapnet
 
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${SA_PASSWORD}\" -Q\"SELECT 1\" -C > /dev/null || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 20s
+  wrap_app:
+    image: wrap.filmproductionmanagementsystem.web
+    container_name: wrap_app
+    build:
+      context: .
+      dockerfile: Wrap.FilmProductionManagementSystem.Web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - wrap_db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DockerConnection: "Server=wrap_db,1433;Database=WrapDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=true;TrustServerCertificate=true;"
+    ports:
+      - "8080:8080"
+    networks:
+      - wrapnet
 
 volumes:
-  sqlserver_data:
-    name: wrap_sqlserver_data
+  wrap_db_data:
+
+networks:
+  wrapnet:
+    driver: bridge

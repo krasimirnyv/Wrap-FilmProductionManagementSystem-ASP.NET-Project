@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>aspnet-FilmProductionManagementSystem.Web-ef18a841-ffa2-4699-8bd4-befb076fca62</UserSecretsId>
         <RootNamespace>FilmProductionManagementSystem.Web</RootNamespace>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -48,6 +49,13 @@
       <Folder Include="wwwroot\img\profile\" />
       <Folder Include="wwwroot\img\thumbnail\" />
       <Folder Include="wwwroot\lib\qrcode\" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>

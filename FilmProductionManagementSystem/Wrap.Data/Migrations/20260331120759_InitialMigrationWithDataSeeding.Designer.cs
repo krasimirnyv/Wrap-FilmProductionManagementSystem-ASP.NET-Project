@@ -12,8 +12,8 @@ using Wrap.Data;
 namespace Wrap.Data.Migrations
 {
     [DbContext(typeof(FilmProductionDbContext))]
-    [Migration("20260330120456_EnitiesImagePathToNullable")]
-    partial class EnitiesImagePathToNullable
+    [Migration("20260331120759_InitialMigrationWithDataSeeding")]
+    partial class InitialMigrationWithDataSeeding
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1085,6 +1085,314 @@ namespace Wrap.Data.Migrations
                             StatusType = 19,
                             Thumbnail = "/img/thumbnail/default-thumbnail.png",
                             Title = "Festival Run"
+                        },
+                        new
+                        {
+                            Id = new Guid("7c5c7d63-1f42-4d89-9b91-1b5d1f3a9001"),
+                            Budget = 175000.00m,
+                            Description = "A psychological drama about memory, guilt, and unresolved loss.",
+                            StatusEndDate = new DateTime(2026, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 4,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Silent Echo"
+                        },
+                        new
+                        {
+                            Id = new Guid("3e8a1c57-6d21-4bcb-8dc4-2f6b42a19002"),
+                            Budget = 540000.00m,
+                            Description = "A visually driven sci-fi drama set on the edge of a collapsing city.",
+                            StatusEndDate = new DateTime(2026, 1, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 5,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Glass Horizon"
+                        },
+                        new
+                        {
+                            Id = new Guid("9f2d8a11-3c4e-4d7b-a2d4-38ce72c39003"),
+                            Budget = 130000.00m,
+                            Description = "A nostalgic indie drama about friendship fractured by a long-buried secret.",
+                            StatusEndDate = new DateTime(2026, 3, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 22,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Ashes of Summer"
+                        },
+                        new
+                        {
+                            Id = new Guid("5b7f9e22-8a11-47c1-bf28-47db53d49004"),
+                            Budget = 280000.00m,
+                            Description = "A stylish thriller following a late-night radio host drawn into a conspiracy.",
+                            StatusEndDate = new DateTime(2026, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 6,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Velvet Signal"
+                        },
+                        new
+                        {
+                            Id = new Guid("a13e4b90-2c74-4d3a-91c8-5cfc64e59005"),
+                            Budget = 95000.00m,
+                            Description = "A bittersweet romance between two artists during the final week of summer.",
+                            StatusEndDate = new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 3,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Fading Lights"
+                        },
+                        new
+                        {
+                            Id = new Guid("6d91c8f4-5e21-4b69-8a5d-61ed75f69006"),
+                            Budget = 410000.00m,
+                            Description = "A crime thriller in which a photographer uncovers evidence hidden in old negatives.",
+                            StatusEndDate = new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 10,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Broken Frame"
+                        },
+                        new
+                        {
+                            Id = new Guid("bc6f0d83-9a52-43de-bc71-72aa86a79007"),
+                            Budget = 160000.00m,
+                            Description = "A road movie about estranged siblings forced to travel together across the country.",
+                            StatusEndDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 6,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Northbound"
+                        },
+                        new
+                        {
+                            Id = new Guid("1e57a6d4-7f88-41bb-a836-83bb97b89008"),
+                            Budget = 110000.00m,
+                            Description = "A quiet character-driven story of renewal in a small coastal town.",
+                            StatusEndDate = new DateTime(2026, 6, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 5, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 11,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "After the Rain"
+                        },
+                        new
+                        {
+                            Id = new Guid("d2c49f75-0b33-4a2f-96a1-94cc08c99009"),
+                            Budget = 145000.00m,
+                            Description = "An experimental ensemble film weaving together intersecting monologues.",
+                            StatusEndDate = new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 13,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Parallel Voices"
+                        },
+                        new
+                        {
+                            Id = new Guid("f84a72b1-6c95-45ad-b417-a5dd19da9010"),
+                            Budget = 85000.00m,
+                            Description = "A chamber drama centered on family tension during the reading of a final will.",
+                            StatusEndDate = new DateTime(2026, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 18,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Final Arrangement"
+                        },
+                        new
+                        {
+                            Id = new Guid("c1f3a8d4-7b21-4b93-91a4-11d2f0a10011"),
+                            Budget = 430000.00m,
+                            Description = "A noir thriller about a detective uncovering corruption in a decaying port city.",
+                            StatusEndDate = new DateTime(2026, 2, 22, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 2,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Crimson Harbor"
+                        },
+                        new
+                        {
+                            Id = new Guid("d2a4b9e5-8c32-4ca4-a2b5-22e3f1b20012"),
+                            Budget = 275000.00m,
+                            Description = "A courtroom drama about a musician fighting to reclaim her voice and reputation.",
+                            StatusEndDate = new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 4,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Shattered Silence"
+                        },
+                        new
+                        {
+                            Id = new Guid("e3b5cad6-9d43-4db5-b3c6-33f4a2c30013"),
+                            Budget = 95000.00m,
+                            Description = "A heartfelt drama following a family photographer confronting the passage of time.",
+                            StatusEndDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 5,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Golden Hour"
+                        },
+                        new
+                        {
+                            Id = new Guid("f4c6dbe7-ae54-4ec6-c4d7-44a5b3d40014"),
+                            Budget = 210000.00m,
+                            Description = "An intimate psychological drama about fame, obsession, and self-destruction.",
+                            StatusEndDate = new DateTime(2026, 3, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 3,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Velvet Ashes"
+                        },
+                        new
+                        {
+                            Id = new Guid("a5d7ecf8-bf65-4fd7-d5e8-55b6c4e50015"),
+                            Budget = 150000.00m,
+                            Description = "A winter mystery centered around a box of unsent letters discovered in an abandoned house.",
+                            StatusEndDate = new DateTime(2026, 2, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 22, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 6,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Frozen Letters"
+                        },
+                        new
+                        {
+                            Id = new Guid("b6e8fd09-c076-40e8-e6f9-66c7d5f60016"),
+                            Budget = 980000.00m,
+                            Description = "A historical war drama about espionage, sacrifice, and impossible choices.",
+                            StatusEndDate = new DateTime(2026, 3, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 7,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Iron Veil"
+                        },
+                        new
+                        {
+                            Id = new Guid("c7f90e1a-d187-41f9-f70a-77d8e6070017"),
+                            Budget = 120000.00m,
+                            Description = "A light coming-of-age dramedy about three friends reliving their last summer together.",
+                            StatusEndDate = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 8,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Summer Rewind"
+                        },
+                        new
+                        {
+                            Id = new Guid("d8011f2b-e298-420a-812b-88e9f7180018"),
+                            Budget = 650000.00m,
+                            Description = "A dystopian thriller about a journalist navigating a city emptied by fear and surveillance.",
+                            StatusEndDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 9,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Hollow City"
+                        },
+                        new
+                        {
+                            Id = new Guid("e912203c-f3a9-431b-923c-99fa08290019"),
+                            Budget = 360000.00m,
+                            Description = "A mystery-thriller where eerie radio transmissions begin predicting violent events.",
+                            StatusEndDate = new DateTime(2026, 5, 24, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 10,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Blue Static"
+                        },
+                        new
+                        {
+                            Id = new Guid("fa23314d-04ba-442c-a34d-a10b193a0020"),
+                            Budget = 80000.00m,
+                            Description = "A poetic indie romance unfolding over a single night in Sofia.",
+                            StatusEndDate = new DateTime(2026, 6, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 11,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Paper Moonlight"
+                        },
+                        new
+                        {
+                            Id = new Guid("ab34425e-15cb-453d-b45e-b21c2a4b0021"),
+                            Budget = 240000.00m,
+                            Description = "A road thriller about a failed musician and a runaway chasing redemption.",
+                            StatusEndDate = new DateTime(2026, 6, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 12,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Dust and Neon"
+                        },
+                        new
+                        {
+                            Id = new Guid("bc45536f-26dc-464e-c56f-c32d3b5c0022"),
+                            Budget = 185000.00m,
+                            Description = "A suspense drama in which a photographer discovers incriminating details in developed film.",
+                            StatusEndDate = new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 13,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Second Exposure"
+                        },
+                        new
+                        {
+                            Id = new Guid("cd566480-37ed-475f-d670-d43e4c6d0023"),
+                            Budget = 410000.00m,
+                            Description = "A subtle sci-fi drama about loneliness, distance, and first contact.",
+                            StatusEndDate = new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 15,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Quiet Signal"
+                        },
+                        new
+                        {
+                            Id = new Guid("de677591-48fe-4860-e781-e54f5d7e0024"),
+                            Budget = 105000.00m,
+                            Description = "A chamber drama about neighbors whose lives intersect after a tragic accident.",
+                            StatusEndDate = new DateTime(2026, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 17,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "The Open Window"
+                        },
+                        new
+                        {
+                            Id = new Guid("ef7886a2-590f-4971-f892-f6606e8f0025"),
+                            Budget = 195000.00m,
+                            Description = "A tense airport-set drama about missed chances, final goodbyes, and unexpected reunions.",
+                            StatusEndDate = new DateTime(2026, 8, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 7, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 18,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Last Departure"
+                        },
+                        new
+                        {
+                            Id = new Guid("f08997b3-6a10-4a82-90a3-07117f900026"),
+                            Budget = 70000.00m,
+                            Description = "A minimalist drama about two strangers connected by a late-night emergency call.",
+                            StatusEndDate = new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 20,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Echo Line"
+                        },
+                        new
+                        {
+                            Id = new Guid("019aa8c4-7b21-4b93-a1b4-18228fa10027"),
+                            Budget = 155000.00m,
+                            Description = "An artist spirals into obsession while preparing the final exhibition of his career.",
+                            StatusEndDate = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 21,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "Burning Canvas"
+                        },
+                        new
+                        {
+                            Id = new Guid("12abb9d5-8c32-4ca4-b2c5-293390b20028"),
+                            Budget = 500000.00m,
+                            Description = "A post-apocalyptic survival story abandoned after loss of primary financing.",
+                            StatusEndDate = new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 22,
+                            Thumbnail = "/img/thumbnail/default-thumbnail.png",
+                            Title = "No Signal Tomorrow"
                         });
                 });
 
