@@ -102,7 +102,14 @@ public static class ApplicationConstants
     // Regular Expressions for splitting text accurately at:
     // 1) Acronym -> word boundary: "ADR Supervisor" (R + Supervisor)
     // 2) Lower -> upper boundary: "Director Of"  (r + O)
-    public const string DisplayNameRegEx = @"(?<=[A-Z])(?=[A-Z][a-z])|(?<=[a-z])(?=[A-Z])";
+    // 3) Letter -> Digit boundary: "Version 2"   (n + 2)
+    // 4) Digit  -> Letter boundary: "2 Alpha"    (2 + A)
+    public const string DisplayNameRegEx =
+        @"(?<=[A-Z])(?=[A-Z][a-z])" +
+        @"|(?<=[a-z])(?=[A-Z])" +
+        @"|(?<=[A-Za-z])(?=\d)" +
+        @"|(?<=\d)(?=[A-Za-z])";
+    
     public const string DisplayNameReplacement = " ";
     
     /* Images */

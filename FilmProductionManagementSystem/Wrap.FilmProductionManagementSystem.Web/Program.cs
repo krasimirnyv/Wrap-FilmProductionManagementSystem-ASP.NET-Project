@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 using Wrap.Data;
 using Wrap.Data.Models.Infrastructure;
-using Wrap.Infrastructure.Extensions;
+using Wrap.Web.Infrastructure.Extensions;
 
 using static Wrap.GCommon.ApplicationConstants;
 
@@ -24,7 +24,10 @@ public class Program
             options.UseSqlServer(connectionString));
         builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-        builder.Services.RegisterApplicationServices();
+        builder.Services
+            .AddDataRepositories()
+            .AddCoreServices()
+            .AddWebInfrastructure();
         
         builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
             {

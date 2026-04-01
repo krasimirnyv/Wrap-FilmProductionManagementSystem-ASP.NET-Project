@@ -2,6 +2,9 @@ namespace Wrap.GCommon;
 
 public static class OutputMessages
 {
+    // Register Extensions error messages
+    public const string MultiImplementationException = "Multiple implementations found for {0}: {1}";
+    
     // verb ending with -ed for Success Messages
     public const string CreatedMessage = "created";
     public const string AddedMessage = "added";
