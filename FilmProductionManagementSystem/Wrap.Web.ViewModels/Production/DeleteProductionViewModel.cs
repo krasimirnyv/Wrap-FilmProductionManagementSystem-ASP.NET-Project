@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.Production;
+namespace Wrap.Web.ViewModels.Production;
 
 public class DeleteProductionViewModel
 {

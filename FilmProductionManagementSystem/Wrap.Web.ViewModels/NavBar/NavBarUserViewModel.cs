@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.NavBar;
+namespace Wrap.Web.ViewModels.NavBar;
 
 public class NavBarUserViewModel
 {

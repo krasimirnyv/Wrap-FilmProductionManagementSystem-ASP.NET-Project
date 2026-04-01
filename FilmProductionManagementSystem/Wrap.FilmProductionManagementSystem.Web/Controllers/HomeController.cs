@@ -5,8 +5,8 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
-using Wrap.ViewModels;
-using Wrap.ViewModels.General;
+using Wrap.Web.ViewModels;
+using Wrap.Web.ViewModels.General;
 using Wrap.Services.Core.Interfaces;
 using Wrap.Services.Models.General;
 using Wrap.GCommon.Enums;

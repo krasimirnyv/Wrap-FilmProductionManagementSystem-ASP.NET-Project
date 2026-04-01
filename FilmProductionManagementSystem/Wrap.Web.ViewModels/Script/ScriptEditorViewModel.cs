@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.Script;
+namespace Wrap.Web.ViewModels.Script;
 
 public class ScriptEditorViewModel
 { 

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 using Wrap.Data.Models.Infrastructure;
-using Wrap.ViewModels.NavBar;
+using Wrap.Web.ViewModels.NavBar;
 using Wrap.Services.Core.Interfaces;
 using Wrap.Services.Models.NavBar;
 

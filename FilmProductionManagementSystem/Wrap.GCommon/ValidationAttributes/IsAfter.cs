@@ -2,7 +2,7 @@ namespace Wrap.GCommon.ValidationAttributes;
 
 using System.ComponentModel.DataAnnotations;
 
-using static GCommon.OutputMessages;
+using static OutputMessages;
 
 public class IsAfter : ValidationAttribute
 {

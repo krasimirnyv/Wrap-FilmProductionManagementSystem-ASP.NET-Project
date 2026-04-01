@@ -1,5 +1,7 @@
 namespace Wrap.Services.Core;
 
+using Microsoft.Extensions.Logging;
+
 using Interfaces;
 using Wrap.Data.Repository.Interfaces;
 using Wrap.Data.Models;
@@ -8,7 +10,7 @@ using Models.NavBar;
 using static GCommon.OutputMessages;
 using static GCommon.OutputMessages.NavBar;
     
-public class NavBarService(INavBarRepository navBarRepository) : INavBarService
+public class NavBarService(INavBarRepository navBarRepository, ILogger<NavBarService> logger) : INavBarService
 {
     public async Task<NavBarUserDto?> GetNavBarUserAsync(Guid userId)
     {
@@ -38,6 +40,7 @@ public class NavBarService(INavBarRepository navBarRepository) : INavBarService
             return navBarDto;
         }
         
+        logger.LogError(string.Format(UserNotFoundMessage, userId));
         throw new ArgumentNullException(string.Format(UserNotFoundMessage, userId));
     }
 }

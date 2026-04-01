@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using Wrap.Services.Core.Interfaces;
 using Wrap.Services.Models.Production;
-using Wrap.ViewModels.Production;
-using Wrap.ViewModels.Production.NestedViewModels;
+using Wrap.Web.ViewModels.Production;
+using Wrap.Web.ViewModels.Production.NestedViewModels;
 
 using static Wrap.GCommon.OutputMessages;
 using static Wrap.GCommon.OutputMessages.Production;

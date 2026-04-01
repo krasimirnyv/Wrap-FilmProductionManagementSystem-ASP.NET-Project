@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using Microsoft.EntityFrameworkCore;
 
-using GCommon.Enums;
 using MappingEntities;
+using GCommon.Enums;
 
 using static GCommon.EntityConstants.Production;
 using static GCommon.DataFormat;
@@ -63,5 +63,4 @@ public class Production
 
     public virtual ICollection<ShootingDay> ShootingDays { get; set; }
         = new List<ShootingDay>();
-    
 }

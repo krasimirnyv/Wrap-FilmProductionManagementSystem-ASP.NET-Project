@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.Profile;
+namespace Wrap.Web.ViewModels.Profile;
 
 using System.ComponentModel.DataAnnotations;
 

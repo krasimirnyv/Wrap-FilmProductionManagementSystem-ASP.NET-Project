@@ -17,7 +17,7 @@ using static GCommon.DataFormat;
 public class CastProfileService(IProfileRepository profileRepository,
                                 IImageService imageService,
                                 IVariantImageStrategyResolver imageStrategyResolver,
-                                ILogger<ProfileService> logger) : ICastProfileService
+                                ILogger<CastProfileService> logger) : ICastProfileService
 {
     public async Task<CastProfileDto> GetCastProfileDataAsync(string username)
     {

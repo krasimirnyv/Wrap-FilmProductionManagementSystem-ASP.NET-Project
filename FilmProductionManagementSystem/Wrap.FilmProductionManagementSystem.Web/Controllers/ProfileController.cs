@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using Wrap.Services.Core.Interfaces;
 using Wrap.Services.Models.Profile;
-using Wrap.ViewModels.Profile;
-using Wrap.ViewModels.Profile.NestedViewModels;
+using Wrap.Web.ViewModels.Profile;
+using Wrap.Web.ViewModels.Profile.NestedViewModels;
 
 using static Wrap.GCommon.OutputMessages;
 using static Wrap.GCommon.OutputMessages.Profile;

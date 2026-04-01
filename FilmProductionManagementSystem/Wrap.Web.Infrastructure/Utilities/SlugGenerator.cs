@@ -2,7 +2,7 @@
 
 using Interfaces;
 
-public class SlugGenerator : ISlugGenerator
+public class SlugProvider : ISlugProvider
 {
     public string GenerateSlug(string input)
     {

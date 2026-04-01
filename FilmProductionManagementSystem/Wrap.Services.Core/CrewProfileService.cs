@@ -19,7 +19,7 @@ using static GCommon.DataFormat;
 public class CrewProfileService(IProfileRepository profileRepository,
                                 IImageService imageService,
                                 IVariantImageStrategyResolver imageStrategyResolver,
-                                ILogger<ProfileService> logger) : ICrewProfileService
+                                ILogger<CrewProfileService> logger) : ICrewProfileService
 {
     public async Task<CrewProfileDto> GetCrewProfileDataAsync(string username)
     {

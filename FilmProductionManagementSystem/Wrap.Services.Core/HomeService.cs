@@ -1,15 +1,16 @@
 namespace Wrap.Services.Core;
 
 using Interfaces;
+using Utilities.Providers.Interfaces;
 using Models.General;
 using Wrap.Data.Models;
 using Wrap.Data.Repository.Interfaces;
 
-public class HomeService(IHomeRepository homeRepository) : IHomeService
+public class HomeService(IHomeRepository homeRepository, IDateTimeProvider dateTimeProvider) : IHomeService
 {
     public async Task<DashboardDataDto> GetDashboardDataAsync()
     {
-        DateTime now = DateTime.Now;
+        DateTime now = dateTimeProvider.Now;
         
         int crewCount = await homeRepository.GetCrewCountAsync();
         int castCount = await homeRepository.GetCastCountAsync();

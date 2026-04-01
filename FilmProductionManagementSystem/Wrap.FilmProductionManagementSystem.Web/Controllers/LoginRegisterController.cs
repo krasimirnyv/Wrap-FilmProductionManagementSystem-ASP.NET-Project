@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Wrap.Services.Core.Interfaces;
 using Wrap.Services.Core.Utilities;
 using Wrap.Services.Models.LoginAndRegistration;
-using Wrap.ViewModels.LoginAndRegistration;
+using Wrap.Web.ViewModels.LoginAndRegistration;
 
 using static Wrap.GCommon.ApplicationConstants;
 using static Wrap.GCommon.OutputMessages;

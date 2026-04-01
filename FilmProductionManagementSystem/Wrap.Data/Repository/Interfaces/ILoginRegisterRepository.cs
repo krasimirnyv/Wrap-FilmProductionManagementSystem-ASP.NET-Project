@@ -1,7 +1,8 @@
 namespace Wrap.Data.Repository.Interfaces;
 
-using Models;
 using Microsoft.EntityFrameworkCore.Storage;
+
+using Models;
 
 public interface ILoginRegisterRepository
 {

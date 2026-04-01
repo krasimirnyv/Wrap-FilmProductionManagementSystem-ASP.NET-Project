@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.General;
+namespace Wrap.Web.ViewModels.General;
 
 public class DashboardViewModel
 {

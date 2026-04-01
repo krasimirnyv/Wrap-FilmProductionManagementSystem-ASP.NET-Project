@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.Profile.NestedViewModels;
+namespace Wrap.Web.ViewModels.Profile.NestedViewModels;
 
 public class CrewMemberScene
 {

@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels;
+namespace Wrap.Web.ViewModels;
 
 public class ErrorViewModel
 {

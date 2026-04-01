@@ -1,4 +1,4 @@
-namespace Wrap.ViewModels.LoginAndRegistration;
+namespace Wrap.Web.ViewModels.LoginAndRegistration;
 
 using System.ComponentModel.DataAnnotations;
 
