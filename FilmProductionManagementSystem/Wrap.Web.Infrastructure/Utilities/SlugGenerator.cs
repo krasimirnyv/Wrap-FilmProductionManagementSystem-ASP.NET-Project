@@ -1,19 +1,32 @@
-﻿namespace Wrap.Infrastructure.Utilities;
+﻿namespace Wrap.Web.Infrastructure.Utilities;
+
+using System.Text.RegularExpressions;
 
 using Interfaces;
 
-public class SlugProvider : ISlugProvider
+public partial class SlugGenerator : ISlugGenerator
 {
     public string GenerateSlug(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
             return string.Empty;
         
-        string[] inputDataSplit = input
-            .Split(" ", StringSplitOptions.RemoveEmptyEntries)
-            .Select(x => x.ToLowerInvariant())
-            .ToArray();
+        string slug = input.Trim().ToLowerInvariant();
 
-        return string.Join("-", inputDataSplit);
+        slug = WhitespaceRegex().Replace(slug, "-");
+        slug = InvalidCharactersRegex().Replace(slug, string.Empty);
+        slug = MultipleDashesRegex().Replace(slug, "-");
+        
+
+        return slug.Trim('-');
     }
+    
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex WhitespaceRegex();
+
+    [GeneratedRegex(@"[^a-z0-9\-]")]
+    private static partial Regex InvalidCharactersRegex();
+
+    [GeneratedRegex(@"\-+")]
+    private static partial Regex MultipleDashesRegex();
 }

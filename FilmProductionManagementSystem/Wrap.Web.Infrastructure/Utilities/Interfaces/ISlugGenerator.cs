@@ -1,6 +1,6 @@
-﻿namespace Wrap.Infrastructure.Utilities.Interfaces;
+﻿namespace Wrap.Web.Infrastructure.Utilities.Interfaces;
 
-public interface ISlugProvider
+public interface ISlugGenerator
 {
     string GenerateSlug(string input);
 }
