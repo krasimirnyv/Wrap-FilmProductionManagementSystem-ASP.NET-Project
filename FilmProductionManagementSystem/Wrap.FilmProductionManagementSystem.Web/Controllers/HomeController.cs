@@ -39,6 +39,7 @@ public class HomeController(IHomeService homeService) : BaseController
 
     [HttpGet]
     [AllowAnonymous]
+    [Route("Home/Error")]
     [Route("/Home/Error/{statusCode:int}")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error(int statusCode)

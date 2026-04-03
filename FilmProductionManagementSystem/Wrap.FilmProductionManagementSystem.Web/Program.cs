@@ -26,6 +26,7 @@ public class Program
 
         builder.Services
             .AddDataRepositories()
+            .AddApplicationRoleSeeding()
             .AddCoreServices()
             .AddWebInfrastructure();
         
@@ -34,7 +35,8 @@ public class Program
                 ConfigureIdentity(options, builder.Configuration);
             })
             .AddRoles<ApplicationRole>()
-            .AddEntityFrameworkStores<FilmProductionDbContext>();
+            .AddEntityFrameworkStores<FilmProductionDbContext>()
+            .AddDefaultTokenProviders();
         
         builder.Services.ConfigureApplicationCookie(options =>
         {
@@ -60,9 +62,7 @@ public class Program
         builder.Services.AddRazorPages();
 
         WebApplication app = builder.Build();
-
-        app.UseStatusCodePagesWithReExecute(StatusCodeErrorPath);
-
+        
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -74,6 +74,8 @@ public class Program
             app.UseExceptionHandler(ExceptionHandlerPath);
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
+            
+            app.UseStatusCodePagesWithRedirects(StatusCodeErrorPath); // More RESTful way to handle status code errors
         }
         
         app.UseHttpsRedirection();
@@ -85,7 +87,17 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseRolesSeeder();
+
+        app.UseStatusCodePagesWithRedirects(StatusCodeErrorPath);
         
+        app.MapControllerRoute(
+            name: "DirectionAndProduction",
+            pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+        app.MapControllerRoute(
+            name: "Identity",
+            pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
         app.MapControllerRoute(
             name: "slugRouteWithId",
             pattern: "{controller=Home}/{action=Index}/{id:required}/{slug:required}");
