@@ -86,12 +86,10 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
     public async Task<LoginStatusDto> LoginStatusAsync(LoginRequestDto? loginDto)
     {
         LoginStatusDto statusDto = new LoginStatusDto();
-
-        if (loginDto is null || loginDto.Role != CrewString && loginDto.Role != CastString)
+        if (loginDto is null || (loginDto.Role != CrewString && loginDto.Role != CastString))
         {
             statusDto.IsSucceeded = false;
             statusDto.Role = string.Empty;
-            
             return statusDto;
         }
         
@@ -99,69 +97,72 @@ public class LoginRegisterService(UserManager<ApplicationUser> userManager,
         if (user is null)
         {
             logger.LogError(string.Format(UserNotFound, loginDto.UserName));
-            
             statusDto.IsSucceeded = false;
             statusDto.Role = string.Empty;
-
             return statusDto;
         }
 
-        SignInResult result = await signInManager.PasswordSignInAsync(user, loginDto.Password, loginDto.RememberMe, false);
-        if (!result.Succeeded)
+        bool isPasswordValid = await userManager.CheckPasswordAsync(user, loginDto.Password);
+        if (!isPasswordValid)
         {
             logger.LogError(string.Format(LoginFailedPass, loginDto.UserName));
-            
             statusDto.IsSucceeded = false;
             statusDto.Role = string.Empty;
-            
             return statusDto;
         }
-
+        
         switch (loginDto.Role)
         {
             case CrewString:
             {
                 bool crewExist = await loginRegisterRepository.CrewExistsByUserIdAsync(user.Id);
-                if (crewExist)
+                if (!crewExist)
                 {
-                    statusDto.IsSucceeded = true;
+                    statusDto.IsSucceeded = false;
                     statusDto.Role = CrewString;
-                
                     return statusDto;
                 }
-
-                await signInManager.SignOutAsync();
-            
-                statusDto.IsSucceeded = false;
+                
+                SignInResult result = await signInManager.PasswordSignInAsync(user, loginDto.Password, loginDto.RememberMe, false);
+                if (!result.Succeeded)
+                {
+                    logger.LogError(string.Format(LoginFailedPass, loginDto.UserName));
+                    statusDto.IsSucceeded = false;
+                    statusDto.Role = string.Empty;
+                    return statusDto;
+                }
+                
+                statusDto.IsSucceeded = true;
                 statusDto.Role = CrewString;
-            
                 return statusDto;
             }
             case CastString:
             {
                 bool castExist = await loginRegisterRepository.CastExistsByUserIdAsync(user.Id);
-                if (castExist)
+                if (!castExist)
                 {
-                    statusDto.IsSucceeded = true;
+                    statusDto.IsSucceeded = false;
                     statusDto.Role = CastString;
-                
                     return statusDto;
                 }
 
-                await signInManager.SignOutAsync();
-            
-                statusDto.IsSucceeded = false;
+                SignInResult result = await signInManager.PasswordSignInAsync(user, loginDto.Password, loginDto.RememberMe, false);
+                if (!result.Succeeded)
+                {
+                    logger.LogError(string.Format(LoginFailedPass, loginDto.UserName));
+                    statusDto.IsSucceeded = false;
+                    statusDto.Role = string.Empty;
+                    return statusDto;
+                }
+                
+                statusDto.IsSucceeded = true;
                 statusDto.Role = CastString;
-            
                 return statusDto;
             }
             default:
-                await signInManager.SignOutAsync();
                 logger.LogError(LoginFailedRole);
-            
                 statusDto.IsSucceeded = false;
                 statusDto.Role = string.Empty;
-            
                 return statusDto;
         }
     }

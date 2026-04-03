@@ -86,7 +86,7 @@ public class CrewRegistrationHandler(UserManager<ApplicationUser> userManager,
             LastName = draft.LastName,
             Nickname = draft.Nickname,
             Biography = draft.Biography,
-            IsActive = true,
+            IsActive = false,
             IsDeleted = false
         };
         

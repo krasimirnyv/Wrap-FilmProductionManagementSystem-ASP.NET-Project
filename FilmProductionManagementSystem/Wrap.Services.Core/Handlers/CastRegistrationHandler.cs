@@ -72,7 +72,7 @@ public class CastRegistrationHandler(UserManager<ApplicationUser> userManager,
             Biography = registrationDto.Biography,
             BirthDate = registrationDto.BirthDate,
             Gender = registrationDto.Gender,
-            IsActive = true,
+            IsActive = false,
             IsDeleted = false
         };
         
