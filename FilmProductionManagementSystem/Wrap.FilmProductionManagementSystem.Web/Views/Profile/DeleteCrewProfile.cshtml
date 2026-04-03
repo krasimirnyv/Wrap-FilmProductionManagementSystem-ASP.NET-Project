@@ -1,0 +1,197 @@
+@model DeleteProfileInputModel
+
+@{
+    ViewData[TitleDataKey] = "Delete Filmmaker Profile";
+
+    string fullName = $"{Model.FirstName} {Model.LastName}";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+}
+
+<div class="production-wrapper">
+    <div class="container">
+
+        @* ── Danger Header ── *@
+        <div class="production-header-card text-center">
+            <i class="bi bi-exclamation-triangle-fill"
+               style="font-size:2.5rem; color:#e53935;"></i>
+            <h2 class="fw-bold mt-3 mb-1" style="color:#c62828;">Delete Filmmaker Profile</h2>
+            <p class="text-muted mb-0">This action is permanent and cannot be undone.</p>
+        </div>
+
+        <div class="row g-4">
+
+            @* ── Left: Profile preview ── *@
+            <div class="col-lg-5">
+                <div class="section-card h-100">
+                    <div class="section-header">
+                        <i class="bi bi-person-badge-fill me-2"></i>
+                        <h3>Profile to Delete</h3>
+                    </div>
+
+                    <div class="text-center my-4">
+                        <div class="d-flex justify-content-center">
+                            <div class="profile-image-container">
+                                <img src="@Model.ProfileImagePath"
+                                     alt="@fullName"
+                                     class="profile-image">
+                            </div>
+                        </div>
+
+                        <h4 class="fw-bold mt-4 mb-3" style="color:var(--wrap-dark-blue);">
+                            @fullName
+                        </h4>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Username</div>
+                        <div class="info-value">@Model.UserName</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">@Model.Email</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Phone number</div>
+                        <div class="info-value">@Model.PhoneNumber</div>
+                    </div>
+
+                    <div class="rounded-3 p-3 mx-3 alert-danger mt-4 mb-0 d-flex gap-2 align-items-center">
+                        <i class="bi bi-exclamation-octagon-fill flex-shrink-0"></i>
+                        <span><strong>Your account and profile data will be deleted.</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            @* ── Right: Warnings + GDPR + Confirm ── *@
+            <div class="col-lg-7 d-flex flex-column gap-4">
+
+                @* Associated data warning *@
+                <div class="danger-zone-card">
+                    <div class="section-header">
+                        <i class="bi bi-database-exclamation me-2"></i>
+                        <h3>Associated Data</h3>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        Deleting your profile will remove you from all linked entities below.
+                        The productions/scenes will remain, but your participation/roles will be removed.
+                    </p>
+
+                    <div class="associated-data-item">
+                        <i class="bi bi-film"></i>
+                        <div class="flex-grow-1">Productions</div>
+                        <span class="associated-count">@Model.ProductionsCount</span>
+                    </div>
+
+                    <div class="associated-data-item">
+                        <i class="bi bi-camera-reels"></i>
+                        <div class="flex-grow-1">Scenes</div>
+                        <span class="associated-count">@Model.ScenesCount</span>
+                    </div>
+
+                    <div class="associated-data-item">
+                        <i class="bi bi-tools"></i>
+                        <div class="flex-grow-1">Skills</div>
+                        <span class="associated-count">@Model.SkillsCount</span>
+                    </div>
+
+                    @if (Model.ProductionsCount > 0 || Model.ScenesCount > 0 || Model.SkillsCount > 0)
+                    {
+                        <div class="rounded-3 p-3 mx-3 alert-warning mt-3 mb-0 d-flex gap-2 align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                            <span>All associations above will be permanently removed.</span>
+                        </div>
+                    }
+                </div>
+
+                @* GDPR Export *@
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="bi bi-shield-lock-fill me-2"></i>
+                        <h3>Download Personal Data (GDPR)</h3>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        You can download your personal data in <strong>JSON</strong> format before deleting your account.
+                    </p>
+
+                    <a asp-area=""
+                       asp-controller="Profile"
+                       asp-action="DownloadFilmmakerPersonalData"
+                       class="btn btn-production-secondary btn-lg">
+                        <i class="bi bi-download me-2"></i>Download JSON
+                    </a>
+                </div>
+
+                @* Final confirmation *@
+                <div class="section-card">
+                    <div class="section-header">
+                        <i class="bi bi-shield-exclamation me-2"></i>
+                        <h3>Confirm Deletion</h3>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        Enter your <strong>password</strong> to confirm deletion of <strong>@fullName</strong>.
+                    </p>
+
+                    <form asp-area=""
+                          asp-controller="Profile"
+                          asp-action="DeleteFilmmaker"
+                          method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-semibold"></label>
+                            <input asp-for="Password"
+                                   type="password"
+                                   id="passwordInput"
+                                   class="form-control form-control-lg"
+                                   placeholder="Enter your password to confirm deletion"
+                                   autocomplete="current-password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                            <small class="text-muted d-block">Required to proceed.</small>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input asp-for="IsConfirmed" class="form-check-input" id="confirmCheck" />
+                            <label class="form-check-label" for="confirmCheck">
+                                I understand this action is permanent!
+                            </label>
+                            <span asp-validation-for="IsConfirmed" class="text-danger d-block mt-1"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between flex-wrap gap-3">
+                            <a asp-area=""
+                               asp-controller="Profile"
+                               asp-action="FilmmakerProfile"
+                               class="btn btn-production-success btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel, Keep It
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-production-secondary btn-lg"
+                                    id="deleteButton"
+                                    disabled>
+                                <i class="bi bi-trash-fill me-2"></i>Yes, Delete Permanently
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/profile/profile-delete.js" asp-append-version="true"></script>
+}

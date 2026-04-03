@@ -1,13 +1,18 @@
 namespace Wrap.Services.Core;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
 
 using Interfaces;
 using Utilities.ImageLogic.Interfaces;
 using Data.Models;
 using Data.Models.MappingEntities;
+using Data.Models.Infrastructure;
 using Data.Repository.Interfaces;
+using Data.Dtos.Crew;
 using Models.Profile;
 using Models.Profile.NestedDtos;
 using GCommon.Enums;
@@ -16,14 +21,16 @@ using GCommon.UI;
 using static GCommon.OutputMessages.Profile;
 using static GCommon.DataFormat;
 
-public class CrewProfileService(IProfileRepository profileRepository,
+public class CrewProfileService(UserManager<ApplicationUser> userManager,
+                                SignInManager<ApplicationUser> signInManager,
+                                IProfileRepository profileRepository,
                                 IImageService imageService,
                                 IVariantImageStrategyResolver imageStrategyResolver,
                                 ILogger<CrewProfileService> logger) : ICrewProfileService
 {
     public async Task<CrewProfileDto> GetCrewProfileDataAsync(string username)
     {
-        Crew? crew = await profileRepository.GetCrewByUsernameAsync(username);
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
         if (crew is null)
             throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
         
@@ -76,7 +83,7 @@ public class CrewProfileService(IProfileRepository profileRepository,
 
     public async Task<EditCrewProfileDto> GetEditCrewProfileAsync(string username)
     {
-        Crew? crew = await profileRepository.GetCrewByUsernameAsync(username);
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
         if (crew is null)
             throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
 
@@ -90,7 +97,7 @@ public class CrewProfileService(IProfileRepository profileRepository,
             ProfileImage = null,
             // Read-only properties
             Email = crew.User.Email,
-            CurrentProfileImagePath = crew.ProfileImagePath,
+            CurrentProfileImagePath = crew.ProfileImagePath
         };
         
         return editCrewDto;
@@ -101,7 +108,7 @@ public class CrewProfileService(IProfileRepository profileRepository,
         await using IDbContextTransaction transaction = await profileRepository.BeginTransactionAsync();
         try
         {
-            Crew? crew = await profileRepository.GetCrewForUpdateAsync(username);
+            Crew? crew = await profileRepository.GetCrewByUsernameAsync(username);
             if (crew is null)
                 throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
             
@@ -137,7 +144,7 @@ public class CrewProfileService(IProfileRepository profileRepository,
     
     public async Task<EditSkillsDto> GetEditSkillsAsync(string username)
     {
-        Crew? crew = await profileRepository.GetCrewByUsernameAsync(username);
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
         if (crew is null)
             throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
 
@@ -161,7 +168,7 @@ public class CrewProfileService(IProfileRepository profileRepository,
 
     public async Task UpdateSkillsAsync(string username, UpdateSkillsDto skillsDto)
     {
-        Crew? crew = await profileRepository.GetCrewByUsernameAsync(username);
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
         if (crew is null)
             throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
 
@@ -207,7 +214,66 @@ public class CrewProfileService(IProfileRepository profileRepository,
             throw new Exception(e.Message);
         }
     }
-    
+
+    public async Task<DeleteProfileDto> GetDeleteCrewProfileAsync(string username)
+    {
+        Crew? crew = await profileRepository.GetCrewWithAllDataIncludedByUsernameAsNoTrackingAsync(username);
+        if (crew is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        DeleteProfileDto deleteCrewDto = new DeleteProfileDto
+        {
+            FirstName = crew.FirstName,
+            LastName = crew.LastName,
+            ProfileImagePath = crew.ProfileImagePath!,
+            UserName = crew.User.UserName!,
+            Email = crew.User.Email!,
+            PhoneNumber = crew.User.PhoneNumber!,
+            ProductionsCount = crew.CrewMemberProductions.Count,
+            ScenesCount = crew.CrewMemberScenes.Count,
+            SkillsCount = crew.Skills.Count
+        };
+        
+        return deleteCrewDto;
+    }
+
+    public async Task<bool> DeleteCrewProfileAsync(string username, DeleteProfileDto dto)
+    {
+        Crew? crew = await profileRepository.GetCrewByUsernameAsync(username);
+        if (crew is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+        
+        ApplicationUser user = crew.User;
+        bool isPasswordValid = await userManager.CheckPasswordAsync(user, dto.Password);
+        if (!isPasswordValid)
+        {
+            logger.LogError(string.Format(FailedPassword, username));
+            return false;
+        }
+        
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+        
+        await imageService.DeleteAsync(crew.ProfileImagePath, strategy);
+        
+        await profileRepository.DeleteCrewProfileAsync(crew.Id);
+        await profileRepository.SaveAllChangesAsync();
+        
+        await signInManager.SignOutAsync();
+        return true;
+    }
+
+    public async Task<string> DownloadCrewProfileDataAsync(string username)
+    {
+        CrewPersonalDataDto[]? crewPersonalData = await profileRepository.DownloadCrewDataAsync(username);
+        if (crewPersonalData is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        string json = JsonConvert
+            .SerializeObject(crewPersonalData, Formatting.Indented);
+        
+        return json;
+    }
+
     private static ICollection<CrewRoleType> ParseSelectedSkills(string selectedSkillsString)
     {
         if (string.IsNullOrWhiteSpace(selectedSkillsString))

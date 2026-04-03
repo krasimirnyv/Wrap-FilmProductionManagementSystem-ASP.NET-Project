@@ -40,6 +40,13 @@ public static class OutputMessages
     
     // validation attribute messages
     public const string IsAfterExceptionMessage = "The date must be after {0}";
+
+    public static class ApplicationRoles
+    {
+        public const string RoleSeedingExceptionMessage = "There was an error while trying to seed the role {0}! Please see inner exception for details! Identity result errors: {1}";
+        
+        public const string AccessDeniedExceptionMessage = "Access denied! You must be from {0} department to access this area.";
+    }
     
     public static class Assets
     {
@@ -74,20 +81,27 @@ public static class OutputMessages
         public const string UsernameIsNullOrEmptyMessage = "Username is null, empty or whitespace.";
         public const string UserNotFoundMessage = "User with username: {0} is NOT found as crew or cast";
         public const string ErrorFindingUserMessage = "Exception occured while trying to find your profile. {0}";
+        public const string FailedPassword = "Invalid password for '{0}'.";
 
         public const string DataExceptionMessage = "Exception occured while trying to get the data of your profile. {0}";
         
         public const string ErrorLoadingProfileMessage = "Error loading profile: {0}";
         public const string ErrorLoadingEditorMessage = "Error loading editor for profile: {0}";
+        public const string ErrorLoadingDeleteMessage = "Error loading deletetor for profile: {0}";
         public const string ErrorLoadingSkillsMessage = "Error loading skills in editor: {0}";
         public const string ErrorUpdatingProfile = "Error updating profile: {0}";
         public const string ErrorUpdatingSkills = "Error updating profile's skills: {0}";
+        public const string ErrorDeletingProfile = "Error deleting profile: {0}";
+        public const string ErrorDownloadingProfileData = "Error during downloading your profile's personal data: {0}";
 
         public const string NoSkillsSelected = "At least one skill must be selected.";
 
         public const string UpdateProfileSuccessMessage = "Profile updated successfully!";
         public const string UpdateSkillsSuccessMessage = "Skills updated successfully!";
         
+        public const string DeleteProfileSuccessMessage = "Profile deleted successfully!";
+        public const string CheckBoxForDeleteErrorMessage = "You must confirm before deletion!";
+
         public const string CrewNotFoundMessage = "Crew member with username '{0}' not found.";
         public const string CastNotFoundMessage = "Cast member with username '{0}' not found.";
     }
@@ -133,11 +147,6 @@ public static class OutputMessages
     }
     
     public static class Scripts
-    {
-        
-    }
-    
-    public static class Search
     {
         
     }

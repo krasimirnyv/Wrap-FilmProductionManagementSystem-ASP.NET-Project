@@ -12,6 +12,8 @@ public class CrewConfiguration : IEntityTypeConfiguration<Crew>
 {
     public void Configure(EntityTypeBuilder<Crew> entity)
     {
+        entity.HasQueryFilter(c => !c.IsDeleted);
+
         entity.HasData(CrewMembersSeed);
     }
     

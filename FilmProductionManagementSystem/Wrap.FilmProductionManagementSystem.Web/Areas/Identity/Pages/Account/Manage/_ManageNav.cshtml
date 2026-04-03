@@ -1,0 +1,72 @@
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    bool hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+
+    string? currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    string? currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    bool isDeleteProfileActive =
+        string.Equals(currentController, "Profile", StringComparison.OrdinalIgnoreCase) &&
+        (string.Equals(currentAction, "DeleteFilmmakerOverview", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(currentAction, "DeleteActorOverview", StringComparison.OrdinalIgnoreCase));
+
+    bool isDownloadDataActive =
+        string.Equals(currentController, "Profile", StringComparison.OrdinalIgnoreCase) &&
+        (string.Equals(currentAction, "DownloadFilmmakerPersonalData", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(currentAction, "DownloadActorPersonalData", StringComparison.OrdinalIgnoreCase));
+}
+
+<ul class="nav nav-pills flex-column manage-nav">
+    <li class="nav-item">
+        <a class="nav-link manage-link @ManageNavPages.EmailNavClass(ViewContext)"
+           id="email" asp-page="./Email">
+            <i class="bi bi-envelope me-2"></i>Email
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link manage-link @ManageNavPages.ChangePasswordNavClass(ViewContext)"
+           id="change-password" asp-page="./ChangePassword">
+            <i class="bi bi-key me-2"></i>Password
+        </a>
+    </li>
+
+    @if (hasExternalLogins)
+    {
+        <li class="nav-item">
+            <a class="nav-link manage-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)"
+               id="external-login" asp-page="./ExternalLogins">
+                <i class="bi bi-box-arrow-in-right me-2"></i>External logins
+            </a>
+        </li>
+    }
+
+    <li class="nav-item">
+        <a class="nav-link manage-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)"
+           id="two-factor" asp-page="./TwoFactorAuthentication">
+            <i class="bi bi-shield-lock me-2"></i>Two-factor authentication
+        </a>
+    </li>
+
+    <li class="nav-item mt-3">
+        <hr class="my-2" />
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link manage-link @(isDownloadDataActive ? "active" : null)"
+           asp-area=""
+           asp-controller="Profile"
+           asp-action="DownloadPersonalData">
+            <i class="bi bi-download me-2"></i>Download personal data
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link manage-link manage-link-danger @(isDeleteProfileActive ? "active" : null)"
+           asp-area=""
+           asp-controller="Profile"
+           asp-action="DeleteProfileOverview">
+            <i class="bi bi-trash3-fill me-2"></i>Delete profile
+        </a>
+    </li>
+</ul>

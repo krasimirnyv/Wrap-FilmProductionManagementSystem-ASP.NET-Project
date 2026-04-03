@@ -9,6 +9,7 @@
 
 @section Styles{
     <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
 }
 
 <div class="profile-wrapper">
@@ -210,6 +211,29 @@
             </div>
         }
 
+        <div class="py-4 d-flex justify-content-center flex-wrap gap-5">
+            <a asp-area="" 
+               asp-controller="Profile" 
+               asp-action="DeleteActorOverview" 
+               asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+               class="btn btn-custom-1 btn-lg">
+                <i class="bi bi-trash3-fill me-2 "></i>Delete Profile
+            </a>
+            
+            <a asp-area="" 
+               asp-controller="Profile" 
+               asp-action="DownloadActorPersonalData"
+               class="btn btn-production-success btn-lg">
+                <i class="bi bi-download me-2"></i>Download Personal Data (JSON)
+            </a>
+            
+            <a asp-area="Identity"
+               asp-page="/Account/Manage/Email"
+               class="btn btn-custom btn-lg">
+                <i class="bi bi-gear"></i> Manage your account
+            </a>
+        </div>
+        
     </div>
 </div>
 

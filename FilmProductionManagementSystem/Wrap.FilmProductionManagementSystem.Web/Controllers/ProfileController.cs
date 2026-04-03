@@ -1,5 +1,7 @@
 namespace FilmProductionManagementSystem.Web.Controllers;
 
+using System.Text;
+
 using Microsoft.AspNetCore.Mvc;
 
 using Wrap.Services.Core.Interfaces;
@@ -192,7 +194,7 @@ public class ProfileController(IProfileService profileService,
         catch (ArgumentNullException nullEx)
         {
             logger.LogError(nullEx.Message);
-            TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
             return RedirectToAction("Dashboard", "Home");
         }
         catch (NotSupportedException nse)
@@ -204,7 +206,7 @@ public class ProfileController(IProfileService profileService,
         catch (Exception e)
         {
             logger.LogError(e, string.Format(ErrorUpdatingProfile, username) + e.Message);
-            ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, e.Message));
+            TempData[ErrorTempDateKey] = string.Format(ErrorUpdatingProfile, e.Message);
             return View("EditCrewProfile", inputModel);
         }
     }
@@ -229,7 +231,7 @@ public class ProfileController(IProfileService profileService,
         catch (ArgumentNullException nullEx)
         {
             logger.LogError(nullEx.Message);
-            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
             return RedirectToAction("Dashboard", "Home");
         }
         catch (Exception e)
@@ -277,7 +279,7 @@ public class ProfileController(IProfileService profileService,
         catch (Exception e)
         {
             logger.LogError(e, string.Format(ErrorUpdatingProfile, username) + e.Message);
-            ModelState.AddModelError(string.Empty, string.Format(ErrorUpdatingProfile, e.Message));
+            TempData[ErrorTempDateKey] = string.Format(ErrorUpdatingProfile, e.Message);
             return View("EditCastProfile", inputModel);
         }
     }
@@ -354,7 +356,290 @@ public class ProfileController(IProfileService profileService,
             return View(model);
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> DeleteProfileOverview()
+    {
+        string? username = GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        try
+        {
+            ProfileRoleDto roleDto = await profileService.GetRoleInfoAsync(username);
+            if (roleDto.IsCrew)
+                return RedirectToAction(nameof(DeleteFilmmakerOverview), new { username });
+
+            if (roleDto.IsCast)
+                return RedirectToAction(nameof(DeleteActorOverview), new { username });
+
+            logger.LogWarning(string.Format(UserNotFoundMessage, username));
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(ErrorFindingUserMessage, e.Message));
+            return View(nameof(BadRequest), UserNotIdentifiedMessage);
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DeleteFilmmakerOverview(string? username)
+    {
+        username ??= GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            logger.LogWarning($"{nameof(DeleteFilmmakerOverview)} {HttpGetAction} {UsernameIsNullOrEmptyMessage}");
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        try
+        {
+            DeleteProfileDto dto = await crewProfileService.GetDeleteCrewProfileAsync(username);
+            DeleteProfileInputModel inputModel = MapToDeleteProfileInputModelFromDto(dto);
+            
+            return View("DeleteCrewProfile", inputModel);
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(ErrorLoadingDeleteMessage, e.Message));
+            TempData[ErrorTempDateKey] = string.Format(ErrorLoadingDeleteMessage, e.Message);
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteFilmmaker(DeleteProfileInputModel inputModel)
+    {
+        string? username = GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            logger.LogWarning($"{nameof(DeleteFilmmaker)} {HttpPostAction} {UsernameIsNullOrEmptyMessage}");
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        if (!inputModel.IsConfirmed)
+        {
+            DeleteProfileInputModel filled = await FillDeleteFilmmakerModelAsync(username, inputModel);
+            return View("DeleteCrewProfile", filled);
+        }
+        
+        try
+        {
+            DeleteProfileDto dto = MapToDeleteProfileDtoFromInputModel(inputModel);
+            
+            bool isSucceeded = await crewProfileService.DeleteCrewProfileAsync(username, dto);
+            if (!isSucceeded)
+            {
+                ModelState.AddModelError(nameof(DeleteProfileInputModel.Password), FailedPassword);
+                DeleteProfileInputModel filled = await FillDeleteFilmmakerModelAsync(username, inputModel);
+
+                return View("DeleteCrewProfile", filled);
+            }
+            
+            TempData[SuccessTempDataKey] = DeleteProfileSuccessMessage;
+            return RedirectToAction("Index", "Home");
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(ErrorDeletingProfile, username) + e.Message);
+            TempData[ErrorTempDateKey] = string.Format(ErrorDeletingProfile, e.Message);
+            
+            DeleteProfileInputModel filled = await FillDeleteFilmmakerModelAsync(username, inputModel);
+            return View("DeleteCrewProfile", filled);
+        }
+    }
     
+    [HttpGet]
+    public async Task<IActionResult> DeleteActorOverview(string? username)
+    {
+        username ??= GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            logger.LogWarning($"{nameof(DeleteActorOverview)} {HttpGetAction} {UsernameIsNullOrEmptyMessage}");
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        try
+        {
+            DeleteProfileDto dto = await castProfileService.GetDeleteCastProfileAsync(username);
+            DeleteProfileInputModel inputModel = MapToDeleteProfileInputModelFromDto(dto);
+            
+            return View("DeleteCastProfile", inputModel);
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(ErrorLoadingDeleteMessage, e.Message));
+            TempData[ErrorTempDateKey] = string.Format(ErrorLoadingDeleteMessage, e.Message);
+            return RedirectToAction("Dashboard", "Home");
+        }
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> DeleteActor(DeleteProfileInputModel inputModel)
+    {
+        string? username = GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            logger.LogWarning($"{nameof(DeleteActor)} {HttpPostAction} {UsernameIsNullOrEmptyMessage}");
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        
+        if (!inputModel.IsConfirmed)
+        {
+            DeleteProfileInputModel filled = await FillDeleteActorModelAsync(username, inputModel);
+            return View("DeleteCastProfile", filled);
+        }
+        
+        try
+        {
+            DeleteProfileDto dto = MapToDeleteProfileDtoFromInputModel(inputModel);
+            
+            bool isSucceeded = await castProfileService.DeleteCastProfileAsync(username, dto);
+            if (!isSucceeded)
+            {
+                ModelState.AddModelError(nameof(DeleteProfileInputModel.Password), FailedPassword);
+                DeleteProfileInputModel filled = await FillDeleteActorModelAsync(username, inputModel);
+                
+                return View("DeleteCastProfile", filled);
+            }
+            
+            TempData[SuccessTempDataKey] = DeleteProfileSuccessMessage;
+            return RedirectToAction("Index", "Home");
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(ErrorDeletingProfile, username) + e.Message);
+            TempData[ErrorTempDateKey] = string.Format(ErrorDeletingProfile, e.Message);
+            
+            DeleteProfileInputModel filled = await FillDeleteActorModelAsync(username, inputModel);
+            return View("DeleteCastProfile", filled);
+        }
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> DownloadPersonalData()
+    {
+        string? username = GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        
+        try
+        {
+            ProfileRoleDto roleDto = await profileService.GetRoleInfoAsync(username);
+            if (roleDto.IsCrew)
+                return RedirectToAction(nameof(DownloadFilmmakerPersonalData), new { username });
+
+            if (roleDto.IsCast)
+                return RedirectToAction(nameof(DownloadActorPersonalData), new { username });
+
+            logger.LogWarning(string.Format(UserNotFoundMessage, username));
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(ErrorFindingUserMessage, e.Message));
+            return View(nameof(BadRequest), UserNotIdentifiedMessage);
+        }
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> DownloadFilmmakerPersonalData(string? username)
+    {
+        username ??= GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            logger.LogWarning($"{nameof(DownloadFilmmakerPersonalData)} {HttpGetAction} {UsernameIsNullOrEmptyMessage}");
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        try
+        {
+            string personalData = await crewProfileService.DownloadCrewProfileDataAsync(username);
+            byte[] bytes = Encoding.UTF8.GetBytes(personalData);
+            
+            string fileName = string.Format(ExportJsonFileName, username);
+            FileContentResult contentResult = File(bytes, ContentType, fileName);
+            
+            return contentResult;
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CrewNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(ErrorDownloadingProfileData, username) + e.Message);
+            TempData[ErrorTempDateKey] = string.Format(ErrorDownloadingProfileData, e.Message);
+            return RedirectToAction("FilmmakerProfile");
+        }
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> DownloadActorPersonalData(string? username)
+    {
+        username ??= GetUsername();
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            logger.LogWarning($"{nameof(DownloadActorPersonalData)} {HttpGetAction} {UsernameIsNullOrEmptyMessage}");
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        try
+        {
+            string personalData = await castProfileService.DownloadCastProfileDataAsync(username);
+            byte[] bytes = Encoding.UTF8.GetBytes(personalData);
+            
+            string fileName = string.Format(ExportJsonFileName, username);
+            FileContentResult contentResult = File(bytes, ContentType, fileName);
+            
+            return contentResult;
+        }
+        catch (ArgumentNullException nullEx)
+        {
+            logger.LogError(nullEx.Message);
+            TempData[ErrorTempDateKey] = string.Format(CastNotFoundMessage, username);
+            return RedirectToAction("Dashboard", "Home");
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(ErrorDownloadingProfileData, username) + e.Message);
+            TempData[ErrorTempDateKey] = string.Format(ErrorDownloadingProfileData, e.Message);
+            return RedirectToAction("ActorProfile");
+        }
+    }
     
     private static CrewProfileViewModel MapToCrewProfileViewModelFromDto(CrewProfileDto dto)
     {
@@ -520,5 +805,56 @@ public class ProfileController(IProfileService profileService,
         };
         
         return dto;
+    }
+    
+    private DeleteProfileInputModel MapToDeleteProfileInputModelFromDto(DeleteProfileDto dto)
+    {
+        DeleteProfileInputModel viewModel = new DeleteProfileInputModel
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            ProfileImagePath = dto.ProfileImagePath,
+            UserName = dto.UserName,
+            Email = dto.Email,
+            PhoneNumber = dto.PhoneNumber,
+            ProductionsCount = dto.ProductionsCount,
+            ScenesCount = dto.ScenesCount,
+            SkillsCount = dto.SkillsCount
+        };
+        
+        return viewModel;
+    }
+    
+    private DeleteProfileDto MapToDeleteProfileDtoFromInputModel(DeleteProfileInputModel inputModel)
+    {
+        DeleteProfileDto dto = new DeleteProfileDto
+        {
+           Password = inputModel.Password,
+           IsConfirmed = inputModel.IsConfirmed,
+        };
+        
+        return dto;
+    }
+    
+    private async Task<DeleteProfileInputModel> FillDeleteFilmmakerModelAsync(string username, DeleteProfileInputModel posted)
+    {
+        DeleteProfileDto dto = await crewProfileService.GetDeleteCrewProfileAsync(username);
+        DeleteProfileInputModel filled = MapToDeleteProfileInputModelFromDto(dto);
+
+        filled.Password = posted.Password;
+        filled.IsConfirmed = posted.IsConfirmed;
+
+        return filled;
+    }
+    
+    private async Task<DeleteProfileInputModel> FillDeleteActorModelAsync(string username, DeleteProfileInputModel posted)
+    {
+        DeleteProfileDto dto = await castProfileService.GetDeleteCastProfileAsync(username);
+        DeleteProfileInputModel filled = MapToDeleteProfileInputModelFromDto(dto);
+
+        filled.Password = posted.Password;
+        filled.IsConfirmed = posted.IsConfirmed;
+
+        return filled;
     }
 }

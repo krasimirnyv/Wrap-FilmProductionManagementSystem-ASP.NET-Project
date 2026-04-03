@@ -16,6 +16,10 @@ public static class ApplicationConstants
     public const byte MegaBytesBase = 10;
     public const long MaxFileSize = MegaBytesBase * 1024 * 1024; // 10 MB
     public const int StreamBufferSize = 81920;
+    
+    /* Export JSON file constants */
+    public const string ExportJsonFileName = "personal-data-{0}.json";
+    public const string ContentType = "application/json; charset=utf-8";
 
     /* Error Paths */
     public const string StatusCodeErrorPath = "/Home/Error/{0}";

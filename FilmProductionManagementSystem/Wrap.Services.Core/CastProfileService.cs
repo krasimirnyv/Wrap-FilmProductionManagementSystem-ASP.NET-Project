@@ -1,27 +1,34 @@
 namespace Wrap.Services.Core;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
 
 using Interfaces;
 using Utilities.ImageLogic.Interfaces;
 using Data.Models;
 using Data.Models.MappingEntities;
+using Data.Models.Infrastructure;
 using Data.Repository.Interfaces;
+using Data.Dtos.Cast;
 using Models.Profile;
 using Models.Profile.NestedDtos;
 
 using static GCommon.OutputMessages.Profile;
 using static GCommon.DataFormat;
 
-public class CastProfileService(IProfileRepository profileRepository,
+public class CastProfileService(UserManager<ApplicationUser> userManager, 
+                                SignInManager<ApplicationUser> signInManager,
+                                IProfileRepository profileRepository,
                                 IImageService imageService,
                                 IVariantImageStrategyResolver imageStrategyResolver,
                                 ILogger<CastProfileService> logger) : ICastProfileService
 {
     public async Task<CastProfileDto> GetCastProfileDataAsync(string username)
     {
-        Cast? cast = await profileRepository.GetCastByUsernameAsync(username);
+        Cast? cast = await profileRepository.GetCastByUsernameAsNoTrackingAsync(username);
         if (cast is null)
             throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
 
@@ -70,7 +77,7 @@ public class CastProfileService(IProfileRepository profileRepository,
 
     public async Task<EditCastProfileDto> GetEditCastProfileAsync(string username)
     {
-        Cast? cast = await profileRepository.GetCastByUsernameAsync(username);
+        Cast? cast = await profileRepository.GetCastByUsernameAsNoTrackingAsync(username);
         if (cast is null)
             throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
 
@@ -97,7 +104,7 @@ public class CastProfileService(IProfileRepository profileRepository,
         await using IDbContextTransaction transaction = await profileRepository.BeginTransactionAsync();
         try
         {
-            Cast? cast = await profileRepository.GetCastForUpdateAsync(username);
+            Cast? cast = await profileRepository.GetCastByUsernameAsync(username);
             if (cast is null)
                 throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
         
@@ -129,5 +136,65 @@ public class CastProfileService(IProfileRepository profileRepository,
             logger.LogError(string.Format(ErrorUpdatingProfile,  username) + e.Message);
             throw new Exception(e.Message);
         }
+    }
+    
+    public async Task<DeleteProfileDto> GetDeleteCastProfileAsync(string username)
+    {
+        Cast? cast = await profileRepository.GetCastWithAllDataIncludedByUsernameAsNoTrackingAsync(username);
+        if (cast is null)
+            throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
+
+        DeleteProfileDto deleteCastDto = new DeleteProfileDto
+        {
+            FirstName = cast.FirstName,
+            LastName = cast.LastName,
+            ProfileImagePath = cast.ProfileImagePath!,
+            UserName = cast.User.UserName!,
+            Email = cast.User.Email!,
+            PhoneNumber = cast.User.PhoneNumber!,
+            ProductionsCount = cast.CastMemberProductions.Count,
+            ScenesCount = cast.CastMemberScenes.Count,
+            SkillsCount = null
+        };
+        
+        return deleteCastDto;
+    }
+
+    public async Task<bool> DeleteCastProfileAsync(string username, DeleteProfileDto dto)
+    {
+        Cast? cast = await profileRepository.GetCastByUsernameAsync(username);
+        if (cast is null)
+            throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
+        
+        ApplicationUser user = cast.User;
+        bool isPasswordValid = await userManager.CheckPasswordAsync(user, dto.Password);
+        if (!isPasswordValid)
+        {
+            logger.LogError(string.Format(FailedPassword, username));
+            return false;
+        }
+        
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+        
+        await imageService.DeleteAsync(cast.ProfileImagePath, strategy);
+        
+        await profileRepository.DeleteCastProfileAsync(cast.Id);
+        await profileRepository.SaveAllChangesAsync();
+        
+        await signInManager.SignOutAsync();
+        return true;
+    }
+
+    public async Task<string> DownloadCastProfileDataAsync(string username)
+    {
+        CastPersonalDataDto[]? castPersonalData = await profileRepository.DownloadCastDataAsync(username);
+        if (castPersonalData is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        string json = JsonConvert
+            .SerializeObject(castPersonalData, Formatting.Indented);
+        
+        return json;
+        
     }
 }

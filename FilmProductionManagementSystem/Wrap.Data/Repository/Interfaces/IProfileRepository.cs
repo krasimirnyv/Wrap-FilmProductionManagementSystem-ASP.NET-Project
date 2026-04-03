@@ -4,9 +4,19 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 using Models;
 using Models.MappingEntities;
+using Dtos.Crew;
+using Dtos.Cast;
 
 public interface IProfileRepository
 {
+    Task<Crew?> GetCrewByUsernameAsNoTrackingAsync(string username);
+    
+    Task<Cast?> GetCastByUsernameAsNoTrackingAsync(string username);
+    
+    Task<Crew?> GetCrewWithAllDataIncludedByUsernameAsNoTrackingAsync(string username);
+    
+    Task<Cast?> GetCastWithAllDataIncludedByUsernameAsNoTrackingAsync(string username);
+    
     Task<Crew?> GetCrewByUsernameAsync(string username);
     
     Task<Cast?> GetCastByUsernameAsync(string username);
@@ -21,15 +31,19 @@ public interface IProfileRepository
     
     Task<IReadOnlyCollection<SceneCast>> GetCastScenesAsync(Guid castId);
 
-    Task<Crew?> GetCrewForUpdateAsync(string username);
-    
-    Task<Cast?> GetCastForUpdateAsync(string username);
-
     Task<IReadOnlyCollection<CrewSkill>> GetCrewSkillsForUpdateAsync(Guid crewId);
 
     Task AddCrewSkillsAsync(IEnumerable<CrewSkill> skillsToAdd);
     
     Task RemoveCrewSkillsAsync(IEnumerable<CrewSkill> skillsToRemove);
+    
+    Task<bool> DeleteCrewProfileAsync(Guid crewId);
+
+    Task<bool> DeleteCastProfileAsync(Guid castId);
+    
+    Task<CrewPersonalDataDto[]?> DownloadCrewDataAsync(string username);
+    
+    Task<CastPersonalDataDto[]?> DownloadCastDataAsync(string username);
 
     Task<int> SaveAllChangesAsync();
 

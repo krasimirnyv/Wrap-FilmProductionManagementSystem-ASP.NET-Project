@@ -16,6 +16,7 @@ public static class DataFormat
     public const string DisplayUsername = "Username";
     public const string DisplayPassword = "Password";
 
+    public const string NewFileName = "{0}.webp";
     public const string ImageFolderName = "img";
     public const string ProfileFolderName = "profile";
     public const string ThumbnailFolderName = "thumbnail";

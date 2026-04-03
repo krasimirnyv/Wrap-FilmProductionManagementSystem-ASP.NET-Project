@@ -25,4 +25,26 @@ public interface ICastProfileService
     /// <param name="username">string</param>
     /// <param name="castDto">EditCastProfileDto</param>
     Task UpdateCastProfileAsync(string username, EditCastProfileDto castDto);
+
+    /// <summary>
+    /// Gets the data for deleting a cast profile.
+    /// </summary>
+    /// <param name="username">string</param>
+    /// <returns>DeleteProfileDto</returns>
+    Task<DeleteProfileDto> GetDeleteCastProfileAsync(string username);
+    
+    /// <summary>
+    /// Deletes the cast profile
+    /// </summary>
+    /// <param name="username">string</param>
+    /// <param name="dto">DeleteProfileDto</param>
+    /// <returns>false if password is incorrect and true if success</returns>
+    Task<bool> DeleteCastProfileAsync(string username, DeleteProfileDto dto);
+    
+    /// <summary>
+    /// Downloads the complete profile data for a cast member as a JSON string.
+    /// </summary>
+    /// <param name="username">string</param>
+    /// <returns>JSON as string</returns>
+    Task<string> DownloadCastProfileDataAsync(string username);
 }

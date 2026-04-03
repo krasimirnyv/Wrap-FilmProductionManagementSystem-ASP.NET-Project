@@ -9,6 +9,8 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+
 }
 
 <div class="profile-wrapper">
@@ -123,7 +125,7 @@
             @if (Model.DepartmentSkills.Any())
             {
                 <div class="row">
-                    @foreach (var department in Model.DepartmentSkills)
+                    @foreach (KeyValuePair<string, ICollection<CrewRoleType>> department in Model.DepartmentSkills)
                     {
                         <div class="col-md-6 mb-4">
                             <div class="department-section">
@@ -149,10 +151,6 @@
                 <div class="text-center py-4 text-muted">
                     <i class="bi bi-tools" style="font-size: 3rem;"></i>
                     <p class="mt-2">No skills added yet</p>
-                    <a asp-area="" asp-controller="Profile" asp-action="EditSkills" asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
-                       class="btn btn-custom mt-2">
-                        <i class="bi bi-plus-circle me-2"></i>Edit Skills
-                    </a>
                 </div>
             }
             <div class="text-center py-4 text-muted">
@@ -254,6 +252,29 @@
                 </div>
             </div>
         }
+        
+        <div class="py-4 d-flex justify-content-center flex-wrap gap-5">
+            <a asp-area=""
+               asp-controller="Profile"
+               asp-action="DeleteFilmmakerOverview"
+               asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+               class="btn btn-custom-1 btn-lg">
+                <i class="bi bi-trash3-fill me-2"></i>Delete Profile
+            </a>
+
+            <a asp-area=""
+               asp-controller="Profile"
+               asp-action="DownloadFilmmakerPersonalData"
+               class="btn btn-production-success btn-lg">
+                <i class="bi bi-download me-2"></i>Download Personal Data (JSON)
+            </a>
+            
+            <a asp-area="Identity"
+               asp-page="/Account/Manage/Email"
+               class="btn btn-custom btn-lg">
+                <i class="bi bi-gear"></i> Manage your account
+            </a>
+        </div>
         
     </div>
 </div>

@@ -136,13 +136,24 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="text-center mt-4 mb-5">
-                    <button type="submit" class="btn btn-custom btn-lg me-2">
+                <div class="py-4 d-flex justify-content-center flex-wrap gap-5">
+                    <button type="submit" 
+                            class="btn btn-custom btn-lg">
                         <i class="bi bi-check-circle me-2"></i>Save Changes
                     </button>
-                    <a asp-area="" asp-controller="Profile" asp-action="FilmmakerProfile" asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
+                    
+                    <a asp-area="" 
+                       asp-controller="Profile" 
+                       asp-action="FilmmakerProfile" 
+                       asp-route-slug="@SlugGenerator.GenerateSlug(fullName)"
                        class="btn btn-outline-secondary btn-lg">
                         <i class="bi bi-x-circle me-2"></i>Cancel
+                    </a>
+                    
+                    <a asp-area="Identity"
+                       asp-page="/Account/Manage/Email"
+                       class="btn btn-custom btn-lg">
+                        <i class="bi bi-gear"></i> Manage your account
                     </a>
                 </div>
             </form>

@@ -13,6 +13,8 @@ public class CastConfiguration : IEntityTypeConfiguration<Cast>
 {
     public void Configure(EntityTypeBuilder<Cast> entity)
     {
+        entity.HasQueryFilter(c => !c.IsDeleted);
+
         entity.HasData(CastMembersSeed);
     }
     
