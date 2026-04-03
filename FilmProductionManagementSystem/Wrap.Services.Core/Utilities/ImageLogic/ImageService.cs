@@ -64,7 +64,7 @@ public class ImageService(IWebHostEnvironment environment) : IImageService
 
             image.Mutate(operation => operation.Resize(resizeOptions));
 
-            string fileName = $"{Guid.NewGuid():N}.webp";
+            string fileName = string.Format(NewFileName, $"{Guid.NewGuid():N}");
             string wwwrootPath = environment.WebRootPath;
             string uploadsFolder = Path.Combine(wwwrootPath, ImageFolderName, strategy.FolderName);
 

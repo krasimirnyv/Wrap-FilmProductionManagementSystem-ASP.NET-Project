@@ -137,7 +137,7 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
 
     public async Task<int> SaveAllChangesAsync()
     {
-        int effectedRows = await SaveChangesAsync();
-        return effectedRows;
+        int affectedRows = await SaveChangesAsync();
+        return affectedRows;
     }
 }

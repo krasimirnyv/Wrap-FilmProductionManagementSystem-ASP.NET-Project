@@ -59,5 +59,6 @@ public interface IProductionService
     /// Deletes a production from the system based on its ID after confirmation
     /// </summary>
     /// <param name="id">string</param>
+    /// <returns>bool -> true or false</returns>
     Task<bool> DeleteProductionAsync(string? id);
 }
