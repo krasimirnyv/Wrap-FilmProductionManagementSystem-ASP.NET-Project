@@ -19,13 +19,13 @@
         <h3 class="section-title">Overview</h3>
         <div class="row">
             <div class="col-md-3 col-sm-6">
-                <a class="text-decoration-none text-reset" asp-area="" asp-controller="Production" asp-action="AllActiveProjects" >
+                <a class="text-decoration-none text-reset" asp-area="" asp-controller="Production" asp-action="Index" asp-route-isActive="true" >
                     <div class="stat-card">
                         <div class="stat-icon primary">
                             <i class="bi bi-camera-reels"></i>
                         </div>
                         <h2 class="stat-number">@Model.Productions.Count()</h2>
-                        <p class="stat-label">Active Projects</p>
+                        <p class="stat-label">Actively Shooting Projects</p>
                     </div>
                     </a>
             </div>
@@ -141,7 +141,7 @@
                     @{ int i = 0;
                        foreach (ProductionInfoViewModel production in Model.Productions)
                        {
-                           if (i == 2)
+                           if (i == 3)
                                break;
                            
                            i++;

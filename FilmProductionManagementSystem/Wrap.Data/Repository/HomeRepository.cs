@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Interfaces;
 using Models;
+using GCommon.Enums;
 
 public class HomeRepository(FilmProductionDbContext dbContext)
     : BaseRepository(dbContext), IHomeRepository
@@ -33,6 +34,10 @@ public class HomeRepository(FilmProductionDbContext dbContext)
         IReadOnlyCollection<Production> productions = await Context!
             .Productions
             .AsNoTracking()
+            .Where(p =>
+                p.StatusType == ProductionStatusType.Production ||
+                p.StatusType == ProductionStatusType.OnHold ||
+                p.StatusType == ProductionStatusType.Reshoots)
             .ToArrayAsync();
         
         return productions;

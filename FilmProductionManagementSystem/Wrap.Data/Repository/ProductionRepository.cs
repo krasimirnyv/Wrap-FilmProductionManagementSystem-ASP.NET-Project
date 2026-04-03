@@ -5,46 +5,40 @@ using Microsoft.EntityFrameworkCore;
 using Interfaces;
 using Models;
 using Models.MappingEntities;
+using GCommon.Enums;
 
 public class ProductionRepository(FilmProductionDbContext dbContext) 
     : BaseRepository(dbContext), IProductionRepository
 {
-    public async Task<IReadOnlyCollection<Production>> GetAllAsync(int? skipCount = null, int? takeCount = null)
+    public async Task<IReadOnlyCollection<Production>> GetAllAsync(int? skipCount = null, int? takeCount = null, IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null)
     {
         IQueryable<Production> productionsQuery = Context!
             .Productions
             .AsNoTracking()
             .OrderBy(p => p.Title)
-            .ThenBy(p => p.Budget)
-            .ThenBy(p => p.Description)
             .ThenBy(p => p.StatusType)
             .ThenBy(p => p.Id);
+
+        productionsQuery = ProductionsQuery(statuses, isActive, productionsQuery);
         
         if (skipCount.HasValue && skipCount > 0)
-        {
-            productionsQuery = productionsQuery
-                .Skip(skipCount.Value)
-                .AsQueryable();
-        }
+            productionsQuery = productionsQuery.Skip(skipCount.Value);
 
         if (takeCount.HasValue && takeCount > 0)
-        {
-            productionsQuery = productionsQuery
-                .Take(takeCount.Value)
-                .AsQueryable();
-        }
+            productionsQuery = productionsQuery.Take(takeCount.Value);
 
         IReadOnlyCollection<Production> productions = await productionsQuery.ToArrayAsync();
         
         return productions;
     }
 
-    public async Task<int> CountAsync()
+    public async Task<int> CountAsync(IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null)
     {
         IQueryable<Production> productionsQuery = Context!
             .Productions
-            .AsNoTracking()
-            .AsQueryable();
+            .AsNoTracking();
+        
+        productionsQuery = ProductionsQuery(statuses, isActive, productionsQuery);
         
         int productionsCount = await productionsQuery.CountAsync();
         
@@ -139,5 +133,24 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
     {
         int affectedRows = await SaveChangesAsync();
         return affectedRows;
+    }
+    
+    private static IQueryable<Production> ProductionsQuery(IReadOnlyCollection<ProductionStatusType>? statuses, bool? isActive, IQueryable<Production> productionsQuery)
+    {
+        if (statuses is not null && statuses.Count > 0)
+        {
+            productionsQuery = productionsQuery
+                .Where(p => statuses.Contains(p.StatusType));
+        }
+        else if (isActive.HasValue)
+        { 
+            productionsQuery = productionsQuery
+                .Where(p =>
+                    p.StatusType == ProductionStatusType.Production ||
+                    p.StatusType == ProductionStatusType.OnHold ||
+                    p.StatusType == ProductionStatusType.Reshoots);
+        } 
+
+        return productionsQuery;
     }
 }

@@ -1,6 +1,7 @@
 namespace Wrap.Services.Core.Interfaces;
 
 using Models.Production;
+using GCommon.Enums;
 
 using static GCommon.ApplicationConstants;
 
@@ -12,13 +13,13 @@ public interface IProductionService
     /// <param name="productionsPerPage">int</param>
     /// </summary>
     /// <returns>IReadOnlyCollection<ProductionDto> collection of productions</returns>
-    Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, int productionsPerPage = DefaultProductionsPerPage);
-
+    Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, string? status = null, bool? isActive = null, int productionsPerPage = DefaultProductionsPerPage);
+    
     /// <summary>
     /// Returns the count of the productions
     /// </summary>
     /// <returns>int count</returns>
-    Task<int> GetProductionsCountAsync();
+    Task<int> GetProductionsCountAsync(string? status = null, bool? isActive = null);
     
     /// <summary>
     /// Gets detailed information about a specific production by its ID

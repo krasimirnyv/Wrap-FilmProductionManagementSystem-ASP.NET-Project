@@ -19,10 +19,15 @@
         <div class="production-header-card d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <h1 class="fw-bold mb-1" style="color: var(--wrap-dark-blue);">
-                    <i class="bi bi-camera-reels me-2" style="color: var(--wrap-blue);"></i>All Productions
+                    <i class="bi bi-camera-reels me-2" style="color: var(--wrap-blue);"></i>
+                    @(Model.IsActive == true ? "Actively Shooting Productions" : "All Productions")
                 </h1>
-                <p class="text-muted mb-0">Browse and manage your film productions</p>
-            </div>
+                <p class="text-muted mb-0">
+                    @(Model.IsActive == true
+                        ? "Browse currently active productions"
+                        : "Browse and manage your film productions")
+                </p>
+                </div>
             <a asp-area="" asp-controller="Production" asp-action="Create" class="btn btn-production">
                 <i class="bi bi-plus-circle me-2"></i>New Production
             </a>
@@ -45,23 +50,25 @@
                 @* ── Filter Bar ── *@
                 <div class="col-md-2">
                     <select id="statusFilter" class="form-select">
-                        <option value="">All Phases</option>
-                        <option value="Pre-production">Pre-production</option>
-                        <option value="Production">Production</option>
-                        <option value="Post-production">Post-production</option>
-                        <option value="Distribution">Distribution</option>
+                        <option value="" selected="@(string.IsNullOrEmpty(Model.SelectedStatus))">All Phases</option>
+                        <option value="@PreProductionKey" selected="@(Model.SelectedStatus == PreProductionKey)">Pre-production</option>
+                        <option value="@ProductionKey" selected="@(Model.SelectedStatus == ProductionKey)">Production</option>
+                        <option value="@PostProductionKey" selected="@(Model.SelectedStatus == PostProductionKey)">Post-production</option>
+                        <option value="@DistributionKey" selected="@(Model.SelectedStatus == DistributionKey)">Distribution</option>
                     </select>
                 </div>
                 
                 @* ── Pagination ── *@
-                <div class="col-md-4 d-flex justify-content-end align-items-center gap-3">
+                <div class="col-md-4 d-flex justify-content-end align-items-center gap-3" >
                     <span class="text-muted small"
                           id="resultsCount"
                           data-total="@Model.TotalCount">
                         @Model.Count of @Model.TotalCount @(Model.TotalCount == 1 ? "production" : "productions")
                     </span>
 
-                    <partial name="_ProductionsPaginationPartial" model="Model" />
+                    <div id="topPaginationWrap">
+                        <partial name="_ProductionsPaginationPartial" model="Model" />
+                    </div>
                 </div>
             </div>
         </div>

@@ -24,11 +24,16 @@ public class ProductionService(IProductionRepository productionRepository,
     private static string GetStatusAbstractClass(ProductionStatusType statusType)
         => StatusAbstractMap.GetValueOrDefault(statusType, DefaultStatus);
     
-    public async Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, int productionsPerPage = DefaultProductionsPerPage)
+    public async Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, string? status = null, bool? isActive = null, int productionsPerPage = DefaultProductionsPerPage)
     {
         int skipCount = (pageNumber - 1) * productionsPerPage;
         
-        IReadOnlyCollection<Production> production = await productionRepository.GetAllAsync(skipCount, productionsPerPage);
+        IReadOnlyCollection<ProductionStatusType>? possibleStatuses = ProductionStatusTypes(status);
+        IReadOnlyCollection<Production> production = await productionRepository.GetAllAsync(
+            skipCount: skipCount, 
+            takeCount: productionsPerPage,
+            statuses: possibleStatuses,
+            isActive: isActive);
 
         IReadOnlyCollection<ProductionDto> dto = production
             .Select(p => new ProductionDto
@@ -47,9 +52,11 @@ public class ProductionService(IProductionRepository productionRepository,
         return dto;
     }
 
-    public async Task<int> GetProductionsCountAsync()
+    public async Task<int> GetProductionsCountAsync(string? status = null, bool? isActive = null)
     {
-        int productionsCount = await productionRepository.CountAsync();
+        IReadOnlyCollection<ProductionStatusType>? possibleStatuses = ProductionStatusTypes(status);
+        
+        int productionsCount = await productionRepository.CountAsync(possibleStatuses, isActive);
         
         return productionsCount;
     }
@@ -284,6 +291,20 @@ public class ProductionService(IProductionRepository productionRepository,
             return null;
         
         return productionId;
+    }
+    
+    private static IReadOnlyCollection<ProductionStatusType>? ProductionStatusTypes(string? status)
+    {
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> statusMap 
+                = ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
+
+            if (statusMap.TryGetValue(status, out IReadOnlyCollection<ProductionStatusType>? statuses))
+                return statuses;
+        }
+
+        return null;
     }
     
     private static IReadOnlyDictionary<ProductionStatusType, string> BuildStatusCssMap()

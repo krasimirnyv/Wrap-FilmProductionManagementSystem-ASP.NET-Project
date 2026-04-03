@@ -2,12 +2,13 @@ namespace Wrap.Data.Repository.Interfaces;
 
 using Models;
 using Models.MappingEntities;
+using GCommon.Enums;
 
 public interface IProductionRepository
 {
-    Task<IReadOnlyCollection<Production>> GetAllAsync(int? skipCount = null, int? takeCount = null);
-
-    Task<int> CountAsync();
+    Task<IReadOnlyCollection<Production>> GetAllAsync(int? skipCount = null, int? takeCount = null, IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null);
+    
+    Task<int> CountAsync(IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null);
     
     Task<Production?> GetByIdAsNoTrackingAsync(Guid productionId);
     

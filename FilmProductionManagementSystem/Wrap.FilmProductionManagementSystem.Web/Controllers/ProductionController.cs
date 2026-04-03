@@ -18,7 +18,7 @@ public class ProductionController(IProductionService productionService,
                                   ILogger<ProductionController> logger) : BaseController
 {
     [HttpGet]
-    public async Task<IActionResult> Index(AllProductionsIndexViewModel model)
+    public async Task<IActionResult> Index([FromQuery] AllProductionsIndexViewModel model)
     {
         if (!ModelState.IsValid)
         {
@@ -28,7 +28,11 @@ public class ProductionController(IProductionService productionService,
         
         try
         {
-            IReadOnlyCollection<ProductionDto> productionDtos = await productionService.GetAllProductionsAsync(model.PageNumber);
+            IReadOnlyCollection<ProductionDto> productionDtos = await productionService.GetAllProductionsAsync(
+                pageNumber: model.PageNumber,
+                status: model.SelectedStatus,
+                isActive: model.IsActive);
+            
             AllProductionsIndexViewModel viewModel = await MapToAllProductionsIndexViewModelFromDto(model, productionDtos);
             
             return View(viewModel);
@@ -188,12 +192,6 @@ public class ProductionController(IProductionService productionService,
         }
     }
     
-    // TODO: Future functionality - not implemented yet but will be added in the future.
-    public IActionResult AllActiveProjects()
-    {
-        throw new NotImplementedException();
-    }
-    
     public IActionResult AddMember()
     {
         throw new NotImplementedException();
@@ -206,7 +204,10 @@ public class ProductionController(IProductionService productionService,
     
     private async Task<AllProductionsIndexViewModel> MapToAllProductionsIndexViewModelFromDto(AllProductionsIndexViewModel model, IReadOnlyCollection<ProductionDto> productionDtos)
     {
-        int productionsTotalCount = await productionService.GetProductionsCountAsync();
+        int productionsTotalCount = await productionService.GetProductionsCountAsync(
+            status: model.SelectedStatus,
+            isActive: model.IsActive);
+        
         IReadOnlyCollection<ProductionViewModel> productions = MapToProductionViewModelsFromDtos(productionDtos);
         
         AllProductionsIndexViewModel viewModel = new AllProductionsIndexViewModel
@@ -215,7 +216,9 @@ public class ProductionController(IProductionService productionService,
             TotalPages = (int)Math.Ceiling(productionsTotalCount / (double)DefaultProductionsPerPage),
             ShowingPages = model.ShowingPages,
             Productions = productions,
-            TotalCount = productionsTotalCount
+            TotalCount = productionsTotalCount,
+            SelectedStatus = model.SelectedStatus,
+            IsActive = model.IsActive
         };
 
         if (viewModel.PageNumber > viewModel.TotalPages && viewModel.TotalPages != 0)

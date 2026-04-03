@@ -14,4 +14,8 @@ public class AllProductionsIndexViewModel
     public int Count => Productions.Count;
     
     public int TotalCount { get; set; }
+    
+    public string? SelectedStatus { get; set; }
+    
+    public bool? IsActive { get; set; }
 }
