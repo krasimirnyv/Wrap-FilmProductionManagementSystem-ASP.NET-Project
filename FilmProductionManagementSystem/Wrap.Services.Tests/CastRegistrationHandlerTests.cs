@@ -2,6 +2,7 @@ namespace Wrap.Services.Tests;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,6 +19,7 @@ using Models.LoginAndRegistration;
 
 using static GCommon.OutputMessages.Register;
 using static GCommon.DataFormat;
+using static GCommon.ApplicationConstants.IdentityRoles;
 
 [TestFixture]
 public class CastRegistrationHandlerTests
@@ -105,7 +107,58 @@ public class CastRegistrationHandlerTests
         userManagerMock.Verify(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Password), Times.Once);
         loginRegisterRepositoryMock.Verify(repo => repo.RollbackTransactionAsync(transactionMock.Object), Times.Once);
 
-        // No domain persistence if identity create failed
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+        imageStrategyResolverMock.Verify(isr => isr.Resolve(It.IsAny<string>()), Times.Never);
+        imageServiceMock.Verify(img => img.SaveImageAsync(It.IsAny<IFormFile?>(), It.IsAny<IVariantImageStrategy>(), It.IsAny<CancellationToken>()), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr => lrr.CreateCastAsync(It.IsAny<Cast>()), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr => lrr.SaveAllChangesAsync(), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr => lrr.CommitTransactionAsync(It.IsAny<IDbContextTransaction>()), Times.Never);
+        signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Never);
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenRoleAssignmentFails_RollsBackDeletesUserAndReturnsIdentityResult()
+    {
+        // Arrange
+        Mock<IDbContextTransaction> transactionMock = CreateTransactionMock();
+
+        CastRegistrationDto dto = ValidCastDto();
+
+        IdentityResult roleFail = IdentityResult.Failed(new IdentityError { Description = "role failed" });
+
+        loginRegisterRepositoryMock
+            .Setup(lrr => lrr.BeginTransactionAsync())
+            .ReturnsAsync(transactionMock.Object);
+
+        userManagerMock
+            .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Password))
+            .ReturnsAsync(IdentityResult.Success);
+
+        userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Actor))
+            .ReturnsAsync(roleFail);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr => lrr.RollbackTransactionAsync(transactionMock.Object))
+            .Returns(Task.CompletedTask);
+
+        userManagerMock
+            .Setup(um => um.DeleteAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        IdentityResult result = await castHandler.CompleteRegistrationAsync(dto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.False);
+        Assert.That(result.Errors.Select(e => e.Description), Does.Contain("role failed"));
+
+        loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Once);
+        userManagerMock.Verify(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Password), Times.Once);
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Actor), Times.Once);
+        loginRegisterRepositoryMock.Verify(repo => repo.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+        userManagerMock.Verify(um => um.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Once);
+
         imageStrategyResolverMock.Verify(isr => isr.Resolve(It.IsAny<string>()), Times.Never);
         imageServiceMock.Verify(img => img.SaveImageAsync(It.IsAny<IFormFile?>(), It.IsAny<IVariantImageStrategy>(), It.IsAny<CancellationToken>()), Times.Never);
         loginRegisterRepositoryMock.Verify(lrr => lrr.CreateCastAsync(It.IsAny<Cast>()), Times.Never);
@@ -133,6 +186,10 @@ public class CastRegistrationHandlerTests
             .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Password))
             .ReturnsAsync(IdentityResult.Success);
 
+        userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Actor))
+            .ReturnsAsync(IdentityResult.Success);
+
         imageStrategyResolverMock
             .Setup(isr => isr.Resolve(ProfileFolderName))
             .Returns(strategy);
@@ -145,7 +202,6 @@ public class CastRegistrationHandlerTests
             .Setup(lrr => lrr.CreateCastAsync(It.IsAny<Cast>()))
             .Returns(Task.CompletedTask);
 
-        // expectedRows = 1 (from PersistDomainDataAsync)
         loginRegisterRepositoryMock
             .Setup(lrr => lrr.SaveAllChangesAsync())
             .ReturnsAsync(0);
@@ -165,6 +221,7 @@ public class CastRegistrationHandlerTests
         Assert.That(result.Succeeded, Is.False);
         Assert.That(result.Errors.Select(e => e.Description), Does.Contain(RegistrationTransactionFailure));
 
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Actor), Times.Once);
         imageStrategyResolverMock.Verify(isr => isr.Resolve(ProfileFolderName), Times.Once);
         imageServiceMock.Verify(img => img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny<CancellationToken>()), Times.Once);
 
@@ -198,6 +255,10 @@ public class CastRegistrationHandlerTests
             .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Password))
             .ReturnsAsync(IdentityResult.Success);
 
+        userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Actor))
+            .ReturnsAsync(IdentityResult.Success);
+
         imageStrategyResolverMock
             .Setup(isr => isr.Resolve(ProfileFolderName))
             .Returns(strategy);
@@ -212,7 +273,6 @@ public class CastRegistrationHandlerTests
             .Callback<Cast>(c => capturedCast = c)
             .Returns(Task.CompletedTask);
 
-        // expectedRows = 1; return 1
         loginRegisterRepositoryMock
             .Setup(lrr => lrr.SaveAllChangesAsync())
             .ReturnsAsync(1);
@@ -231,6 +291,7 @@ public class CastRegistrationHandlerTests
         // Assert
         Assert.That(result.Succeeded, Is.True);
 
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Actor), Times.Once);
         imageStrategyResolverMock.Verify(isr => isr.Resolve(ProfileFolderName), Times.Once);
         imageServiceMock.Verify(img => img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny<CancellationToken>()), Times.Once);
 
@@ -242,7 +303,8 @@ public class CastRegistrationHandlerTests
         signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Once);
 
         Assert.That(capturedCast, Is.Not.Null);
-        Assert.That(capturedCast!.Id, Is.Not.EqualTo(Guid.Empty));
+        Assert.That(capturedCast.Id, Is.Not.EqualTo(Guid.Empty));
+        Assert.That(capturedCast.UserId, Is.EqualTo(Guid.Empty));
         Assert.That(capturedCast.ProfileImagePath, Is.EqualTo(savedPath));
         Assert.That(capturedCast.FirstName, Is.EqualTo(dto.FirstName));
         Assert.That(capturedCast.LastName, Is.EqualTo(dto.LastName));
@@ -250,10 +312,9 @@ public class CastRegistrationHandlerTests
         Assert.That(capturedCast.Biography, Is.EqualTo(dto.Biography));
         Assert.That(capturedCast.BirthDate, Is.EqualTo(dto.BirthDate));
         Assert.That(capturedCast.Gender, Is.EqualTo(dto.Gender));
-        Assert.That(capturedCast.IsActive, Is.True);
+        Assert.That(capturedCast.IsActive, Is.False);
         Assert.That(capturedCast.IsDeleted, Is.False);
 
-        // Ensure rollback/delete not called on success
         loginRegisterRepositoryMock.Verify(lrr => lrr.RollbackTransactionAsync(It.IsAny<IDbContextTransaction>()), Times.Never);
         userManagerMock.Verify(um => um.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Never);
     }
@@ -272,6 +333,10 @@ public class CastRegistrationHandlerTests
 
         userManagerMock
             .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Password))
+            .ReturnsAsync(IdentityResult.Success);
+
+        userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Actor))
             .ReturnsAsync(IdentityResult.Success);
 
         imageStrategyResolverMock
@@ -294,6 +359,7 @@ public class CastRegistrationHandlerTests
         Assert.That(result.Errors.Select(e => e.Description), Does.Contain(RegistrationTransactionFailure));
 
         loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Once);
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Actor), Times.Once);
         imageStrategyResolverMock.Verify(isr => isr.Resolve(ProfileFolderName), Times.Once);
 
         loginRegisterRepositoryMock.Verify(lrr => lrr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
@@ -303,13 +369,9 @@ public class CastRegistrationHandlerTests
         signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Never);
     }
 
-    // ---------------------------
-    // Helpers
-    // ---------------------------
-
     private static CastRegistrationDto ValidCastDto()
     {
-        return new CastRegistrationDto
+        CastRegistrationDto dto = new CastRegistrationDto
         {
             UserName = "cast.user",
             Email = "cast@wrap.local",
@@ -320,16 +382,18 @@ public class CastRegistrationHandlerTests
             Nickname = "N",
             BirthDate = new DateTime(2000, 1, 1),
             Gender = GCommon.Enums.GenderType.Male,
-            ProfilePicture = CreateFormFile("pic.png", new byte[] { 1, 2, 3 }),
+            ProfilePicture = CreateFormFile("pic.png", [1, 2, 3]),
             Biography = "bio"
         };
+        
+        return dto;
     }
 
     private static IFormFile CreateFormFile(string fileName, byte[] content)
     {
         MemoryStream stream = new MemoryStream(content);
         IFormFile file = new FormFile(stream, 0, content.Length, "file", fileName);
-        
+
         return file;
     }
 
@@ -360,7 +424,7 @@ public class CastRegistrationHandlerTests
             Mock.Of<IServiceProvider>(),
             Mock.Of<ILogger<UserManager<ApplicationUser>>>()
         );
-        
+
         return userManagerMock;
     }
 
@@ -373,10 +437,10 @@ public class CastRegistrationHandlerTests
             Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
             Mock.Of<IOptions<IdentityOptions>>(),
             Mock.Of<ILogger<SignInManager<ApplicationUser>>>(),
-            Mock.Of<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>(),
+            Mock.Of<IAuthenticationSchemeProvider>(),
             Mock.Of<IUserConfirmation<ApplicationUser>>()
         );
-        
+
         return signInManagerMock;
     }
 }
