@@ -40,7 +40,6 @@
 
 
     <ItemGroup>
-      <Folder Include="Areas\DirectionAndProduction\Views\" />
       <Folder Include="Areas\Identity\Pages\Account\" />
       <Folder Include="Views\Production\" />
       <Folder Include="wwwroot\img\assets\colorwheel\" />
