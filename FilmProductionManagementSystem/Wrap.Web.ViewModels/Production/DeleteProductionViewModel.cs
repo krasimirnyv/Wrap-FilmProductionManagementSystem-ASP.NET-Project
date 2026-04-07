@@ -19,4 +19,6 @@ public class DeleteProductionViewModel
     public int CastMembersCount { get; set; }
     
     public int ScenesCount { get; set; }
+
+    public int AssetsCount { get; set; }
 }

@@ -19,4 +19,6 @@ public class CreateProductionDto
     public DateTime StatusStartDate { get; set; }
 
     public DateTime? StatusEndDate { get; set; }
+
+    public Guid CreatorId { get; set; }
 }

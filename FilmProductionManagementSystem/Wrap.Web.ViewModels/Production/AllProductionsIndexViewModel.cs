@@ -18,4 +18,6 @@ public class AllProductionsIndexViewModel
     public string? SelectedStatus { get; set; }
     
     public bool? IsActive { get; set; }
+
+    public bool IsUserCrew { get; set; } = true;
 }
