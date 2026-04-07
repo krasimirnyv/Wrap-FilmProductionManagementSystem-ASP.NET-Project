@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ProductionCastConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models.MappingEntities;
+
+using static Common.EntityIdentificationConstants;
+
+public class ProductionCastConfiguration : IEntityTypeConfiguration&lt;ProductionCast&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;ProductionCast&gt; entity)
+    {
+        entity.HasKey(pc =&gt; new { pc.ProductionId, pc.CastMemberId });
+
+        entity
+            .HasOne(pc =&gt; pc.Production)
+            .WithMany(p =&gt; p.ProductionCastMembers)
+            .HasForeignKey(pc =&gt; pc.ProductionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity
+            .HasOne(pc =&gt; pc.CastMember)
+            .WithMany(c =&gt; c.CastMemberProductions)
+            .HasForeignKey(pc =&gt; pc.CastMemberId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasQueryFilter(pc =&gt; !pc.CastMember.IsDeleted);
+        
+        entity.HasData(ProductionCastSeed);
+    }
+    
+    private static readonly ProductionCast[] ProductionCastSeed =
+    [
+        new() { ProductionId = ProductionIdTestFilm, CastMemberId = CastId1, Role = &quot;Detective Ivanov&quot; },
+        new() { ProductionId = ProductionIdTestFilm, CastMemberId = CastId2, Role = &quot;Witness&quot; },
+
+        new() { ProductionId = ProductionIdMidnightDreams, CastMemberId = CastId3, Role = &quot;Lead Actress&quot; },
+
+        new() { ProductionId = ProductionIdPaperPlanes, CastMemberId = CastId1, Role = &quot;Private Investigator&quot; },
+        new() { ProductionId = ProductionIdPaperPlanes, CastMemberId = CastId2, Role = &quot;Antagonist&quot; },
+
+        new() { ProductionId = ProductionIdTheLastTake, CastMemberId = CastId2, Role = &quot;Supporting Role&quot; },
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,5,13,6,0],[14,9,14,71,0],[16,9,20,47,0],[22,9,26,47,0],[28,9,28,63,0],[30,9,30,44,0],[31,5,31,6,0],[33,5,44,7,0]]);
+    </script>
+  </body>
+</html>

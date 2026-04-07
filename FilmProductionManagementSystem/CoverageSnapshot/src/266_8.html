@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/LoginAndRegistration/AccountLogInInputModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.LoginAndRegistration;
+
+using System.ComponentModel.DataAnnotations;
+
+using static GCommon.DataFormat;
+
+public class AccountLogInInputModel
+{
+    [Required]
+    [Display(Name = DisplayUsername)]
+    public string UserName { get; set; } = null!;
+    
+    [Required]
+    [Display(Name = DisplayPassword)]
+    public string Password { get; set; } = null!;
+    
+    [Required]
+    public string Role { get; set; } = null!; // &quot;Crew&quot; or &quot;Cast&quot;
+
+    public bool RememberMe { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,44,11,49,0],[15,44,15,49,0],[18,40,18,45,0]]);
+    </script>
+  </body>
+</html>

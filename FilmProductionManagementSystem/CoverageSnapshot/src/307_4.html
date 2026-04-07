@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/Production.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+
+using Infrastructure;
+using MappingEntities;
+using GCommon.Enums;
+
+using static GCommon.EntityConstants.Production;
+using static GCommon.DataFormat;
+
+/// &lt;summary&gt;
+/// Това Entity представлява филмова продукцията, която съдържа 1 сценарий,
+/// колекция от екип и актьори, от сцени, инструменти и снимачни дни
+/// &lt;/summary&gt;
+public class Production
+{
+    [Key]
+    public Guid Id { get; set; }
+
+    [Unicode]
+    [Required]
+    [MaxLength(TitleMaxLength)]
+    public string Title { get; set; } = null!;
+
+    [Unicode]
+    [MaxLength(DescriptionMaxLength)]
+    public string? Description { get; set; }
+
+    [Column(TypeName = DecimalTypeFormat)]
+    public decimal Budget { get; set; }
+
+    [Unicode]
+    [MaxLength(ThumbnailMaxLength)]
+    public string? Thumbnail { get; set; }
+    // Example with image path: &quot;/images/productions/production-1.png&quot;
+
+    [Required]
+    public ProductionStatusType StatusType { get; set; }
+
+    [Required]
+    [Column(TypeName = DateTimeTypeFormat)]
+    public DateTime StatusStartDate { get; set; }
+
+    [Column(TypeName = DateTimeTypeFormat)]
+    public DateTime? StatusEndDate { get; set; }
+
+    [Required]
+    [ForeignKey(nameof(CreatedByUser))]
+    public Guid CreatedByUserId { get; set; }
+
+    public virtual ApplicationUser CreatedByUser { get; set; } = null!;
+    
+    public virtual Script? Script { get; set; }
+
+    public virtual ICollection&lt;ProductionCrew&gt; ProductionCrewMembers { get; set; }
+        = new List&lt;ProductionCrew&gt;();
+    
+    public virtual ICollection&lt;ProductionCast&gt; ProductionCastMembers { get; set; }
+        = new List&lt;ProductionCast&gt;();
+    
+    public virtual ICollection&lt;Scene&gt; Scenes { get; set; }
+        = new HashSet&lt;Scene&gt;();
+
+    public virtual ICollection&lt;ProductionAsset&gt; ProductionAssets { get; set; }
+        = new List&lt;ProductionAsset&gt;();
+
+    public virtual ICollection&lt;ShootingDay&gt; ShootingDays { get; set; }
+        = new List&lt;ShootingDay&gt;();
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[27,41,27,46,1],[55,66,55,71,1],[60,11,60,37,1],[63,11,63,37,1],[66,11,66,31,1],[69,11,69,38,1],[72,11,72,34,1]]);
+    </script>
+  </body>
+</html>

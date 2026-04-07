@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Migrations/FilmProductionDbContextModelSnapshot.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+// &lt;auto-generated /&gt;
+using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Wrap.Data;
+
+#nullable disable
+
+namespace Wrap.Data.Migrations
+{
+    [DbContext(typeof(FilmProductionDbContext))]
+    partial class FilmProductionDbContextModelSnapshot : ModelSnapshot
+    {
+        protected override void BuildModel(ModelBuilder modelBuilder)
+        {
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasAnnotation(&quot;ProductVersion&quot;, &quot;8.0.25&quot;)
+                .HasAnnotation(&quot;Relational:MaxIdentifierLength&quot;, 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityRoleClaim&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.Property&lt;int&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;int&quot;);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property&lt;int&gt;(&quot;Id&quot;));
+
+                    b.Property&lt;string&gt;(&quot;ClaimType&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;ClaimValue&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;RoleId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;RoleId&quot;);
+
+                    b.ToTable(&quot;AspNetRoleClaims&quot;, (string)null);
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityUserClaim&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.Property&lt;int&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;int&quot;);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property&lt;int&gt;(&quot;Id&quot;));
+
+                    b.Property&lt;string&gt;(&quot;ClaimType&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;ClaimValue&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;UserId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;UserId&quot;);
+
+                    b.ToTable(&quot;AspNetUserClaims&quot;, (string)null);
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityUserLogin&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.Property&lt;string&gt;(&quot;LoginProvider&quot;)
+                        .HasMaxLength(128)
+                        .HasColumnType(&quot;nvarchar(128)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;ProviderKey&quot;)
+                        .HasMaxLength(128)
+                        .HasColumnType(&quot;nvarchar(128)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;ProviderDisplayName&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;UserId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;LoginProvider&quot;, &quot;ProviderKey&quot;);
+
+                    b.HasIndex(&quot;UserId&quot;);
+
+                    b.ToTable(&quot;AspNetUserLogins&quot;, (string)null);
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityUserRole&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;UserId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;RoleId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;UserId&quot;, &quot;RoleId&quot;);
+
+                    b.HasIndex(&quot;RoleId&quot;);
+
+                    b.ToTable(&quot;AspNetUserRoles&quot;, (string)null);
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityUserToken&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;UserId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;LoginProvider&quot;)
+                        .HasMaxLength(128)
+                        .HasColumnType(&quot;nvarchar(128)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Name&quot;)
+                        .HasMaxLength(128)
+                        .HasColumnType(&quot;nvarchar(128)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Value&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.HasKey(&quot;UserId&quot;, &quot;LoginProvider&quot;, &quot;Name&quot;);
+
+                    b.ToTable(&quot;AspNetUserTokens&quot;, (string)null);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Cast&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Biography&quot;)
+                        .HasMaxLength(4000)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(4000)&quot;);
+
+                    b.Property&lt;DateTime&gt;(&quot;BirthDate&quot;)
+                        .HasColumnType(&quot;DATETIME2&quot;);
+
+                    b.Property&lt;string&gt;(&quot;FirstName&quot;)
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(150)&quot;);
+
+                    b.Property&lt;int&gt;(&quot;Gender&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;IsActive&quot;)
+                        .HasColumnType(&quot;bit&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;IsDeleted&quot;)
+                        .HasColumnType(&quot;bit&quot;);
+
+                    b.Property&lt;string&gt;(&quot;LastName&quot;)
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(150)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Nickname&quot;)
+                        .HasMaxLength(100)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(100)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;ProfileImagePath&quot;)
+                        .HasMaxLength(500)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(500)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;UserId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;UserId&quot;);
+
+                    b.ToTable(&quot;CastMembers&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;),
+                            Biography = &quot;Stage and screen actor, passionate about drama and indie productions.&quot;,
+                            BirthDate = new DateTime(1998, 4, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = &quot;Elena&quot;,
+                            Gender = 2,
+                            IsActive = true,
+                            IsDeleted = false,
+                            LastName = &quot;Stoyanova&quot;,
+                            Nickname = &quot;Eli&quot;,
+                            ProfileImagePath = &quot;/img/profile/default-profile.png&quot;,
+                            UserId = new Guid(&quot;5f279043-b38f-4f5f-b990-12fd90dcc30e&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;),
+                            Biography = &quot;Film actor with a focus on action and thrillers.&quot;,
+                            BirthDate = new DateTime(1995, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = &quot;Georgi&quot;,
+                            Gender = 1,
+                            IsActive = true,
+                            IsDeleted = false,
+                            LastName = &quot;Ivanov&quot;,
+                            ProfileImagePath = &quot;/img/profile/default-profile.png&quot;,
+                            UserId = new Guid(&quot;47a394d7-2ddb-4511-8355-a489dc8ea3f5&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;80e32159-612c-4f6d-9eee-fe91afe5f619&quot;),
+                            Biography = &quot;Aspiring actor, experienced in commercials and short films.&quot;,
+                            BirthDate = new DateTime(2001, 1, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            FirstName = &quot;Siyana&quot;,
+                            Gender = 2,
+                            IsActive = true,
+                            IsDeleted = false,
+                            LastName = &quot;Petrova&quot;,
+                            Nickname = &quot;Sisi&quot;,
+                            ProfileImagePath = &quot;/img/profile/default-profile.png&quot;,
+                            UserId = new Guid(&quot;a77cc134-28f3-45d3-8e46-ba041a5371d0&quot;)
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Crew&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Biography&quot;)
+                        .HasMaxLength(4000)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(4000)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;FirstName&quot;)
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(150)&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;IsActive&quot;)
+                        .HasColumnType(&quot;bit&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;IsDeleted&quot;)
+                        .HasColumnType(&quot;bit&quot;);
+
+                    b.Property&lt;string&gt;(&quot;LastName&quot;)
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(150)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Nickname&quot;)
+                        .HasMaxLength(100)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(100)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;ProfileImagePath&quot;)
+                        .HasMaxLength(500)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(500)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;UserId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;UserId&quot;);
+
+                    b.ToTable(&quot;CrewMembers&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            Biography = &quot;Director of Photography focused on natural light and handheld storytelling.&quot;,
+                            FirstName = &quot;Alex&quot;,
+                            IsActive = true,
+                            IsDeleted = false,
+                            LastName = &quot;Petrov&quot;,
+                            Nickname = &quot;AP/DP&quot;,
+                            ProfileImagePath = &quot;/img/profile/default-profile.png&quot;,
+                            UserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            Biography = &quot;Production coordinator with experience in budgeting, call sheets and logistics.&quot;,
+                            FirstName = &quot;Maria&quot;,
+                            IsActive = true,
+                            IsDeleted = false,
+                            LastName = &quot;Georgieva&quot;,
+                            Nickname = &quot;Maya&quot;,
+                            ProfileImagePath = &quot;/img/profile/default-profile.png&quot;,
+                            UserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            Biography = &quot;Sound recordist and boom operator. Location sound, ADR planning, and on-set workflow.&quot;,
+                            FirstName = &quot;Ivan&quot;,
+                            IsActive = true,
+                            IsDeleted = false,
+                            LastName = &quot;Dimitrov&quot;,
+                            ProfileImagePath = &quot;/img/profile/default-profile.png&quot;,
+                            UserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;)
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.CrewSkill&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;CrewMemberId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;int&gt;(&quot;RoleType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;CrewMemberId&quot;);
+
+                    b.ToTable(&quot;CrewSkills&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000001&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000002&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000003&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 20
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000004&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 21
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000005&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 50
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000006&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 51
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000007&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 60
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000008&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 62
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000009&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 70
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000010&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 71
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000011&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 80
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-0000-0000-0000-000000000012&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 82
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Infrastructure.ApplicationRole&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;ConcurrencyStamp&quot;)
+                        .IsConcurrencyToken()
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Name&quot;)
+                        .HasMaxLength(256)
+                        .HasColumnType(&quot;nvarchar(256)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;NormalizedName&quot;)
+                        .HasMaxLength(256)
+                        .HasColumnType(&quot;nvarchar(256)&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;NormalizedName&quot;)
+                        .IsUnique()
+                        .HasDatabaseName(&quot;RoleNameIndex&quot;)
+                        .HasFilter(&quot;[NormalizedName] IS NOT NULL&quot;);
+
+                    b.ToTable(&quot;AspNetRoles&quot;, (string)null);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Infrastructure.ApplicationUser&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;int&gt;(&quot;AccessFailedCount&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;string&gt;(&quot;ConcurrencyStamp&quot;)
+                        .IsConcurrencyToken()
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Email&quot;)
+                        .HasMaxLength(256)
+                        .HasColumnType(&quot;nvarchar(256)&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;EmailConfirmed&quot;)
+                        .HasColumnType(&quot;bit&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;LockoutEnabled&quot;)
+                        .HasColumnType(&quot;bit&quot;);
+
+                    b.Property&lt;DateTimeOffset?&gt;(&quot;LockoutEnd&quot;)
+                        .HasColumnType(&quot;datetimeoffset&quot;);
+
+                    b.Property&lt;string&gt;(&quot;NormalizedEmail&quot;)
+                        .HasMaxLength(256)
+                        .HasColumnType(&quot;nvarchar(256)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;NormalizedUserName&quot;)
+                        .HasMaxLength(256)
+                        .HasColumnType(&quot;nvarchar(256)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;PasswordHash&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;PhoneNumber&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;PhoneNumberConfirmed&quot;)
+                        .HasColumnType(&quot;bit&quot;);
+
+                    b.Property&lt;string&gt;(&quot;SecurityStamp&quot;)
+                        .HasColumnType(&quot;nvarchar(max)&quot;);
+
+                    b.Property&lt;bool&gt;(&quot;TwoFactorEnabled&quot;)
+                        .HasColumnType(&quot;bit&quot;);
+
+                    b.Property&lt;string&gt;(&quot;UserName&quot;)
+                        .HasMaxLength(256)
+                        .HasColumnType(&quot;nvarchar(256)&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;NormalizedEmail&quot;)
+                        .HasDatabaseName(&quot;EmailIndex&quot;);
+
+                    b.HasIndex(&quot;NormalizedUserName&quot;)
+                        .IsUnique()
+                        .HasDatabaseName(&quot;UserNameIndex&quot;)
+                        .HasFilter(&quot;[NormalizedUserName] IS NOT NULL&quot;);
+
+                    b.ToTable(&quot;AspNetUsers&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = &quot;seed-crew-con-1&quot;,
+                            Email = &quot;alex.petrov@wrap.local&quot;,
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = &quot;ALEX.PETROV@WRAP.LOCAL&quot;,
+                            NormalizedUserName = &quot;ALEX.PETROV&quot;,
+                            PhoneNumber = &quot;+359888000001&quot;,
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = &quot;seed-crew-sec-1&quot;,
+                            TwoFactorEnabled = false,
+                            UserName = &quot;alex.petrov&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = &quot;seed-crew-con-2&quot;,
+                            Email = &quot;maria.georgieva@wrap.local&quot;,
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = &quot;MARIA.GEORGIEVA@WRAP.LOCAL&quot;,
+                            NormalizedUserName = &quot;MARIA.GEORGIEVA&quot;,
+                            PhoneNumber = &quot;+359888000002&quot;,
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = &quot;seed-crew-sec-2&quot;,
+                            TwoFactorEnabled = false,
+                            UserName = &quot;maria.georgieva&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = &quot;seed-crew-con-3&quot;,
+                            Email = &quot;ivan.dimitrov@wrap.local&quot;,
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = &quot;IVAN.DIMITROV@WRAP.LOCAL&quot;,
+                            NormalizedUserName = &quot;IVAN.DIMITROV&quot;,
+                            PhoneNumber = &quot;+359888000003&quot;,
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = &quot;seed-crew-sec-3&quot;,
+                            TwoFactorEnabled = false,
+                            UserName = &quot;ivan.dimitrov&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;5f279043-b38f-4f5f-b990-12fd90dcc30e&quot;),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = &quot;seed-cast-con-1&quot;,
+                            Email = &quot;elena.stoyanova@wrap.local&quot;,
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = &quot;ELENA.STOYANOVA@WRAP.LOCAL&quot;,
+                            NormalizedUserName = &quot;ELENA.STOYANOVA&quot;,
+                            PhoneNumber = &quot;+359888100001&quot;,
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = &quot;seed-cast-sec-1&quot;,
+                            TwoFactorEnabled = false,
+                            UserName = &quot;elena.stoyanova&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;47a394d7-2ddb-4511-8355-a489dc8ea3f5&quot;),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = &quot;seed-cast-con-2&quot;,
+                            Email = &quot;georgi.ivanov@wrap.local&quot;,
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = &quot;GEORGI.IVANOV@WRAP.LOCAL&quot;,
+                            NormalizedUserName = &quot;GEORGI.IVANOV&quot;,
+                            PhoneNumber = &quot;+359888100002&quot;,
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = &quot;seed-cast-sec-2&quot;,
+                            TwoFactorEnabled = false,
+                            UserName = &quot;georgi.ivanov&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a77cc134-28f3-45d3-8e46-ba041a5371d0&quot;),
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = &quot;seed-cast-con-3&quot;,
+                            Email = &quot;siyana.petrova@wrap.local&quot;,
+                            EmailConfirmed = true,
+                            LockoutEnabled = false,
+                            NormalizedEmail = &quot;SIYANA.PETROVA@WRAP.LOCAL&quot;,
+                            NormalizedUserName = &quot;SIYANA.PETROVA&quot;,
+                            PhoneNumber = &quot;+359888100003&quot;,
+                            PhoneNumberConfirmed = true,
+                            SecurityStamp = &quot;seed-cast-sec-3&quot;,
+                            TwoFactorEnabled = false,
+                            UserName = &quot;siyana.petrova&quot;
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.MappingEntities.ProductionCast&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;ProductionId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;CastMemberId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Role&quot;)
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(200)&quot;);
+
+                    b.HasKey(&quot;ProductionId&quot;, &quot;CastMemberId&quot;);
+
+                    b.HasIndex(&quot;CastMemberId&quot;);
+
+                    b.ToTable(&quot;ProductionsCastMembers&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            CastMemberId = new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;),
+                            Role = &quot;Detective Ivanov&quot;
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            CastMemberId = new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;),
+                            Role = &quot;Witness&quot;
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;),
+                            CastMemberId = new Guid(&quot;80e32159-612c-4f6d-9eee-fe91afe5f619&quot;),
+                            Role = &quot;Lead Actress&quot;
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            CastMemberId = new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;),
+                            Role = &quot;Private Investigator&quot;
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            CastMemberId = new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;),
+                            Role = &quot;Antagonist&quot;
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            CastMemberId = new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;),
+                            Role = &quot;Supporting Role&quot;
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.MappingEntities.ProductionCrew&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;ProductionId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;CrewMemberId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;int&gt;(&quot;RoleType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.HasKey(&quot;ProductionId&quot;, &quot;CrewMemberId&quot;);
+
+                    b.HasIndex(&quot;CrewMemberId&quot;);
+
+                    b.ToTable(&quot;ProductionsCrewMembers&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 1
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 20
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 70
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d06&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 1
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d05&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 21
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 71
+                        },
+                        new
+                        {
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 82
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.MappingEntities.SceneCast&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;SceneId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;CastMemberId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Role&quot;)
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(200)&quot;);
+
+                    b.HasKey(&quot;SceneId&quot;, &quot;CastMemberId&quot;);
+
+                    b.HasIndex(&quot;CastMemberId&quot;);
+
+                    b.ToTable(&quot;ScenesCastMembers&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            SceneId = new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;),
+                            CastMemberId = new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;),
+                            Role = &quot;Detective Ivanov&quot;
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;),
+                            CastMemberId = new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;),
+                            Role = &quot;Witness&quot;
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;),
+                            CastMemberId = new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;),
+                            Role = &quot;Detective Ivanov&quot;
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;),
+                            CastMemberId = new Guid(&quot;80e32159-612c-4f6d-9eee-fe91afe5f619&quot;),
+                            Role = &quot;Lead Actress&quot;
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;),
+                            CastMemberId = new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;),
+                            Role = &quot;Private Investigator&quot;
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;),
+                            CastMemberId = new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;),
+                            Role = &quot;Antagonist&quot;
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;),
+                            CastMemberId = new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;),
+                            Role = &quot;Supporting Role&quot;
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.MappingEntities.SceneCrew&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;SceneId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;CrewMemberId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;int&gt;(&quot;RoleType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.HasKey(&quot;SceneId&quot;, &quot;CrewMemberId&quot;);
+
+                    b.HasIndex(&quot;CrewMemberId&quot;);
+
+                    b.ToTable(&quot;ScenesCrewMembers&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            SceneId = new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 1
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 20
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 70
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 1
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 21
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;33333333-bbbb-bbbb-bbbb-333333333333&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 22
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;33333333-bbbb-bbbb-bbbb-333333333333&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 71
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 1
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 20
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;55555555-bbbb-bbbb-bbbb-555555555555&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 30
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;55555555-bbbb-bbbb-bbbb-555555555555&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 72
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 7
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 20
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;77777777-bbbb-bbbb-bbbb-777777777777&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 2
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;77777777-bbbb-bbbb-bbbb-777777777777&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 70
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 21
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 71
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;99999999-bbbb-bbbb-bbbb-999999999999&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 1
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;99999999-bbbb-bbbb-bbbb-999999999999&quot;),
+                            CrewMemberId = new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;),
+                            RoleType = 20
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;aaaaaaaa-bbbb-bbbb-bbbb-aaaaaaaaaaaa&quot;),
+                            CrewMemberId = new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;),
+                            RoleType = 7
+                        },
+                        new
+                        {
+                            SceneId = new Guid(&quot;aaaaaaaa-bbbb-bbbb-bbbb-aaaaaaaaaaaa&quot;),
+                            CrewMemberId = new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;),
+                            RoleType = 73
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Production&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;decimal&gt;(&quot;Budget&quot;)
+                        .HasColumnType(&quot;DECIMAL(18,2)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;CreatedByUserId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Description&quot;)
+                        .HasMaxLength(2000)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(2000)&quot;);
+
+                    b.Property&lt;DateTime?&gt;(&quot;StatusEndDate&quot;)
+                        .HasColumnType(&quot;DATETIME2&quot;);
+
+                    b.Property&lt;DateTime&gt;(&quot;StatusStartDate&quot;)
+                        .HasColumnType(&quot;DATETIME2&quot;);
+
+                    b.Property&lt;int&gt;(&quot;StatusType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Thumbnail&quot;)
+                        .HasMaxLength(500)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(500)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Title&quot;)
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(200)&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;CreatedByUserId&quot;);
+
+                    b.ToTable(&quot;Productions&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            Budget = 1000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;This is a test&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 1,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Test Film&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;),
+                            Budget = 250000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A neo-noir mystery unfolding over one sleepless night.&quot;,
+                            StatusEndDate = new DateTime(2026, 2, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 2,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Midnight Dreams&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            Budget = 120000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A coming-of-age drama about ambition, fear, and first love.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 5,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Paper Planes&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            Budget = 180000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A comedic behind-the-scenes story about a cursed film set.&quot;,
+                            StatusEndDate = new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 3,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;The Last Take&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d04&quot;),
+                            Budget = 750000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A sci-fi thriller set in a near-future megacity.&quot;,
+                            StatusEndDate = new DateTime(2026, 1, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 4,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Neon Skyline&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d05&quot;),
+                            Budget = 90000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A documentary journey following musicians on the road.&quot;,
+                            StatusEndDate = new DateTime(2026, 2, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 6,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Wild Tracks&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d06&quot;),
+                            Budget = 60000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A character study about burnout and reinvention.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 9,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;On Hold&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d07&quot;),
+                            Budget = 320000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A tense drama about fixing a film before the deadline.&quot;,
+                            StatusEndDate = new DateTime(2026, 4, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 10,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Reshoot Season&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d08&quot;),
+                            Budget = 140000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;An art-house film exploring memory through sound and color.&quot;,
+                            StatusEndDate = new DateTime(2026, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 14,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Color &amp; Noise&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;),
+                            Budget = 210000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A finished film preparing for its festival circuit debut.&quot;,
+                            StatusEndDate = new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 19,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Festival Run&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;7c5c7d63-1f42-4d89-9b91-1b5d1f3a9001&quot;),
+                            Budget = 175000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A psychological drama about memory, guilt, and unresolved loss.&quot;,
+                            StatusEndDate = new DateTime(2026, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 4,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Silent Echo&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;3e8a1c57-6d21-4bcb-8dc4-2f6b42a19002&quot;),
+                            Budget = 540000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A visually driven sci-fi drama set on the edge of a collapsing city.&quot;,
+                            StatusEndDate = new DateTime(2026, 1, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 5,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Glass Horizon&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;9f2d8a11-3c4e-4d7b-a2d4-38ce72c39003&quot;),
+                            Budget = 130000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A nostalgic indie drama about friendship fractured by a long-buried secret.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 22,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Ashes of Summer&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;5b7f9e22-8a11-47c1-bf28-47db53d49004&quot;),
+                            Budget = 280000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A stylish thriller following a late-night radio host drawn into a conspiracy.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 6,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Velvet Signal&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a13e4b90-2c74-4d3a-91c8-5cfc64e59005&quot;),
+                            Budget = 95000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A bittersweet romance between two artists during the final week of summer.&quot;,
+                            StatusEndDate = new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 3,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Fading Lights&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;6d91c8f4-5e21-4b69-8a5d-61ed75f69006&quot;),
+                            Budget = 410000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A crime thriller in which a photographer uncovers evidence hidden in old negatives.&quot;,
+                            StatusEndDate = new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 10,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Broken Frame&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;bc6f0d83-9a52-43de-bc71-72aa86a79007&quot;),
+                            Budget = 160000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A road movie about estranged siblings forced to travel together across the country.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 6,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Northbound&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;1e57a6d4-7f88-41bb-a836-83bb97b89008&quot;),
+                            Budget = 110000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A quiet character-driven story of renewal in a small coastal town.&quot;,
+                            StatusEndDate = new DateTime(2026, 6, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 5, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 11,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;After the Rain&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;d2c49f75-0b33-4a2f-96a1-94cc08c99009&quot;),
+                            Budget = 145000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;An experimental ensemble film weaving together intersecting monologues.&quot;,
+                            StatusEndDate = new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 13,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Parallel Voices&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;f84a72b1-6c95-45ad-b417-a5dd19da9010&quot;),
+                            Budget = 85000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A chamber drama centered on family tension during the reading of a final will.&quot;,
+                            StatusEndDate = new DateTime(2026, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 18,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Final Arrangement&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;c1f3a8d4-7b21-4b93-91a4-11d2f0a10011&quot;),
+                            Budget = 430000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A noir thriller about a detective uncovering corruption in a decaying port city.&quot;,
+                            StatusEndDate = new DateTime(2026, 2, 22, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 2,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Crimson Harbor&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;d2a4b9e5-8c32-4ca4-a2b5-22e3f1b20012&quot;),
+                            Budget = 275000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A courtroom drama about a musician fighting to reclaim her voice and reputation.&quot;,
+                            StatusEndDate = new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 4,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Shattered Silence&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;e3b5cad6-9d43-4db5-b3c6-33f4a2c30013&quot;),
+                            Budget = 95000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A heartfelt drama following a family photographer confronting the passage of time.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 5,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Golden Hour&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;f4c6dbe7-ae54-4ec6-c4d7-44a5b3d40014&quot;),
+                            Budget = 210000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;An intimate psychological drama about fame, obsession, and self-destruction.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 3,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Velvet Ashes&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a5d7ecf8-bf65-4fd7-d5e8-55b6c4e50015&quot;),
+                            Budget = 150000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A winter mystery centered around a box of unsent letters discovered in an abandoned house.&quot;,
+                            StatusEndDate = new DateTime(2026, 2, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 1, 22, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 6,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Frozen Letters&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b6e8fd09-c076-40e8-e6f9-66c7d5f60016&quot;),
+                            Budget = 980000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A historical war drama about espionage, sacrifice, and impossible choices.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 7,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Iron Veil&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;c7f90e1a-d187-41f9-f70a-77d8e6070017&quot;),
+                            Budget = 120000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A light coming-of-age dramedy about three friends reliving their last summer together.&quot;,
+                            StatusEndDate = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 8,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Summer Rewind&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;d8011f2b-e298-420a-812b-88e9f7180018&quot;),
+                            Budget = 650000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A dystopian thriller about a journalist navigating a city emptied by fear and surveillance.&quot;,
+                            StatusEndDate = new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 9,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Hollow City&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;e912203c-f3a9-431b-923c-99fa08290019&quot;),
+                            Budget = 360000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A mystery-thriller where eerie radio transmissions begin predicting violent events.&quot;,
+                            StatusEndDate = new DateTime(2026, 5, 24, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 10,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Blue Static&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;fa23314d-04ba-442c-a34d-a10b193a0020&quot;),
+                            Budget = 80000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A poetic indie romance unfolding over a single night in Sofia.&quot;,
+                            StatusEndDate = new DateTime(2026, 6, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 11,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Paper Moonlight&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;ab34425e-15cb-453d-b45e-b21c2a4b0021&quot;),
+                            Budget = 240000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A road thriller about a failed musician and a runaway chasing redemption.&quot;,
+                            StatusEndDate = new DateTime(2026, 6, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 12,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Dust and Neon&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;bc45536f-26dc-464e-c56f-c32d3b5c0022&quot;),
+                            Budget = 185000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A suspense drama in which a photographer discovers incriminating details in developed film.&quot;,
+                            StatusEndDate = new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 13,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Second Exposure&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;cd566480-37ed-475f-d670-d43e4c6d0023&quot;),
+                            Budget = 410000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A subtle sci-fi drama about loneliness, distance, and first contact.&quot;,
+                            StatusEndDate = new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 6, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 15,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Quiet Signal&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;de677591-48fe-4860-e781-e54f5d7e0024&quot;),
+                            Budget = 105000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;A chamber drama about neighbors whose lives intersect after a tragic accident.&quot;,
+                            StatusEndDate = new DateTime(2026, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 17,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;The Open Window&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;ef7886a2-590f-4971-f892-f6606e8f0025&quot;),
+                            Budget = 195000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A tense airport-set drama about missed chances, final goodbyes, and unexpected reunions.&quot;,
+                            StatusEndDate = new DateTime(2026, 8, 20, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 7, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 18,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Last Departure&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;f08997b3-6a10-4a82-90a3-07117f900026&quot;),
+                            Budget = 70000.00m,
+                            CreatedByUserId = new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;),
+                            Description = &quot;A minimalist drama about two strangers connected by a late-night emergency call.&quot;,
+                            StatusEndDate = new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 20,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Echo Line&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;019aa8c4-7b21-4b93-a1b4-18228fa10027&quot;),
+                            Budget = 155000.00m,
+                            CreatedByUserId = new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;),
+                            Description = &quot;An artist spirals into obsession while preparing the final exhibition of his career.&quot;,
+                            StatusEndDate = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 21,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;Burning Canvas&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;12abb9d5-8c32-4ca4-b2c5-293390b20028&quot;),
+                            Budget = 500000.00m,
+                            CreatedByUserId = new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;),
+                            Description = &quot;A post-apocalyptic survival story abandoned after loss of primary financing.&quot;,
+                            StatusEndDate = new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusStartDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            StatusType = 22,
+                            Thumbnail = &quot;/img/thumbnail/default-thumbnail.png&quot;,
+                            Title = &quot;No Signal Tomorrow&quot;
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ProductionAsset&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;int&gt;(&quot;AssetType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Description&quot;)
+                        .HasMaxLength(500)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(500)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;FilePath&quot;)
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(500)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;ProductionId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Title&quot;)
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(200)&quot;);
+
+                    b.Property&lt;DateTime&gt;(&quot;UploadedAt&quot;)
+                        .HasColumnType(&quot;DATETIME2&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;ProductionId&quot;, &quot;AssetType&quot;);
+
+                    b.ToTable(&quot;ProductionsAssets&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;11111111-cccc-cccc-cccc-111111111111&quot;),
+                            AssetType = 1,
+                            Description = &quot;Basic scene coverage and camera beats.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            Title = &quot;Storyboard v1&quot;,
+                            UploadedAt = new DateTime(2026, 3, 1, 10, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;22222222-cccc-cccc-cccc-222222222222&quot;),
+                            AssetType = 2,
+                            Description = &quot;Lighting references and overall vibe.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            Title = &quot;Moodboard - Visual Tone&quot;,
+                            UploadedAt = new DateTime(2026, 3, 1, 10, 0, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;33333333-cccc-cccc-cccc-333333333333&quot;),
+                            AssetType = 3,
+                            Description = &quot;Primary palette for day interiors.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            Title = &quot;Color Palette - Day Scenes&quot;,
+                            UploadedAt = new DateTime(2026, 3, 2, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;44444444-cccc-cccc-cccc-444444444444&quot;),
+                            AssetType = 4,
+                            Description = &quot;Reference stills for framing and composition.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;),
+                            Title = &quot;Reference Frames Pack&quot;,
+                            UploadedAt = new DateTime(2026, 3, 2, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;55555555-cccc-cccc-cccc-555555555555&quot;),
+                            AssetType = 1,
+                            Description = &quot;Action sequence beats and movement.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;),
+                            Title = &quot;Storyboard - Chase Sequence&quot;,
+                            UploadedAt = new DateTime(2026, 3, 3, 9, 40, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;66666666-cccc-cccc-cccc-666666666666&quot;),
+                            AssetType = 99,
+                            Description = &quot;Draft PDF with lens &amp; shot notes.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;),
+                            Title = &quot;Shot List Draft&quot;,
+                            UploadedAt = new DateTime(2026, 3, 3, 9, 40, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;77777777-cccc-cccc-cccc-777777777777&quot;),
+                            AssetType = 2,
+                            Description = &quot;Neon, fog, wet streets.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            Title = &quot;Moodboard - Night Atmosphere&quot;,
+                            UploadedAt = new DateTime(2026, 3, 3, 9, 40, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;88888888-cccc-cccc-cccc-888888888888&quot;),
+                            AssetType = 3,
+                            Description = &quot;Cold shadows with warm practicals.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            Title = &quot;Color Palette - Night Scenes&quot;,
+                            UploadedAt = new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;99999999-cccc-cccc-cccc-999999999999&quot;),
+                            AssetType = 4,
+                            Description = &quot;Props and set dressing ideas.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            Title = &quot;Set Dressing References&quot;,
+                            UploadedAt = new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;aaaaaaaa-cccc-cccc-cccc-aaaaaaaaaaaa&quot;),
+                            AssetType = 1,
+                            Description = &quot;Final sequence beats and transitions.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            Title = &quot;Storyboard - Finale&quot;,
+                            UploadedAt = new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;bbbbbbbb-cccc-cccc-cccc-bbbbbbbbbbbb&quot;),
+                            AssetType = 99,
+                            Description = &quot;Scouting photos for final location.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            Title = &quot;Location Photos&quot;,
+                            UploadedAt = new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;cccccccc-cccc-cccc-cccc-cccccccccccc&quot;),
+                            AssetType = 4,
+                            Description = &quot;Wardrobe references for key characters.&quot;,
+                            FilePath = &quot;/img/assets/default-asset.png&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            Title = &quot;Costume References&quot;,
+                            UploadedAt = new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Scene&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Description&quot;)
+                        .HasMaxLength(2000)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(2000)&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Location&quot;)
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(300)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;ProductionId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;string&gt;(&quot;SceneName&quot;)
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(200)&quot;);
+
+                    b.Property&lt;int&gt;(&quot;SceneNumber&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;int&gt;(&quot;SceneType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;ProductionId&quot;, &quot;SceneNumber&quot;);
+
+                    b.ToTable(&quot;Scenes&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;),
+                            Description = &quot;A tense meeting sets the stakes for the story.&quot;,
+                            Location = &quot;Downtown Coffee Shop&quot;,
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            SceneName = &quot;Coffee Shop Conversation&quot;,
+                            SceneNumber = 1,
+                            SceneType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;),
+                            Description = &quot;Fast-paced pursuit through the city streets.&quot;,
+                            Location = &quot;Main Boulevard&quot;,
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            SceneName = &quot;Street Chase&quot;,
+                            SceneNumber = 2,
+                            SceneType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;33333333-bbbb-bbbb-bbbb-333333333333&quot;),
+                            Description = &quot;Key evidence is discovered.&quot;,
+                            Location = &quot;Character A Apartment&quot;,
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            SceneName = &quot;Apartment Reveal&quot;,
+                            SceneNumber = 3,
+                            SceneType = 3
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;),
+                            Description = &quot;A suspect breaks under pressure.&quot;,
+                            Location = &quot;Police Station&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;),
+                            SceneName = &quot;Interrogation Room&quot;,
+                            SceneNumber = 1,
+                            SceneType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;55555555-bbbb-bbbb-bbbb-555555555555&quot;),
+                            Description = &quot;Conflict escalates with a dramatic skyline backdrop.&quot;,
+                            Location = &quot;Office Building Rooftop&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;),
+                            SceneName = &quot;Rooftop Argument&quot;,
+                            SceneNumber = 2,
+                            SceneType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;),
+                            Description = &quot;A mysterious figure appears in the shadows.&quot;,
+                            Location = &quot;Old Town Alley&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            SceneName = &quot;Night Alley Encounter&quot;,
+                            SceneNumber = 1,
+                            SceneType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;77777777-bbbb-bbbb-bbbb-777777777777&quot;),
+                            Description = &quot;The team plans the next move.&quot;,
+                            Location = &quot;Garage Workshop&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            SceneName = &quot;Workshop Planning&quot;,
+                            SceneNumber = 2,
+                            SceneType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;),
+                            Description = &quot;Emotional turning point for the lead character.&quot;,
+                            Location = &quot;City Hospital&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            SceneName = &quot;Hospital Corridor&quot;,
+                            SceneNumber = 1,
+                            SceneType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;99999999-bbbb-bbbb-bbbb-999999999999&quot;),
+                            Description = &quot;Two characters reconcile after a fallout.&quot;,
+                            Location = &quot;Central Park&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            SceneName = &quot;Park Reunion&quot;,
+                            SceneNumber = 2,
+                            SceneType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;aaaaaaaa-bbbb-bbbb-bbbb-aaaaaaaaaaaa&quot;),
+                            Description = &quot;Closing moment with a hopeful sunrise.&quot;,
+                            Location = &quot;Cliffside Overlook&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            SceneName = &quot;Finale: Sunrise Cliff&quot;,
+                            SceneNumber = 3,
+                            SceneType = 2
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Script&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;DateTime&gt;(&quot;LastEditedAt&quot;)
+                        .HasColumnType(&quot;DATETIME2&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;ProductionId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;int?&gt;(&quot;RevisionType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;int&gt;(&quot;StageType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Title&quot;)
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(200)&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;ProductionId&quot;)
+                        .IsUnique();
+
+                    b.ToTable(&quot;Scripts&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;),
+                            LastEditedAt = new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc),
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;),
+                            StageType = 2,
+                            Title = &quot;Test Screenplay&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;11111111-2222-3333-4444-555555555555&quot;),
+                            LastEditedAt = new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc),
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;),
+                            StageType = 2,
+                            Title = &quot;Midnight Dreams — Draft&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;22222222-3333-4444-5555-666666666666&quot;),
+                            LastEditedAt = new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc),
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;),
+                            RevisionType = 3,
+                            StageType = 7,
+                            Title = &quot;Paper Planes — Shooting Script&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;33333333-4444-5555-6666-777777777777&quot;),
+                            LastEditedAt = new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc),
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;),
+                            RevisionType = 2,
+                            StageType = 8,
+                            Title = &quot;The Last Take — Blue Revision&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;44444444-5555-6666-7777-888888888888&quot;),
+                            LastEditedAt = new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc),
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d04&quot;),
+                            StageType = 1,
+                            Title = &quot;Neon Skyline — Outline&quot;
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;55555555-6666-7777-8888-999999999999&quot;),
+                            LastEditedAt = new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc),
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d05&quot;),
+                            RevisionType = 4,
+                            StageType = 4,
+                            Title = &quot;Wild Tracks — Polish&quot;
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ScriptBlock&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;int&gt;(&quot;BlockType&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Content&quot;)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;NVARCHAR(MAX)&quot;);
+
+                    b.Property&lt;DateTime&gt;(&quot;CreatedAt&quot;)
+                        .HasColumnType(&quot;DATETIME2&quot;);
+
+                    b.Property&lt;DateTime&gt;(&quot;LastModifiedAt&quot;)
+                        .HasColumnType(&quot;DATETIME2&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Metadata&quot;)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;NVARCHAR(MAX)&quot;);
+
+                    b.Property&lt;int&gt;(&quot;OrderIndex&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;ScriptId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;ScriptId&quot;, &quot;OrderIndex&quot;)
+                        .IsUnique();
+
+                    b.ToTable(&quot;ScriptBlocks&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;65a5a61f-204d-4274-be48-bf4b440ff6a1&quot;),
+                            BlockType = 1,
+                            Content = &quot;INT. COFFEE SHOP - DAY&quot;,
+                            CreatedAt = new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc),
+                            LastModifiedAt = new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc),
+                            OrderIndex = 0,
+                            ScriptId = new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;c5cc8272-c35d-4b4b-bb31-137df7fe86d5&quot;),
+                            BlockType = 3,
+                            Content = &quot;A bustling morning crowd. Steam rises from espresso machines.&quot;,
+                            CreatedAt = new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc),
+                            LastModifiedAt = new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc),
+                            OrderIndex = 1,
+                            ScriptId = new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;befd3f37-d237-4e46-8a21-e08704c6ef00&quot;),
+                            BlockType = 4,
+                            Content = &quot;JOHN&quot;,
+                            CreatedAt = new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc),
+                            LastModifiedAt = new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc),
+                            OrderIndex = 2,
+                            ScriptId = new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;3bed994a-cbee-4d60-b22f-a922b82eb841&quot;),
+                            BlockType = 7,
+                            Content = &quot;I&#39;ll have a double espresso. Make it strong.&quot;,
+                            CreatedAt = new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc),
+                            LastModifiedAt = new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc),
+                            OrderIndex = 3,
+                            ScriptId = new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;)
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ShootingDay&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;DateTime&gt;(&quot;Date&quot;)
+                        .HasColumnType(&quot;DATETIME2&quot;);
+
+                    b.Property&lt;string&gt;(&quot;Notes&quot;)
+                        .HasMaxLength(400)
+                        .IsUnicode(true)
+                        .HasColumnType(&quot;nvarchar(400)&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;ProductionId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;ProductionId&quot;);
+
+                    b.ToTable(&quot;ShootingDays&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000001&quot;),
+                            Date = new DateTime(2026, 3, 20, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Day 1: Coffee shop scene coverage.&quot;,
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000002&quot;),
+                            Date = new DateTime(2026, 3, 21, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Day 2: Pickups and insert shots.&quot;,
+                            ProductionId = new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;20000000-aaaa-aaaa-aaaa-200000000001&quot;),
+                            Date = new DateTime(2026, 3, 23, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Night exterior sequence.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;20000000-aaaa-aaaa-aaaa-200000000002&quot;),
+                            Date = new DateTime(2026, 3, 24, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Studio interiors + dialogue scenes.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;30000000-aaaa-aaaa-aaaa-300000000001&quot;),
+                            Date = new DateTime(2026, 3, 26, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;School hallway + classroom scenes.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000001&quot;),
+                            Date = new DateTime(2026, 3, 28, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Stage scenes and rehearsal coverage.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000002&quot;),
+                            Date = new DateTime(2026, 3, 29, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Close-ups, alt takes, safety shots.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;50000000-aaaa-aaaa-aaaa-500000000001&quot;),
+                            Date = new DateTime(2026, 3, 31, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;City night montage (neon locations).&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d04&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;60000000-aaaa-aaaa-aaaa-600000000001&quot;),
+                            Date = new DateTime(2026, 4, 2, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Outdoor travel sequence.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d05&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;70000000-aaaa-aaaa-aaaa-700000000001&quot;),
+                            Date = new DateTime(2026, 4, 4, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Planned shoot (project currently on hold).&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d06&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;80000000-aaaa-aaaa-aaaa-800000000001&quot;),
+                            Date = new DateTime(2026, 4, 6, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Reshoot day: continuity fixes + inserts.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d07&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;90000000-aaaa-aaaa-aaaa-900000000001&quot;),
+                            Date = new DateTime(2026, 4, 8, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;B-roll day for post-production needs.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d08&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;a0000000-aaaa-aaaa-aaaa-a00000000001&quot;),
+                            Date = new DateTime(2026, 4, 10, 8, 0, 0, 0, DateTimeKind.Utc),
+                            Notes = &quot;Press / promo shoot day.&quot;,
+                            ProductionId = new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;)
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ShootingDayScene&quot;, b =&gt;
+                {
+                    b.Property&lt;Guid&gt;(&quot;Id&quot;)
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;int&gt;(&quot;Order&quot;)
+                        .HasColumnType(&quot;int&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;SceneId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.Property&lt;Guid&gt;(&quot;ShootingDayId&quot;)
+                        .HasColumnType(&quot;uniqueidentifier&quot;);
+
+                    b.HasKey(&quot;Id&quot;);
+
+                    b.HasIndex(&quot;SceneId&quot;);
+
+                    b.HasIndex(&quot;ShootingDayId&quot;, &quot;SceneId&quot;)
+                        .IsUnique();
+
+                    b.ToTable(&quot;ShootingDaysScenes&quot;, (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid(&quot;b1000000-cccc-cccc-cccc-b10000000001&quot;),
+                            Order = 1,
+                            SceneId = new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;),
+                            ShootingDayId = new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000001&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b1000000-cccc-cccc-cccc-b10000000002&quot;),
+                            Order = 2,
+                            SceneId = new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;),
+                            ShootingDayId = new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000001&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b1000000-cccc-cccc-cccc-b10000000003&quot;),
+                            Order = 1,
+                            SceneId = new Guid(&quot;33333333-bbbb-bbbb-bbbb-333333333333&quot;),
+                            ShootingDayId = new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000002&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b2000000-cccc-cccc-cccc-b20000000001&quot;),
+                            Order = 1,
+                            SceneId = new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;),
+                            ShootingDayId = new Guid(&quot;20000000-aaaa-aaaa-aaaa-200000000001&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b2000000-cccc-cccc-cccc-b20000000002&quot;),
+                            Order = 1,
+                            SceneId = new Guid(&quot;55555555-bbbb-bbbb-bbbb-555555555555&quot;),
+                            ShootingDayId = new Guid(&quot;20000000-aaaa-aaaa-aaaa-200000000002&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b3000000-cccc-cccc-cccc-b30000000001&quot;),
+                            Order = 1,
+                            SceneId = new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;),
+                            ShootingDayId = new Guid(&quot;30000000-aaaa-aaaa-aaaa-300000000001&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b3000000-cccc-cccc-cccc-b30000000002&quot;),
+                            Order = 2,
+                            SceneId = new Guid(&quot;77777777-bbbb-bbbb-bbbb-777777777777&quot;),
+                            ShootingDayId = new Guid(&quot;30000000-aaaa-aaaa-aaaa-300000000001&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b4000000-cccc-cccc-cccc-b40000000001&quot;),
+                            Order = 1,
+                            SceneId = new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;),
+                            ShootingDayId = new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000001&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b4000000-cccc-cccc-cccc-b40000000002&quot;),
+                            Order = 2,
+                            SceneId = new Guid(&quot;99999999-bbbb-bbbb-bbbb-999999999999&quot;),
+                            ShootingDayId = new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000001&quot;)
+                        },
+                        new
+                        {
+                            Id = new Guid(&quot;b4000000-cccc-cccc-cccc-b40000000003&quot;),
+                            Order = 1,
+                            SceneId = new Guid(&quot;aaaaaaaa-bbbb-bbbb-bbbb-aaaaaaaaaaaa&quot;),
+                            ShootingDayId = new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000002&quot;)
+                        });
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityRoleClaim&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationRole&quot;, null)
+                        .WithMany()
+                        .HasForeignKey(&quot;RoleId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityUserClaim&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationUser&quot;, null)
+                        .WithMany()
+                        .HasForeignKey(&quot;UserId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityUserLogin&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationUser&quot;, null)
+                        .WithMany()
+                        .HasForeignKey(&quot;UserId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityUserRole&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationRole&quot;, null)
+                        .WithMany()
+                        .HasForeignKey(&quot;RoleId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationUser&quot;, null)
+                        .WithMany()
+                        .HasForeignKey(&quot;UserId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity(&quot;Microsoft.AspNetCore.Identity.IdentityUserToken&lt;System.Guid&gt;&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationUser&quot;, null)
+                        .WithMany()
+                        .HasForeignKey(&quot;UserId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Cast&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationUser&quot;, &quot;User&quot;)
+                        .WithMany()
+                        .HasForeignKey(&quot;UserId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;User&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Crew&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationUser&quot;, &quot;User&quot;)
+                        .WithMany()
+                        .HasForeignKey(&quot;UserId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;User&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.CrewSkill&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Crew&quot;, &quot;CrewMember&quot;)
+                        .WithMany(&quot;Skills&quot;)
+                        .HasForeignKey(&quot;CrewMemberId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;CrewMember&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.MappingEntities.ProductionCast&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Cast&quot;, &quot;CastMember&quot;)
+                        .WithMany(&quot;CastMemberProductions&quot;)
+                        .HasForeignKey(&quot;CastMemberId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne(&quot;Wrap.Data.Models.Production&quot;, &quot;Production&quot;)
+                        .WithMany(&quot;ProductionCastMembers&quot;)
+                        .HasForeignKey(&quot;ProductionId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;CastMember&quot;);
+
+                    b.Navigation(&quot;Production&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.MappingEntities.ProductionCrew&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Crew&quot;, &quot;CrewMember&quot;)
+                        .WithMany(&quot;CrewMemberProductions&quot;)
+                        .HasForeignKey(&quot;CrewMemberId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne(&quot;Wrap.Data.Models.Production&quot;, &quot;Production&quot;)
+                        .WithMany(&quot;ProductionCrewMembers&quot;)
+                        .HasForeignKey(&quot;ProductionId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;CrewMember&quot;);
+
+                    b.Navigation(&quot;Production&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.MappingEntities.SceneCast&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Cast&quot;, &quot;CastMember&quot;)
+                        .WithMany(&quot;CastMemberScenes&quot;)
+                        .HasForeignKey(&quot;CastMemberId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne(&quot;Wrap.Data.Models.Scene&quot;, &quot;Scene&quot;)
+                        .WithMany(&quot;SceneCastMembers&quot;)
+                        .HasForeignKey(&quot;SceneId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;CastMember&quot;);
+
+                    b.Navigation(&quot;Scene&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.MappingEntities.SceneCrew&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Crew&quot;, &quot;CrewMember&quot;)
+                        .WithMany(&quot;CrewMemberScenes&quot;)
+                        .HasForeignKey(&quot;CrewMemberId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne(&quot;Wrap.Data.Models.Scene&quot;, &quot;Scene&quot;)
+                        .WithMany(&quot;SceneCrewMembers&quot;)
+                        .HasForeignKey(&quot;SceneId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;CrewMember&quot;);
+
+                    b.Navigation(&quot;Scene&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Production&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Infrastructure.ApplicationUser&quot;, &quot;CreatedByUser&quot;)
+                        .WithMany()
+                        .HasForeignKey(&quot;CreatedByUserId&quot;)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation(&quot;CreatedByUser&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ProductionAsset&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Production&quot;, &quot;Production&quot;)
+                        .WithMany(&quot;ProductionAssets&quot;)
+                        .HasForeignKey(&quot;ProductionId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;Production&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Scene&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Production&quot;, &quot;Production&quot;)
+                        .WithMany(&quot;Scenes&quot;)
+                        .HasForeignKey(&quot;ProductionId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;Production&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Script&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Production&quot;, &quot;Production&quot;)
+                        .WithOne(&quot;Script&quot;)
+                        .HasForeignKey(&quot;Wrap.Data.Models.Script&quot;, &quot;ProductionId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;Production&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ScriptBlock&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Script&quot;, &quot;Script&quot;)
+                        .WithMany(&quot;ScriptBlocks&quot;)
+                        .HasForeignKey(&quot;ScriptId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;Script&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ShootingDay&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Production&quot;, &quot;Production&quot;)
+                        .WithMany(&quot;ShootingDays&quot;)
+                        .HasForeignKey(&quot;ProductionId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;Production&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ShootingDayScene&quot;, b =&gt;
+                {
+                    b.HasOne(&quot;Wrap.Data.Models.Scene&quot;, &quot;Scene&quot;)
+                        .WithMany(&quot;ShootingDayScenes&quot;)
+                        .HasForeignKey(&quot;SceneId&quot;)
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne(&quot;Wrap.Data.Models.ShootingDay&quot;, &quot;ShootingDay&quot;)
+                        .WithMany(&quot;ShootingDayScenes&quot;)
+                        .HasForeignKey(&quot;ShootingDayId&quot;)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation(&quot;Scene&quot;);
+
+                    b.Navigation(&quot;ShootingDay&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Cast&quot;, b =&gt;
+                {
+                    b.Navigation(&quot;CastMemberProductions&quot;);
+
+                    b.Navigation(&quot;CastMemberScenes&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Crew&quot;, b =&gt;
+                {
+                    b.Navigation(&quot;CrewMemberProductions&quot;);
+
+                    b.Navigation(&quot;CrewMemberScenes&quot;);
+
+                    b.Navigation(&quot;Skills&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Production&quot;, b =&gt;
+                {
+                    b.Navigation(&quot;ProductionAssets&quot;);
+
+                    b.Navigation(&quot;ProductionCastMembers&quot;);
+
+                    b.Navigation(&quot;ProductionCrewMembers&quot;);
+
+                    b.Navigation(&quot;Scenes&quot;);
+
+                    b.Navigation(&quot;Script&quot;);
+
+                    b.Navigation(&quot;ShootingDays&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Scene&quot;, b =&gt;
+                {
+                    b.Navigation(&quot;SceneCastMembers&quot;);
+
+                    b.Navigation(&quot;SceneCrewMembers&quot;);
+
+                    b.Navigation(&quot;ShootingDayScenes&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.Script&quot;, b =&gt;
+                {
+                    b.Navigation(&quot;ScriptBlocks&quot;);
+                });
+
+            modelBuilder.Entity(&quot;Wrap.Data.Models.ShootingDay&quot;, b =&gt;
+                {
+                    b.Navigation(&quot;ShootingDayScenes&quot;);
+                });
+#pragma warning restore 612, 618
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,9,17,10,0],[19,13,21,71,0],[23,13,23,78,0],[25,13,26,17,0],[26,17,26,18,0],[26,18,27,21,0],[27,21,29,47,0],[29,47,31,21,0],[31,21,31,97,0],[31,97,33,21,0],[33,21,34,57,0],[34,57,36,21,0],[36,21,37,57,0],[37,57,39,21,0],[39,21,40,60,0],[40,60,42,21,0],[42,21,42,36,0],[42,36,44,21,0],[44,21,44,42,0],[44,42,46,21,0],[46,21,46,65,0],[46,65,47,17,0],[47,17,47,18,0],[47,18,47,20,0],[49,13,50,17,0],[50,17,50,18,0],[50,18,51,21,0],[51,21,53,47,0],[53,47,55,21,0],[55,21,55,97,0],[55,97,57,21,0],[57,21,58,57,0],[58,57,60,21,0],[60,21,61,57,0],[61,57,63,21,0],[63,21,64,60,0],[64,60,66,21,0],[66,21,66,36,0],[66,36,68,21,0],[68,21,68,42,0],[68,42,70,21,0],[70,21,70,65,0],[70,65,71,17,0],[71,17,71,18,0],[71,18,71,20,0],[73,13,74,17,0],[74,17,74,18,0],[74,18,75,21,0],[75,21,77,57,0],[77,57,79,21,0],[79,21,81,57,0],[81,57,83,21,0],[83,21,84,57,0],[84,57,86,21,0],[86,21,87,60,0],[87,60,89,21,0],[89,21,89,62,0],[89,62,91,21,0],[91,21,91,42,0],[91,42,93,21,0],[93,21,93,65,0],[93,65,94,17,0],[94,17,94,18,0],[94,18,94,20,0],[96,13,97,17,0],[97,17,97,18,0],[97,18,98,21,0],[98,21,99,60,0],[99,60,101,21,0],[101,21,102,60,0],[102,60,104,21,0],[104,21,104,50,0],[104,50,106,21,0],[106,21,106,42,0],[106,42,108,21,0],[108,21,108,64,0],[108,64,109,17,0],[109,17,109,18,0],[109,18,109,20,0],[111,13,112,17,0],[112,17,112,18,0],[112,18,113,21,0],[113,21,114,60,0],[114,60,116,21,0],[116,21,118,57,0],[118,57,120,21,0],[120,21,122,57,0],[122,57,124,21,0],[124,21,125,57,0],[125,57,127,21,0],[127,21,127,65,0],[127,65,129,21,0],[129,21,129,65,0],[129,65,130,17,0],[130,17,130,18,0],[130,18,130,20,0],[132,13,133,17,0],[133,17,133,18,0],[133,18,134,21,0],[134,21,136,60,0],[136,60,138,21,0],[138,21,141,58,0],[141,58,143,21,0],[143,21,144,53,0],[144,53,146,21,0],[146,21,150,57,0],[150,57,152,21,0],[152,21,153,47,0],[153,47,155,21,0],[155,21,156,47,0],[156,47,158,21,0],[158,21,159,47,0],[159,47,161,21,0],[161,21,165,57,0],[165,57,167,21,0],[167,21,170,57,0],[170,57,172,21,0],[172,21,175,57,0],[175,57,177,21,0],[177,21,178,60,0],[178,60,180,21,0],[180,21,180,36,0],[180,36,182,21,0],[182,21,182,42,0],[182,42,184,21,0],[184,21,184,60,0],[184,60,186,21,0],[186,21,227,28,0],[227,28,228,17,0],[228,17,228,18,0],[228,18,228,20,0],[230,13,231,17,0],[231,17,231,18,0],[231,18,232,21,0],[232,21,234,60,0],[234,60,236,21,0],[236,21,239,58,0],[239,58,241,21,0],[241,21,245,57,0],[245,57,247,21,0],[247,21,248,47,0],[248,47,250,21,0],[250,21,251,47,0],[251,47,253,21,0],[253,21,257,57,0],[257,57,259,21,0],[259,21,262,57,0],[262,57,264,21,0],[264,21,267,57,0],[267,57,269,21,0],[269,21,270,60,0],[270,60,272,21,0],[272,21,272,36,0],[272,36,274,21,0],[274,21,274,42,0],[274,42,276,21,0],[276,21,276,60,0],[276,60,278,21,0],[278,21,313,28,0],[313,28,314,17,0],[314,17,314,18,0],[314,18,314,20,0],[316,13,317,17,0],[317,17,317,18,0],[317,18,318,21,0],[318,21,320,60,0],[320,60,322,21,0],[322,21,323,60,0],[323,60,325,21,0],[325,21,326,47,0],[326,47,328,21,0],[328,21,328,36,0],[328,36,330,21,0],[330,21,330,48,0],[330,48,332,21,0],[332,21,332,59,0],[332,59,334,21,0],[334,21,406,28,0],[406,28,407,17,0],[407,17,407,18,0],[407,18,407,20,0],[409,13,410,17,0],[410,17,410,18,0],[410,18,411,21,0],[411,21,413,60,0],[413,60,415,21,0],[415,21,417,57,0],[417,57,419,21,0],[419,21,421,57,0],[421,57,423,21,0],[423,21,425,57,0],[425,57,427,21,0],[427,21,427,36,0],[427,36,429,21,0],[429,21,432,68,0],[432,68,434,21,0],[434,21,434,60,0],[434,60,435,17,0],[435,17,435,18,0],[435,18,435,20,0],[437,13,438,17,0],[438,17,438,18,0],[438,18,439,21,0],[439,21,441,60,0],[441,60,443,21,0],[443,21,444,47,0],[444,47,446,21,0],[446,21,448,57,0],[448,57,450,21,0],[450,21,452,57,0],[452,57,454,21,0],[454,21,455,47,0],[455,47,457,21,0],[457,21,458,47,0],[458,47,460,21,0],[460,21,461,58,0],[461,58,463,21,0],[463,21,465,57,0],[465,57,467,21,0],[467,21,469,57,0],[469,57,471,21,0],[471,21,472,57,0],[472,57,474,21,0],[474,21,475,57,0],[475,57,477,21,0],[477,21,478,47,0],[478,47,480,21,0],[480,21,481,57,0],[481,57,483,21,0],[483,21,484,47,0],[484,47,486,21,0],[486,21,488,57,0],[488,57,490,21,0],[490,21,490,36,0],[490,36,492,21,0],[492,21,493,56,0],[493,56,495,21,0],[495,21,498,72,0],[498,72,500,21,0],[500,21,500,60,0],[500,60,502,21,0],[502,21,598,28,0],[598,28,599,17,0],[599,17,599,18,0],[599,18,599,20,0],[601,13,602,17,0],[602,17,602,18,0],[602,18,603,21,0],[603,21,604,60,0],[604,60,606,21,0],[606,21,607,60,0],[607,60,609,21,0],[609,21,613,57,0],[613,57,615,21,0],[615,21,615,62,0],[615,62,617,21,0],[617,21,617,48,0],[617,48,619,21,0],[619,21,619,71,0],[619,71,621,21,0],[621,21,657,28,0],[657,28,658,17,0],[658,17,658,18,0],[658,18,658,20,0],[660,13,661,17,0],[661,17,661,18,0],[661,18,662,21,0],[662,21,663,60,0],[663,60,665,21,0],[665,21,666,60,0],[666,60,668,21,0],[668,21,669,47,0],[669,47,671,21,0],[671,21,671,62,0],[671,62,673,21,0],[673,21,673,48,0],[673,48,675,21,0],[675,21,675,71,0],[675,71,677,21,0],[677,21,719,28,0],[719,28,720,17,0],[720,17,720,18,0],[720,18,720,20,0],[722,13,723,17,0],[723,17,723,18,0],[723,18,724,21,0],[724,21,725,60,0],[725,60,727,21,0],[727,21,728,60,0],[728,60,730,21,0],[730,21,734,57,0],[734,57,736,21,0],[736,21,736,57,0],[736,57,738,21,0],[738,21,738,48,0],[738,48,740,21,0],[740,21,740,66,0],[740,66,742,21,0],[742,21,784,28,0],[784,28,785,17,0],[785,17,785,18,0],[785,18,785,20,0],[787,13,788,17,0],[788,17,788,18,0],[788,18,789,21,0],[789,21,790,60,0],[790,60,792,21,0],[792,21,793,60,0],[793,60,795,21,0],[795,21,796,47,0],[796,47,798,21,0],[798,21,798,57,0],[798,57,800,21,0],[800,21,800,48,0],[800,48,802,21,0],[802,21,802,66,0],[802,66,804,21,0],[804,21,930,28,0],[930,28,931,17,0],[931,17,931,18,0],[931,18,931,20,0],[933,13,934,17,0],[934,17,934,18,0],[934,18,935,21,0],[935,21,937,60,0],[937,60,939,21,0],[939,21,940,57,0],[940,57,942,21,0],[942,21,943,60,0],[943,60,945,21,0],[945,21,948,58,0],[948,58,950,21,0],[950,21,951,53,0],[951,53,953,21,0],[953,21,954,53,0],[954,53,956,21,0],[956,21,957,47,0],[957,47,959,21,0],[959,21,962,57,0],[962,57,964,21,0],[964,21,968,57,0],[968,57,970,21,0],[970,21,970,36,0],[970,36,972,21,0],[972,21,972,51,0],[972,51,974,21,0],[974,21,974,60,0],[974,60,976,21,0],[976,21,1432,28,0],[1432,28,1433,17,0],[1433,17,1433,18,0],[1433,18,1433,20,0],[1435,13,1436,17,0],[1436,17,1436,18,0],[1436,18,1437,21,0],[1437,21,1439,60,0],[1439,60,1441,21,0],[1441,21,1442,47,0],[1442,47,1444,21,0],[1444,21,1447,57,0],[1447,57,1449,21,0],[1449,21,1453,57,0],[1453,57,1455,21,0],[1455,21,1456,60,0],[1456,60,1458,21,0],[1458,21,1462,57,0],[1462,57,1464,21,0],[1464,21,1465,53,0],[1465,53,1467,21,0],[1467,21,1467,36,0],[1467,36,1469,21,0],[1469,21,1469,61,0],[1469,61,1471,21,0],[1471,21,1471,66,0],[1471,66,1473,21,0],[1473,21,1593,28,0],[1593,28,1594,17,0],[1594,17,1594,18,0],[1594,18,1594,20,0],[1596,13,1597,17,0],[1597,17,1597,18,0],[1597,18,1598,21,0],[1598,21,1600,60,0],[1600,60,1602,21,0],[1602,21,1605,58,0],[1605,58,1607,21,0],[1607,21,1611,57,0],[1611,57,1613,21,0],[1613,21,1614,60,0],[1614,60,1616,21,0],[1616,21,1620,57,0],[1620,57,1622,21,0],[1622,21,1623,47,0],[1623,47,1625,21,0],[1625,21,1626,47,0],[1626,47,1628,21,0],[1628,21,1628,36,0],[1628,36,1630,21,0],[1630,21,1630,63,0],[1630,63,1632,21,0],[1632,21,1632,55,0],[1632,55,1634,21,0],[1634,21,1734,28,0],[1734,28,1735,17,0],[1735,17,1735,18,0],[1735,18,1735,20,0],[1737,13,1738,17,0],[1738,17,1738,18,0],[1738,18,1739,21,0],[1739,21,1741,60,0],[1741,60,1743,21,0],[1743,21,1744,53,0],[1744,53,1746,21,0],[1746,21,1747,60,0],[1747,60,1749,21,0],[1749,21,1750,47,0],[1750,47,1752,21,0],[1752,21,1753,47,0],[1753,47,1755,21,0],[1755,21,1759,57,0],[1759,57,1761,21,0],[1761,21,1761,36,0],[1761,36,1763,21,0],[1763,21,1764,37,0],[1764,37,1766,21,0],[1766,21,1766,56,0],[1766,56,1768,21,0],[1768,21,1819,28,0],[1819,28,1820,17,0],[1820,17,1820,18,0],[1820,18,1820,20,0],[1822,13,1823,17,0],[1823,17,1823,18,0],[1823,18,1824,21,0],[1824,21,1826,60,0],[1826,60,1828,21,0],[1828,21,1829,47,0],[1829,47,1831,21,0],[1831,21,1833,57,0],[1833,57,1835,21,0],[1835,21,1836,53,0],[1836,53,1838,21,0],[1838,21,1839,53,0],[1839,53,1841,21,0],[1841,21,1843,57,0],[1843,57,1845,21,0],[1845,21,1846,47,0],[1846,47,1848,21,0],[1848,21,1849,60,0],[1849,60,1851,21,0],[1851,21,1851,36,0],[1851,36,1853,21,0],[1853,21,1854,37,0],[1854,37,1856,21,0],[1856,21,1856,61,0],[1856,61,1858,21,0],[1858,21,1898,28,0],[1898,28,1899,17,0],[1899,17,1899,18,0],[1899,18,1899,20,0],[1901,13,1902,17,0],[1902,17,1902,18,0],[1902,18,1903,21,0],[1903,21,1905,60,0],[1905,60,1907,21,0],[1907,21,1908,53,0],[1908,53,1910,21,0],[1910,21,1913,57,0],[1913,57,1915,21,0],[1915,21,1916,60,0],[1916,60,1918,21,0],[1918,21,1918,36,0],[1918,36,1920,21,0],[1920,21,1920,48,0],[1920,48,1922,21,0],[1922,21,1922,61,0],[1922,61,1924,21,0],[1924,21,2015,28,0],[2015,28,2016,17,0],[2016,17,2016,18,0],[2016,18,2016,20,0],[2018,13,2019,17,0],[2019,17,2019,18,0],[2019,18,2020,21,0],[2020,21,2022,60,0],[2022,60,2024,21,0],[2024,21,2025,47,0],[2025,47,2027,21,0],[2027,21,2028,60,0],[2028,60,2030,21,0],[2030,21,2031,60,0],[2031,60,2033,21,0],[2033,21,2033,36,0],[2033,36,2035,21,0],[2035,21,2035,43,0],[2035,43,2037,21,0],[2037,21,2038,37,0],[2038,37,2040,21,0],[2040,21,2040,67,0],[2040,67,2042,21,0],[2042,21,2112,28,0],[2112,28,2113,17,0],[2113,17,2113,18,0],[2113,18,2113,20,0],[2115,13,2116,17,0],[2116,17,2116,18,0],[2116,18,2117,21,0],[2117,21,2121,39,0],[2121,39,2122,17,0],[2122,17,2122,18,0],[2122,18,2122,20,0],[2124,13,2125,17,0],[2125,17,2125,18,0],[2125,18,2126,21,0],[2126,21,2130,39,0],[2130,39,2131,17,0],[2131,17,2131,18,0],[2131,18,2131,20,0],[2133,13,2134,17,0],[2134,17,2134,18,0],[2134,18,2135,21,0],[2135,21,2139,39,0],[2139,39,2140,17,0],[2140,17,2140,18,0],[2140,18,2140,20,0],[2142,13,2143,17,0],[2143,17,2143,18,0],[2143,18,2144,21,0],[2144,21,2148,39,0],[2148,39,2150,21,0],[2150,21,2154,39,0],[2154,39,2155,17,0],[2155,17,2155,18,0],[2155,18,2155,20,0],[2157,13,2158,17,0],[2158,17,2158,18,0],[2158,18,2159,21,0],[2159,21,2163,39,0],[2163,39,2164,17,0],[2164,17,2164,18,0],[2164,18,2164,20,0],[2166,13,2167,17,0],[2167,17,2167,18,0],[2167,18,2168,21,0],[2168,21,2172,39,0],[2172,39,2174,21,0],[2174,21,2174,42,0],[2174,42,2175,17,0],[2175,17,2175,18,0],[2175,18,2175,20,0],[2177,13,2178,17,0],[2178,17,2178,18,0],[2178,18,2179,21,0],[2179,21,2183,39,0],[2183,39,2185,21,0],[2185,21,2185,42,0],[2185,42,2186,17,0],[2186,17,2186,18,0],[2186,18,2186,20,0],[2188,13,2189,17,0],[2189,17,2189,18,0],[2189,18,2190,21,0],[2190,21,2194,39,0],[2194,39,2196,21,0],[2196,21,2196,48,0],[2196,48,2197,17,0],[2197,17,2197,18,0],[2197,18,2197,20,0],[2199,13,2200,17,0],[2200,17,2200,18,0],[2200,18,2201,21,0],[2201,21,2205,39,0],[2205,39,2207,21,0],[2207,21,2211,39,0],[2211,39,2213,21,0],[2213,21,2213,48,0],[2213,48,2215,21,0],[2215,21,2215,48,0],[2215,48,2216,17,0],[2216,17,2216,18,0],[2216,18,2216,20,0],[2218,13,2219,17,0],[2219,17,2219,18,0],[2219,18,2220,21,0],[2220,21,2224,39,0],[2224,39,2226,21,0],[2226,21,2230,39,0],[2230,39,2232,21,0],[2232,21,2232,48,0],[2232,48,2234,21,0],[2234,21,2234,48,0],[2234,48,2235,17,0],[2235,17,2235,18,0],[2235,18,2235,20,0],[2237,13,2238,17,0],[2238,17,2238,18,0],[2238,18,2239,21,0],[2239,21,2243,39,0],[2243,39,2245,21,0],[2245,21,2249,39,0],[2249,39,2251,21,0],[2251,21,2251,48,0],[2251,48,2253,21,0],[2253,21,2253,43,0],[2253,43,2254,17,0],[2254,17,2254,18,0],[2254,18,2254,20,0],[2256,13,2257,17,0],[2257,17,2257,18,0],[2257,18,2258,21,0],[2258,21,2262,39,0],[2262,39,2264,21,0],[2264,21,2268,39,0],[2268,39,2270,21,0],[2270,21,2270,48,0],[2270,48,2272,21,0],[2272,21,2272,43,0],[2272,43,2273,17,0],[2273,17,2273,18,0],[2273,18,2273,20,0],[2275,13,2276,17,0],[2276,17,2276,18,0],[2276,18,2277,21,0],[2277,21,2281,39,0],[2281,39,2283,21,0],[2283,21,2283,51,0],[2283,51,2284,17,0],[2284,17,2284,18,0],[2284,18,2284,20,0],[2286,13,2287,17,0],[2287,17,2287,18,0],[2287,18,2288,21,0],[2288,21,2292,39,0],[2292,39,2294,21,0],[2294,21,2294,48,0],[2294,48,2295,17,0],[2295,17,2295,18,0],[2295,18,2295,20,0],[2297,13,2298,17,0],[2298,17,2298,18,0],[2298,18,2299,21,0],[2299,21,2303,39,0],[2303,39,2305,21,0],[2305,21,2305,48,0],[2305,48,2306,17,0],[2306,17,2306,18,0],[2306,18,2306,20,0],[2308,13,2309,17,0],[2309,17,2309,18,0],[2309,18,2310,21,0],[2310,21,2314,39,0],[2314,39,2316,21,0],[2316,21,2316,48,0],[2316,48,2317,17,0],[2317,17,2317,18,0],[2317,18,2317,20,0],[2319,13,2320,17,0],[2320,17,2320,18,0],[2320,18,2321,21,0],[2321,21,2325,39,0],[2325,39,2327,21,0],[2327,21,2327,44,0],[2327,44,2328,17,0],[2328,17,2328,18,0],[2328,18,2328,20,0],[2330,13,2331,17,0],[2331,17,2331,18,0],[2331,18,2332,21,0],[2332,21,2336,39,0],[2336,39,2338,21,0],[2338,21,2338,48,0],[2338,48,2339,17,0],[2339,17,2339,18,0],[2339,18,2339,20,0],[2341,13,2342,17,0],[2342,17,2342,18,0],[2342,18,2343,21,0],[2343,21,2347,39,0],[2347,39,2349,21,0],[2349,21,2353,39,0],[2353,39,2355,21,0],[2355,21,2355,43,0],[2355,43,2357,21,0],[2357,21,2357,49,0],[2357,49,2358,17,0],[2358,17,2358,18,0],[2358,18,2358,20,0],[2360,13,2361,17,0],[2361,17,2361,18,0],[2361,18,2362,21,0],[2362,21,2362,59,0],[2362,59,2364,21,0],[2364,21,2364,54,0],[2364,54,2365,17,0],[2365,17,2365,18,0],[2365,18,2365,20,0],[2367,13,2368,17,0],[2368,17,2368,18,0],[2368,18,2369,21,0],[2369,21,2369,59,0],[2369,59,2371,21,0],[2371,21,2371,54,0],[2371,54,2373,21,0],[2373,21,2373,44,0],[2373,44,2374,17,0],[2374,17,2374,18,0],[2374,18,2374,20,0],[2376,13,2377,17,0],[2377,17,2377,18,0],[2377,18,2378,21,0],[2378,21,2378,54,0],[2378,54,2380,21,0],[2380,21,2380,59,0],[2380,59,2382,21,0],[2382,21,2382,59,0],[2382,59,2384,21,0],[2384,21,2384,44,0],[2384,44,2386,21,0],[2386,21,2386,44,0],[2386,44,2388,21,0],[2388,21,2388,50,0],[2388,50,2389,17,0],[2389,17,2389,18,0],[2389,18,2389,20,0],[2391,13,2392,17,0],[2392,17,2392,18,0],[2392,18,2393,21,0],[2393,21,2393,54,0],[2393,54,2395,21,0],[2395,21,2395,54,0],[2395,54,2397,21,0],[2397,21,2397,55,0],[2397,55,2398,17,0],[2398,17,2398,18,0],[2398,18,2398,20,0],[2400,13,2401,17,0],[2401,17,2401,18,0],[2401,18,2402,21,0],[2402,21,2402,50,0],[2402,50,2403,17,0],[2403,17,2403,18,0],[2403,18,2403,20,0],[2405,13,2406,17,0],[2406,17,2406,18,0],[2406,18,2407,21,0],[2407,21,2407,55,0],[2407,55,2408,17,0],[2408,17,2408,18,0],[2408,18,2408,20,0],[2410,9,2410,10,0]]);
+    </script>
+  </body>
+</html>

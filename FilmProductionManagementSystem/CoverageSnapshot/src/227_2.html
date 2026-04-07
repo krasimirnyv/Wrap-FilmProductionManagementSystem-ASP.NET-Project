@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Production/Index.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model AllProductionsIndexViewModel
+
+@inject ISlugGenerator SlugGenerator;
+
+@{
+    ViewData[TitleDataKey] = &quot;Productions&quot;;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;div class=&quot;production-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+
+        &lt;partial name=&quot;_TempDataPartial&quot;&gt;&lt;/partial&gt;
+
+        @* ── Page Header ── *@
+        &lt;div class=&quot;production-header-card d-flex justify-content-between align-items-center flex-wrap gap-3&quot;&gt;
+            &lt;div&gt;
+                &lt;h1 class=&quot;fw-bold mb-1&quot; style=&quot;color: var(--wrap-dark-blue);&quot;&gt;
+                    &lt;i class=&quot;bi bi-camera-reels me-2&quot; style=&quot;color: var(--wrap-blue);&quot;&gt;&lt;/i&gt;
+                    @(Model.IsActive == true ? &quot;Actively Shooting Productions&quot; : &quot;All Productions&quot;)
+                &lt;/h1&gt;
+                &lt;p class=&quot;text-muted mb-0&quot;&gt;
+                    @(Model.IsActive == true
+                        ? &quot;Browse currently active productions&quot;
+                        : &quot;Browse all film productions&quot;)
+                &lt;/p&gt;
+            &lt;/div&gt;
+            @if (Model.IsUserCrew)
+            {
+                &lt;a asp-area=&quot;Filmmaker&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Create&quot; class=&quot;btn btn-production&quot;&gt;
+                    &lt;i class=&quot;bi bi-plus-circle me-2&quot;&gt;&lt;/i&gt;New Production
+                &lt;/a&gt;
+            }
+        &lt;/div&gt;
+
+        @* ── Search Bar ── *@
+        &lt;div class=&quot;section-card py-3 px-4&quot;&gt;
+            &lt;div class=&quot;row g-2 align-items-center&quot;&gt;
+                &lt;div class=&quot;col-md-6&quot;&gt;
+                    &lt;div class=&quot;input-group&quot;&gt;
+                        &lt;span class=&quot;input-group-text&quot;
+                              style=&quot;border-color: var(--wrap-blue); color: var(--wrap-blue);&quot;&gt;
+                            &lt;i class=&quot;bi bi-search&quot;&gt;&lt;/i&gt;
+                        &lt;/span&gt;
+                        &lt;input type=&quot;text&quot; id=&quot;searchInput&quot; class=&quot;form-control&quot;
+                               placeholder=&quot;Search by production&#39;s title…&quot; /&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                
+                @* ── Filter Bar ── *@
+                &lt;div class=&quot;col-md-2&quot;&gt;
+                    &lt;select id=&quot;statusFilter&quot; class=&quot;form-select&quot;&gt;
+                        &lt;option value=&quot;&quot; selected=&quot;@(string.IsNullOrEmpty(Model.SelectedStatus))&quot;&gt;All Phases&lt;/option&gt;
+                        &lt;option value=&quot;@PreProductionKey&quot; selected=&quot;@(Model.SelectedStatus == PreProductionKey)&quot;&gt;Pre-production&lt;/option&gt;
+                        &lt;option value=&quot;@ProductionKey&quot; selected=&quot;@(Model.SelectedStatus == ProductionKey)&quot;&gt;Production&lt;/option&gt;
+                        &lt;option value=&quot;@PostProductionKey&quot; selected=&quot;@(Model.SelectedStatus == PostProductionKey)&quot;&gt;Post-production&lt;/option&gt;
+                        &lt;option value=&quot;@DistributionKey&quot; selected=&quot;@(Model.SelectedStatus == DistributionKey)&quot;&gt;Distribution&lt;/option&gt;
+                    &lt;/select&gt;
+                &lt;/div&gt;
+                
+                @* ── Pagination ── *@
+                &lt;div class=&quot;col-md-4 d-flex justify-content-end align-items-center gap-3&quot; &gt;
+                    &lt;span class=&quot;text-muted small&quot;
+                          id=&quot;resultsCount&quot;
+                          data-total=&quot;@Model.TotalCount&quot;&gt;
+                        @Model.Count of @Model.TotalCount @(Model.TotalCount == 1 ? &quot;production&quot; : &quot;productions&quot;)
+                    &lt;/span&gt;
+
+                    &lt;div id=&quot;topPaginationWrap&quot;&gt;
+                        &lt;partial name=&quot;_ProductionsPaginationPartial&quot; model=&quot;Model&quot; /&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        @* ── Grid ── *@
+        @if (!Model.Productions.Any())
+        {
+            &lt;div class=&quot;section-card mt-4&quot;&gt;
+                &lt;div class=&quot;empty-state&quot;&gt;
+                    &lt;i class=&quot;bi bi-film&quot;&gt;&lt;/i&gt;
+                    @if (Model.IsUserCrew)
+                    {
+                        &lt;p class=&quot;mt-2&quot;&gt;No productions yet. Create your first one!&lt;/p&gt;
+
+                        &lt;a asp-area=&quot;Filmmaker&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Create&quot; class=&quot;btn btn-production mt-3&quot;&gt;
+                            &lt;i class=&quot;bi bi-plus-circle me-2&quot;&gt;&lt;/i&gt;Create Your Production
+                        &lt;/a&gt;
+                    }
+                    else
+                    {
+                        &lt;p class=&quot;mt-2&quot;&gt;No productions yet.&lt;/p&gt;
+                    }
+                &lt;/div&gt;
+            &lt;/div&gt;
+        }
+        else
+        {
+            &lt;div class=&quot;row mt-4&quot; id=&quot;productionsGrid&quot;&gt;
+                @foreach (ProductionViewModel production in Model.Productions)
+                {
+                    &lt;div class=&quot;col-md-4 col-sm-6 mb-4 prod-grid-item&quot;
+                         data-title=&quot;@production.Title&quot;
+                         data-status=&quot;@production.StatusType&quot;&gt;
+                        &lt;div class=&quot;prod-card&quot;&gt;
+                            &lt;img src=&quot;@production.ThumbnailPath&quot;
+                                 class=&quot;prod-card-img&quot;
+                                 alt=&quot;@production.Title&quot;&gt;
+
+                            &lt;div class=&quot;prod-card-body&quot;&gt;
+                                &lt;h5 class=&quot;prod-card-title&quot;&gt;@production.Title&lt;/h5&gt;
+                                &lt;span class=&quot;status-badge @production.StatusAbstractClass&quot;&gt;
+                                    @GetDisplayName(production.StatusType)
+                                &lt;/span&gt;
+                            &lt;/div&gt;
+
+                            &lt;div class=&quot;prod-card-footer justify-content-end&quot;&gt;
+                                &lt;a asp-area=&quot;&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Details&quot; asp-route-productionId=&quot;@production.Id&quot; 
+                                   asp-route-slug=&quot;@SlugGenerator.GenerateSlug(production.Title)&quot;
+                                   class=&quot;btn-icon-sm btn-icon-view&quot; title=&quot;View&quot;&gt; Details
+                                    &lt;i class=&quot;bi bi-eye-fill&quot;&gt;&lt;/i&gt;
+                                &lt;/a&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                }
+            &lt;/div&gt;
+
+            &lt;div class=&quot;text-center py-4 d-none&quot; id=&quot;noResults&quot;&gt;
+                &lt;div class=&quot;section-card d-inline-block px-5&quot;&gt;
+                    &lt;div class=&quot;empty-state&quot;&gt;
+                        &lt;i class=&quot;bi bi-search&quot;&gt;&lt;/i&gt;
+                        &lt;p&gt;No productions match your search.&lt;/p&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;div class=&quot;d-flex justify-content-center mt-2 mb-4&quot; id=&quot;bottomPaginationWrap&quot;&gt;
+                &lt;partial name=&quot;_ProductionsPaginationPartial&quot; model=&quot;Model&quot; /&gt;
+            &lt;/div&gt;
+        }
+
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;script src=&quot;~/js/production/production-index.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[6,5,6,44,0],[31,14,31,35,0],[32,13,32,14,0],[36,13,36,14,0],[80,10,80,39,0],[81,9,81,10,0],[85,22,85,43,0],[86,21,86,22,0],[92,21,92,22,0],[94,21,94,22,0],[96,21,96,22,0],[99,9,99,10,0],[101,9,101,10,0],[103,18,103,25,0],[103,27,103,57,0],[103,58,103,60,0],[103,61,103,78,0],[104,17,104,18,0],[129,17,129,18,0],[144,9,144,10,0]]);
+    </script>
+  </body>
+</html>

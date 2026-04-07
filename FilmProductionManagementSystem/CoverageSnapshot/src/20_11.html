@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ProductionCrewConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models.MappingEntities;
+using GCommon.Enums;
+
+using static Common.EntityIdentificationConstants;
+
+public class ProductionCrewConfiguration : IEntityTypeConfiguration&lt;ProductionCrew&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;ProductionCrew&gt; entity)
+    {
+        entity.HasKey(pc =&gt; new { pc.ProductionId, pc.CrewMemberId });
+
+        entity
+            .HasOne(pc =&gt; pc.Production)
+            .WithMany(p =&gt; p.ProductionCrewMembers)
+            .HasForeignKey(pc =&gt; pc.ProductionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity
+            .HasOne(pc =&gt; pc.CrewMember)
+            .WithMany(c =&gt; c.CrewMemberProductions)
+            .HasForeignKey(pc =&gt; pc.CrewMemberId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasQueryFilter(pc =&gt; !pc.CrewMember.IsDeleted);
+
+        entity.HasData(ProductionCrewSeed);
+    }
+
+    private static readonly ProductionCrew[] ProductionCrewSeed =
+    [
+        new() { ProductionId = ProductionIdFestivalRun, CrewMemberId = CrewId1, RoleType = CrewRoleType.Director },
+        new() { ProductionId = ProductionIdFestivalRun, CrewMemberId = CrewId2, RoleType = CrewRoleType.DirectorOfPhotography },
+        new() { ProductionId = ProductionIdFestivalRun, CrewMemberId = CrewId3, RoleType = CrewRoleType.ProductionSoundMixer },
+
+        new() { ProductionId = ProductionIdOnHold, CrewMemberId = CrewId1, RoleType = CrewRoleType.Director },
+
+        new() { ProductionId = ProductionIdWildTracks, CrewMemberId = CrewId2, RoleType = CrewRoleType.CameraOperator },
+
+        new() { ProductionId = ProductionIdTheLastTake, CrewMemberId = CrewId3, RoleType = CrewRoleType.BoomOperator },
+        new() { ProductionId = ProductionIdTheLastTake, CrewMemberId = CrewId2, RoleType = CrewRoleType.Colorist }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,6,0],[15,9,15,71,0],[17,9,21,47,0],[23,9,27,47,0],[29,9,29,63,0],[31,9,31,44,0],[32,5,32,6,0],[34,5,46,7,0]]);
+    </script>
+  </body>
+</html>

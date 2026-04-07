@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ScriptBlockConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+using GCommon.Enums;
+
+using static Common.EntityIdentificationConstants;
+
+public class ScriptBlockConfiguration : IEntityTypeConfiguration&lt;ScriptBlock&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;ScriptBlock&gt; entity)
+    {
+        entity
+            .HasOne(sb =&gt; sb.Script)
+            .WithMany(s =&gt; s.ScriptBlocks)
+            .HasForeignKey(sb =&gt; sb.ScriptId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasIndex(sb =&gt; new { sb.ScriptId, sb.OrderIndex }).IsUnique();
+        
+        entity.HasData(ScriptBlocks);
+    }
+    
+    private static readonly DateTime SeedCreatedAtUtc = new(2026, 03, 09, 13, 22, 05, DateTimeKind.Utc);
+    private static readonly DateTime SeedModifiedAtUtc = new(2026, 03, 09, 13, 22, 05, DateTimeKind.Utc);
+
+    private static readonly ScriptBlock[] ScriptBlocks =
+    [
+        new()
+        {
+            Id = ScriptBlock_01,
+            OrderIndex = 0,
+            BlockType = ScriptBlockType.SceneHeading,
+            Content = &quot;INT. COFFEE SHOP - DAY&quot;,
+            CreatedAt = SeedCreatedAtUtc,
+            LastModifiedAt = SeedModifiedAtUtc,
+            ScriptId = ScriptId_01
+        },
+        new()
+        {
+            Id = ScriptBlock_02,
+            OrderIndex = 1,
+            BlockType = ScriptBlockType.Action,
+            Content = &quot;A bustling morning crowd. Steam rises from espresso machines.&quot;,
+            CreatedAt = SeedCreatedAtUtc,
+            LastModifiedAt = SeedModifiedAtUtc,
+            ScriptId = ScriptId_01
+        },
+        new()
+        {
+            Id = ScriptBlock_03,
+            OrderIndex = 2,
+            BlockType = ScriptBlockType.Character,
+            Content = &quot;JOHN&quot;,
+            CreatedAt = SeedCreatedAtUtc,
+            LastModifiedAt = SeedModifiedAtUtc,
+            ScriptId = ScriptId_01
+        },
+        new()
+        {
+            Id = ScriptBlock_04,
+            OrderIndex = 3,
+            BlockType = ScriptBlockType.Dialogue,
+            Content = &quot;I&#39;ll have a double espresso. Make it strong.&quot;,
+            CreatedAt = SeedCreatedAtUtc,
+            LastModifiedAt = SeedModifiedAtUtc,
+            ScriptId = ScriptId_01
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,6,0],[15,9,19,47,0],[21,9,21,78,0],[23,9,23,38,0],[24,5,24,6,0],[26,5,26,105,0],[27,5,27,106,0],[29,5,71,7,0]]);
+    </script>
+  </body>
+</html>

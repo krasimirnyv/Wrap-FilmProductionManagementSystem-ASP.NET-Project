@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/ProfileService.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core;
+
+using Interfaces;
+using Data.Models;
+using Data.Repository.Interfaces;
+using Models.Profile;
+
+public class ProfileService(IProfileRepository profileRepository) : IProfileService
+{
+    public async Task&lt;bool&gt; IsUserCrewAsync(string username)
+    {
+        Crew? crewMembers = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
+        return crewMembers is not null;
+    }
+    
+    public async Task&lt;bool&gt; IsUserCastAsync(string username)
+    {
+        Cast? castMember = await profileRepository.GetCastByUsernameAsNoTrackingAsync(username);
+        return castMember is not null;
+    }
+
+    public async Task&lt;ProfileRoleDto&gt; GetRoleInfoAsync(string username)
+    {
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
+        if (crew is not null)
+            return new ProfileRoleDto { IsCrew = true, IsCast = false };
+
+        Cast? cast = await profileRepository.GetCastByUsernameAsNoTrackingAsync(username);
+        if (cast is not null)
+            return new ProfileRoleDto { IsCrew = false, IsCast = true };
+        
+        return new ProfileRoleDto { IsCrew = false, IsCast = false };
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,14,8,66,1],[11,5,11,6,1],[12,9,12,98,1],[13,9,13,40,1],[14,5,14,6,1],[17,5,17,6,1],[18,9,18,97,1],[19,9,19,39,1],[20,5,20,6,1],[23,5,23,6,1],[24,9,24,91,1],[25,9,25,30,1],[26,13,26,73,1],[28,9,28,91,1],[29,9,29,30,1],[30,13,30,73,1],[32,9,32,70,1],[33,5,33,6,1]]);
+    </script>
+  </body>
+</html>

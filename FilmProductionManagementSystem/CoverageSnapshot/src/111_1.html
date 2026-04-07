@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/DateTimeProviderTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using NUnit.Framework;
+
+using Core.Utilities.Providers;
+using Core.Utilities.Providers.Interfaces;
+
+[TestFixture]
+public class DateTimeProviderTests
+{
+    [Test]
+    public void Now_WhenCalled_ReturnsTimeBetweenBeforeAndAfter()
+    {
+        // Arrange
+        IDateTimeProvider provider = new DateTimeProvider();
+
+        DateTime before = DateTime.Now;
+
+        // Act
+        DateTime now = provider.Now;
+
+        DateTime after = DateTime.Now;
+
+        // Assert
+        Assert.That(now, Is.GreaterThanOrEqualTo(before));
+        Assert.That(now, Is.LessThanOrEqualTo(after));
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,5,13,6,1],[15,9,15,61,1],[17,9,17,40,1],[20,9,20,37,1],[22,9,22,39,1],[25,9,25,59,1],[26,9,26,55,1],[27,5,27,6,1]]);
+    </script>
+  </body>
+</html>

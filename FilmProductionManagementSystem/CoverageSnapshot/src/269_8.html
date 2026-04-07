@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/LoginAndRegistration/CrewRegistrationStepTwoInputModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.LoginAndRegistration;
+
+using GCommon.Enums;
+
+/// &lt;summary&gt;
+/// Step 2: Skills Selection for Crew Registration
+/// Потребител селектира множество умения
+/// Primary role ще се посочва от Продуцента (в по-късен етап на апликацията)
+/// &lt;/summary&gt;
+public class CrewRegistrationStepTwoInputModel
+{
+    /// &lt;summary&gt;
+    /// Избрани умения - допускат се няколко
+    /// &lt;/summary&gt;
+    public IReadOnlyCollection&lt;int&gt; SelectedSkills { get; set; } =
+        new List&lt;int&gt;();
+
+    /// &lt;summary&gt;
+    /// Всички налични умения, групирани по департаменти
+    /// Използва се за рендиране на потребителския интерфейс на акордеона
+    /// &lt;/summary&gt;
+    public IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; SkillsByDepartment { get; set; }
+        = new Dictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt;();
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,9,16,24,0],[23,11,23,70,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Controllers/ProductionController.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace FilmProductionManagementSystem.Web.Controllers;
+
+using System.Globalization;
+
+using Microsoft.AspNetCore.Mvc;
+
+using Wrap.Services.Core.Interfaces;
+using Wrap.Services.Models.Production;
+using Wrap.Web.ViewModels.Production;
+using Wrap.Web.ViewModels.Production.NestedViewModels;
+
+using static Wrap.GCommon.OutputMessages;
+using static Wrap.GCommon.OutputMessages.Production;
+using static Wrap.GCommon.OutputMessages.Profile;
+using static Wrap.GCommon.ApplicationConstants;
+using static Wrap.GCommon.DataFormat;
+
+public class ProductionController(IProductionService productionService,
+                                  ILogger&lt;ProductionController&gt; logger) : BaseController
+{
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; Index([FromQuery] AllProductionsIndexViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData[ErrorTempDateKey] = PaginationFailedMessage;
+            return RedirectToAction(&quot;Dashboard&quot;, &quot;Home&quot;);
+        }
+        
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        
+        try
+        {
+            IReadOnlyCollection&lt;ProductionDto&gt; productionDtos = await productionService.GetAllProductionsAsync(
+                pageNumber: model.PageNumber,
+                status: model.SelectedStatus,
+                isActive: model.IsActive);
+            
+            AllProductionsIndexViewModel viewModel = await MapToAllProductionsIndexViewModelFromDto(model, productionDtos);
+            
+            Guid? userIsCrew = await productionService.GetUserIdIfIsCrewAsync(userId); 
+            viewModel.IsUserCrew = userIsCrew is not null;
+            
+            return View(viewModel);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(LoadingManyProductionsErrorMessageWithException, e.Message));
+            TempData[ErrorTempDateKey] = LoadingManyProductionsErrorMessage;
+            return RedirectToAction(&quot;Dashboard&quot;, &quot;Home&quot;);
+        }
+    }
+
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; Details(string? productionId)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        try
+        {
+            DetailsProductionDto? dto = await productionService.GetProductionDetailsAsync(productionId);
+            if (dto is null)
+            {
+                logger.LogWarning(string.Format(IdIsNullOrEmptyMessage, productionId));
+                return View(nameof(NotFound), string.Format(NotFoundMessage, productionId));
+            }
+            
+            DetailsProductionViewModel viewModel = MapToDetailsProductionViewModelFromDto(dto);
+            
+            bool canManage = await productionService.IsUserAllowedToManageProductionAsync(productionId, userId);
+            viewModel.CanManage = canManage;
+            
+            return View(viewModel);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(CrudFailureMessage, DetailsMessage, e.Message));
+            return View(nameof(NotFound), string.Format(IdIsNullOrEmptyMessage, productionId));
+        }
+    }
+    
+    private async Task&lt;AllProductionsIndexViewModel&gt; MapToAllProductionsIndexViewModelFromDto(AllProductionsIndexViewModel model, IReadOnlyCollection&lt;ProductionDto&gt; productionDtos)
+    {
+        int productionsTotalCount = await productionService.GetProductionsCountAsync(
+            status: model.SelectedStatus,
+            isActive: model.IsActive);
+        
+        IReadOnlyCollection&lt;ProductionViewModel&gt; productions = MapToProductionViewModelsFromDtos(productionDtos);
+        
+        AllProductionsIndexViewModel viewModel = new AllProductionsIndexViewModel
+        {
+            PageNumber = model.PageNumber,
+            TotalPages = (int)Math.Ceiling(productionsTotalCount / (double)DefaultProductionsPerPage),
+            ShowingPages = model.ShowingPages,
+            Productions = productions,
+            TotalCount = productionsTotalCount,
+            SelectedStatus = model.SelectedStatus,
+            IsActive = model.IsActive
+        };
+
+        if (viewModel.PageNumber &gt; viewModel.TotalPages &amp;&amp; viewModel.TotalPages != 0)
+            viewModel.PageNumber = viewModel.TotalPages;
+        else if (viewModel.PageNumber &lt; 1)
+            viewModel.PageNumber = 1;
+        
+        return viewModel;
+    }
+    
+    private static IReadOnlyCollection&lt;ProductionViewModel&gt; MapToProductionViewModelsFromDtos(IReadOnlyCollection&lt;ProductionDto&gt; productionDtos)
+    {
+        IReadOnlyCollection&lt;ProductionViewModel&gt; viewModels = productionDtos
+            .Select(dto =&gt; new ProductionViewModel
+            {
+                Id = dto.Id.ToString(),
+                Title = dto.Title,
+                ThumbnailPath = dto.ThumbnailPath,
+                StatusType = dto.StatusType.ToString()
+            })
+            .ToArray()
+            .AsReadOnly();
+        
+        return viewModels;
+    }
+    
+    private static DetailsProductionViewModel MapToDetailsProductionViewModelFromDto(DetailsProductionDto dto)
+    {
+        DetailsProductionViewModel viewModel = new DetailsProductionViewModel
+        {
+            Id = dto.Id.ToString(),
+            Thumbnail = dto.Thumbnail,
+            Title = dto.Title,
+            Description = dto.Description,
+            Budget = dto.Budget.ToString(CurrencyFormat, CultureInfo.CurrentCulture),
+            StatusType = dto.StatusType.ToString(),
+            StatusAbstractClass = dto.StatusAbstractClass,
+            StatusStartDate = dto.StatusStartDate.ToString(DateFormat, CultureInfo.CurrentCulture),
+            StatusEndDate = dto.StatusEndDate?.ToString(DateFormat, CultureInfo.CurrentCulture) ?? NotAvailableFormat,
+            ScriptId = dto.ScriptId.ToString() ?? string.Empty,
+
+            ProductionCrewMembers = dto.ProductionCrewMembers
+                .Select(pCrew =&gt; new ProductionCrewMemberViewModel
+                {
+                    Id = pCrew.Id,
+                    ProfileImagePath = pCrew.ProfileImagePath,
+                    FirstName = pCrew.FirstName,
+                    LastName = pCrew.LastName,
+                    Role = pCrew.Role.ToString()
+                })
+                .ToArray()
+                .AsReadOnly(),
+
+            ProductionCastMembers = dto.ProductionCastMembers
+                .Select(pCast =&gt; new ProductionCastMemberViewModel
+                {
+                    Id = pCast.Id,
+                    ProfileImagePath = pCast.ProfileImagePath,
+                    FirstName = pCast.FirstName,
+                    LastName = pCast.LastName,
+                    Role = pCast.Role,
+                    Age = pCast.Age.ToString(),
+                    Gender = pCast.Gender.ToString()
+                })
+                .ToArray()
+                .AsReadOnly(),
+
+            ProductionScenes = dto.ProductionScenes
+                .Select(ps =&gt; new ProductionSceneViewModel
+                {
+                    SceneNumber = ps.SceneNumber.ToString(),
+                    SceneType = ps.SceneType.ToString(),
+                    SceneName = ps.SceneName,
+                    Location = ps.Location
+                })
+                .ToArray()
+                .AsReadOnly(),
+
+            ProductionAssets = dto.ProductionAssets
+                .Select(pa =&gt; new ProductionAssetViewModel
+                {
+                    AssetType = pa.AssetType.ToString(),
+                    Title = pa.Title
+                })
+                .ToArray()
+                .AsReadOnly(),
+
+            ProductionShootingDays = dto.ProductionShootingDays
+                .Select(psd =&gt; new ProductionShootingDayViewModel
+                {
+                    Date = psd.Date.ToString(DateFormat, CultureInfo.CurrentCulture)
+                })
+                .ToArray()
+                .AsReadOnly()
+        };
+        
+        return viewModel;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,14,19,72,0],[23,5,23,6,0],[24,9,24,33,0],[25,9,25,10,0],[26,13,26,66,0],[27,13,27,58,0],[30,9,30,38,0],[31,9,31,47,0],[32,9,32,10,0],[33,13,33,61,0],[34,13,34,69,0],[38,9,38,10,0],[39,13,42,43,0],[44,13,44,124,0],[46,13,46,87,0],[47,13,47,59,0],[49,13,49,36,0],[51,9,51,28,0],[52,9,52,10,0],[53,13,53,107,0],[54,13,54,77,0],[55,13,55,58,0],[57,5,57,6,0],[61,5,61,6,0],[62,9,62,38,0],[63,9,63,47,0],[64,9,64,10,0],[65,13,65,61,0],[66,13,66,69,0],[70,9,70,10,0],[71,13,71,105,0],[72,13,72,29,0],[73,13,73,14,0],[74,17,74,88,0],[75,17,75,93,0],[78,13,78,96,0],[80,13,80,113,0],[81,13,81,45,0],[83,13,83,36,0],[85,9,85,28,0],[86,9,86,10,0],[87,13,87,94,0],[88,13,88,96,0],[90,5,90,6,0],[93,5,93,6,0],[94,9,96,39,0],[98,9,98,114,0],[100,9,109,11,0],[111,9,111,86,0],[112,13,112,57,0],[113,14,113,43,0],[114,13,114,38,0],[116,9,116,26,0],[117,5,117,6,0],[120,5,120,6,0],[121,9,122,28,0],[122,28,128,14,0],[128,14,130,27,0],[132,9,132,27,0],[133,5,133,6,0],[136,5,136,6,0],[137,9,151,34,0],[151,34,158,18,0],[158,18,163,34,0],[163,34,172,18,0],[172,18,177,31,0],[177,31,183,18,0],[183,18,188,31,0],[188,31,192,18,0],[192,18,197,32,0],[197,32,200,18,0],[200,18,203,11,0],[205,9,205,26,0],[206,5,206,6,0]]);
+    </script>
+  </body>
+</html>

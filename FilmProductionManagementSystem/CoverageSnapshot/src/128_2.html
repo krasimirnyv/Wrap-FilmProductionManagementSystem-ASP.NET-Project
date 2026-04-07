@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Filmmaker/Controllers/ProductionController.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace FilmProductionManagementSystem.Web.Areas.Filmmaker.Controllers;
+
+using System.Globalization;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
+using FilmProductionManagementSystem.Web.Controllers;
+using Wrap.Web.ViewModels.Production;
+using Wrap.Web.ViewModels.FindPeople;
+using Wrap.Services.Core.Interfaces;
+using Wrap.Services.Models.Production;
+using Wrap.Services.Models.FindPeople;
+using Wrap.GCommon.Enums;
+
+using static Wrap.GCommon.ApplicationConstants;
+using static Wrap.GCommon.OutputMessages;
+using static Wrap.GCommon.OutputMessages.Profile;
+using static Wrap.GCommon.OutputMessages.Production;
+using static Wrap.GCommon.DataFormat;
+
+[Area(&quot;Filmmaker&quot;)]
+[Authorize(Roles = IdentityRoles.Filmmaker)]
+public class ProductionController(IProductionService productionService,
+                                  IFindPeopleService findPeopleService,
+                                  ILogger&lt;ProductionController&gt; logger) : BaseController
+{
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; Create()
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        Guid? creatorId = await productionService.GetUserIdIfIsCrewAsync(userId);
+        if (creatorId is null)
+        {
+            logger.LogWarning(CastTryingToCreateProductionMessage);
+            return View(nameof(BadRequest), CastTryingToCreateProductionMessage);
+        }
+
+        return View(new CreateProductionInputModel());
+    }
+
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; Create(CreateProductionInputModel inputModel)
+    {
+        if (!ModelState.IsValid)
+            return View(inputModel);
+
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        Guid? creatorId = await productionService.GetUserIdIfIsCrewAsync(userId);
+        if (creatorId is null)
+        {
+            logger.LogWarning(CastTryingToCreateProductionMessage);
+            return View(nameof(BadRequest), CastTryingToCreateProductionMessage);
+        }
+
+        try
+        {
+            CreateProductionDto dto = MapToCreateProductionDtoFromInputModel(inputModel, creatorId.Value);
+            string? productionId = await productionService.CreateProductionAsync(dto);
+            if (productionId is null)
+            {
+                logger.LogError(string.Format(CrudFailureMessage, CreatingMessage, UserNotIdentifiedMessage));
+                return View(nameof(BadRequest), string.Format(CrudFailureMessage, CreatingMessage, UserNotIdentifiedMessage));
+            }
+
+            TempData[SuccessTempDataKey] = string.Format(CrudSuccessMessage, CreatedMessage);
+            return RedirectToAction(&quot;Details&quot;, &quot;Production&quot;, new { area = string.Empty, productionId});
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(CrudFailureMessage, CreatingMessage, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(CrudFailureMessage, CreatingMessage, e.Message));
+            return View(inputModel);
+        }
+    }
+
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; Edit(string? productionId)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(productionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Index&quot;, &quot;Production&quot;, new { area = string.Empty });
+        }
+
+        try
+        {
+            EditProductionDto? dto = await productionService.GetEditProductionAsync(productionId);
+            if (dto is null)
+                return View(nameof(NotFound), string.Format(IdIsNullOrEmptyMessage, productionId));
+
+            EditProductionInputModel inputModel = MapToEditProductionInputModelFromDto(dto);
+
+            return View(inputModel);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(LoadingProductionErrorMessageWithException, productionId, e.Message));
+            return View(nameof(BadRequest), string.Format(LoadingProductionErrorMessage, productionId));
+        }
+    }
+
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; Edit(EditProductionInputModel inputModel)
+    {
+        if (!ModelState.IsValid)
+            return View(inputModel);
+
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(inputModel.ProductionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Index&quot;, &quot;Production&quot;, new { area = string.Empty });
+        }
+
+        try
+        {
+            EditProductionDto dto = MapToEditProductionDtoFromInputModel(inputModel);
+            bool isUpdated = await productionService.UpdateProductionAsync(dto);
+            if (!isUpdated)
+                return View(nameof(NotFound), string.Format(NotFoundMessage, dto.ProductionId));
+
+            TempData[SuccessTempDataKey] = string.Format(CrudSuccessMessage, UpdatedMessage);
+            return RedirectToAction(&quot;Details&quot;, &quot;Production&quot;, new { area = string.Empty, productionId = dto.ProductionId });
+        }
+        catch (ArgumentException ae)
+        {
+            logger.LogError(ae, string.Format(CrudFailureMessage, UpdatingMessage, ae.Message));
+            TempData[ErrorTempDateKey] = string.Format(CrudFailureMessage, UpdatingMessage, ae.Message);
+            return View(nameof(NotFound), string.Format(NotFoundMessage, inputModel.ProductionId));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(CrudFailureMessage, UpdatingMessage, e.Message));
+            ModelState.AddModelError(string.Empty, string.Format(CrudFailureMessage, UpdatingMessage, e.Message));
+            return View(inputModel);
+        }
+    }
+
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; Delete(string? productionId)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(productionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Index&quot;, &quot;Production&quot;, new { area = string.Empty });
+        }
+
+        try
+        {
+            DeleteProductionDto? dto = await productionService.GetDeleteProductionAsync(productionId);
+            if (dto is null)
+                return View(nameof(NotFound), string.Format(NotFoundMessage, productionId));
+
+            DeleteProductionViewModel viewModel = MapToDeleteProductionViewModelFromDto(dto);
+
+            return View(viewModel);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(CrudFailureMessage, DeletingMessage, e.Message));
+            return View(nameof(BadRequest), string.Format(LoadingProductionErrorMessage, productionId));
+        }
+    }
+
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; DeleteConfirmed(string? productionId)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(productionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Index&quot;, &quot;Production&quot;, new { area = string.Empty });
+        }
+
+        try
+        {
+            bool isDeleted = await productionService.DeleteProductionAsync(productionId);
+            if (!isDeleted)
+                return View(nameof(NotFound), string.Format(NotFoundMessage, productionId));
+
+            TempData[SuccessTempDataKey] = string.Format(CrudSuccessMessage, DeletedMessage);
+            return RedirectToAction(&quot;Index&quot;, &quot;Production&quot;, new { area = string.Empty });
+        }
+        catch (ArgumentException ae)
+        {
+            logger.LogError(ae, string.Format(CrudFailureMessage, DeletingMessage, ae.Message));
+            TempData[ErrorTempDateKey] = string.Format(CrudFailureMessage, DeletingMessage, ae.Message);
+            return View(nameof(NotFound), string.Format(NotFoundMessage, productionId));
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, string.Format(CrudFailureMessage, DeletingMessage, e.Message));
+            TempData[ErrorTempDateKey] = string.Format(CrudFailureMessage, DeletingMessage, e.Message);
+            return RedirectToAction(&quot;Details&quot;, &quot;Production&quot;, new { area = string.Empty, productionId });
+        }
+    }
+
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; AddCrewMember(string? productionId)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(productionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Details&quot;, &quot;Production&quot;, new { area = string.Empty, productionId });
+        }
+        
+        return RedirectToAction(&quot;FindFilmmakers&quot;, &quot;Home&quot;, new { area = string.Empty, ProductionId = productionId });
+    }
+    
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; AddFilmmakerToProduction(AddFilmmakerViewModel viewModel)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(viewModel.ProductionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Details&quot;, &quot;Production&quot;, new { area = string.Empty, viewModel.ProductionId });
+        }
+
+        AddFilmmakerDto? dto = MapFromAddFilmmakerViewModelToDto(viewModel);
+        if (dto is null)
+            return View(nameof(BadRequest), SomethingWentWrong);
+
+        await findPeopleService.AddCrewAsync(dto);
+        TempData[SuccessTempDataKey] = AddedCrew;
+        return RedirectToAction(&quot;FindFilmmakers&quot;, &quot;Home&quot;, new { area = string.Empty, viewModel.ProductionId });
+    }
+
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; AddActorToProduction(AddActorViewModel viewModel)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(viewModel.ProductionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Details&quot;, &quot;Production&quot;, new { area = string.Empty, viewModel.ProductionId });
+        }
+
+        AddActorDto? dto = MapFromAddActorViewModelToDto(viewModel);
+        if (dto is null)
+            return View(nameof(BadRequest), SomethingWentWrong);
+
+        await findPeopleService.AddCastAsync(dto);
+        TempData[SuccessTempDataKey] = AddedCast;
+        return RedirectToAction(&quot;FindActors&quot;, &quot;Home&quot;, new { area = string.Empty, viewModel.ProductionId });
+    }
+
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; RemoveFilmmakerFromProduction(string productionId, string crewId)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(productionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Details&quot;, &quot;Production&quot;, new { area = string.Empty, productionId });
+        }
+
+        bool isProductionIdGuid = Guid.TryParse(productionId, out Guid productionGuid);
+        bool isCrewIdGuid = Guid.TryParse(crewId, out Guid crewGuid);
+        if (!isProductionIdGuid || !isCrewIdGuid)
+            return View(nameof(BadRequest), SomethingWentWrong);
+
+        await findPeopleService.RemoveCrewAsync(productionGuid, crewGuid);
+        TempData[SuccessTempDataKey] = RemovedCrew;
+        return RedirectToAction(&quot;FindFilmmakers&quot;, &quot;Home&quot;, new { area = string.Empty, ProductionId = productionId });
+    }
+    
+    [HttpPost]
+    public async Task&lt;IActionResult&gt; RemoveActorFromProduction(string productionId, string castId)
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+        
+        bool canManage = await productionService.IsUserAllowedToManageProductionAsync(productionId, userId);
+        if (!canManage)
+        {
+            TempData[WarningTempDataKey] = ManageDenied;
+            return RedirectToAction(&quot;Details&quot;, &quot;Production&quot;, new { area = string.Empty, productionId });
+        }
+
+        bool isProductionIdGuid = Guid.TryParse(productionId, out Guid productionGuid);
+        bool isCastIdGuid = Guid.TryParse(castId, out Guid castGuid);
+        if (!isProductionIdGuid || !isCastIdGuid)
+            return View(nameof(BadRequest), SomethingWentWrong);
+
+        await findPeopleService.RemoveCastAsync(productionGuid, castGuid);
+        TempData[SuccessTempDataKey] = RemovedCast;
+        return RedirectToAction(&quot;FindActors&quot;, &quot;Home&quot;, new { area = string.Empty, ProductionId = productionId });
+    }
+    
+    private static CreateProductionDto MapToCreateProductionDtoFromInputModel(CreateProductionInputModel inputModel, Guid userId)
+    {
+        CreateProductionDto dto = new CreateProductionDto
+        {
+            ThumbnailImage = inputModel.ThumbnailImage,
+            Title = inputModel.Title,
+            Description = inputModel.Description,
+            Budget = inputModel.Budget,
+            StatusType = inputModel.StatusType,
+            StatusStartDate = inputModel.StatusStartDate,
+            StatusEndDate = inputModel.StatusEndDate,
+            CreatorId = userId
+        };
+        
+        return dto;
+    }
+    
+    private static EditProductionInputModel MapToEditProductionInputModelFromDto(EditProductionDto dto)
+    {
+        EditProductionInputModel inputModel = new EditProductionInputModel
+        {
+            ProductionId = dto.ProductionId.ToString(),
+            ThumbnailImage = dto.ThumbnailImage,
+            Title = dto.Title,
+            Description = dto.Description,
+            Budget = dto.Budget,
+            StatusType = dto.StatusType,
+            StatusStartDate = dto.StatusStartDate,
+            StatusEndDate = dto.StatusEndDate,
+            CurrentThumbnailPath = dto.CurrentThumbnailPath
+        };
+
+        return inputModel;
+    }
+
+    private static EditProductionDto MapToEditProductionDtoFromInputModel(EditProductionInputModel inputModel)
+    {
+        EditProductionDto dto = new EditProductionDto
+        {
+            ProductionId = Guid.Parse(inputModel.ProductionId),
+            ThumbnailImage = inputModel.ThumbnailImage,
+            Title = inputModel.Title,
+            Description = inputModel.Description,
+            Budget = inputModel.Budget,
+            StatusType = inputModel.StatusType,
+            StatusStartDate = inputModel.StatusStartDate,
+            StatusEndDate = inputModel.StatusEndDate,
+            CurrentThumbnailPath = inputModel.CurrentThumbnailPath
+        };
+
+        return dto;
+    }
+
+    private static DeleteProductionViewModel MapToDeleteProductionViewModelFromDto(DeleteProductionDto dto)
+    {
+        DeleteProductionViewModel viewModel = new DeleteProductionViewModel
+        {
+            Id = dto.Id.ToString(),
+            Title = dto.Title,
+            Thumbnail = dto.Thumbnail,
+            Description = dto.Description,
+            StatusType = dto.StatusType.ToString(),
+            Budget = dto.Budget.ToString(CurrencyFormat, CultureInfo.CurrentCulture),
+            CrewMembersCount = dto.CrewMembersCount,
+            CastMembersCount = dto.CastMembersCount,
+            ScenesCount = dto.ScenesCount
+        };
+
+        return viewModel;
+    }
+    
+    private static AddFilmmakerDto? MapFromAddFilmmakerViewModelToDto(AddFilmmakerViewModel viewModel)
+    {
+        bool isProductionIdOk = Guid.TryParse(viewModel.ProductionId, out Guid productionId);
+        bool isCrewIdOk = Guid.TryParse(viewModel.CrewId, out Guid crewId);
+        bool isRoleOk = Enum.TryParse(viewModel.RoleType, out CrewRoleType roleType);
+
+        if (!isProductionIdOk || !isCrewIdOk || !isRoleOk) 
+            return null;
+        
+        AddFilmmakerDto dto = new AddFilmmakerDto
+        {
+            ProductionId = productionId,
+            CrewId = crewId,
+            RoleType = roleType
+        };
+            
+        return dto;
+    }
+    
+    private static AddActorDto? MapFromAddActorViewModelToDto(AddActorViewModel viewModel)
+    {
+        bool isProductionIdOk = Guid.TryParse(viewModel.ProductionId, out Guid productionId);
+        bool isCastIdOk = Guid.TryParse(viewModel.CastId, out Guid castId);
+
+        if (!isProductionIdOk || !isCastIdOk || string.IsNullOrWhiteSpace(viewModel.RoleName)) 
+            return null;
+        
+        AddActorDto dto = new AddActorDto
+        {
+            ProductionId = productionId,
+            CastId = castId,
+            RoleName = viewModel.RoleName
+        };
+        
+        return dto;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[24,14,26,72,0],[30,5,30,6,0],[31,9,31,38,0],[32,9,32,47,0],[33,9,33,10,0],[34,13,34,61,0],[35,13,35,69,0],[38,9,38,82,0],[39,9,39,31,0],[40,9,40,10,0],[41,13,41,68,0],[42,13,42,82,0],[45,9,45,55,0],[46,5,46,6,0],[50,5,50,6,0],[51,9,51,33,0],[52,13,52,37,0],[54,9,54,38,0],[55,9,55,47,0],[56,9,56,10,0],[57,13,57,61,0],[58,13,58,69,0],[61,9,61,82,0],[62,9,62,31,0],[63,9,63,10,0],[64,13,64,68,0],[65,13,65,82,0],[69,9,69,10,0],[70,13,70,107,0],[71,13,71,87,0],[72,13,72,38,0],[73,13,73,14,0],[74,17,74,111,0],[75,17,75,127,0],[78,13,78,94,0],[79,13,79,104,0],[81,9,81,28,0],[82,9,82,10,0],[83,13,83,95,0],[84,13,84,115,0],[85,13,85,37,0],[87,5,87,6,0],[91,5,91,6,0],[92,9,92,38,0],[93,9,93,47,0],[94,9,94,10,0],[95,13,95,61,0],[96,13,96,69,0],[99,9,99,109,0],[100,9,100,24,0],[101,9,101,10,0],[102,13,102,57,0],[103,13,103,89,0],[107,9,107,10,0],[108,13,108,99,0],[109,13,109,29,0],[110,17,110,100,0],[112,13,112,93,0],[114,13,114,37,0],[116,9,116,28,0],[117,9,117,10,0],[118,13,118,116,0],[119,13,119,105,0],[121,5,121,6,0],[125,5,125,6,0],[126,9,126,33,0],[127,13,127,37,0],[129,9,129,38,0],[130,9,130,47,0],[131,9,131,10,0],[132,13,132,61,0],[133,13,133,69,0],[136,9,136,120,0],[137,9,137,24,0],[138,9,138,10,0],[139,13,139,57,0],[140,13,140,89,0],[144,9,144,10,0],[145,13,145,86,0],[146,13,146,81,0],[147,13,147,28,0],[148,17,148,97,0],[150,13,150,94,0],[151,13,151,124,0],[153,9,153,37,0],[154,9,154,10,0],[155,13,155,97,0],[156,13,156,105,0],[157,13,157,100,0],[159,9,159,28,0],[160,9,160,10,0],[161,13,161,95,0],[162,13,162,115,0],[163,13,163,37,0],[165,5,165,6,0],[169,5,169,6,0],[170,9,170,38,0],[171,9,171,47,0],[172,9,172,10,0],[173,13,173,61,0],[174,13,174,69,0],[177,9,177,109,0],[178,9,178,24,0],[179,9,179,10,0],[180,13,180,57,0],[181,13,181,89,0],[185,9,185,10,0],[186,13,186,103,0],[187,13,187,29,0],[188,17,188,93,0],[190,13,190,94,0],[192,13,192,36,0],[194,9,194,28,0],[195,9,195,10,0],[196,13,196,95,0],[197,13,197,105,0],[199,5,199,6,0],[203,5,203,6,0],[204,9,204,38,0],[205,9,205,47,0],[206,9,206,10,0],[207,13,207,61,0],[208,13,208,69,0],[211,9,211,109,0],[212,9,212,24,0],[213,9,213,10,0],[214,13,214,57,0],[215,13,215,89,0],[219,9,219,10,0],[220,13,220,90,0],[221,13,221,28,0],[222,17,222,93,0],[224,13,224,94,0],[225,13,225,89,0],[227,9,227,37,0],[228,9,228,10,0],[229,13,229,97,0],[230,13,230,105,0],[231,13,231,89,0],[233,9,233,28,0],[234,9,234,10,0],[235,13,235,95,0],[236,13,236,104,0],[237,13,237,105,0],[239,5,239,6,0],[243,5,243,6,0],[244,9,244,38,0],[245,9,245,47,0],[246,9,246,10,0],[247,13,247,61,0],[248,13,248,69,0],[251,9,251,109,0],[252,9,252,24,0],[253,9,253,10,0],[254,13,254,57,0],[255,13,255,105,0],[258,9,258,117,0],[259,5,259,6,0],[263,5,263,6,0],[264,9,264,38,0],[265,9,265,47,0],[266,9,266,10,0],[267,13,267,61,0],[268,13,268,69,0],[271,9,271,119,0],[272,9,272,24,0],[273,9,273,10,0],[274,13,274,57,0],[275,13,275,115,0],[278,9,278,77,0],[279,9,279,25,0],[280,13,280,65,0],[282,9,282,51,0],[283,9,283,50,0],[284,9,284,112,0],[285,5,285,6,0],[289,5,289,6,0],[290,9,290,38,0],[291,9,291,47,0],[292,9,292,10,0],[293,13,293,61,0],[294,13,294,69,0],[297,9,297,119,0],[298,9,298,24,0],[299,9,299,10,0],[300,13,300,57,0],[301,13,301,115,0],[304,9,304,69,0],[305,9,305,25,0],[306,13,306,65,0],[308,9,308,51,0],[309,9,309,50,0],[310,9,310,108,0],[311,5,311,6,0],[315,5,315,6,0],[316,9,316,38,0],[317,9,317,47,0],[318,9,318,10,0],[319,13,319,61,0],[320,13,320,69,0],[323,9,323,109,0],[324,9,324,24,0],[325,9,325,10,0],[326,13,326,57,0],[327,13,327,105,0],[330,9,330,88,0],[331,9,331,70,0],[332,9,332,50,0],[333,13,333,65,0],[335,9,335,75,0],[336,9,336,52,0],[337,9,337,117,0],[338,5,338,6,0],[342,5,342,6,0],[343,9,343,38,0],[344,9,344,47,0],[345,9,345,10,0],[346,13,346,61,0],[347,13,347,69,0],[350,9,350,109,0],[351,9,351,24,0],[352,9,352,10,0],[353,13,353,57,0],[354,13,354,105,0],[357,9,357,88,0],[358,9,358,70,0],[359,9,359,50,0],[360,13,360,65,0],[362,9,362,75,0],[363,9,363,52,0],[364,9,364,113,0],[365,5,365,6,0],[368,5,368,6,0],[369,9,379,11,0],[381,9,381,20,0],[382,5,382,6,0],[385,5,385,6,0],[386,9,397,11,0],[399,9,399,27,0],[400,5,400,6,0],[403,5,403,6,0],[404,9,415,11,0],[417,9,417,20,0],[418,5,418,6,0],[421,5,421,6,0],[422,9,433,11,0],[435,9,435,26,0],[436,5,436,6,0],[439,5,439,6,0],[440,9,440,94,0],[441,9,441,76,0],[442,9,442,86,0],[444,9,444,59,0],[445,13,445,25,0],[447,9,452,11,0],[454,9,454,20,0],[455,5,455,6,0],[458,5,458,6,0],[459,9,459,94,0],[460,9,460,76,0],[462,9,462,95,0],[463,13,463,25,0],[465,9,470,11,0],[472,9,472,20,0],[473,5,473,6,0]]);
+    </script>
+  </body>
+</html>

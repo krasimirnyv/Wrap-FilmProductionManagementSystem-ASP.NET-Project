@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/SceneCastConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models.MappingEntities;
+
+using static Common.EntityIdentificationConstants;
+
+public class SceneCastConfiguration : IEntityTypeConfiguration&lt;SceneCast&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;SceneCast&gt; entity)
+    {
+        entity.HasKey(sc =&gt; new { sc.SceneId, sc.CastMemberId });
+
+        entity
+            .HasOne(sc =&gt; sc.Scene)
+            .WithMany(s =&gt; s.SceneCastMembers)
+            .HasForeignKey(sc =&gt; sc.SceneId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity
+            .HasOne(sc =&gt; sc.CastMember)
+            .WithMany(c =&gt; c.CastMemberScenes)
+            .HasForeignKey(sc =&gt; sc.CastMemberId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasQueryFilter(sc =&gt; !sc.CastMember.IsDeleted);
+        
+        entity.HasData(SceneCastSeed);
+    }
+    
+    private static readonly SceneCast[] SceneCastSeed =
+    [
+        new() { SceneId = SceneId_TestFilm_01, CastMemberId = CastId1, Role = &quot;Detective Ivanov&quot; },
+        new() { SceneId = SceneId_TestFilm_01, CastMemberId = CastId2, Role = &quot;Witness&quot; },
+        new() { SceneId = SceneId_TestFilm_02, CastMemberId = CastId1, Role = &quot;Detective Ivanov&quot; },
+
+        new() { SceneId = SceneId_MidnightDreams_01, CastMemberId = CastId3, Role = &quot;Lead Actress&quot; },
+
+        new() { SceneId = SceneId_PaperPlanes_01, CastMemberId = CastId1, Role = &quot;Private Investigator&quot; },
+        new() { SceneId = SceneId_PaperPlanes_01, CastMemberId = CastId2, Role = &quot;Antagonist&quot; },
+
+        new() { SceneId = SceneId_TheLastTake_01, CastMemberId = CastId2, Role = &quot;Supporting Role&quot; },
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,5,13,6,0],[14,9,14,66,0],[16,9,20,47,0],[22,9,26,47,0],[28,9,28,63,0],[30,9,30,39,0],[31,5,31,6,0],[33,5,45,7,0]]);
+    </script>
+  </body>
+</html>

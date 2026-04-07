@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/Handlers/RegistrationHandlerResolver.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core.Handlers;
+
+using Interfaces;
+using Models.LoginAndRegistration;
+
+using static GCommon.OutputMessages.Register;
+
+public class RegistrationHandlerResolver(IRegistrationHandler&lt;CrewRegistrationCompleteDto&gt; crewRegistrationHandler,
+                                         IRegistrationHandler&lt;CastRegistrationDto&gt; castRegistrationHandler) : IRegistrationHandlerResolver
+{
+    public IRegistrationHandler&lt;TRegistrationDto&gt; Resolve&lt;TRegistrationDto&gt;()
+    {
+        IRegistrationHandler&lt;TRegistrationDto&gt; registrationHandler = typeof(TRegistrationDto) switch
+        {
+            _ when typeof(TRegistrationDto) == typeof(CrewRegistrationCompleteDto) =&gt; (IRegistrationHandler&lt;TRegistrationDto&gt;)crewRegistrationHandler,
+            
+            _ when typeof(TRegistrationDto) == typeof(CastRegistrationDto) =&gt; (IRegistrationHandler&lt;TRegistrationDto&gt;)castRegistrationHandler,
+            
+            _ =&gt; throw new NotSupportedException(string.Format(UnsupportedRegistrationType, typeof(TRegistrationDto).Name))
+        };
+        
+        return registrationHandler;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,14,9,108,1],[12,5,12,6,1],[13,9,15,15,1],[15,15,15,83,1],[15,83,15,87,1],[15,87,15,150,1],[15,150,17,15,1],[17,15,17,75,1],[17,75,17,79,1],[17,79,17,142,1],[17,142,19,18,1],[19,18,19,124,1],[19,124,20,11,1],[22,9,22,36,1],[23,5,23,6,1]]);
+    </script>
+  </body>
+</html>

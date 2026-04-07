@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ShootingDaySceneConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+
+using static Common.EntityIdentificationConstants;
+
+public class ShootingDaySceneConfiguration : IEntityTypeConfiguration&lt;ShootingDayScene&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;ShootingDayScene&gt; entity)
+    {
+        entity.HasIndex(sds =&gt; new { sds.ShootingDayId, sds.SceneId }).IsUnique();
+
+        entity
+            .HasOne(sds =&gt; sds.Scene)
+            .WithMany(s =&gt; s.ShootingDayScenes)
+            .HasForeignKey(sds =&gt; sds.SceneId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        entity
+            .HasOne(sds =&gt; sds.ShootingDay)
+            .WithMany(sd =&gt; sd.ShootingDayScenes)
+            .HasForeignKey(sds =&gt; sds.ShootingDayId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasData(ShootingDayScenesSeed);
+    }
+    
+    private static readonly ShootingDayScene[] ShootingDayScenesSeed =
+    [
+        // Test Film: Day 1 -&gt; Scene 1, Scene 2
+        new()
+        {
+            Id = ShootingDaySceneId_TestFilm_01_01,
+            ShootingDayId = ShootingDayId_TestFilm_01,
+            SceneId = SceneId_TestFilm_01,
+            Order = 1
+        },
+        new()
+        {
+            Id = ShootingDaySceneId_TestFilm_01_02,
+            ShootingDayId = ShootingDayId_TestFilm_01,
+            SceneId = SceneId_TestFilm_02,
+            Order = 2
+        },
+
+        // Test Film: Day 2 -&gt; Scene 3
+        new()
+        {
+            Id = ShootingDaySceneId_TestFilm_02_01,
+            ShootingDayId = ShootingDayId_TestFilm_02,
+            SceneId = SceneId_TestFilm_03,
+            Order = 1
+        },
+
+        // Midnight Dreams: Day 1 -&gt; Scene 1
+        new()
+        {
+            Id = ShootingDaySceneId_MidnightDreams_01_01,
+            ShootingDayId = ShootingDayId_MidnightDreams_01,
+            SceneId = SceneId_MidnightDreams_01,
+            Order = 1
+        },
+
+        // Midnight Dreams: Day 2 -&gt; Scene 2
+        new()
+        {
+            Id = ShootingDaySceneId_MidnightDreams_02_01,
+            ShootingDayId = ShootingDayId_MidnightDreams_02,
+            SceneId = SceneId_MidnightDreams_02,
+            Order = 1
+        },
+
+        // Paper Planes: Day 1 -&gt; Scene 1, Scene 2
+        new()
+        {
+            Id = ShootingDaySceneId_PaperPlanes_01_01,
+            ShootingDayId = ShootingDayId_PaperPlanes_01,
+            SceneId = SceneId_PaperPlanes_01,
+            Order = 1
+        },
+        new()
+        {
+            Id = ShootingDaySceneId_PaperPlanes_01_02,
+            ShootingDayId = ShootingDayId_PaperPlanes_01,
+            SceneId = SceneId_PaperPlanes_02,
+            Order = 2
+        },
+
+        // The Last Take: Day 1 -&gt; Scene 1, Scene 2
+        new()
+        {
+            Id = ShootingDaySceneId_TheLastTake_01_01,
+            ShootingDayId = ShootingDayId_TheLastTake_01,
+            SceneId = SceneId_TheLastTake_01,
+            Order = 1
+        },
+        new()
+        {
+            Id = ShootingDaySceneId_TheLastTake_01_02,
+            ShootingDayId = ShootingDayId_TheLastTake_01,
+            SceneId = SceneId_TheLastTake_02,
+            Order = 2
+        },
+
+        // The Last Take: Day 2 -&gt; Scene 3
+        new()
+        {
+            Id = ShootingDaySceneId_TheLastTake_02_01,
+            ShootingDayId = ShootingDayId_TheLastTake_02,
+            SceneId = SceneId_TheLastTake_03,
+            Order = 1
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,5,13,6,0],[14,9,14,83,0],[16,9,20,48,0],[22,9,26,47,0],[28,9,28,47,0],[29,5,29,6,0],[31,5,116,7,0]]);
+    </script>
+  </body>
+</html>

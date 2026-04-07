@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/Profile/EditSkillsInputModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.Profile;
+
+using System.ComponentModel.DataAnnotations;
+
+using GCommon.Enums;
+
+public class EditSkillsInputModel
+{
+    public IReadOnlyCollection&lt;CrewRoleType&gt; CurrentSkills { get; set; }
+        = new HashSet&lt;CrewRoleType&gt;();
+    
+    public IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; AllDepartments { get; set; }
+        = new Dictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt;();
+    
+    [Required]
+    public string SelectedSkills { get; set; } = null!;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,11,10,38,0],[13,11,13,70,0],[16,50,16,55,0]]);
+    </script>
+  </body>
+</html>

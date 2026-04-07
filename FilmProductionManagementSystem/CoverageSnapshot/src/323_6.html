@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Models/General/DashboardDataDto.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Models.General;
+
+public class DashboardDataDto
+{
+    public int CrewMembersCount { get; set; }
+    
+    public int CastMembersCount { get; set; }
+    
+    public int UpcomingScenesTotal { get; set; }
+
+    public IReadOnlyCollection&lt;ProductionDashboardDto&gt; Productions { get; set; }
+        = new HashSet&lt;ProductionDashboardDto&gt;();
+    
+    public bool IsUserCrew { get; set; } = false;
+
+    public bool HasOwnProductions { get; set; } = false;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,11,12,48,1],[14,44,14,49,1],[16,51,16,56,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Shared/Error.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model ErrorViewModel
+@{
+    ViewData[&quot;Title&quot;] = &quot;Something went wrong&quot;;
+    bool showDetails = Model?.ShowRequestId == true;
+}
+
+&lt;div class=&quot;dashboard-wrapper&quot;&gt;
+    &lt;div class=&quot;container py-4&quot;&gt;
+        &lt;div class=&quot;welcome-banner&quot;&gt;
+            &lt;h1&gt;Something went wrong&lt;/h1&gt;
+            &lt;p&gt;We hit an unexpected error while processing your request.&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;row g-4 mt-2&quot;&gt;
+            &lt;div class=&quot;col-lg-7&quot;&gt;
+                &lt;div class=&quot;card border-0 shadow-lg&quot; style=&quot;border-radius: 18px;&quot;&gt;
+                    &lt;div class=&quot;card-body p-4&quot;&gt;
+                        &lt;div class=&quot;d-flex align-items-start gap-3&quot;&gt;
+                            &lt;div class=&quot;stat-icon&quot; style=&quot;width:56px;height:56px;border-radius:16px;background: linear-gradient(135deg, #ff512f 0%, #dd2476 100%); color: white;&quot;&gt;
+                                &lt;i class=&quot;bi bi-bug-fill&quot; style=&quot;font-size:1.4rem;&quot;&gt;&lt;/i&gt;
+                            &lt;/div&gt;
+
+                            &lt;div class=&quot;flex-grow-1&quot;&gt;
+                                &lt;h3 class=&quot;mb-1 fw-bold&quot;&gt;Error 500&lt;/h3&gt;
+                                &lt;p class=&quot;mb-3 text-muted&quot;&gt;
+                                    Please try again in a moment. If the problem persists, contact support.
+                                &lt;/p&gt;
+
+                                @if (showDetails)
+                                {
+                                    &lt;div class=&quot;alert alert-secondary d-flex align-items-center gap-2 mb-3&quot; role=&quot;alert&quot;&gt;
+                                        &lt;i class=&quot;bi bi-hash&quot;&gt;&lt;/i&gt;
+                                        &lt;div&gt;
+                                            &lt;div class=&quot;fw-semibold&quot;&gt;Request ID&lt;/div&gt;
+                                            &lt;code class=&quot;small&quot;&gt;@Model!.RequestId&lt;/code&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                }
+
+                                &lt;div class=&quot;d-flex flex-wrap gap-2&quot;&gt;
+                                    &lt;a asp-controller=&quot;Home&quot; asp-action=&quot;Dashboard&quot; class=&quot;btn btn-custom-1 me-2&quot;&gt;
+                                        &lt;i class=&quot;bi bi-house-door me-2&quot;&gt;&lt;/i&gt;Go to Dashboard
+                                    &lt;/a&gt;
+
+                                    &lt;button type=&quot;button&quot; class=&quot;btn btn-outline-secondary&quot; onclick=&quot;location.reload()&quot;&gt;
+                                        &lt;i class=&quot;bi bi-arrow-clockwise me-2&quot;&gt;&lt;/i&gt;Retry
+                                    &lt;/button&gt;
+
+                                    &lt;button type=&quot;button&quot; class=&quot;btn btn-outline-secondary&quot; onclick=&quot;history.back()&quot;&gt;
+                                        &lt;i class=&quot;bi bi-arrow-left me-2&quot;&gt;&lt;/i&gt;Go Back
+                                    &lt;/button&gt;
+                                &lt;/div&gt;
+
+                                &lt;hr class=&quot;my-4&quot; /&gt;
+
+                                &lt;div class=&quot;small text-muted&quot;&gt;
+                                    Tip: if you were submitting a form, double-check required fields and try again.
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                @* Developer guidance kept, but visually contained *@
+                &lt;div class=&quot;alert alert-warning mt-3 mb-0&quot; role=&quot;alert&quot;&gt;
+                    &lt;div class=&quot;d-flex align-items-start gap-2&quot;&gt;
+                        &lt;i class=&quot;bi bi-shield-lock mt-1&quot;&gt;&lt;/i&gt;
+                        &lt;div&gt;
+                            &lt;div class=&quot;fw-semibold&quot;&gt;Development mode note&lt;/div&gt;
+                            &lt;div class=&quot;small&quot;&gt;
+                                For local debugging only: switch to &lt;strong&gt;Development&lt;/strong&gt; to see detailed errors.
+                                Don’t enable it in production because it may expose sensitive information.
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class=&quot;col-lg-5&quot;&gt;
+                &lt;div class=&quot;recent-activity&quot;&gt;
+                    &lt;h4&gt;&lt;i class=&quot;bi bi-life-preserver me-2&quot;&gt;&lt;/i&gt;What you can do&lt;/h4&gt;
+
+                    &lt;div class=&quot;activity-item&quot;&gt;
+                        &lt;div class=&quot;activity-title&quot;&gt;Refresh the page&lt;/div&gt;
+                        &lt;div class=&quot;activity-time&quot;&gt;Ctrl/Cmd + R&lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;activity-item&quot;&gt;
+                        &lt;div class=&quot;activity-title&quot;&gt;Try again from Dashboard&lt;/div&gt;
+                        &lt;div class=&quot;activity-time&quot;&gt;Use navigation&lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;activity-item&quot;&gt;
+                        &lt;div class=&quot;activity-title&quot;&gt;Sign out and sign in&lt;/div&gt;
+                        &lt;div class=&quot;activity-time&quot;&gt;If auth/session is stuck&lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;text-center mt-4&quot;&gt;
+                        &lt;a asp-controller=&quot;Home&quot; asp-action=&quot;Dashboard&quot; class=&quot;btn btn-custom&quot;&gt;
+                            &lt;i class=&quot;bi bi-house-door me-2&quot;&gt;&lt;/i&gt;Back to Dashboard
+                        &lt;/a&gt;
+                    &lt;/div&gt;
+
+                    @if (showDetails)
+                    {
+                        &lt;div class=&quot;mt-3 small text-muted&quot;&gt;
+                            Share the Request ID with support so the error can be traced.
+                        &lt;/div&gt;
+                    }
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[3,5,3,48,0],[4,5,4,53,0],[29,34,29,50,0],[30,33,30,34,0],[38,33,38,34,0],[104,22,104,38,0],[105,21,105,22,0],[109,21,109,22,0]]);
+    </script>
+  </body>
+</html>

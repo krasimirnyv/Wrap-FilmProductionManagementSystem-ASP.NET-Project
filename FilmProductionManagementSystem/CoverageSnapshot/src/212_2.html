@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/ShowRecoveryCodes.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@page
+@model ShowRecoveryCodesModel
+@{
+    ViewData[&quot;Title&quot;] = &quot;Recovery codes&quot;;
+    ViewData[&quot;ActivePage&quot;] = &quot;TwoFactorAuthentication&quot;;
+}
+
+&lt;partial name=&quot;_StatusMessage&quot; for=&quot;StatusMessage&quot; /&gt;
+
+&lt;h3&gt;@ViewData[&quot;Title&quot;]&lt;/h3&gt;
+
+&lt;div class=&quot;alert alert-warning&quot; role=&quot;alert&quot;&gt;
+    &lt;p&gt;
+        &lt;strong&gt;Put these codes in a safe place.&lt;/strong&gt;
+    &lt;/p&gt;
+    &lt;p&gt;
+        If you lose your device and don&#39;t have the recovery codes you will lose access to your account.
+    &lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-12&quot;&gt;
+        @for (int row = 0; row &lt; Model.RecoveryCodes.Length; row += 2)
+        {
+            &lt;code class=&quot;recovery-code&quot;&gt;&lt;strong&gt;@Model.RecoveryCodes[row]&lt;/strong&gt;&lt;/code&gt;&lt;text&gt;&amp;nbsp;&lt;/text&gt;&lt;code class=&quot;recovery-code&quot;&gt;@Model.RecoveryCodes[row + 1]&lt;/code&gt;&lt;br /&gt;
+        }
+    &lt;/div&gt;
+&lt;/div&gt;
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,42,0],[5,5,5,56,0],[22,15,22,26,0],[22,28,22,60,0],[22,62,22,70,0],[23,9,23,10,0],[25,9,25,10,0]]);
+    </script>
+  </body>
+</html>

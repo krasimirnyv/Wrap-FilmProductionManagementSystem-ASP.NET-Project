@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.Infrastructure/Utilities/SlugGenerator.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.Infrastructure.Utilities;
+
+using System.Text.RegularExpressions;
+
+using Interfaces;
+
+public partial class SlugGenerator : ISlugGenerator
+{
+    public string GenerateSlug(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+        
+        string slug = input.Trim().ToLowerInvariant();
+
+        slug = WhitespaceRegex().Replace(slug, &quot;-&quot;);
+        slug = InvalidCharactersRegex().Replace(slug, string.Empty);
+        slug = MultipleDashesRegex().Replace(slug, &quot;-&quot;);
+        
+
+        return slug.Trim(&#39;-&#39;);
+    }
+    
+    [GeneratedRegex(@&quot;\s+&quot;)]
+    private static partial Regex WhitespaceRegex();
+
+    [GeneratedRegex(@&quot;[^a-z0-9\-]&quot;)]
+    private static partial Regex InvalidCharactersRegex();
+
+    [GeneratedRegex(@&quot;\-+&quot;)]
+    private static partial Regex MultipleDashesRegex();
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,5,10,6,1],[11,9,11,46,1],[12,13,12,33,1],[14,9,14,55,1],[16,9,16,53,1],[17,9,17,69,1],[18,9,18,57,1],[21,9,21,31,1],[22,5,22,6,1]]);
+    </script>
+  </body>
+</html>

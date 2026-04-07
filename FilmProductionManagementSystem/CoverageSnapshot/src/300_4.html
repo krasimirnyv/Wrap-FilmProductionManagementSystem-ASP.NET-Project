@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/CrewSkill.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using GCommon.Enums;
+
+/// &lt;summary&gt;
+/// Представлява едно умение, което човек от снимачния екип притежава
+/// &lt;/summary&gt;
+public class CrewSkill
+{
+    [Key]
+    public Guid Id { get; set; }
+
+    [Required]
+    public CrewRoleType RoleType { get; set; }
+    
+    [Required]
+    [ForeignKey(nameof(CrewMember))]
+    public Guid CrewMemberId { get; set; }
+    
+    public virtual Crew CrewMember { get; set; } = null!;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[23,52,23,57,1]]);
+    </script>
+  </body>
+</html>

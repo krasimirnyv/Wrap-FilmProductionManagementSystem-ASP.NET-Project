@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Infrastructure.Tests/ProductionStatusAbstractionCatalogTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Infrastructure.Tests;
+
+using NUnit.Framework;
+
+using GCommon.Enums;
+using GCommon.UI;
+
+using static GCommon.ApplicationConstants;
+
+[TestFixture]
+public class ProductionStatusAbstractionCatalogTests
+{
+    [Test]
+    public void GetStatusTypeByAbstraction_ReturnsAllExpectedKeys()
+    {
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; map 
+            = ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
+
+        Assert.That(map.ContainsKey(PreProductionKey), Is.True);
+        Assert.That(map.ContainsKey(ProductionKey), Is.True);
+        Assert.That(map.ContainsKey(PostProductionKey), Is.True);
+        Assert.That(map.ContainsKey(DistributionKey), Is.True);
+        
+        Assert.That(map[PreProductionKey], Is.Not.Empty);
+        Assert.That(map[ProductionKey], Is.Not.Empty);
+        Assert.That(map[PostProductionKey], Is.Not.Empty);
+        Assert.That(map[DistributionKey], Is.Not.Empty);
+    }
+
+    [Test]
+    public void GetStatusTypeByAbstraction_CoversEveryEnumValueExactlyOnce()
+    {
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; map 
+            = ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
+
+        ProductionStatusType[] allFromMap = map.SelectMany(kvp =&gt; kvp.Value).ToArray();
+        ProductionStatusType[] allEnumValues = Enum.GetValues&lt;ProductionStatusType&gt;();
+
+        // no missing values
+        Assert.That(allEnumValues, Is.SubsetOf(allFromMap));
+
+        // no extra values (normally impossible, but keep symmetric)
+        Assert.That(allFromMap, Is.SubsetOf(allEnumValues));
+
+        // no duplicates across groups
+        Assert.That(allFromMap.Length, Is.EqualTo(allFromMap.Distinct().Count()),
+            &quot;Some ProductionStatusType values appear in more than one group.&quot;);
+    }
+
+    [TestCase(&quot;PreProduction&quot;, &quot;Pre Production&quot;)]
+    [TestCase(&quot;PostProduction&quot;, &quot;Post Production&quot;)]
+    [TestCase(&quot;PictureLock&quot;, &quot;Picture Lock&quot;)]
+    public void GetDisplayName_FormatsStatusName(string input, string expected)
+    {
+        string result = ProductionStatusAbstractionCatalog.GetDisplayName(input);
+
+        Assert.That(result, Is.EqualTo(expected));
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,5,15,6,1],[16,9,17,79,1],[19,9,19,65,1],[20,9,20,62,1],[21,9,21,66,1],[22,9,22,64,1],[24,9,24,58,1],[25,9,25,55,1],[26,9,26,59,1],[27,9,27,57,1],[28,5,28,6,1],[32,5,32,6,1],[33,9,34,79,1],[36,9,36,67,1],[36,67,36,76,1],[36,76,36,88,1],[37,9,37,87,1],[40,9,40,61,1],[43,9,43,61,1],[46,9,47,80,1],[48,5,48,6,1],[54,5,54,6,1],[55,9,55,82,1],[57,9,57,51,1],[58,5,58,6,1]]);
+    </script>
+  </body>
+</html>

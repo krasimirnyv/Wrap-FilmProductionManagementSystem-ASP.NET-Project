@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Shared/_ProductionsPaginationPartial.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model AllProductionsIndexViewModel
+
+@{
+    int page = Model.PageNumber;
+    int total = Model.TotalPages;
+    int chunkSize = Model.ShowingPages;
+
+    int chunkStart = ((page - 1) / chunkSize) * chunkSize + 1;
+    int chunkEnd = Math.Min(chunkStart + chunkSize - 1, total);
+
+    bool showPrevious = page &gt; 1;
+    bool showNext = page &lt; total;
+
+    bool showBackwardEllipsis = chunkStart &gt; 1;
+    int backwardEllipsisTarget = Math.Max(1, chunkStart - chunkSize);
+
+    bool showForwardEllipsis = chunkEnd &lt; total;
+    int forwardEllipsisTarget = Math.Min(total, chunkStart + chunkSize);
+}
+
+@if (total &gt; 1)
+{
+    &lt;nav aria-label=&quot;Productions pagination&quot;&gt;
+        &lt;ul class=&quot;pagination pagination-sm mb-0 production-pagination&quot;&gt;
+
+            @if (showPrevious)
+            {
+                &lt;li class=&quot;page-item&quot;&gt;
+                    &lt;a asp-area=&quot;&quot;
+                       asp-controller=&quot;Production&quot;
+                       asp-action=&quot;Index&quot;
+                       asp-route-PageNumber=&quot;@(page - 1)&quot;
+                       asp-route-SelectedStatus=&quot;@Model.SelectedStatus&quot;
+                       asp-route-IsActive=&quot;@Model.IsActive&quot;
+                       class=&quot;page-link&quot;&gt;
+                        Previous
+                    &lt;/a&gt;
+                &lt;/li&gt;
+            }
+
+            @if (showBackwardEllipsis)
+            {
+                &lt;li class=&quot;page-item&quot;&gt;
+                    &lt;a asp-area=&quot;&quot;
+                       asp-controller=&quot;Production&quot;
+                       asp-action=&quot;Index&quot;
+                       asp-route-PageNumber=&quot;@backwardEllipsisTarget&quot;
+                       asp-route-SelectedStatus=&quot;@Model.SelectedStatus&quot;
+                       asp-route-IsActive=&quot;@Model.IsActive&quot;
+                       class=&quot;page-link&quot;
+                       aria-label=&quot;Previous pages&quot;&gt;
+                        ...
+                    &lt;/a&gt;
+                &lt;/li&gt;
+            }
+
+            @for (int i = chunkStart; i &lt;= chunkEnd; i++)
+            {
+                &lt;li class=&quot;page-item @(page == i ? &quot;active&quot; : string.Empty)&quot;
+                    aria-current=&quot;@(page == i ? &quot;page&quot; : null)&quot;&gt;
+                    &lt;a asp-area=&quot;&quot;
+                       asp-controller=&quot;Production&quot;
+                       asp-action=&quot;Index&quot;
+                       asp-route-PageNumber=&quot;@i&quot;
+                       asp-route-SelectedStatus=&quot;@Model.SelectedStatus&quot;
+                       asp-route-IsActive=&quot;@Model.IsActive&quot;
+                       class=&quot;page-link&quot;&gt;
+                        @i
+                    &lt;/a&gt;
+                &lt;/li&gt;
+            }
+
+            @if (showForwardEllipsis)
+            {
+                &lt;li class=&quot;page-item&quot;&gt;
+                    &lt;a asp-area=&quot;&quot;
+                       asp-controller=&quot;Production&quot;
+                       asp-action=&quot;Index&quot;
+                       asp-route-PageNumber=&quot;@forwardEllipsisTarget&quot;
+                       asp-route-SelectedStatus=&quot;@Model.SelectedStatus&quot;
+                       asp-route-IsActive=&quot;@Model.IsActive&quot;
+                       class=&quot;page-link&quot;
+                       aria-label=&quot;Next pages&quot;&gt;
+                        ...
+                    &lt;/a&gt;
+                &lt;/li&gt;
+            }
+
+            @if (showNext)
+            {
+                &lt;li class=&quot;page-item&quot;&gt;
+                    &lt;a asp-area=&quot;&quot;
+                       asp-controller=&quot;Production&quot;
+                       asp-action=&quot;Index&quot;
+                       asp-route-PageNumber=&quot;@(page + 1)&quot;
+                       asp-route-SelectedStatus=&quot;@Model.SelectedStatus&quot;
+                       asp-route-IsActive=&quot;@Model.IsActive&quot;
+                       class=&quot;page-link&quot;&gt;
+                        Next
+                    &lt;/a&gt;
+                &lt;/li&gt;
+            }
+        &lt;/ul&gt;
+    &lt;/nav&gt;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,33,0],[5,5,5,34,0],[6,5,6,40,0],[8,5,8,63,0],[9,5,9,64,0],[11,5,11,34,0],[12,5,12,34,0],[14,5,14,48,0],[15,5,15,70,0],[17,5,17,49,0],[18,5,18,73,0],[21,2,21,16,0],[22,1,22,2,0],[26,14,26,31,0],[27,13,27,14,0],[39,13,39,14,0],[41,14,41,39,0],[42,13,42,14,0],[55,13,55,14,0],[57,19,57,37,0],[57,39,57,52,0],[57,54,57,57,0],[58,13,58,14,0],[71,13,71,14,0],[73,14,73,38,0],[74,13,74,14,0],[87,13,87,14,0],[89,14,89,27,0],[90,13,90,14,0],[102,13,102,14,0],[105,1,105,2,0]]);
+    </script>
+  </body>
+</html>

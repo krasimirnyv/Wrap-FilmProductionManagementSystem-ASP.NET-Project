@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/ProfileServiceTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using Moq;
+using NUnit.Framework;
+
+using Data.Models;
+using Data.Repository.Interfaces;
+using Core;
+using Models.Profile;
+
+[TestFixture]
+public class ProfileServiceTests
+{
+    private Mock&lt;IProfileRepository&gt; profileRepositoryMock = null!;
+    private ProfileService profileService = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        profileRepositoryMock = new Mock&lt;IProfileRepository&gt;(MockBehavior.Strict);
+        profileService = new ProfileService(profileRepositoryMock.Object);
+    }
+
+    [Test]
+    public async Task IsUserCrewAsync_WhenCrewExists_ReturnsTrue()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+
+        Crew crew = new Crew { Id = Guid.NewGuid() };
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync(crew);
+
+        // Act
+        bool result = await profileService.IsUserCrewAsync(username);
+
+        // Assert
+        Assert.That(result, Is.True);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserCrewAsync_WhenCrewDoesNotExist_ReturnsFalse()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        bool result = await profileService.IsUserCrewAsync(username);
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserCastAsync_WhenCastExists_ReturnsTrue()
+    {
+        // Arrange
+        const string username = &quot;cast.user&quot;;
+
+        Cast cast = new Cast { Id = Guid.NewGuid() };
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync(cast);
+
+        // Act
+        bool result = await profileService.IsUserCastAsync(username);
+
+        // Assert
+        Assert.That(result, Is.True);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserCastAsync_WhenCastDoesNotExist_ReturnsFalse()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Cast?)null);
+
+        // Act
+        bool result = await profileService.IsUserCastAsync(username);
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetRoleInfoAsync_WhenCrewExists_ReturnsCrewTrueCastFalse_AndDoesNotQueryCast()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+
+        Crew crew = new Crew { Id = Guid.NewGuid() };
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync(crew);
+
+        // Act
+        ProfileRoleDto result = await profileService.GetRoleInfoAsync(username);
+
+        // Assert
+        Assert.That(result.IsCrew, Is.True);
+        Assert.That(result.IsCast, Is.False);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(It.IsAny&lt;string&gt;()), Times.Never);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetRoleInfoAsync_WhenCrewDoesNotExistButCastExists_ReturnsCrewFalseCastTrue()
+    {
+        // Arrange
+        const string username = &quot;cast.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        Cast cast = new Cast { Id = Guid.NewGuid() };
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync(cast);
+
+        // Act
+        ProfileRoleDto result = await profileService.GetRoleInfoAsync(username);
+
+        // Assert
+        Assert.That(result.IsCrew, Is.False);
+        Assert.That(result.IsCast, Is.True);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetRoleInfoAsync_WhenNeitherCrewNorCastExists_ReturnsCrewFalseCastFalse()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Cast?)null);
+
+        // Act
+        ProfileRoleDto result = await profileService.GetRoleInfoAsync(username);
+
+        // Assert
+        Assert.That(result.IsCrew, Is.False);
+        Assert.That(result.IsCast, Is.False);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,68,1],[15,5,15,51,1],[19,5,19,6,1],[20,9,20,83,1],[21,9,21,75,1],[22,5,22,6,1],[26,5,26,6,1],[30,9,30,54,1],[32,9,34,33,1],[37,9,37,70,1],[40,9,40,38,1],[42,9,42,105,1],[43,9,43,52,1],[44,5,44,6,1],[48,5,48,6,1],[52,9,54,40,1],[57,9,57,70,1],[60,9,60,39,1],[62,9,62,105,1],[63,9,63,52,1],[64,5,64,6,1],[68,5,68,6,1],[72,9,72,54,1],[74,9,76,33,1],[79,9,79,70,1],[82,9,82,38,1],[84,9,84,105,1],[85,9,85,52,1],[86,5,86,6,1],[90,5,90,6,1],[94,9,96,40,1],[99,9,99,70,1],[102,9,102,39,1],[104,9,104,105,1],[105,9,105,52,1],[106,5,106,6,1],[110,5,110,6,1],[114,9,114,54,1],[116,9,118,33,1],[121,9,121,81,1],[124,9,124,45,1],[125,9,125,46,1],[127,9,127,105,1],[128,9,128,116,1],[129,9,129,52,1],[130,5,130,6,1],[134,5,134,6,1],[138,9,140,40,1],[142,9,142,54,1],[144,9,146,33,1],[149,9,149,81,1],[152,9,152,46,1],[153,9,153,45,1],[155,9,155,105,1],[156,9,156,105,1],[157,9,157,52,1],[158,5,158,6,1],[162,5,162,6,1],[166,9,168,40,1],[170,9,172,40,1],[175,9,175,81,1],[178,9,178,46,1],[179,9,179,46,1],[181,9,181,105,1],[182,9,182,105,1],[183,9,183,52,1],[184,5,184,6,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/MappingEntities/SceneCrew.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models.MappingEntities;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using GCommon.Enums;
+
+/// &lt;summary&gt;
+/// За момента игнораме това mapping entity, то е за план-графикa
+/// &lt;/summary&gt;
+public class SceneCrew
+{
+    [ForeignKey(nameof(Scene))]
+    public Guid SceneId { get; set; }
+
+    public virtual Scene Scene { get; set; } = null!;
+
+    [ForeignKey(nameof(CrewMember))]
+    public Guid CrewMemberId { get; set; }
+
+    public virtual Crew CrewMember { get; set; } = null!;
+    
+    [Required]
+    public CrewRoleType RoleType { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,48,16,53,1],[21,52,21,57,1]]);
+    </script>
+  </body>
+</html>

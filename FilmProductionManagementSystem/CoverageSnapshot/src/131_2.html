@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/GenerateRecoveryCodes.cshtml.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+#nullable disable
+
+namespace FilmProductionManagementSystem.Web.Areas.Identity.Pages.Account.Manage;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+using Wrap.Data.Models.Infrastructure;
+
+public class GenerateRecoveryCodesModel(UserManager&lt;ApplicationUser&gt; userManager, 
+    ILogger&lt;GenerateRecoveryCodesModel&gt; logger) : PageModel
+{
+    /// &lt;summary&gt;
+    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// &lt;/summary&gt;
+    [TempData]
+    public string[] RecoveryCodes { get; set; }
+
+    /// &lt;summary&gt;
+    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// &lt;/summary&gt;
+    [TempData]
+    public string StatusMessage { get; set; }
+
+    public async Task&lt;IActionResult&gt; OnGetAsync()
+    {
+        ApplicationUser user = await userManager.GetUserAsync(User);
+        if (user == null)
+            return NotFound($&quot;Unable to load user with ID &#39;{userManager.GetUserId(User)}&#39;.&quot;);
+
+        bool isTwoFactorEnabled = await userManager.GetTwoFactorEnabledAsync(user);
+        if (!isTwoFactorEnabled)
+            throw new InvalidOperationException($&quot;Cannot generate recovery codes for user because they do not have 2FA enabled.&quot;);
+
+        return Page();
+    }
+
+    public async Task&lt;IActionResult&gt; OnPostAsync()
+    {
+        ApplicationUser user = await userManager.GetUserAsync(User);
+        if (user == null)
+            return NotFound($&quot;Unable to load user with ID &#39;{userManager.GetUserId(User)}&#39;.&quot;);
+
+        bool isTwoFactorEnabled = await userManager.GetTwoFactorEnabledAsync(user);
+        string userId = await userManager.GetUserIdAsync(user);
+        if (!isTwoFactorEnabled)
+            throw new InvalidOperationException($&quot;Cannot generate recovery codes for user as they do not have 2FA enabled.&quot;);
+
+        IEnumerable&lt;string&gt; recoveryCodes = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+        RecoveryCodes = recoveryCodes!.ToArray();
+
+        logger.LogInformation(&quot;User with ID &#39;{UserId}&#39; has generated new 2FA recovery codes.&quot;, userId);
+        StatusMessage = &quot;You have generated new recovery codes.&quot;;
+        return RedirectToPage(&quot;./ShowRecoveryCodes&quot;);
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,14,14,48,0],[31,5,31,6,0],[32,9,32,69,0],[33,9,33,26,0],[34,13,34,94,0],[36,9,36,84,0],[37,9,37,33,0],[38,13,38,131,0],[40,9,40,23,0],[41,5,41,6,0],[44,5,44,6,0],[45,9,45,69,0],[46,9,46,26,0],[47,13,47,94,0],[49,9,49,84,0],[50,9,50,64,0],[51,9,51,33,0],[52,13,52,126,0],[54,9,54,112,0],[55,9,55,50,0],[57,9,57,104,0],[58,9,58,66,0],[59,9,59,54,0],[60,5,60,6,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Program.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace FilmProductionManagementSystem.Web;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Authentication.Cookies;
+
+using Wrap.Data;
+using Wrap.Data.Models.Infrastructure;
+using Wrap.Web.Infrastructure.Extensions;
+
+using static Wrap.GCommon.ApplicationConstants;
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        
+        string connectionString = ConnectionString(builder);
+
+        builder.Services.AddDbContext&lt;FilmProductionDbContext&gt;(options =&gt; 
+            options.UseSqlServer(connectionString));
+        builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+        builder.Services
+            .AddDataRepositories()
+            .AddApplicationRoleSeeding()
+            .AddCoreServices()
+            .AddWebInfrastructure();
+        
+        builder.Services.AddDefaultIdentity&lt;ApplicationUser&gt;(options =&gt;
+            {
+                ConfigureIdentity(options, builder.Configuration);
+            })
+            .AddRoles&lt;ApplicationRole&gt;()
+            .AddEntityFrameworkStores&lt;FilmProductionDbContext&gt;()
+            .AddDefaultTokenProviders();
+        
+        builder.Services.ConfigureApplicationCookie(options =&gt;
+        {
+            ConfigureCookie(options, builder.Configuration);
+        });
+
+        // Using session + &quot;draft&quot; JSON for the two-step registration form for crew members.
+        builder.Services.AddDistributedMemoryCache();
+        builder.Services.AddSession(options =&gt;
+        {
+            ConfigureSession(options, builder.Configuration);
+        });
+        builder.Services.AddHttpContextAccessor();
+        
+        builder.Services.Configure&lt;FormOptions&gt;(options =&gt;
+        {
+            options.MultipartBodyLengthLimit = builder.Configuration.GetValue&lt;long&gt;(MaxFileSizeOptions);
+        });
+        
+        builder.Services.AddControllersWithViews()
+            .AddMvcOptions(options =&gt; options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+        
+        builder.Services.AddRazorPages();
+
+        WebApplication app = builder.Build();
+        
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseMigrationsEndPoint();
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler(ExceptionHandlerPath);
+            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+            app.UseHsts();
+            
+            app.UseStatusCodePagesWithRedirects(StatusCodeErrorPath); // More RESTful way to handle status code errors
+        }
+        
+        app.UseHttpsRedirection();
+        app.UseRouting();
+
+        app.UseCookiePolicy();
+        app.UseStaticFiles();
+        app.UseSession();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseRolesSeeder();
+
+        app.UseStatusCodePagesWithRedirects(StatusCodeErrorPath);
+        
+        app.MapControllerRoute(
+            name: &quot;areas&quot;,
+            pattern: &quot;{area:exists}/{controller=Home}/{action=Index}/{id?}&quot;);
+        app.MapControllerRoute(
+            name: &quot;slugRouteWithId&quot;,
+            pattern: &quot;{controller=Home}/{action=Index}/{id:required}/{slug:required}&quot;);
+        app.MapControllerRoute(
+            name: &quot;slugRoute&quot;,
+            pattern: &quot;{controller=Home}/{action=Index}/{slug:required}&quot;);
+        app.MapControllerRoute(
+            name: &quot;default&quot;,
+            pattern: &quot;{controller=Home}/{action=Index}/{id?}&quot;);
+        
+        app.MapRazorPages();
+        
+        app.Run();
+    }
+    
+    private static string ConnectionString(WebApplicationBuilder builder)
+    {
+        string? defaultConnection = builder.Configuration.GetConnectionString(DefaultConnection);
+        string? connectionString;
+        
+        bool isRunningInContainer = string.Equals(Environment.GetEnvironmentVariable(ContainerEnvironment), &quot;true&quot;, StringComparison.OrdinalIgnoreCase);
+        if (isRunningInContainer)
+        {
+            string? secretDockerConnection = builder.Configuration.GetConnectionString(DockerConnectionString);
+            
+            connectionString = !string.IsNullOrWhiteSpace(secretDockerConnection) 
+                ? secretDockerConnection
+                : defaultConnection 
+                  ?? throw new InvalidOperationException(MissingConnectionStringMessage);
+            
+            return connectionString;
+        }
+
+        builder.Configuration.AddUserSecrets&lt;Program&gt;();
+        string? secretConnection = builder.Configuration[SecretConnectionString];
+        
+        connectionString = !string.IsNullOrWhiteSpace(secretConnection) 
+            ? secretConnection 
+            : defaultConnection 
+              ?? throw new InvalidOperationException(MissingConnectionStringMessage);
+        
+        return connectionString;
+    }
+
+    private static void ConfigureIdentity(IdentityOptions options, ConfigurationManager configuration)
+    {
+        options.SignIn.RequireConfirmedAccount = configuration.GetValue&lt;bool&gt;(SignInRequireConfirmedAccount);
+        options.SignIn.RequireConfirmedEmail = configuration.GetValue&lt;bool&gt;(SignInRequireConfirmedEmail);
+        options.SignIn.RequireConfirmedPhoneNumber = configuration.GetValue&lt;bool&gt;(SignInRequireConfirmedPhoneNumber);
+
+        options.User.RequireUniqueEmail = configuration.GetValue&lt;bool&gt;(UserRequireUniqueEmail);
+        
+        options.Lockout.MaxFailedAccessAttempts = configuration.GetValue&lt;int&gt;(LockoutMaxFailedAccessAttempts);
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(configuration.GetValue&lt;int&gt;(LockoutDefaultLockoutTimeSpan));
+                
+        options.Password.RequireDigit = configuration.GetValue&lt;bool&gt;(PasswordRequireDigit);
+        options.Password.RequireLowercase = configuration.GetValue&lt;bool&gt;(PasswordRequireLowercase);
+        options.Password.RequireUppercase = configuration.GetValue&lt;bool&gt;(PasswordRequireUppercase);
+        options.Password.RequireNonAlphanumeric = configuration.GetValue&lt;bool&gt;(PasswordRequireNonAlphanumeric);
+        options.Password.RequiredUniqueChars = configuration.GetValue&lt;int&gt;(PasswordRequiredUniqueChars);
+        options.Password.RequiredLength = configuration.GetValue&lt;int&gt;(PasswordRequiredLength);
+             
+        options.Stores.ProtectPersonalData = configuration.GetValue&lt;bool&gt;(StoresProtectPersonalData);
+    }
+
+    private static void ConfigureCookie(CookieAuthenticationOptions options, ConfigurationManager configuration)
+    {
+        options.Cookie.HttpOnly = configuration.GetValue&lt;bool&gt;(CookieHttpOnly);
+        options.ExpireTimeSpan  = TimeSpan.FromMinutes(configuration.GetValue&lt;int&gt;(CookieExpireTimeSpan));
+        options.SlidingExpiration = configuration.GetValue&lt;bool&gt;(CookieSlidingExpiration);
+        
+        options.LoginPath = configuration.GetValue&lt;string&gt;(CookieLoginPath);
+        options.LogoutPath = configuration.GetValue&lt;string&gt;(CookieLogoutPath);;
+        options.AccessDeniedPath = configuration.GetValue&lt;string&gt;(CookieAccessDeniedPath);;
+    }
+    
+    private static void ConfigureSession(SessionOptions options, ConfigurationManager configuration)
+    {
+        options.IdleTimeout = TimeSpan.FromMinutes(configuration.GetValue&lt;int&gt;(IdleTimeoutMinutes));
+        options.Cookie.HttpOnly = configuration.GetValue&lt;bool&gt;(SessionCookieHttpOnly);
+        options.Cookie.IsEssential = configuration.GetValue&lt;bool&gt;(SessionCookieIsEssential);
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,5,18,6,0],[19,9,19,76,0],[21,9,21,61,0],[23,9,24,13,0],[24,13,24,51,0],[24,51,24,53,0],[25,9,25,68,0],[27,9,31,37,0],[33,9,34,13,0],[34,13,34,14,0],[34,14,35,17,0],[35,17,35,67,0],[35,67,36,13,0],[36,13,36,14,0],[36,14,39,41,0],[41,9,42,9,0],[42,9,42,10,0],[42,10,43,13,0],[43,13,43,61,0],[43,61,44,9,0],[44,9,44,10,0],[44,10,44,12,0],[47,9,47,54,0],[48,9,49,9,0],[49,9,49,10,0],[49,10,50,13,0],[50,13,50,62,0],[50,62,51,9,0],[51,9,51,10,0],[51,10,51,12,0],[52,9,52,51,0],[54,9,55,9,0],[55,9,55,10,0],[55,10,56,13,0],[56,13,56,105,0],[56,105,57,9,0],[57,9,57,10,0],[57,10,57,12,0],[59,9,60,39,0],[60,39,60,103,0],[60,103,60,105,0],[62,9,62,42,0],[64,9,64,46,0],[67,9,67,45,0],[68,9,68,10,0],[69,13,69,41,0],[70,13,70,45,0],[71,9,71,10,0],[73,9,73,10,0],[74,13,74,59,0],[76,13,76,27,0],[78,13,78,70,0],[79,9,79,10,0],[81,9,81,35,0],[82,9,82,26,0],[84,9,84,31,0],[85,9,85,30,0],[86,9,86,26,0],[88,9,88,33,0],[89,9,89,32,0],[91,9,91,30,0],[93,9,93,66,0],[95,9,97,78,0],[98,9,100,88,0],[101,9,103,74,0],[104,9,106,64,0],[108,9,108,29,0],[110,9,110,19,0],[111,5,111,6,0],[114,5,114,6,0],[115,9,115,98,0],[118,9,118,153,0],[119,9,119,34,0],[120,9,120,10,0],[121,13,121,112,0],[123,13,126,90,0],[128,13,128,37,0],[131,9,131,57,0],[132,9,132,82,0],[134,9,137,86,0],[139,9,139,33,0],[140,5,140,6,0],[143,5,143,6,0],[144,9,144,110,0],[145,9,145,106,0],[146,9,146,118,0],[148,9,148,96,0],[150,9,150,111,0],[151,9,151,131,0],[153,9,153,92,0],[154,9,154,100,0],[155,9,155,100,0],[156,9,156,112,0],[157,9,157,105,0],[158,9,158,95,0],[160,9,160,102,0],[161,5,161,6,0],[164,5,164,6,0],[165,9,165,80,0],[166,9,166,107,0],[167,9,167,91,0],[169,9,169,77,0],[170,9,170,79,0],[170,79,170,80,0],[171,9,171,91,0],[171,91,171,92,0],[172,5,172,6,0],[175,5,175,6,0],[176,9,176,101,0],[177,9,177,87,0],[178,9,178,93,0],[179,5,179,6,0]]);
+    </script>
+  </body>
+</html>

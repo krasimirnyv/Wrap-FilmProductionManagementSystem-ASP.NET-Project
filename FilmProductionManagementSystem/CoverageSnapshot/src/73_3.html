@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/Utilities/ImageLogic/ImageService.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core.Utilities.ImageLogic;
+
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
+
+using Interfaces;
+
+using static GCommon.DataFormat;
+using static GCommon.OutputMessages;
+using static GCommon.ApplicationConstants;
+
+public class ImageService(IWebHostEnvironment environment) : IImageService
+{
+    public async Task&lt;string&gt; SaveImageAsync(IFormFile? photo, IVariantImageStrategy strategy, CancellationToken cancellationToken = default)
+    {
+        if (photo is null || photo.Length &lt;= 0)
+            return strategy.DefaultPath;
+
+        if (photo.Length &gt; MaxFileSize)
+            throw new NotSupportedException(string.Format(ExceededFileSizeLimit, MaxFileSize));
+
+        string fileExtension = Path.GetExtension(photo.FileName);
+
+        if (string.IsNullOrWhiteSpace(fileExtension) || !AllowedExtensions.Contains(fileExtension))
+            throw new NotSupportedException(string.Format(NotSupportedFileExtension, fileExtension));
+
+        Image image;
+        try
+        {
+            await using Stream input = photo.OpenReadStream();
+            image = await Image.LoadAsync(input, cancellationToken);
+        }
+        catch (UnknownImageFormatException uife)
+        {
+            throw new NotSupportedException(string.Format(UnsupportedOrCorruptedFormat, uife.Message));
+        }
+        catch (Exception e)
+        {
+            throw new NotSupportedException(string.Format(FailedToReadImage, e.Message));
+        }
+
+        using (image)
+        {
+            if (image.Height &lt;= 0 || image.Width &lt;= 0)
+                throw new NotSupportedException(string.Format(InvalidImageDimensions, image.Height, image.Width));
+
+            if (image.Height &gt; MaxPixelDimension || image.Width &gt; MaxPixelDimension)
+                throw new NotSupportedException(string.Format(ImageTooLarge, MaxPixelDimension, image.Height, image.Width));
+
+            image.Metadata.ExifProfile = null;
+            image.Metadata.IccProfile = null;
+            image.Metadata.XmpProfile = null;
+
+            ResizeOptions resizeOptions = new ResizeOptions
+            {
+                Size = new Size(strategy.Width, strategy.Height),
+                Mode = strategy.ResizeMode,
+                Position = strategy.AnchorPosition
+            };
+
+            image.Mutate(operation =&gt; operation.Resize(resizeOptions));
+
+            string fileName = string.Format(NewFileName, $&quot;{Guid.NewGuid():N}&quot;);
+            string wwwrootPath = environment.WebRootPath;
+            string uploadsFolder = Path.Combine(wwwrootPath, ImageFolderName, strategy.FolderName);
+
+            Directory.CreateDirectory(uploadsFolder);
+
+            string physicalPath = Path.Combine(uploadsFolder, fileName);
+
+            WebpEncoder encoder = new WebpEncoder
+            {
+                Quality = strategy.Quality,
+                FileFormat = strategy.FileFormat
+            };
+
+            await using FileStream output = new FileStream(
+                physicalPath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: StreamBufferSize,
+                useAsync: true);
+
+            await image.SaveAsync(output, encoder, cancellationToken);
+
+            string webPath = $&quot;/{ImageFolderName}/{strategy.FolderName}/{fileName}&quot;;
+            
+            return webPath;
+        }
+    }
+
+    public async Task&lt;string&gt; ReplaceAsync(string? currentWebPath, IFormFile? newPhoto, IVariantImageStrategy strategy, CancellationToken cancellationToken = default)
+    {
+        if (newPhoto is null || newPhoto.Length &lt;= 0)
+            return currentWebPath ?? strategy.DefaultPath;
+        
+        string newWebPath = await SaveImageAsync(newPhoto, strategy, cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(currentWebPath) &amp;&amp;
+            !string.Equals(currentWebPath, newWebPath, StringComparison.OrdinalIgnoreCase) &amp;&amp;
+            !string.Equals(currentWebPath, strategy.DefaultPath, StringComparison.OrdinalIgnoreCase))
+        {
+            await DeleteAsync(currentWebPath, strategy, cancellationToken);
+        }
+        
+        return newWebPath;
+    }
+
+    public Task DeleteAsync(string? webPath, IVariantImageStrategy strategy, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(webPath))
+            return Task.CompletedTask;
+
+        if (string.Equals(webPath, strategy.DefaultPath, StringComparison.OrdinalIgnoreCase))
+            return Task.CompletedTask;
+
+        string? physicalPath = TryMapWebPathToPhysicalPath(webPath);
+        if (physicalPath is null)
+            return Task.CompletedTask;
+
+        if (File.Exists(physicalPath))
+            File.Delete(physicalPath);
+        
+        return Task.CompletedTask;
+    }
+    
+    private string? TryMapWebPathToPhysicalPath(string? webPath)
+    {
+        if (string.IsNullOrWhiteSpace(webPath))
+            return null;
+
+        string wwwrootPath = environment.WebRootPath;
+        string relativePath = webPath.TrimStart(&#39;/&#39;).Replace(&#39;/&#39;, Path.DirectorySeparatorChar);
+        string physicalPath = Path.Combine(wwwrootPath, relativePath);
+
+        return physicalPath;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[16,14,16,59,1],[19,5,19,6,1],[20,9,20,48,1],[21,13,21,41,1],[23,9,23,40,1],[24,13,24,96,1],[26,9,26,66,1],[28,9,28,100,1],[29,13,29,102,1],[33,9,33,10,1],[34,13,34,63,1],[35,13,35,69,1],[36,9,36,10,1],[37,9,37,49,1],[38,9,38,10,1],[39,13,39,104,1],[41,9,41,28,0],[42,9,42,10,0],[43,13,43,90,0],[46,9,46,22,1],[47,9,47,10,1],[48,13,48,55,1],[49,17,49,115,0],[51,13,51,85,1],[52,17,52,125,1],[54,13,54,47,1],[55,13,55,46,1],[56,13,56,46,1],[58,13,63,15,1],[65,13,65,39,1],[65,39,65,70,1],[65,70,65,72,1],[67,13,67,81,1],[68,13,68,58,1],[69,13,69,100,1],[71,13,71,54,1],[73,13,73,73,1],[75,13,79,15,1],[81,13,87,33,1],[89,13,89,71,1],[91,13,91,85,1],[93,13,93,28,1],[94,9,94,10,0],[95,5,95,6,1],[98,5,98,6,1],[99,9,99,54,1],[100,13,100,59,1],[102,9,102,89,1],[104,9,106,102,1],[107,9,107,10,1],[108,13,108,76,1],[109,9,109,10,1],[111,9,111,27,1],[112,5,112,6,1],[115,5,115,6,1],[116,9,116,48,1],[117,13,117,39,1],[119,9,119,94,1],[120,13,120,39,1],[122,9,122,69,1],[123,9,123,34,1],[124,13,124,39,0],[126,9,126,39,1],[127,13,127,39,1],[129,9,129,35,1],[130,5,130,6,1],[133,5,133,6,1],[134,9,134,48,1],[135,13,135,25,0],[137,9,137,54,1],[138,9,138,96,1],[139,9,139,71,1],[141,9,141,29,1],[142,5,142,6,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Infrastructure.Tests/CrewRolesDepartmentCatalogTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Infrastructure.Tests;
+
+using NUnit.Framework;
+
+using GCommon.Enums;
+using GCommon.UI;
+
+using static GCommon.ApplicationConstants;
+
+[TestFixture]
+public class CrewRolesDepartmentCatalogTests
+{
+    [Test]
+    public void GetRolesByDepartment_ReturnsAllExpectedKeys()
+    {
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; map =
+            CrewRolesDepartmentCatalog.GetRolesByDepartment();
+        
+        Assert.That(map.ContainsKey(DirectionAndProduction), Is.True);
+        Assert.That(map.ContainsKey(WritingAndDevelopment), Is.True);
+        Assert.That(map.ContainsKey(CameraDepartment), Is.True);
+        Assert.That(map.ContainsKey(LightingDepartment), Is.True);
+        Assert.That(map.ContainsKey(GripDepartment), Is.True);
+        Assert.That(map.ContainsKey(ArtDepartment), Is.True);
+        Assert.That(map.ContainsKey(CostumeAndMakeup), Is.True);
+        Assert.That(map.ContainsKey(SoundDepartment), Is.True);
+        Assert.That(map.ContainsKey(PostProductionDepartment), Is.True);
+        Assert.That(map.ContainsKey(MusicDepartment), Is.True);
+        Assert.That(map.ContainsKey(LocationsDepartment), Is.True);
+        Assert.That(map.ContainsKey(LogisticsAndTransportationDepartment), Is.True);
+        Assert.That(map.ContainsKey(SetOperationsAndSupportDepartment), Is.True);
+        Assert.That(map.ContainsKey(OtherDepartment), Is.True);
+        
+        foreach (KeyValuePair&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; kvp in map)
+        {
+            Assert.That(kvp.Value, Is.Not.Empty);
+        }
+    }
+
+    [Test]
+    public void GetRolesByDepartment_CoversEveryEnumValueExactlyOnce()
+    {
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; map =
+            CrewRolesDepartmentCatalog.GetRolesByDepartment();
+
+        CrewRoleType[] allFromMap = map.SelectMany(kvp =&gt; kvp.Value).ToArray();
+        CrewRoleType[] allEnumValues = Enum.GetValues&lt;CrewRoleType&gt;();
+
+        // missing?
+        Assert.That(allEnumValues, Is.SubsetOf(allFromMap));
+
+        // duplicates across departments?
+        Assert.That(allFromMap.Length, Is.EqualTo(allFromMap.Distinct().Count()),
+            &quot;Some CrewRoleType values appear in more than one department.&quot;);
+
+        // extra? (symmetry)
+        Assert.That(allFromMap, Is.SubsetOf(allEnumValues));
+    }
+
+    [Test]
+    public void GetRolesByDepartment_OtherDepartment_ContainsOnlyOther()
+    {
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; map =
+            CrewRolesDepartmentCatalog.GetRolesByDepartment();
+
+        Assert.That(map[OtherDepartment], Is.EquivalentTo(new[] { CrewRoleType.Other }));
+    }
+
+    [TestCase(CrewRoleType.FirstAssistantDirector, &quot;First Assistant Director&quot;)]
+    [TestCase(CrewRoleType.DirectorOfPhotography, &quot;Director Of Photography&quot;)]
+    [TestCase(CrewRoleType.PostProductionSupervisor, &quot;Post Production Supervisor&quot;)]
+    public void GetDisplayName_FormatsRoleName(CrewRoleType role, string expected)
+    {
+        string result = CrewRolesDepartmentCatalog.GetDisplayName(role);
+
+        Assert.That(result, Is.EqualTo(expected));
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,5,15,6,1],[16,9,17,63,1],[19,9,19,71,1],[20,9,20,70,1],[21,9,21,65,1],[22,9,22,67,1],[23,9,23,63,1],[24,9,24,62,1],[25,9,25,65,1],[26,9,26,64,1],[27,9,27,73,1],[28,9,28,64,1],[29,9,29,68,1],[30,9,30,85,1],[31,9,31,82,1],[32,9,32,64,1],[34,9,34,16,1],[34,18,34,77,1],[34,78,34,80,1],[34,81,34,84,1],[35,9,35,10,1],[36,13,36,50,1],[37,9,37,10,1],[38,5,38,6,1],[42,5,42,6,1],[43,9,44,63,1],[46,9,46,59,1],[46,59,46,68,1],[46,68,46,80,1],[47,9,47,71,1],[50,9,50,61,1],[53,9,54,77,1],[57,9,57,61,1],[58,5,58,6,1],[62,5,62,6,1],[63,9,64,63,1],[66,9,66,90,1],[67,5,67,6,1],[73,5,73,6,1],[74,9,74,73,1],[76,9,76,51,1],[77,5,77,6,1]]);
+    </script>
+  </body>
+</html>

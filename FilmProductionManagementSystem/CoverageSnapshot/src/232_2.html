@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Profile/EditCrewProfile.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@using static Wrap.GCommon.EntityConstants.Crew;
+@using static Wrap.GCommon.DataFormat;
+
+@model EditCrewProfileInputModel
+
+@inject ISlugGenerator SlugGenerator;
+
+@{
+    ViewData[TitleDataKey] = &quot;Edit Filmmaker Profile&quot;;
+    string allowedExtensions = string.Join(&quot;, &quot;, AllowedExtensions);
+    
+    string fullName = $&quot;{Model.FirstName} {Model.LastName}&quot;;
+
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/profile.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;div class=&quot;profile-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+        
+        &lt;!-- Edit Profile Header --&gt;
+        &lt;div class=&quot;profile-header-card&quot;&gt;
+            &lt;div class=&quot;text-center mb-4&quot;&gt;
+                &lt;h2 class=&quot;text-wrap-blue&quot;&gt;
+                    &lt;i class=&quot;bi bi-pencil-square me-2&quot;&gt;&lt;/i&gt;
+                    Edit Filmmaker Profile
+                &lt;/h2&gt;
+                &lt;p class=&quot;text-muted&quot;&gt;Update your profile information&lt;/p&gt;
+            &lt;/div&gt;
+
+            &lt;form asp-area=&quot;&quot; asp-controller=&quot;Profile&quot; asp-action=&quot;EditFilmmaker&quot; asp-route-slug=&quot;@SlugGenerator.GenerateSlug(fullName)&quot;
+                  method=&quot;post&quot; enctype=&quot;multipart/form-data&quot;&gt;
+                &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;text-danger mb-3&quot;&gt;&lt;/div&gt;
+
+                &lt;!-- Profile Image Upload --&gt;
+                &lt;div class=&quot;row mb-4&quot;&gt;
+                    &lt;div class=&quot;col-md-4 text-center&quot;&gt;
+                        
+                        &lt;div class=&quot;profile-image-container&quot;&gt;
+                            &lt;img src=&quot;@Model.CurrentProfileImagePath&quot;
+                                 id=&quot;profilePreview&quot;
+                                 alt=&quot;Profile Preview&quot;
+                                 class=&quot;profile-image&quot;&gt;
+                            &lt;label for=&quot;profileImageInput&quot; class=&quot;edit-icon-overlay&quot; title=&quot;Change Profile Picture&quot;&gt;
+                                &lt;i class=&quot;bi bi-camera-fill&quot;&gt;&lt;/i&gt;
+                            &lt;/label&gt;
+                            
+                            &lt;input type=&quot;hidden&quot; asp-for=&quot;CurrentProfileImagePath&quot; /&gt;
+                        &lt;/div&gt;
+
+                        &lt;input type=&quot;file&quot;
+                               asp-for=&quot;ProfileImage&quot;
+                               id=&quot;profileImageInput&quot;
+                               class=&quot;d-none&quot;
+                               accept=&quot;image/*&quot;/&gt;
+
+                        &lt;small class=&quot;text-muted d-block mt-2&quot;&gt;Click the camera icon to change photo&lt;/small&gt;
+                        &lt;span asp-validation-for=&quot;ProfileImage&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;col-md-8&quot;&gt;
+                        &lt;div class=&quot;alert alert-info&quot;&gt;
+                            &lt;i class=&quot;bi bi-info-circle me-2&quot;&gt;&lt;/i&gt;
+                            &lt;strong&gt;Profile Picture Tips:&lt;/strong&gt;
+                            &lt;ul class=&quot;mb-0 mt-2&quot;&gt;
+                                &lt;li&gt;Use a clear photo of you (optional)&lt;/li&gt;
+                                &lt;li&gt;Maximum file size: @MegaBytesBase MB&lt;/li&gt;
+                                &lt;li&gt;Supported formats: @allowedExtensions&lt;/li&gt;
+                            &lt;/ul&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Personal Information Section --&gt;
+                &lt;div class=&quot;section-card&quot;&gt;
+                    &lt;div class=&quot;section-header&quot;&gt;
+                        &lt;i class=&quot;bi bi-person-fill me-2&quot;&gt;&lt;/i&gt;
+                        &lt;h3&gt;Personal Information&lt;/h3&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;row&quot;&gt;
+                        &lt;!-- First Name --&gt;
+                        &lt;div class=&quot;col-md-6 mb-3&quot;&gt;
+                            &lt;label asp-for=&quot;FirstName&quot; class=&quot;form-label&quot;&gt;First Name *&lt;/label&gt;
+                            &lt;input asp-for=&quot;FirstName&quot; class=&quot;form-control&quot; placeholder=&quot;John&quot; /&gt;
+                            &lt;span asp-validation-for=&quot;FirstName&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Last Name --&gt;
+                        &lt;div class=&quot;col-md-6 mb-3&quot;&gt;
+                            &lt;label asp-for=&quot;LastName&quot; class=&quot;form-label&quot;&gt;Last Name *&lt;/label&gt;
+                            &lt;input asp-for=&quot;LastName&quot; class=&quot;form-control&quot; placeholder=&quot;Doe&quot; /&gt;
+                            &lt;span asp-validation-for=&quot;LastName&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;row&quot;&gt;
+                        &lt;!-- Nickname --&gt;
+                        &lt;div class=&quot;col-md-6 mb-3&quot;&gt;
+                            &lt;label asp-for=&quot;Nickname&quot; class=&quot;form-label&quot;&gt;Nickname (optional)&lt;/label&gt;
+                            &lt;input asp-for=&quot;Nickname&quot; class=&quot;form-control&quot; placeholder=&quot;JD&quot; /&gt;
+                            &lt;span asp-validation-for=&quot;Nickname&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Phone Number --&gt;
+                        &lt;div class=&quot;col-md-6 mb-3&quot;&gt;
+                            &lt;label asp-for=&quot;PhoneNumber&quot; class=&quot;form-label&quot;&gt;Phone Number *&lt;/label&gt;
+                            &lt;input asp-for=&quot;PhoneNumber&quot; class=&quot;form-control&quot; placeholder=&quot;0878123456&quot; /&gt;
+                            &lt;span asp-validation-for=&quot;PhoneNumber&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;!-- Email (Read-only) --&gt;
+                    &lt;div class=&quot;mb-3&quot;&gt;
+                        &lt;label class=&quot;form-label&quot;&gt;Email&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; class=&quot;form-control&quot; style=&quot;color: #6c757d&quot; value=&quot;@Model.Email&quot; readonly disabled /&gt;
+                        &lt;small class=&quot;text-muted&quot; style=&quot;color: #6c757d&quot; &gt;Email cannot be changed from profile settings&lt;/small&gt;
+                    &lt;/div&gt;
+
+                    &lt;!-- Biography --&gt;
+                    &lt;div class=&quot;mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;Biography&quot; class=&quot;form-label&quot;&gt;Biography (Optional)&lt;/label&gt;
+                        &lt;textarea asp-for=&quot;Biography&quot;
+                                  class=&quot;form-control&quot;
+                                  rows=&quot;6&quot;
+                                  placeholder=&quot;Share your experience, passion for filmmaking, and what drives you as a creator...&quot;
+                                  maxlength=&quot;4000&quot;
+                                  id=&quot;biographyField&quot;&gt;&lt;/textarea&gt;
+                        &lt;span asp-validation-for=&quot;Biography&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                        &lt;small class=&quot;form-text text-muted&quot;&gt;
+                            &lt;span id=&quot;bioCharCount&quot;&gt;0&lt;/span&gt; / @BiographyMaxLength characters
+                        &lt;/small&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Action Buttons --&gt;
+                &lt;div class=&quot;py-4 d-flex justify-content-center flex-wrap gap-5&quot;&gt;
+                    &lt;button type=&quot;submit&quot; 
+                            class=&quot;btn btn-custom btn-lg&quot;&gt;
+                        &lt;i class=&quot;bi bi-check-circle me-2&quot;&gt;&lt;/i&gt;Save Changes
+                    &lt;/button&gt;
+                    
+                    &lt;a asp-area=&quot;&quot; 
+                       asp-controller=&quot;Profile&quot; 
+                       asp-action=&quot;FilmmakerProfile&quot; 
+                       asp-route-slug=&quot;@SlugGenerator.GenerateSlug(fullName)&quot;
+                       class=&quot;btn btn-outline-secondary btn-lg&quot;&gt;
+                        &lt;i class=&quot;bi bi-x-circle me-2&quot;&gt;&lt;/i&gt;Cancel
+                    &lt;/a&gt;
+                    
+                    &lt;a asp-area=&quot;Identity&quot;
+                       asp-page=&quot;/Account/Manage/Email&quot;
+                       class=&quot;btn btn-custom btn-lg&quot;&gt;
+                        &lt;i class=&quot;bi bi-gear&quot;&gt;&lt;/i&gt; Manage your account
+                    &lt;/a&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;partial name=&quot;_ValidationScriptsPartial&quot;/&gt;
+    
+    &lt;script src=&quot;~/js/profile/profile-edit.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,5,9,55,0],[10,5,10,69,0],[12,5,12,61,0]]);
+    </script>
+  </body>
+</html>

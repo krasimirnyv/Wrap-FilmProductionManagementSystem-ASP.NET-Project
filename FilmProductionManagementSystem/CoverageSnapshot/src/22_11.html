@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/SceneConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+using GCommon.Enums;
+
+using static Common.EntityIdentificationConstants;
+
+public class SceneConfiguration : IEntityTypeConfiguration&lt;Scene&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;Scene&gt; entity)
+    {
+        entity
+            .HasOne(s =&gt; s.Production)
+            .WithMany(p =&gt; p.Scenes)
+            .HasForeignKey(s =&gt; s.ProductionId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasIndex(s =&gt; new { s.ProductionId, s.SceneNumber });
+
+        entity.HasData(ScenesSeed);
+    }
+    
+    private static readonly Scene[] ScenesSeed =
+    [
+        // Production 01 - &quot;Test Film&quot;
+        new()
+        {
+            Id = SceneId_TestFilm_01,
+            ProductionId = ProductionIdTestFilm,
+            SceneNumber = 1,
+            SceneType = SceneType.Interior,
+            SceneName = &quot;Coffee Shop Conversation&quot;,
+            Location = &quot;Downtown Coffee Shop&quot;,
+            Description = &quot;A tense meeting sets the stakes for the story.&quot;
+        },
+        new()
+        {
+            Id = SceneId_TestFilm_02,
+            ProductionId = ProductionIdTestFilm,
+            SceneNumber = 2,
+            SceneType = SceneType.Exterior,
+            SceneName = &quot;Street Chase&quot;,
+            Location = &quot;Main Boulevard&quot;,
+            Description = &quot;Fast-paced pursuit through the city streets.&quot;
+        },
+        new()
+        {
+            Id = SceneId_TestFilm_03,
+            ProductionId = ProductionIdTestFilm,
+            SceneNumber = 3,
+            SceneType = SceneType.InteriorExterior,
+            SceneName = &quot;Apartment Reveal&quot;,
+            Location = &quot;Character A Apartment&quot;,
+            Description = &quot;Key evidence is discovered.&quot;
+        },
+
+        // Production 02 - &quot;Midnight Dreams&quot;
+        new()
+        {
+            Id = SceneId_MidnightDreams_01,
+            ProductionId = ProductionIdMidnightDreams,
+            SceneNumber = 1,
+            SceneType = SceneType.Interior,
+            SceneName = &quot;Interrogation Room&quot;,
+            Location = &quot;Police Station&quot;,
+            Description = &quot;A suspect breaks under pressure.&quot;
+        },
+        new()
+        {
+            Id = SceneId_MidnightDreams_02,
+            ProductionId = ProductionIdMidnightDreams,
+            SceneNumber = 2,
+            SceneType = SceneType.Exterior,
+            SceneName = &quot;Rooftop Argument&quot;,
+            Location = &quot;Office Building Rooftop&quot;,
+            Description = &quot;Conflict escalates with a dramatic skyline backdrop.&quot;
+        },
+
+        // Production 03 - &quot;Paper Planes&quot;
+        new()
+        {
+            Id = SceneId_PaperPlanes_01,
+            ProductionId = ProductionIdPaperPlanes,
+            SceneNumber = 1,
+            SceneType = SceneType.Exterior,
+            SceneName = &quot;Night Alley Encounter&quot;,
+            Location = &quot;Old Town Alley&quot;,
+            Description = &quot;A mysterious figure appears in the shadows.&quot;
+        },
+        new()
+        {
+            Id = SceneId_PaperPlanes_02,
+            ProductionId = ProductionIdPaperPlanes,
+            SceneNumber = 2,
+            SceneType = SceneType.Interior,
+            SceneName = &quot;Workshop Planning&quot;,
+            Location = &quot;Garage Workshop&quot;,
+            Description = &quot;The team plans the next move.&quot;
+        },
+
+        // Production 04 - &quot;The Last Take&quot;
+        new()
+        {
+            Id = SceneId_TheLastTake_01,
+            ProductionId = ProductionIdTheLastTake,
+            SceneNumber = 1,
+            SceneType = SceneType.Interior,
+            SceneName = &quot;Hospital Corridor&quot;,
+            Location = &quot;City Hospital&quot;,
+            Description = &quot;Emotional turning point for the lead character.&quot;
+        },
+        new()
+        {
+            Id = SceneId_TheLastTake_02,
+            ProductionId = ProductionIdTheLastTake,
+            SceneNumber = 2,
+            SceneType = SceneType.Exterior,
+            SceneName = &quot;Park Reunion&quot;,
+            Location = &quot;Central Park&quot;,
+            Description = &quot;Two characters reconcile after a fallout.&quot;
+        },
+        new()
+        {
+            Id = SceneId_TheLastTake_03,
+            ProductionId = ProductionIdTheLastTake,
+            SceneNumber = 3,
+            SceneType = SceneType.Exterior,
+            SceneName = &quot;Finale: Sunrise Cliff&quot;,
+            Location = &quot;Cliffside Overlook&quot;,
+            Description = &quot;Closing moment with a hopeful sunrise.&quot;
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,6,0],[15,9,19,47,0],[21,9,21,69,0],[23,9,23,36,0],[24,5,24,6,0],[26,5,135,7,0]]);
+    </script>
+  </body>
+</html>

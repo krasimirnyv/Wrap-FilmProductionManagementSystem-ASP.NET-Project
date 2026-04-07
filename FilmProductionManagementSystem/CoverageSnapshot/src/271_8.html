@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/Production/AllProductionsIndexViewModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.Production;
+
+public class AllProductionsIndexViewModel
+{
+    public int PageNumber { get; set; } = 1;
+
+    public int TotalPages { get; set; } = 1;
+
+    public int ShowingPages { get; set; } = 3;
+    
+    public IReadOnlyCollection&lt;ProductionViewModel&gt; Productions { get; set; } 
+        = new List&lt;ProductionViewModel&gt;();
+    
+    public int Count =&gt; Productions.Count;
+    
+    public int TotalCount { get; set; }
+    
+    public string? SelectedStatus { get; set; }
+    
+    public bool? IsActive { get; set; }
+
+    public bool IsUserCrew { get; set; } = true;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[5,43,5,44,0],[7,43,7,44,0],[9,45,9,46,0],[12,11,12,42,0],[14,25,14,42,0],[22,44,22,48,0]]);
+    </script>
+  </body>
+</html>

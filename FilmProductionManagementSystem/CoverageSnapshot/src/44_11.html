@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Repository/FindPeopleRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Repository;
+
+using Microsoft.EntityFrameworkCore;
+
+using Interfaces;
+using Models;
+using Models.MappingEntities;
+using Services.Models.FindPeople;
+using GCommon.Enums;
+
+public class FindPeopleRepository(FilmProductionDbContext dbContext) : BaseRepository(dbContext), IFindPeopleRepository
+{
+    public async Task&lt;(IReadOnlyCollection&lt;FilmmakerListDto&gt; Filmmakers, int TotalCount)&gt; GetFilmmakersPagedAsync
+        (int skip, int take, string? search, CrewRoleType? roleType, Guid? productionId)
+    {
+        IQueryable&lt;Crew&gt; query = Context!
+            .CrewMembers
+            .Include(c =&gt; c.Skills)
+            .AsNoTracking();
+        
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            string normalized = search.Trim().ToLower();
+            
+            query = query.Where(c =&gt;
+                c.FirstName.ToLower().Contains(normalized) ||
+                c.LastName.ToLower().Contains(normalized)  ||
+                (c.Nickname != null &amp;&amp; c.Nickname.ToLower().Contains(normalized)));
+        }
+
+        if (roleType.HasValue)
+            query = query.Where(c =&gt; c.Skills.Any(s =&gt; s.RoleType == roleType));
+        
+        HashSet&lt;Guid&gt; alreadyInProduction = [];
+        if (productionId.HasValue)
+        {
+            alreadyInProduction = (await Context!
+                    .ProductionsCrewMembers
+                    .AsNoTracking()
+                    .Where(pc =&gt; pc.ProductionId == productionId.Value)
+                    .Select(pc =&gt; pc.CrewMemberId)
+                    .ToListAsync())
+                .ToHashSet();
+        };
+        
+        IReadOnlyCollection&lt;FilmmakerListDto&gt; filmmakers = await query
+            .OrderBy(c =&gt; c.FirstName)
+            .ThenBy(c =&gt; c.LastName)
+            .Skip(skip)
+            .Take(take)
+            .Select(c =&gt; new FilmmakerListDto
+            {
+                CrewId = c.Id,
+                ProfileImagePath = c.ProfileImagePath!,
+                FullName = c.FirstName + &quot; &quot; + c.LastName,
+                Nickname = c.Nickname,
+                Role = c.Skills
+                    .OrderByDescending(s =&gt; s.RoleType)
+                    .Select(s =&gt; s.RoleType.ToString())
+                    .FirstOrDefault(),
+                IsAlreadyInProduction = alreadyInProduction.Contains(c.Id)
+            })
+            .ToListAsync();
+
+        int totalCount = await query.CountAsync();
+
+        return (filmmakers, totalCount);
+    }
+
+    public async Task&lt;(IReadOnlyCollection&lt;ActorListDto&gt; Actors, int TotalCount)&gt; GetActorsPagedAsync
+        (int skip, int take, string? search, byte? age, string? gender, Guid? productionId)
+    {
+        IQueryable&lt;Cast&gt; query = Context!
+            .CastMembers
+            .Include(c =&gt; c.User)
+            .AsNoTracking();
+        
+         if (!string.IsNullOrWhiteSpace(search))
+        {
+            string normalized = search.Trim().ToLower();
+            
+            query = query.Where(c =&gt;
+                c.FirstName.ToLower().Contains(normalized) ||
+                c.LastName.ToLower().Contains(normalized)  ||
+                (c.Nickname != null &amp;&amp; c.Nickname.ToLower().Contains(normalized)));
+        }
+
+        if (!string.IsNullOrWhiteSpace(gender) &amp;&amp; Enum.TryParse(gender, out GenderType genderType))
+            query = query.Where(c =&gt; c.Gender == genderType);
+
+        if (age.HasValue)
+        {
+            DateTime today = DateTime.Today;
+
+            DateTime minBirthDate = today.AddYears(-(age.Value + 1)).AddDays(1);
+            DateTime maxBirthDateExclusive = today.AddYears(-age.Value).AddDays(1);
+
+            query = query.Where(c =&gt; c.BirthDate &gt;= minBirthDate &amp;&amp;
+                                     c.BirthDate &lt; maxBirthDateExclusive);
+        }
+        
+        HashSet&lt;Guid&gt; alreadyInProduction = [];
+        if (productionId.HasValue)
+        {
+            alreadyInProduction = (await Context
+                    .ProductionsCastMembers
+                    .AsNoTracking()
+                    .Where(pc =&gt; pc.ProductionId == productionId.Value)
+                    .Select(pc =&gt; pc.CastMemberId)
+                    .ToListAsync())
+                .ToHashSet();
+        };
+        
+        List&lt;ActorListDto&gt; actors = await query
+            .OrderBy(c =&gt; c.FirstName)
+            .ThenBy(c =&gt; c.LastName)
+            .Skip(skip)
+            .Take(take)
+            .Select(c =&gt; new ActorListDto
+            {
+                CastId = c.Id,
+                ProfileImagePath = c.ProfileImagePath!,
+                FullName = c.FirstName + &quot; &quot; + c.LastName,
+                Nickname = c.Nickname,
+                Age = c.Age,
+                Gender = c.Gender.ToString(),
+                IsAlreadyInProduction = alreadyInProduction.Contains(c.Id)
+            })
+            .ToListAsync();
+
+        int totalCount = await query.CountAsync();
+
+        return (actors, totalCount);
+    }
+
+    public async Task AddCrewToProductionAsync(Guid productionId, Guid crewId, CrewRoleType roleType)
+    {
+        bool isAlreadyExists = await Context!
+            .ProductionsCrewMembers
+            .AnyAsync(pc =&gt; pc.ProductionId == productionId &amp;&amp; pc.CrewMemberId == crewId);
+
+        if (isAlreadyExists)
+            return;
+
+        ProductionCrew newProductionCrew = new()
+        {
+            ProductionId = productionId,
+            CrewMemberId = crewId,
+            RoleType = roleType
+        };
+        
+        Crew crew = await Context!
+            .CrewMembers
+            .SingleAsync(c =&gt; c.Id == crewId);
+
+        crew.IsActive = true;
+        await Context!.ProductionsCrewMembers.AddAsync(newProductionCrew);
+    }
+
+    public async Task RemoveCrewFromProductionAsync(Guid productionId, Guid crewId)
+    {
+        ProductionCrew? productionCrew = await Context!
+            .ProductionsCrewMembers
+            .SingleOrDefaultAsync(pc =&gt; pc.ProductionId == productionId &amp;&amp; pc.CrewMemberId == crewId);
+        
+        if (productionCrew is not null)
+            Context!.ProductionsCrewMembers.Remove(productionCrew);
+        
+        Crew crew = await Context!
+            .CrewMembers
+            .Include(c =&gt; c.CrewMemberProductions)
+            .SingleAsync(c =&gt; c.Id == crewId);
+
+        if (!crew.CrewMemberProductions.Any())
+            crew.IsActive = false;
+    }
+
+    public async Task AddCastToProductionAsync(Guid productionId, Guid castId, string roleName)
+    {
+        bool isAlreadyExists = await Context!
+            .ProductionsCastMembers
+            .AnyAsync(pc =&gt; pc.ProductionId == productionId &amp;&amp; pc.CastMemberId == castId);
+
+        if (isAlreadyExists)
+            return;
+
+        ProductionCast newProductionCast = new()
+        {
+            ProductionId = productionId,
+            CastMemberId = castId,
+            Role = roleName
+        };
+        
+        Cast cast = await Context!
+            .CastMembers
+            .SingleAsync(c =&gt; c.Id == castId);
+        
+        cast.IsActive = true;
+        await Context!.ProductionsCastMembers.AddAsync(newProductionCast);
+    }
+
+    public async Task RemoveCastFromProductionAsync(Guid productionId, Guid castId)
+    {
+        ProductionCast? productionCast = await Context!
+            .ProductionsCastMembers
+            .SingleOrDefaultAsync(pc =&gt; pc.ProductionId == productionId &amp;&amp; pc.CastMemberId == castId);
+
+        if (productionCast is not null)
+            Context!.ProductionsCastMembers.Remove(productionCast);
+        
+        Cast cast = await Context!
+            .CastMembers
+            .Include(c =&gt; c.CastMemberProductions)
+            .SingleAsync(c =&gt; c.Id == castId);
+
+        if (!cast.CastMemberProductions.Any())
+            cast.IsActive = false;
+    }
+
+    public async Task&lt;int&gt; SaveAllChangesAsync()
+    {
+        int affectedRows = await SaveChangesAsync();
+        return affectedRows;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,72,11,97,0],[15,5,15,6,0],[16,9,19,29,0],[21,9,21,48,0],[22,9,22,10,0],[23,13,23,57,0],[25,13,28,84,0],[29,9,29,10,0],[31,9,31,31,0],[32,13,32,81,0],[34,9,34,48,0],[35,9,35,35,0],[36,9,36,10,0],[37,13,43,30,0],[44,9,44,10,0],[44,10,44,11,0],[46,9,63,28,0],[65,9,65,51,0],[67,9,67,41,0],[68,5,68,6,0],[72,5,72,6,0],[73,9,76,29,0],[78,10,78,49,0],[79,9,79,10,0],[80,13,80,57,0],[82,13,85,84,0],[86,9,86,10,0],[88,9,88,100,0],[89,13,89,62,0],[91,9,91,26,0],[92,9,92,10,0],[93,13,93,45,0],[95,13,95,81,0],[96,13,96,84,0],[98,13,99,75,0],[100,9,100,10,0],[102,9,102,48,0],[103,9,103,35,0],[104,9,104,10,0],[105,13,111,30,0],[112,9,112,10,0],[112,10,112,11,0],[114,9,129,28,0],[131,9,131,51,0],[133,9,133,37,0],[134,5,134,6,0],[137,5,137,6,0],[138,9,140,91,0],[142,9,142,29,0],[143,13,143,20,0],[145,9,150,11,0],[152,9,154,47,0],[156,9,156,30,0],[157,9,157,75,0],[158,5,158,6,0],[161,5,161,6,0],[162,9,164,103,0],[166,9,166,40,0],[167,13,167,68,0],[169,9,172,47,0],[174,9,174,47,0],[175,13,175,35,0],[176,5,176,6,0],[179,5,179,6,0],[180,9,182,91,0],[184,9,184,29,0],[185,13,185,20,0],[187,9,192,11,0],[194,9,196,47,0],[198,9,198,30,0],[199,9,199,75,0],[200,5,200,6,0],[203,5,203,6,0],[204,9,206,103,0],[208,9,208,40,0],[209,13,209,68,0],[211,9,214,47,0],[216,9,216,47,0],[217,13,217,35,0],[218,5,218,6,0],[221,5,221,6,0],[222,9,222,53,0],[223,9,223,29,0],[224,5,224,6,0]]);
+    </script>
+  </body>
+</html>

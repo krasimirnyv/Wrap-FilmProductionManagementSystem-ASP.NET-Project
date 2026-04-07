@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/EnableAuthenticator.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@page
+@model EnableAuthenticatorModel
+@{
+    ViewData[&quot;Title&quot;] = &quot;Two-factor authentication (2FA)&quot;;
+    ViewData[&quot;ActivePage&quot;] = ManageNavPages.TwoFactorAuthentication;
+}
+
+&lt;div class=&quot;dashboard-wrapper rounded-3&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+
+        &lt;partial name=&quot;_StatusMessage&quot; for=&quot;StatusMessage&quot; /&gt;
+
+        @* Header *@
+        &lt;div class=&quot;production-header-card text-center&quot;&gt;
+            &lt;i class=&quot;bi bi-shield-lock-fill&quot; style=&quot;font-size:2.5rem; color:#1976d2;&quot;&gt;&lt;/i&gt;
+            &lt;h2 class=&quot;fw-bold mt-3 mb-1&quot; style=&quot;color:var(--wrap-dark-blue);&quot;&gt;
+                Two-factor authentication (2FA)
+            &lt;/h2&gt;
+            &lt;p class=&quot;text-muted mb-0&quot;&gt;
+                Protect your account by enabling an authenticator app.
+            &lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;row g-4&quot;&gt;
+
+            &lt;div class=&quot;section-card h-100&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-shield-lock-fill me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Set up authenticator app&lt;/h3&gt;
+                &lt;/div&gt;
+
+                &lt;p class=&quot;text-muted mb-4&quot;&gt;
+                    Follow the steps below to connect an authenticator app (Microsoft Authenticator / Google Authenticator).
+                &lt;/p&gt;
+
+                &lt;div class=&quot;mb-4&quot;&gt;
+                    &lt;div class=&quot;d-flex align-items-start gap-3&quot;&gt;
+                        &lt;div class=&quot;stat-icon success&quot; style=&quot;width:46px; height:46px;&quot;&gt;
+                            &lt;i class=&quot;bi bi-phone&quot; style=&quot;font-size:1.25rem;&quot;&gt;&lt;/i&gt;
+                        &lt;/div&gt;
+                        &lt;div&gt;
+                            &lt;h5 class=&quot;mb-1&quot;&gt;1) Install an authenticator app&lt;/h5&gt;
+                            &lt;p class=&quot;text-muted mt-3 mb-3&quot;&gt;
+                                Microsoft Authenticator:
+                                &lt;br /&gt;
+                                &lt;a href=&quot;https://go.microsoft.com/fwlink/?Linkid=825072&quot;
+                                   class=&quot;btn btn-custom&quot;
+                                   alt=&quot;Microsoft Authenticator on Android&quot;&gt;
+                                    &lt;i class=&quot;bi bi-android2&quot;&gt;&lt;/i&gt;Android
+                                &lt;/a&gt;
+                                &lt;a href=&quot;https://go.microsoft.com/fwlink/?Linkid=825073&quot;
+                                   class=&quot;btn btn-custom&quot;
+                                   alt=&quot;Microsoft Authenticator on iOS&quot;&gt;
+                                    &lt;i class=&quot;bi bi-apple&quot;&gt;&lt;/i&gt;iOS
+                                &lt;/a&gt;
+                            &lt;/p&gt;
+                            &lt;p class=&quot;text-muted mt-3 mb-3&quot;&gt;
+                                Google Authenticator:
+                                &lt;br /&gt;
+                                &lt;a href=&quot;https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&amp;amp;hl=en&quot;
+                                   class=&quot;btn btn-custom&quot;
+                                   alt=&quot;Google Authenticator on Android&quot;&gt;
+                                    &lt;i class=&quot;bi bi-android2&quot;&gt;&lt;/i&gt;Android
+                                    &lt;/a&gt;
+                                &lt;a href=&quot;https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8&quot;
+                                   class=&quot;btn btn-custom&quot;
+                                   alt=&quot;Google Authenticator on iOS&quot;&gt;
+                                    &lt;i class=&quot;bi bi-apple&quot;&gt;&lt;/i&gt;iOS
+                                &lt;/a&gt;
+                            &lt;/p&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;mb-4&quot;&gt;
+                    &lt;div class=&quot;d-flex align-items-start gap-3&quot;&gt;
+                        &lt;div class=&quot;stat-icon primary&quot; style=&quot;width:46px; height:46px;&quot;&gt;
+                            &lt;i class=&quot;bi bi-qr-code&quot; style=&quot;font-size:1.25rem;&quot;&gt;&lt;/i&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;w-100&quot;&gt;
+                            &lt;h5 class=&quot;mb-1&quot;&gt;2) Scan the QR code&lt;/h5&gt;
+                            &lt;p class=&quot;text-muted mb-2&quot;&gt;
+                                Scan the QR code or enter this key:
+                                &lt;kbd class=&quot;ms-1&quot;&gt;@Model.SharedKey&lt;/kbd&gt;
+                            &lt;/p&gt;
+
+                            &lt;div class=&quot;rounded-3 p-5 p-lg-1 mx-3 alert-info d-flex gap-2 align-items-center&quot;&gt;
+                                &lt;i class=&quot;bi bi-info-circle-fill flex-shrink-0&quot;&gt;&lt;/i&gt;
+                                &lt;span&gt;Spaces and casing do not matter.&lt;/span&gt;
+                            &lt;/div&gt;
+
+                            &lt;div class=&quot;d-flex justify-content mt-5&quot;&gt;
+                                &lt;div class=&quot;section-card&quot; style=&quot;max-width: 320px; width: 100%;&quot;&gt;
+                                    &lt;div class=&quot;text-center&quot;&gt;
+                                        &lt;div id=&quot;qrCode&quot; class=&quot;d-flex justify-content-center&quot;&gt;&lt;/div&gt;
+                                        &lt;div id=&quot;qrCodeData&quot; data-url=&quot;@Model.AuthenticatorUri&quot;&gt;&lt;/div&gt;
+                                        &lt;div class=&quot;text-muted mt-2&quot; style=&quot;font-size:0.9rem;&quot;&gt;
+                                            Scan with your authenticator app
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;div&gt;
+                    &lt;div class=&quot;d-flex align-items-start gap-3&quot;&gt;
+                        &lt;div class=&quot;stat-icon&quot; style=&quot;width:46px; height:46px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;&quot;&gt;
+                            &lt;i class=&quot;bi bi-shield-check&quot; style=&quot;font-size:1.25rem;&quot;&gt;&lt;/i&gt;
+                        &lt;/div&gt;
+                        &lt;div&gt;
+                            &lt;h5 class=&quot;mb-1&quot;&gt;3) Verify code&lt;/h5&gt;
+                            &lt;p class=&quot;text-muted mb-0&quot;&gt;
+                                Enter the 6-digit code from the authenticator app to finish setup.
+                            &lt;/p&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;section-card h-100&quot;&gt;
+            &lt;div class=&quot;section-header&quot;&gt;
+                &lt;i class=&quot;bi bi-key-fill me-2&quot;&gt;&lt;/i&gt;
+                &lt;h3&gt;Verification&lt;/h3&gt;
+            &lt;/div&gt;
+
+            &lt;form id=&quot;send-code&quot; method=&quot;post&quot; class=&quot;mt-2&quot;&gt;
+                &lt;div class=&quot;form-floating mb-3&quot;&gt;
+                    &lt;input asp-for=&quot;Input.Code&quot;
+                           class=&quot;form-control&quot;
+                           autocomplete=&quot;off&quot;
+                           placeholder=&quot;Enter code&quot; /&gt;
+                    &lt;label asp-for=&quot;Input.Code&quot; class=&quot;control-label form-label&quot;&gt;Verification Code&lt;/label&gt;
+                    &lt;span asp-validation-for=&quot;Input.Code&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                &lt;/div&gt;
+
+                &lt;button type=&quot;submit&quot; class=&quot;w-100 btn btn-production-success btn-lg&quot;&gt;
+                    &lt;i class=&quot;bi bi-check2-circle me-2&quot;&gt;&lt;/i&gt;Verify &amp; Enable 2FA
+                &lt;/button&gt;
+
+                &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;text-danger mt-3&quot; role=&quot;alert&quot;&gt;&lt;/div&gt;
+            &lt;/form&gt;
+
+            &lt;div class=&quot;rounded-3 p-5 p-lg-1 mx-3 alert-warning mt-4 mb-0 d-flex gap-2 align-items-center&quot;&gt;
+                &lt;i class=&quot;bi bi-exclamation-triangle-fill flex-shrink-0&quot;&gt;&lt;/i&gt;
+                &lt;span&gt;
+                    Save your recovery codes after enabling 2FA. They’re needed if you lose access to your authenticator.
+                &lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+&lt;/div&gt;
+@section Scripts {
+    &lt;partial name=&quot;_ValidationScriptsPartial&quot; /&gt;
+
+    &lt;script type=&quot;text/javascript&quot; src=&quot;~/lib/qrcode/qrcode.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;~/js/profile/profile-qr-code.js&quot;&gt;&lt;/script&gt;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,59,0],[5,5,5,69,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ShootingDayConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+
+using static Common.EntityIdentificationConstants;
+
+public class ShootingDayConfiguration : IEntityTypeConfiguration&lt;ShootingDay&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;ShootingDay&gt; entity)
+    {
+        entity
+            .HasOne(sd =&gt; sd.Production)
+            .WithMany(p =&gt; p.ShootingDays)
+            .HasForeignKey(sd =&gt; sd.ProductionId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasData(ShootingDaysSeed);
+    }
+    
+    private static readonly DateTime SeedDayUtcBase = new(2026, 03, 20, 08, 00, 00, DateTimeKind.Utc);
+
+    private static readonly ShootingDay[] ShootingDaysSeed =
+    [
+        // Production 01 - &quot;Test Film&quot;
+        new()
+        {
+            Id = ShootingDayId_TestFilm_01,
+            ProductionId = ProductionIdTestFilm,
+            Date = SeedDayUtcBase.AddDays(0),
+            Notes = &quot;Day 1: Coffee shop scene coverage.&quot;
+        },
+        new()
+        {
+            Id = ShootingDayId_TestFilm_02,
+            ProductionId = ProductionIdTestFilm,
+            Date = SeedDayUtcBase.AddDays(1),
+            Notes = &quot;Day 2: Pickups and insert shots.&quot;
+        },
+
+        // Production 02 - &quot;Midnight Dreams&quot;
+        new()
+        {
+            Id = ShootingDayId_MidnightDreams_01,
+            ProductionId = ProductionIdMidnightDreams,
+            Date = SeedDayUtcBase.AddDays(3),
+            Notes = &quot;Night exterior sequence.&quot;
+        },
+        new()
+        {
+            Id = ShootingDayId_MidnightDreams_02,
+            ProductionId = ProductionIdMidnightDreams,
+            Date = SeedDayUtcBase.AddDays(4),
+            Notes = &quot;Studio interiors + dialogue scenes.&quot;
+        },
+
+        // Production 03 - &quot;Paper Planes&quot;
+        new()
+        {
+            Id = ShootingDayId_PaperPlanes_01,
+            ProductionId = ProductionIdPaperPlanes,
+            Date = SeedDayUtcBase.AddDays(6),
+            Notes = &quot;School hallway + classroom scenes.&quot;
+        },
+
+        // Production 04 - &quot;The Last Take&quot;
+        new()
+        {
+            Id = ShootingDayId_TheLastTake_01,
+            ProductionId = ProductionIdTheLastTake,
+            Date = SeedDayUtcBase.AddDays(8),
+            Notes = &quot;Stage scenes and rehearsal coverage.&quot;
+        },
+        new()
+        {
+            Id = ShootingDayId_TheLastTake_02,
+            ProductionId = ProductionIdTheLastTake,
+            Date = SeedDayUtcBase.AddDays(9),
+            Notes = &quot;Close-ups, alt takes, safety shots.&quot;
+        },
+
+        // Production 05 - &quot;Neon Skyline&quot;
+        new()
+        {
+            Id = ShootingDayId_NeonSkyline_01,
+            ProductionId = ProductionIdNeonSkyline,
+            Date = SeedDayUtcBase.AddDays(11),
+            Notes = &quot;City night montage (neon locations).&quot;
+        },
+
+        // Production 06 - &quot;Wild Tracks&quot;
+        new()
+        {
+            Id = ShootingDayId_WildTracks_01,
+            ProductionId = ProductionIdWildTracks,
+            Date = SeedDayUtcBase.AddDays(13),
+            Notes = &quot;Outdoor travel sequence.&quot;
+        },
+
+        // Production 07 - &quot;On Hold&quot;
+        new()
+        {
+            Id = ShootingDayId_OnHold_01,
+            ProductionId = ProductionIdOnHold,
+            Date = SeedDayUtcBase.AddDays(15),
+            Notes = &quot;Planned shoot (project currently on hold).&quot;
+        },
+
+        // Production 08 - &quot;Reshoot Season&quot;
+        new()
+        {
+            Id = ShootingDayId_ReshootSeason_01,
+            ProductionId = ProductionIdReshootSeason,
+            Date = SeedDayUtcBase.AddDays(17),
+            Notes = &quot;Reshoot day: continuity fixes + inserts.&quot;
+        },
+        
+        // Production 09 - &quot;Color &amp; Noise&quot;
+        new()
+        {
+            Id = ShootingDayId_ColorAndNoise_01,
+            ProductionId = ProductionIdColorAndNoise,
+            Date = SeedDayUtcBase.AddDays(19),
+            Notes = &quot;B-roll day for post-production needs.&quot;
+        },
+
+        // Production 10 - &quot;Festival Run&quot;
+        new()
+        {
+            Id = ShootingDayId_FestivalRun_01,
+            ProductionId = ProductionIdFestivalRun,
+            Date = SeedDayUtcBase.AddDays(21),
+            Notes = &quot;Press / promo shoot day.&quot;
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,5,13,6,0],[14,9,18,47,0],[20,9,20,42,0],[21,5,21,6,0],[23,5,23,103,0],[25,5,137,7,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/Email.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@page
+@model EmailModel
+@{
+    ViewData[&quot;Title&quot;] = &quot;Manage Email&quot;;
+    ViewData[&quot;ActivePage&quot;] = ManageNavPages.Email;
+}
+
+&lt;h3&gt;@ViewData[&quot;Title&quot;]&lt;/h3&gt;
+
+&lt;partial name=&quot;_StatusMessage&quot; for=&quot;StatusMessage&quot; /&gt;
+
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+        &lt;form id=&quot;email-form&quot; method=&quot;post&quot;&gt;
+            &lt;div asp-validation-summary=&quot;All&quot; class=&quot;text-danger&quot; role=&quot;alert&quot;&gt;&lt;/div&gt;
+            @if (Model.IsEmailConfirmed)
+            {
+                &lt;div class=&quot;form-floating mb-3 input-group&quot;&gt;
+                    &lt;input asp-for=&quot;Email&quot; class=&quot;form-control&quot; placeholder=&quot;Please enter your email.&quot; disabled /&gt;
+                        &lt;div class=&quot;input-group-append&quot;&gt;
+                            &lt;span class=&quot;h-100 input-group-text text-success font-weight-bold&quot;&gt;✓&lt;/span&gt;
+                        &lt;/div&gt;
+                    &lt;label asp-for=&quot;Email&quot; class=&quot;form-label&quot;&gt;&lt;/label&gt;
+                &lt;/div&gt;
+            }
+            else
+            {
+                &lt;div class=&quot;form-floating mb-3&quot;&gt;
+                    &lt;input asp-for=&quot;Email&quot; class=&quot;form-control&quot; placeholder=&quot;Please enter your email.&quot; disabled /&gt;
+                    &lt;label asp-for=&quot;Email&quot; class=&quot;form-label&quot;&gt;&lt;/label&gt;
+                    &lt;button id=&quot;email-verification&quot; type=&quot;submit&quot; asp-page-handler=&quot;SendVerificationEmail&quot; class=&quot;mt-3 btn btn-custom btn-sm&quot;&gt;Send verification email&lt;/button&gt;
+                &lt;/div&gt;
+            }
+            &lt;div class=&quot;form-floating mb-3&quot;&gt;
+                &lt;input asp-for=&quot;Input.NewEmail&quot; class=&quot;form-control&quot; autocomplete=&quot;email&quot; aria-required=&quot;true&quot; placeholder=&quot;Please enter new email.&quot; /&gt;
+                &lt;label asp-for=&quot;Input.NewEmail&quot; class=&quot;form-label&quot;&gt;&lt;/label&gt;
+                &lt;span asp-validation-for=&quot;Input.NewEmail&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+            &lt;/div&gt;
+            &lt;button id=&quot;change-email-button&quot; type=&quot;submit&quot; asp-page-handler=&quot;ChangeEmail&quot; class=&quot;w-100 btn btn-lg btn-primary&quot;&gt;Change email&lt;/button&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;partial name=&quot;_ValidationScriptsPartial&quot; /&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,40,0],[5,5,5,51,0]]);
+    </script>
+  </body>
+</html>

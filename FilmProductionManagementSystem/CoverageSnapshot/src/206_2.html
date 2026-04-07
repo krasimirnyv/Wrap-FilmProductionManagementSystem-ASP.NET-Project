@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Filmmaker/Views/Production/Edit.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model EditProductionInputModel
+
+@inject ISlugGenerator SlugGenerator;
+
+@{
+    ViewData[TitleDataKey] = &quot;Edit Production&quot;;
+    
+    IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; statusGroups = GetStatusTypeByAbstraction();
+
+    // Resolve which abstract phase the model&#39;s current StatusType belongs to,
+    // so the phase select can be pre-selected without any logic in the script block.
+    string currentPhase = statusGroups
+        .FirstOrDefault(kvp =&gt; kvp.Value.Contains(Model.StatusType))
+        .Key ?? string.Empty;
+    
+    string allowedExtensions = string.Join(&quot;, &quot;, AllowedExtensions);
+
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;div class=&quot;production-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+
+        @* ── Page Header ── *@
+        &lt;div class=&quot;production-header-card text-center&quot;&gt;
+            &lt;i class=&quot;bi bi-pencil-square&quot; style=&quot;font-size: 2.5rem; color: var(--wrap-blue);&quot;&gt;&lt;/i&gt;
+            &lt;h2 class=&quot;fw-bold mt-3 mb-1&quot; style=&quot;color: var(--wrap-dark-blue);&quot;&gt;Edit Production&lt;/h2&gt;
+            &lt;p class=&quot;text-muted mb-0&quot;&gt;Update the details for your film project&lt;/p&gt;
+        &lt;/div&gt;
+        
+        &lt;form asp-area=&quot;Filmmaker&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Edit&quot;
+              asp-route-slug=&quot;@SlugGenerator.GenerateSlug(Model.Title)&quot; method=&quot;post&quot;
+              enctype=&quot;multipart/form-data&quot; id=&quot;editProductionForm&quot;&gt;
+            &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;alert alert-danger&quot; role=&quot;alert&quot;&gt;&lt;/div&gt;
+
+            @Html.AntiForgeryToken()
+
+            &lt;input type=&quot;hidden&quot; asp-for=&quot;ProductionId&quot; /&gt;
+            &lt;input type=&quot;hidden&quot; asp-for=&quot;CurrentThumbnailPath&quot; /&gt;
+            
+            @* ── Thumbnail ── *@
+            &lt;div class=&quot;section-card&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-image me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Production Thumbnail&lt;/h3&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;row g-4 align-items-center&quot;&gt;
+                    &lt;div class=&quot;col-lg-5 col-md-6 text-center&quot;&gt;
+                        &lt;p class=&quot;info-label mb-2&quot;&gt;Current Thumbnail&lt;/p&gt;
+                        &lt;img src=&quot;@Model.CurrentThumbnailPath&quot;
+                             alt=&quot;Current Thumbnail of @Model.Title movie&quot;
+                             class=&quot;thumbnail-preview-img&quot;
+                             id=&quot;currentThumb&quot;/&gt;
+                        
+                        &lt;input type=&quot;hidden&quot; asp-for=&quot;CurrentThumbnailPath&quot; /&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div class=&quot;col-lg-7 col-md-6&quot;&gt;
+                        &lt;label for=&quot;thumbnailInput&quot;
+                               class=&quot;thumbnail-upload-box w-100 d-block&quot;
+                               id=&quot;uploadLabel&quot;&gt;
+                            &lt;i class=&quot;bi bi-cloud-upload&quot; style=&quot;font-size: 2rem; color: var(--wrap-blue);&quot;&gt;&lt;/i&gt;
+                            &lt;p class=&quot;mb-1 mt-2 fw-semibold&quot; style=&quot;color: var(--wrap-dark-blue);&quot;&gt;
+                                @(Model.CurrentThumbnailPath == DefaultThumbnailPath
+                                    ? ClickToReplaceMessage
+                                    : ClickToUploadMessage)
+                            &lt;/p&gt;
+                            &lt;small class=&quot;text-muted&quot;&gt;
+                                @allowedExtensions &#183; max @MegaBytesBase MB &#183; leave empty to keep current thumbnail
+                            &lt;/small&gt;
+                        &lt;/label&gt;
+
+                        &lt;input type=&quot;file&quot;
+                               asp-for=&quot;ThumbnailImage&quot;
+                               id=&quot;thumbnailInput&quot;
+                               class=&quot;d-none&quot;
+                               accept=&quot;image/*&quot; /&gt;
+
+                        &lt;span asp-validation-for=&quot;ThumbnailImage&quot; class=&quot;text-danger small&quot;&gt;&lt;/span&gt;
+
+                        &lt;div id=&quot;newPreviewWrap&quot; class=&quot;mt-3&quot; style=&quot;display:none;&quot;&gt;
+                            &lt;p class=&quot;info-label mb-1&quot;&gt;New Thumbnail Preview&lt;/p&gt;
+                            &lt;img id=&quot;newPreviewImg&quot; src=&quot;#&quot; alt=&quot;New Preview&quot; class=&quot;thumbnail-preview-img&quot; /&gt;
+                            &lt;button type=&quot;button&quot;
+                                    class=&quot;btn btn-sm btn-production-secondary mt-2&quot;
+                                    id=&quot;clearThumbnail&quot;&gt;
+                                &lt;i class=&quot;bi bi-x-circle me-1&quot;&gt;&lt;/i&gt;Clear selection
+                            &lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            @* ── Production Details ── *@
+            &lt;div class=&quot;section-card&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-film me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Production Details&lt;/h3&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;mb-4&quot;&gt;
+                    &lt;label asp-for=&quot;Title&quot; class=&quot;form-label&quot;&gt;
+                        &lt;i class=&quot;bi bi-cursor-text me-1&quot;&gt;&lt;/i&gt;Production Title *
+                    &lt;/label&gt;
+                    &lt;input asp-for=&quot;Title&quot; class=&quot;form-control form-control-lg&quot;
+                           placeholder=&quot;e.g. Midnight Dreams&quot; /&gt;
+                    &lt;span asp-validation-for=&quot;Title&quot; class=&quot;text-danger small&quot;&gt;&lt;/span&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;mb-4&quot;&gt;
+                    &lt;label asp-for=&quot;Description&quot; class=&quot;form-label&quot;&gt;
+                        &lt;i class=&quot;bi bi-text-paragraph me-1&quot;&gt;&lt;/i&gt;Description
+                        &lt;small class=&quot;text-muted fw-normal ms-1&quot;&gt;(optional)&lt;/small&gt;
+                    &lt;/label&gt;
+                    &lt;textarea asp-for=&quot;Description&quot; class=&quot;form-control&quot; rows=&quot;5&quot;
+                              placeholder=&quot;Share the story behind your production…&quot;
+                              id=&quot;descriptionTextarea&quot; maxlength=&quot;2000&quot;&gt;&lt;/textarea&gt;
+                    &lt;span asp-validation-for=&quot;Description&quot; class=&quot;text-danger small&quot;&gt;&lt;/span&gt;
+                    &lt;div class=&quot;form-text text-end&quot;&gt;
+                        &lt;span id=&quot;descriptionCounter&quot;&gt;@(Model.Description?.Length ?? 0)&lt;/span&gt;
+                        / 2000 characters
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;mb-4&quot;&gt;
+                    &lt;label asp-for=&quot;Budget&quot; class=&quot;form-label&quot;&gt;
+                        &lt;i class=&quot;bi bi-cash-coin me-1&quot;&gt;&lt;/i&gt;Budget *
+                    &lt;/label&gt;
+                    &lt;div class=&quot;input-group&quot;&gt;
+                        &lt;span class=&quot;input-group-text&quot;
+                              style=&quot;border-color: var(--wrap-blue); color: var(--wrap-blue);&quot;&gt;$&lt;/span&gt;
+                        &lt;input asp-for=&quot;Budget&quot; class=&quot;form-control&quot; type=&quot;number&quot;
+                               step=&quot;0.01&quot; min=&quot;0&quot; placeholder=&quot;0.00&quot; /&gt;
+                    &lt;/div&gt;
+                    &lt;span asp-validation-for=&quot;Budget&quot; class=&quot;text-danger small&quot;&gt;&lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            @* ── Status &amp; Timeline ── *@
+            &lt;div class=&quot;section-card&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-gear me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Status &amp; Timeline&lt;/h3&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;row g-4&quot;&gt;
+
+                    @* Step 1 – abstract phase (pre-selected via currentPhase) *@
+                    &lt;div class=&quot;col-md-4&quot;&gt;
+                        &lt;label class=&quot;form-label&quot;&gt;
+                            &lt;i class=&quot;bi bi-layers me-1&quot;&gt;&lt;/i&gt;Phase *
+                        &lt;/label&gt;
+                        &lt;select id=&quot;phaseSelect&quot; class=&quot;form-select&quot;&gt;
+                            &lt;option value=&quot;&quot;&gt;— Select Phase —&lt;/option&gt;
+                            @foreach (KeyValuePair&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; group in statusGroups)
+                            {
+                                &lt;option value=&quot;@group.Key&quot; selected=&quot;@(group.Key == currentPhase)&quot;&gt;@group.Key&lt;/option&gt;
+                            }
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+
+                    @* Step 2 – specific enum status (bound to model, pre-selected) *@
+                    &lt;div class=&quot;col-md-4&quot;&gt;
+                        &lt;label asp-for=&quot;StatusType&quot; class=&quot;form-label&quot;&gt;
+                            &lt;i class=&quot;bi bi-tag me-1&quot;&gt;&lt;/i&gt;Specific Status *
+                        &lt;/label&gt;
+                        &lt;select asp-for=&quot;StatusType&quot; class=&quot;form-select&quot; id=&quot;statusTypeSelect&quot;
+                                disabled=&quot;@(string.IsNullOrWhiteSpace(currentPhase))&quot;&gt;
+                            &lt;option value=&quot;&quot;&gt;
+                                @(string.IsNullOrWhiteSpace(currentPhase) ? SelectPhase : SelectStatus)
+                            &lt;/option&gt;
+                            @foreach (KeyValuePair&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; group in statusGroups)
+                            {
+                                &lt;optgroup label=&quot;@group.Key&quot;
+                                          class=&quot;status-optgroup&quot;
+                                          data-phase=&quot;@group.Key&quot;
+                                          style=&quot;@(group.Key == currentPhase ? &quot;&quot; : &quot;display: none;&quot;)&quot;&gt;
+                                    @foreach (ProductionStatusType status in group.Value)
+                                    {
+                                        &lt;option value=&quot;@((int)status)&quot; selected=&quot;@(status == Model.StatusType)&quot;&gt;@GetDisplayName(status.ToString())&lt;/option&gt;
+                                    }
+                                &lt;/optgroup&gt;
+                            }
+                        &lt;/select&gt;
+                        &lt;span asp-validation-for=&quot;StatusType&quot; class=&quot;text-danger small&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+
+                    @* Dates *@
+                    &lt;div class=&quot;col-md-4&quot;&gt;
+                        &lt;label asp-for=&quot;StatusStartDate&quot; class=&quot;form-label&quot;&gt;
+                            &lt;i class=&quot;bi bi-calendar-check me-1&quot;&gt;&lt;/i&gt;Start Date *
+                        &lt;/label&gt;
+                        &lt;input asp-for=&quot;StatusStartDate&quot; type=&quot;date&quot; class=&quot;form-control&quot; /&gt;
+                        &lt;span asp-validation-for=&quot;StatusStartDate&quot; class=&quot;text-danger small&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;col-md-4&quot;&gt;
+                        &lt;label asp-for=&quot;StatusEndDate&quot; class=&quot;form-label&quot;&gt;
+                            &lt;i class=&quot;bi bi-calendar-x me-1&quot;&gt;&lt;/i&gt;End Date
+                            &lt;small class=&quot;text-muted fw-normal&quot;&gt;(optional)&lt;/small&gt;
+                        &lt;/label&gt;
+                        &lt;input asp-for=&quot;StatusEndDate&quot; type=&quot;date&quot; class=&quot;form-control&quot; /&gt;
+                        &lt;span asp-validation-for=&quot;StatusEndDate&quot; class=&quot;text-danger small&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            @* ── Actions ── *@
+            &lt;div class=&quot;text-center mb-5&quot;&gt;
+                &lt;button type=&quot;submit&quot; class=&quot;btn btn-production btn-lg me-2&quot;&gt;
+                    &lt;i class=&quot;bi bi-save me-2&quot;&gt;&lt;/i&gt;Save Changes
+                &lt;/button&gt;
+                &lt;a asp-area=&quot;&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Details&quot; asp-route-productionId=&quot;@Model.ProductionId&quot;
+                   asp-route-slug=&quot;@SlugGenerator.GenerateSlug(Model.Title)&quot;
+                   class=&quot;btn btn-production-secondary btn-lg&quot;&gt;
+                    &lt;i class=&quot;bi bi-x-circle me-2&quot;&gt;&lt;/i&gt;Cancel
+                &lt;/a&gt;
+            &lt;/div&gt;
+
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;partial name=&quot;_ValidationScriptsPartial&quot; /&gt;
+    
+    &lt;script src=&quot;~/js/production/production-edit.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[6,5,6,48,0],[8,5,8,120,0],[12,5,13,32,0],[13,32,13,68,0],[13,68,14,30,0],[16,5,16,69,0],[159,30,159,37,0],[159,39,159,108,0],[159,109,159,111,0],[159,112,159,124,0],[160,29,160,30,0],[162,29,162,30,0],[176,30,176,37,0],[176,39,176,108,0],[176,109,176,111,0],[176,112,176,124,0],[177,29,177,30,0],[182,38,182,45,0],[182,47,182,74,0],[182,75,182,77,0],[182,78,182,89,0],[183,37,183,38,0],[185,37,185,38,0],[187,29,187,30,0]]);
+    </script>
+  </body>
+</html>

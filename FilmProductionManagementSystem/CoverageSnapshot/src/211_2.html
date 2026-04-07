@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/ResetAuthenticator.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@page
+@model ResetAuthenticatorModel
+@{
+    ViewData[&quot;Title&quot;] = &quot;Reset authenticator key&quot;;
+    ViewData[&quot;ActivePage&quot;] = ManageNavPages.TwoFactorAuthentication;
+}
+
+&lt;partial name=&quot;_StatusMessage&quot; for=&quot;StatusMessage&quot; /&gt;
+
+&lt;h3&gt;@ViewData[&quot;Title&quot;]&lt;/h3&gt;
+
+&lt;div&gt;
+    &lt;div class=&quot;rounded-3 p-5 p-lg-1 mx-3 alert-warning&quot; role=&quot;alert&quot;&gt;
+        &lt;p&gt;
+            &lt;span class=&quot;glyphicon glyphicon-warning-sign&quot;&gt;&lt;/span&gt;
+            &lt;strong&gt;If you reset your authenticator key your authenticator app will not work until you reconfigure it.&lt;/strong&gt;
+        &lt;/p&gt;
+        &lt;p&gt;
+            This process disables 2FA until you verify your authenticator app.
+            If you do not complete your authenticator app configuration you may lose access to your account.
+        &lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;mt-5 mx-3&quot;&gt;
+        &lt;form id=&quot;reset-authenticator-form&quot; method=&quot;post&quot;&gt;
+            &lt;button id=&quot;reset-authenticator-button&quot; class=&quot;btn btn-danger&quot; type=&quot;submit&quot;&gt;Reset authenticator key&lt;/button&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,51,0],[5,5,5,69,0]]);
+    </script>
+  </body>
+</html>

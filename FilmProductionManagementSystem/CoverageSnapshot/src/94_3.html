@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/CrewProfileService.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
+
+using Interfaces;
+using Utilities.ImageLogic.Interfaces;
+using Data.Models;
+using Data.Models.MappingEntities;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+using Data.Dtos.Crew;
+using Models.Profile;
+using Models.Profile.NestedDtos;
+using GCommon.Enums;
+using GCommon.UI;
+
+using static GCommon.OutputMessages.Profile;
+using static GCommon.DataFormat;
+
+public class CrewProfileService(UserManager&lt;ApplicationUser&gt; userManager,
+                                SignInManager&lt;ApplicationUser&gt; signInManager,
+                                IProfileRepository profileRepository,
+                                IImageService imageService,
+                                IVariantImageStrategyResolver imageStrategyResolver,
+                                ILogger&lt;CrewProfileService&gt; logger) : ICrewProfileService
+{
+    public async Task&lt;CrewProfileDto&gt; GetCrewProfileDataAsync(string username)
+    {
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
+        if (crew is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+        
+        IReadOnlyCollection&lt;CrewSkill&gt; skills = await profileRepository.GetCrewSkillsAsync(crew.Id);
+        IEnumerable&lt;CrewRoleType&gt; skillTypes = skills.Select(cs =&gt; cs.RoleType);
+        
+        IDictionary&lt;string, ICollection&lt;CrewRoleType&gt;&gt; departmentSkills = GroupSkillsByDepartment(skillTypes);
+    
+        IReadOnlyCollection&lt;ProductionCrew&gt; productions = await profileRepository.GetCrewProductionsAsync(crew.Id);
+        IReadOnlyCollection&lt;SceneCrew&gt; scenes = await profileRepository.GetCrewScenesAsync(crew.Id);
+        
+        CrewProfileDto crewProfile = new CrewProfileDto
+        {
+            FirstName = crew.FirstName,
+            LastName = crew.LastName,
+            ProfileImagePath = crew.ProfileImagePath!,
+            Nickname = crew.Nickname ?? EmptyNickname,
+            UserName = crew.User.UserName!,
+            Email = crew.User.Email!,
+            PhoneNumber = crew.User.PhoneNumber!,
+            IsActive = crew.IsActive,
+            Biography = crew.Biography,
+            DepartmentSkills = departmentSkills,
+
+            Productions = productions
+                .Select(pc =&gt; new CrewMemberProductionDto
+                {
+                    ProductionId = pc.ProductionId.ToString(),
+                    ProductionTitle = pc.Production.Title,
+                    ProjectStatus = pc.Production.StatusType.ToString(),
+                    RoleType = pc.RoleType
+                })
+                .ToArray()
+                .AsReadOnly(),
+
+            Scenes = scenes
+                .Select(sc =&gt; new CrewMemberSceneDto
+                {
+                    SceneId = sc.SceneId.ToString(),
+                    SceneName = sc.Scene.SceneName,
+                    ProductionTitle = sc.Scene.Production.Title,
+                    RoleType = sc.RoleType
+                })
+                .ToArray()
+                .AsReadOnly()
+        };
+        
+        return crewProfile;
+    }
+
+    public async Task&lt;EditCrewProfileDto&gt; GetEditCrewProfileAsync(string username)
+    {
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
+        if (crew is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        EditCrewProfileDto editCrewDto = new EditCrewProfileDto
+        {
+            FirstName = crew.FirstName,
+            LastName = crew.LastName,
+            Nickname = crew.Nickname,
+            PhoneNumber = crew.User.PhoneNumber!,
+            Biography = crew.Biography,
+            ProfileImage = null,
+            // Read-only properties
+            Email = crew.User.Email,
+            CurrentProfileImagePath = crew.ProfileImagePath
+        };
+        
+        return editCrewDto;
+    }
+
+    public async Task UpdateCrewProfileAsync(string username, EditCrewProfileDto crewDto)
+    {
+        await using IDbContextTransaction transaction = await profileRepository.BeginTransactionAsync();
+        try
+        {
+            Crew? crew = await profileRepository.GetCrewByUsernameAsync(username);
+            if (crew is null)
+                throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+            
+            crew.FirstName = crewDto.FirstName;
+            crew.LastName = crewDto.LastName;
+            crew.Nickname = crewDto.Nickname;
+            crew.Biography = crewDto.Biography;
+            crew.User.PhoneNumber = crewDto.PhoneNumber;
+        
+            if (crewDto.ProfileImage is not null &amp;&amp; crewDto.ProfileImage.Length &gt; 0)
+            { 
+                IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+                string newImagePath = await imageService.ReplaceAsync(crewDto.CurrentProfileImagePath, crewDto.ProfileImage, strategy);
+                crew.ProfileImagePath = newImagePath;
+            }
+
+            await profileRepository.SaveAllChangesAsync();
+            await profileRepository.CommitTransactionAsync(transaction);
+        }
+        catch (NotSupportedException nse)
+        {
+            await profileRepository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + nse.Message);
+            throw new NotSupportedException(nse.Message, nse);
+        }
+        catch (Exception e)
+        {
+            await profileRepository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + e.Message);
+            throw new Exception(e.Message);
+        }
+    }
+    
+    public async Task&lt;EditSkillsDto&gt; GetEditSkillsAsync(string username)
+    {
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
+        if (crew is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        IReadOnlyCollection&lt;CrewSkill&gt; crewSkills = await profileRepository.GetCrewSkillsAsync(crew.Id);
+        
+        IReadOnlyCollection&lt;CrewRoleType&gt; currentSkills = crewSkills
+            .Select(cs =&gt; cs.RoleType)
+            .ToArray()
+            .AsReadOnly();
+        
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; allSkillsCatalog = CrewRolesDepartmentCatalog.GetRolesByDepartment();
+
+        EditSkillsDto skillsDto = new EditSkillsDto
+        {
+            CurrentSkills = currentSkills,
+            AllDepartments = allSkillsCatalog
+        };
+        
+        return skillsDto;
+    }
+
+    public async Task UpdateSkillsAsync(string username, UpdateSkillsDto skillsDto)
+    {
+        Crew? crew = await profileRepository.GetCrewByUsernameAsNoTrackingAsync(username);
+        if (crew is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        IReadOnlyCollection&lt;CrewSkill&gt; currentSkills = await profileRepository.GetCrewSkillsForUpdateAsync(crew.Id);
+        
+        ICollection&lt;CrewRoleType&gt; newSkills = ParseSelectedSkills(skillsDto.SelectedSkills);
+        if (newSkills.Count == 0)
+            throw new ArgumentException(NoSkillsSelected);
+        
+        HashSet&lt;CrewRoleType&gt; currentSkillSet = currentSkills.Select(cs =&gt; cs.RoleType).ToHashSet();
+        HashSet&lt;CrewRoleType&gt; newSkillSet = newSkills.ToHashSet();
+        
+        ICollection&lt;CrewSkill&gt; skillsToRemove = currentSkills
+            .Where(cs =&gt; !newSkillSet.Contains(cs.RoleType))
+            .ToList();
+        
+        ICollection&lt;CrewSkill&gt; skillsToAdd = newSkillSet
+            .Where(crt =&gt; !currentSkillSet.Contains(crt))
+            .Select(roleType =&gt; new CrewSkill
+            {
+                Id = Guid.NewGuid(),
+                CrewMemberId = crew.Id,
+                RoleType = roleType
+            })
+            .ToList();
+        
+        await using IDbContextTransaction transaction = await profileRepository.BeginTransactionAsync();
+        try
+        {
+            if (skillsToRemove.Count &gt; 0)
+                await profileRepository.RemoveCrewSkillsAsync(skillsToRemove);
+        
+            if (skillsToAdd.Count &gt; 0)
+                await profileRepository.AddCrewSkillsAsync(skillsToAdd);
+
+            await profileRepository.SaveAllChangesAsync();
+            await profileRepository.CommitTransactionAsync(transaction);
+        }
+        catch (Exception e)
+        {
+            await profileRepository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingSkills,  username) + e.Message);
+            throw new Exception(e.Message);
+        }
+    }
+
+    public async Task&lt;DeleteProfileDto&gt; GetDeleteCrewProfileAsync(string username)
+    {
+        Crew? crew = await profileRepository.GetCrewWithAllDataIncludedByUsernameAsNoTrackingAsync(username);
+        if (crew is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        DeleteProfileDto deleteCrewDto = new DeleteProfileDto
+        {
+            FirstName = crew.FirstName,
+            LastName = crew.LastName,
+            ProfileImagePath = crew.ProfileImagePath!,
+            UserName = crew.User.UserName!,
+            Email = crew.User.Email!,
+            PhoneNumber = crew.User.PhoneNumber!,
+            ProductionsCount = crew.CrewMemberProductions.Count,
+            ScenesCount = crew.CrewMemberScenes.Count,
+            SkillsCount = crew.Skills.Count
+        };
+        
+        return deleteCrewDto;
+    }
+
+    public async Task&lt;bool&gt; DeleteCrewProfileAsync(string username, DeleteProfileDto dto)
+    {
+        Crew? crew = await profileRepository.GetCrewByUsernameAsync(username);
+        if (crew is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+        
+        ApplicationUser user = crew.User;
+        bool isPasswordValid = await userManager.CheckPasswordAsync(user, dto.Password);
+        if (!isPasswordValid)
+        {
+            logger.LogError(string.Format(FailedPassword, username));
+            return false;
+        }
+        
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+        
+        await imageService.DeleteAsync(crew.ProfileImagePath, strategy);
+        
+        await profileRepository.DeleteCrewProfileAsync(crew.Id);
+        await profileRepository.SaveAllChangesAsync();
+        
+        await signInManager.SignOutAsync();
+        return true;
+    }
+
+    public async Task&lt;string&gt; DownloadCrewProfileDataAsync(string username)
+    {
+        CrewPersonalDataDto[]? crewPersonalData = await profileRepository.DownloadCrewDataAsync(username);
+        if (crewPersonalData is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        string json = JsonConvert
+            .SerializeObject(crewPersonalData, Formatting.Indented);
+        
+        return json;
+    }
+
+    private static ICollection&lt;CrewRoleType&gt; ParseSelectedSkills(string selectedSkillsString)
+    {
+        if (string.IsNullOrWhiteSpace(selectedSkillsString))
+            return new HashSet&lt;CrewRoleType&gt;();
+    
+        ICollection&lt;CrewRoleType&gt; listSelectedSkills = selectedSkillsString
+            .Split(CommaSplitter, StringSplitOptions.RemoveEmptyEntries)
+            .Select(s =&gt; (CrewRoleType)int.Parse(s.Trim()))
+            .ToList();
+
+        return listSelectedSkills;
+    }
+    
+    /// &lt;summary&gt;
+    /// Groups skills by their departments
+    /// &lt;/summary&gt;
+    /// &lt;param name=&quot;userSkills&quot;&gt;Already selected user&#39;s skills&lt;/param&gt;
+    /// &lt;returns&gt;IDictionary&lt;string, ICollection&lt;CrewRoleType&gt;&gt; map with collection
+    /// where the Key is the name of the department and the Values are the roles/skills&lt;/returns&gt;
+    private static IDictionary&lt;string, ICollection&lt;CrewRoleType&gt;&gt; GroupSkillsByDepartment(IEnumerable&lt;CrewRoleType&gt; userSkills)
+    {
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; allDepartment = CrewRolesDepartmentCatalog.GetRolesByDepartment();
+
+        HashSet&lt;CrewRoleType&gt; userSkillsSet = userSkills.ToHashSet();
+        
+        IReadOnlyCollection&lt;KeyValuePair&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt;&gt; userDepartments = allDepartment
+            .Where(dept =&gt; dept.Value.Any(role =&gt; userSkillsSet.Contains(role)))
+            .ToArray()
+            .AsReadOnly();
+        
+        IDictionary&lt;string, ICollection&lt;CrewRoleType&gt;&gt; departmentSkills = new Dictionary&lt;string, ICollection&lt;CrewRoleType&gt;&gt;();
+        
+        foreach (KeyValuePair&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; department in userDepartments)
+        {
+            ICollection&lt;CrewRoleType&gt; userSkillsInDept = department.Value
+                .Where(role =&gt; userSkillsSet.Contains(role))
+                .ToArray();
+
+            if (userSkillsInDept.Count &gt; 0)
+                departmentSkills[department.Key] = userSkillsInDept;
+        }
+        
+        return departmentSkills;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[24,14,29,68,1],[32,5,32,6,1],[33,9,33,91,1],[34,9,34,26,1],[35,13,35,91,1],[37,9,37,101,1],[38,9,38,68,1],[38,68,38,79,1],[38,79,38,81,1],[40,9,40,111,1],[42,9,42,116,1],[43,9,43,101,1],[45,9,59,31,1],[59,31,65,18,1],[65,18,70,31,1],[70,31,76,18,1],[76,18,79,11,1],[81,9,81,28,1],[82,5,82,6,1],[85,5,85,6,1],[86,9,86,91,1],[87,9,87,26,1],[88,13,88,91,1],[90,9,101,11,1],[103,9,103,28,1],[104,5,104,6,1],[107,5,107,6,1],[108,9,108,105,1],[110,9,110,10,1],[111,13,111,83,1],[112,13,112,30,1],[113,17,113,95,1],[115,13,115,48,1],[116,13,116,46,1],[117,13,117,46,1],[118,13,118,48,1],[119,13,119,57,1],[121,13,121,85,1],[122,13,122,14,1],[123,17,123,99,1],[124,17,124,136,1],[125,17,125,54,1],[126,13,126,14,1],[128,13,128,59,1],[129,13,129,73,1],[130,9,130,10,1],[131,9,131,42,1],[132,9,132,10,1],[133,13,133,75,1],[134,13,134,91,1],[135,13,135,63,1],[137,9,137,28,1],[138,9,138,10,1],[139,13,139,75,1],[140,13,140,89,1],[141,13,141,44,1],[143,5,143,6,1],[146,5,146,6,1],[147,9,147,91,1],[148,9,148,26,1],[149,13,149,91,1],[151,9,151,105,1],[153,9,154,27,1],[154,27,154,38,1],[154,38,156,27,1],[158,9,158,141,1],[160,9,164,11,1],[166,9,166,26,1],[167,5,167,6,1],[170,5,170,6,1],[171,9,171,91,1],[172,9,172,26,1],[173,13,173,91,1],[175,9,175,117,1],[177,9,177,93,1],[178,9,178,34,1],[179,13,179,59,1],[181,9,181,76,1],[181,76,181,87,1],[181,87,181,101,1],[182,9,182,67,1],[184,9,185,26,1],[185,26,185,60,1],[185,60,186,23,1],[188,9,189,27,1],[189,27,189,57,1],[189,57,190,33,1],[190,33,195,14,1],[195,14,196,23,1],[198,9,198,105,1],[200,9,200,10,1],[201,13,201,42,1],[202,17,202,79,1],[204,13,204,39,1],[205,17,205,73,1],[207,13,207,59,1],[208,13,208,73,1],[209,9,209,10,1],[210,9,210,28,1],[211,9,211,10,1],[212,13,212,75,1],[213,13,213,88,1],[214,13,214,44,1],[216,5,216,6,1],[219,5,219,6,1],[220,9,220,110,1],[221,9,221,26,1],[222,13,222,91,1],[224,9,235,11,1],[237,9,237,30,1],[238,5,238,6,1],[241,5,241,6,1],[242,9,242,79,1],[243,9,243,26,1],[244,13,244,91,1],[246,9,246,42,1],[247,9,247,89,1],[248,9,248,30,1],[249,9,249,10,1],[250,13,250,70,1],[251,13,251,26,1],[254,9,254,91,1],[256,9,256,73,1],[258,9,258,65,1],[259,9,259,55,1],[261,9,261,44,1],[262,9,262,21,1],[263,5,263,6,1],[266,5,266,6,1],[267,9,267,107,1],[268,9,268,38,1],[269,13,269,91,1],[271,9,272,69,1],[274,9,274,21,1],[275,5,275,6,1],[278,5,278,6,1],[279,9,279,61,1],[280,13,280,48,1],[282,9,284,26,1],[284,26,284,59,1],[284,59,285,23,1],[287,9,287,35,1],[288,5,288,6,1],[297,5,297,6,1],[298,9,298,138,1],[300,9,300,70,1],[302,9,303,28,1],[303,28,303,51,1],[303,51,303,79,1],[303,79,303,80,1],[303,80,305,27,1],[307,9,307,127,1],[309,9,309,16,1],[309,18,309,84,1],[309,85,309,87,1],[309,88,309,103,1],[310,9,310,10,1],[311,13,312,32,1],[312,32,312,60,1],[312,60,313,28,1],[315,13,315,44,1],[316,17,316,69,1],[317,9,317,10,1],[319,9,319,33,1],[320,5,320,6,1]]);
+    </script>
+  </body>
+</html>

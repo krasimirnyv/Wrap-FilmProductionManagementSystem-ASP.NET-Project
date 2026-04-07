@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/LoginRegisterService.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+
+using Interfaces;
+using Utilities.ImageLogic.Interfaces;
+using Handlers.Interfaces;
+using Models.LoginAndRegistration;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+using GCommon.UI;
+
+using static GCommon.OutputMessages;
+using static GCommon.OutputMessages.Register;
+using static GCommon.DataFormat;
+
+public class LoginRegisterService(UserManager&lt;ApplicationUser&gt; userManager,
+                                  SignInManager&lt;ApplicationUser&gt; signInManager,
+                                  ILoginRegisterRepository loginRegisterRepository,
+                                  IImageService imageService,
+                                  IVariantImageStrategyResolver imageStrategyResolver,
+                                  IRegistrationHandlerResolver registrationHandlerResolver,
+                                  ILogger&lt;LoginRegisterService&gt; logger) : ILoginRegisterService
+{
+ 
+    public async Task&lt;CrewRegistrationDraftDto?&gt; BuildCrewDraftAsync(CrewRegistrationStepOneDto dto)
+    {
+        try
+        {
+            IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+            string profilePath = await imageService.SaveImageAsync(dto.ProfilePicture, strategy);
+            
+            CrewRegistrationDraftDto draft = new CrewRegistrationDraftDto
+            {
+                UserName = dto.UserName,
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                Password = dto.Password,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Nickname = dto.Nickname,
+                Biography = dto.Biography,
+                ProfilePicturePath = profilePath
+            };
+
+            return draft;
+        }
+        catch (NotSupportedException nse)
+        {
+            throw new NotSupportedException(nse.Message, nse);
+        }
+        catch (Exception e)
+        {
+            throw new Exception(ExceptionBuildingCrewDraft, e);
+        }
+    }
+
+    public CrewRegistrationStepTwoDto GetNewModelWithSkills()
+    {
+        CrewRegistrationStepTwoDto dto = new CrewRegistrationStepTwoDto();
+        
+        GetSkills(dto);
+        return dto;
+    }
+
+    public void GetSkills(CrewRegistrationStepTwoDto dto)
+    {
+        dto.SkillsByDepartment = CrewRolesDepartmentCatalog.GetRolesByDepartment();
+    }
+
+    public void GetSkills(CrewRegistrationCompleteDto dto)
+    {
+        dto.SkillsByDepartment = CrewRolesDepartmentCatalog.GetRolesByDepartment();
+    }
+
+    public async Task&lt;IdentityResult&gt; CompleteRegistrationAsync&lt;TRegistrationDto&gt;(TRegistrationDto registrationDto)
+    {
+        IRegistrationHandler&lt;TRegistrationDto&gt; handler = registrationHandlerResolver.Resolve&lt;TRegistrationDto&gt;();
+        
+        IdentityResult result = await handler.CompleteRegistrationAsync(registrationDto);
+        
+        return result;
+    }
+
+    public async Task&lt;LoginStatusDto&gt; LoginStatusAsync(LoginRequestDto? loginDto)
+    {
+        LoginStatusDto statusDto = new LoginStatusDto();
+        if (loginDto is null || (loginDto.Role != CrewString &amp;&amp; loginDto.Role != CastString))
+        {
+            statusDto.IsSucceeded = false;
+            statusDto.Role = string.Empty;
+            return statusDto;
+        }
+        
+        ApplicationUser? user = await userManager.FindByNameAsync(loginDto.UserName);
+        if (user is null)
+        {
+            logger.LogError(string.Format(UserNotFound, loginDto.UserName));
+            statusDto.IsSucceeded = false;
+            statusDto.Role = string.Empty;
+            return statusDto;
+        }
+
+        bool isPasswordValid = await userManager.CheckPasswordAsync(user, loginDto.Password);
+        if (!isPasswordValid)
+        {
+            logger.LogError(string.Format(LoginFailedPass, loginDto.UserName));
+            statusDto.IsSucceeded = false;
+            statusDto.Role = string.Empty;
+            return statusDto;
+        }
+        
+        switch (loginDto.Role)
+        {
+            case CrewString:
+            {
+                bool crewExist = await loginRegisterRepository.CrewExistsByUserIdAsync(user.Id);
+                if (!crewExist)
+                {
+                    statusDto.IsSucceeded = false;
+                    statusDto.Role = CrewString;
+                    return statusDto;
+                }
+                
+                SignInResult result = await signInManager.PasswordSignInAsync(user, loginDto.Password, loginDto.RememberMe, false);
+                if (!result.Succeeded)
+                {
+                    logger.LogError(string.Format(LoginFailedPass, loginDto.UserName));
+                    statusDto.IsSucceeded = false;
+                    statusDto.Role = string.Empty;
+                    return statusDto;
+                }
+                
+                statusDto.IsSucceeded = true;
+                statusDto.Role = CrewString;
+                return statusDto;
+            }
+            case CastString:
+            {
+                bool castExist = await loginRegisterRepository.CastExistsByUserIdAsync(user.Id);
+                if (!castExist)
+                {
+                    statusDto.IsSucceeded = false;
+                    statusDto.Role = CastString;
+                    return statusDto;
+                }
+
+                SignInResult result = await signInManager.PasswordSignInAsync(user, loginDto.Password, loginDto.RememberMe, false);
+                if (!result.Succeeded)
+                {
+                    logger.LogError(string.Format(LoginFailedPass, loginDto.UserName));
+                    statusDto.IsSucceeded = false;
+                    statusDto.Role = string.Empty;
+                    return statusDto;
+                }
+                
+                statusDto.IsSucceeded = true;
+                statusDto.Role = CastString;
+                return statusDto;
+            }
+            default:
+                logger.LogError(LoginFailedRole);
+                statusDto.IsSucceeded = false;
+                statusDto.Role = string.Empty;
+                return statusDto;
+        }
+    }
+
+    public async Task LogoutAsync()
+    {
+        await signInManager.SignOutAsync();
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,14,24,72,1],[28,5,28,6,1],[30,9,30,10,1],[31,13,31,95,1],[32,13,32,98,1],[34,13,45,15,1],[47,13,47,26,1],[49,9,49,42,1],[50,9,50,10,1],[51,13,51,63,1],[53,9,53,28,1],[54,9,54,10,1],[55,13,55,64,1],[57,5,57,6,1],[60,5,60,6,1],[61,9,61,75,1],[63,9,63,24,1],[64,9,64,20,1],[65,5,65,6,1],[68,5,68,6,1],[69,9,69,84,1],[70,5,70,6,1],[73,5,73,6,1],[74,9,74,84,1],[75,5,75,6,1],[78,5,78,6,1],[79,9,79,114,1],[81,9,81,90,1],[83,9,83,23,1],[84,5,84,6,1],[87,5,87,6,1],[88,9,88,57,1],[89,9,89,94,1],[90,9,90,10,1],[91,13,91,43,1],[92,13,92,43,1],[93,13,93,30,1],[96,9,96,86,1],[97,9,97,26,1],[98,9,98,10,1],[99,13,99,77,1],[100,13,100,43,1],[101,13,101,43,1],[102,13,102,30,1],[105,9,105,94,1],[106,9,106,30,1],[107,9,107,10,1],[108,13,108,80,1],[109,13,109,43,1],[110,13,110,43,1],[111,13,111,30,1],[114,9,114,31,1],[117,13,117,14,1],[118,17,118,97,1],[119,17,119,32,1],[120,17,120,18,1],[121,21,121,51,1],[122,21,122,49,1],[123,21,123,38,1],[126,17,126,132,1],[127,17,127,39,1],[128,17,128,18,1],[129,21,129,88,1],[130,21,130,51,1],[131,21,131,51,1],[132,21,132,38,1],[135,17,135,46,1],[136,17,136,45,1],[137,17,137,34,1],[140,13,140,14,1],[141,17,141,97,1],[142,17,142,32,1],[143,17,143,18,1],[144,21,144,51,1],[145,21,145,49,1],[146,21,146,38,1],[149,17,149,132,1],[150,17,150,39,1],[151,17,151,18,1],[152,21,152,88,1],[153,21,153,51,1],[154,21,154,51,1],[155,21,155,38,1],[158,17,158,46,1],[159,17,159,45,1],[160,17,160,34,1],[163,17,163,50,0],[164,17,164,47,0],[165,17,165,47,0],[166,17,166,34,0],[168,5,168,6,1],[171,5,171,6,1],[172,9,172,44,1],[173,5,173,6,1]]);
+    </script>
+  </body>
+</html>

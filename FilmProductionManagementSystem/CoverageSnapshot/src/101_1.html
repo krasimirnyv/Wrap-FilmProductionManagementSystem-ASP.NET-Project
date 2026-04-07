@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/SessionJsonExtensionsTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using System.Text;
+
+using Microsoft.AspNetCore.Http;
+
+using Moq;
+using NUnit.Framework;
+using Newtonsoft.Json;
+
+using Core.Utilities;
+
+[TestFixture]
+public class SessionJsonExtensionsTests
+{
+    [Test]
+    public void SetJson_WhenCalled_SerializesAndStoresJsonUnderKey()
+    {
+        // Arrange
+        const string key = &quot;myKey&quot;;
+
+        TestDto value = new TestDto
+        {
+            Name = &quot;John&quot;,
+            Age = 25
+        };
+
+        Mock&lt;ISession&gt; sessionMock = new Mock&lt;ISession&gt;(MockBehavior.Strict);
+
+        byte[]? capturedBytes = null;
+
+        sessionMock
+            .Setup(s =&gt; s.Set(
+                key,
+                It.IsAny&lt;byte[]&gt;()))
+            .Callback&lt;string, byte[]&gt;((_, bytes) =&gt; capturedBytes = bytes);
+
+        // Act
+        SessionJsonExtensions.SetJson(sessionMock.Object, key, value);
+
+        // Assert
+        Assert.That(capturedBytes, Is.Not.Null);
+
+        string json = Encoding.UTF8.GetString(capturedBytes);
+
+        TestDto? deserialized = JsonConvert.DeserializeObject&lt;TestDto&gt;(json);
+        Assert.That(deserialized, Is.Not.Null);
+        Assert.That(deserialized.Name, Is.EqualTo(&quot;John&quot;));
+        Assert.That(deserialized.Age, Is.EqualTo(25));
+
+        sessionMock.Verify(s =&gt; s.Set(key, It.IsAny&lt;byte[]&gt;()), Times.Once);
+        sessionMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void GetJson_WhenKeyDoesNotExist_ReturnsDefault()
+    {
+        // Arrange
+        const string key = &quot;missingKey&quot;;
+
+        Mock&lt;ISession&gt; sessionMock = new Mock&lt;ISession&gt;(MockBehavior.Strict);
+
+        sessionMock
+            .Setup(s =&gt; s.TryGetValue(key, out It.Ref&lt;byte[]&gt;.IsAny!))
+            .Returns(false);
+
+        // Act
+        TestDto? result = SessionJsonExtensions.GetJson&lt;TestDto&gt;(sessionMock.Object, key);
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        sessionMock.Verify(s =&gt; s.TryGetValue(key, out It.Ref&lt;byte[]&gt;.IsAny!), Times.Once);
+        sessionMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void GetJson_WhenKeyExists_ReturnsDeserializedValue()
+    {
+        // Arrange
+        const string key = &quot;existingKey&quot;;
+
+        TestDto original = new TestDto
+        {
+            Name = &quot;Alice&quot;,
+            Age = 30
+        };
+
+        string json = JsonConvert.SerializeObject(original);
+        byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+        Mock&lt;ISession&gt; sessionMock = new Mock&lt;ISession&gt;(MockBehavior.Strict);
+
+        sessionMock
+            .Setup(s =&gt; s.TryGetValue(key, out It.Ref&lt;byte[]&gt;.IsAny!))
+            .Callback(new TryGetValueCallback((string _, out byte[] valueBytes) =&gt;
+            {
+                valueBytes = jsonBytes;
+            }))
+            .Returns(true);
+
+        // Act
+        TestDto? result = SessionJsonExtensions.GetJson&lt;TestDto&gt;(sessionMock.Object, key);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Name, Is.EqualTo(&quot;Alice&quot;));
+        Assert.That(result.Age, Is.EqualTo(30));
+
+        sessionMock.Verify(s =&gt; s.TryGetValue(key, out It.Ref&lt;byte[]&gt;.IsAny!), Times.Once);
+        sessionMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void GetJson_WhenStoredJsonIsInvalid_ThrowsJsonException()
+    {
+        // Arrange
+        const string key = &quot;badJsonKey&quot;;
+
+        byte[] jsonBytes = &quot;{ not valid json&quot;u8.ToArray();
+
+        Mock&lt;ISession&gt; sessionMock = new Mock&lt;ISession&gt;(MockBehavior.Strict);
+
+        sessionMock
+            .Setup(s =&gt; s.TryGetValue(key, out It.Ref&lt;byte[]&gt;.IsAny!))
+            .Callback(new TryGetValueCallback((string _, out byte[] valueBytes) =&gt;
+            {
+                valueBytes = jsonBytes;
+            }))
+            .Returns(true);
+
+        // Act + Assert
+        Assert.Throws&lt;JsonReaderException&gt;(() =&gt;
+            SessionJsonExtensions.GetJson&lt;TestDto&gt;(sessionMock.Object, key));
+
+        sessionMock.Verify(s =&gt; s.TryGetValue(key, out It.Ref&lt;byte[]&gt;.IsAny!), Times.Once);
+        sessionMock.VerifyNoOtherCalls();
+    }
+
+    // Delegate type for Moq out-parameter callback
+    private delegate void TryGetValueCallback(string key, out byte[] value);
+
+    private class TestDto
+    {
+        public string Name { get; set; } = null!;
+        
+        public int Age { get; set; }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,5,18,6,1],[22,9,26,11,1],[28,9,28,78,1],[30,9,30,38,1],[32,9,36,53,1],[36,53,36,74,1],[36,74,36,76,1],[39,9,39,71,1],[42,9,42,49,1],[44,9,44,62,1],[46,9,46,78,1],[47,9,47,48,1],[48,9,48,60,1],[49,9,49,55,1],[51,9,51,77,1],[52,9,52,42,1],[53,5,53,6,1],[57,5,57,6,1],[61,9,61,78,1],[63,9,65,29,1],[68,9,68,91,1],[71,9,71,38,1],[73,9,73,92,1],[74,9,74,42,1],[75,5,75,6,1],[79,5,79,6,1],[83,9,87,11,1],[89,9,89,61,1],[90,9,90,57,1],[92,9,92,78,1],[94,9,97,13,1],[97,13,97,14,1],[97,14,98,17,1],[98,17,98,40,1],[98,40,99,13,1],[99,13,99,14,1],[99,14,100,28,1],[103,9,103,91,1],[106,9,106,42,1],[107,9,107,56,1],[108,9,108,49,1],[110,9,110,92,1],[111,9,111,42,1],[112,5,112,6,1],[116,5,116,6,1],[120,9,120,59,1],[122,9,122,78,1],[124,9,127,13,1],[127,13,127,14,1],[127,14,128,17,1],[128,17,128,40,1],[128,40,129,13,1],[129,13,129,14,1],[129,14,130,28,1],[133,9,134,13,1],[134,13,134,76,1],[134,76,134,78,1],[136,9,136,92,1],[137,9,137,42,1],[138,5,138,6,1],[145,44,145,49,1]]);
+    </script>
+  </body>
+</html>

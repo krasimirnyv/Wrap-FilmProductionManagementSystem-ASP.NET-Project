@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/CrewConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+
+using static GCommon.DataFormat;
+using static Common.EntityIdentificationConstants;
+
+public class CrewConfiguration : IEntityTypeConfiguration&lt;Crew&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;Crew&gt; entity)
+    {
+        entity.HasQueryFilter(c =&gt; !c.IsDeleted);
+
+        entity.HasData(CrewMembersSeed);
+    }
+    
+    private static readonly Crew[] CrewMembersSeed =
+    [
+        new()
+        {
+            Id = CrewId1,
+            UserId = CrewUserId1,
+            ProfileImagePath = DefaultProfilePath,
+            FirstName = &quot;Alex&quot;,
+            LastName = &quot;Petrov&quot;,
+            Nickname = &quot;AP/DP&quot;,
+            Biography = &quot;Director of Photography focused on natural light and handheld storytelling.&quot;,
+            IsActive = true,
+            IsDeleted = false
+        },
+        new()
+        {
+            Id = CrewId2,
+            UserId = CrewUserId2,
+            ProfileImagePath = DefaultProfilePath,
+            FirstName = &quot;Maria&quot;,
+            LastName = &quot;Georgieva&quot;,
+            Nickname = &quot;Maya&quot;,
+            Biography = &quot;Production coordinator with experience in budgeting, call sheets and logistics.&quot;,
+            IsActive = true,
+            IsDeleted = false
+        },
+        new()
+        {
+            Id = CrewId3,
+            UserId = CrewUserId3,
+            ProfileImagePath = DefaultProfilePath,
+            FirstName = &quot;Ivan&quot;,
+            LastName = &quot;Dimitrov&quot;,
+            Nickname = null,
+            Biography = &quot;Sound recordist and boom operator. Location sound, ADR planning, and on-set workflow.&quot;,
+            IsActive = true,
+            IsDeleted = false
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,6,0],[15,9,15,50,0],[17,9,17,41,0],[18,5,18,6,0],[20,5,58,7,0]]);
+    </script>
+  </body>
+</html>

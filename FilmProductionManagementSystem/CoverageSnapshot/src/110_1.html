@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/FindPeopleServiceTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using Moq;
+using NUnit.Framework;
+
+using Core;
+using Core.Interfaces;
+using Data.Repository.Interfaces;
+using GCommon.Enums;
+using Models.FindPeople;
+
+using static GCommon.ApplicationConstants;
+
+[TestFixture]
+public class FindPeopleServiceTests
+{
+    private Mock&lt;IFindPeopleRepository&gt; findPeopleRepositoryMock = null!;
+    private Mock&lt;IProductionRepository&gt; productionRepositoryMock = null!;
+
+    private IFindPeopleService findPeopleService = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        findPeopleRepositoryMock = new Mock&lt;IFindPeopleRepository&gt;(MockBehavior.Strict);
+        productionRepositoryMock = new Mock&lt;IProductionRepository&gt;(MockBehavior.Strict);
+
+        findPeopleService = new FindPeopleService(
+            findPeopleRepositoryMock.Object,
+            productionRepositoryMock.Object);
+    }
+
+    [Test]
+    public async Task GetFilmmakersAsync_WhenCalledWithDefaults_UsesPageOneAndReturnsDto()
+    {
+        // Arrange
+        IReadOnlyCollection&lt;FilmmakerListDto&gt; filmmakers =
+        [
+            new()
+            {
+                CrewId = Guid.NewGuid(),
+                ProfileImagePath = &quot;/img/profile/crew1.webp&quot;,
+                FullName = &quot;Ivan Petrov&quot;,
+                Nickname = &quot;Ivo&quot;,
+                Role = CrewRoleType.Director.ToString(),
+                IsAlreadyInProduction = false
+            },
+            new()
+            {
+                CrewId = Guid.NewGuid(),
+                ProfileImagePath = &quot;/img/profile/crew2.webp&quot;,
+                FullName = &quot;Maria Ivanova&quot;,
+                Nickname = null,
+                Role = CrewRoleType.Producer.ToString(),
+                IsAlreadyInProduction = true
+            }
+        ];
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.GetFilmmakersPagedAsync(0, DefaultPeoplePerPage, null, null, null))
+            .ReturnsAsync((filmmakers, 2));
+
+        // Act
+        FindFilmmakersDto result = await findPeopleService.GetFilmmakersAsync();
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.TotalCount, Is.EqualTo(2));
+        Assert.That(result.FilmmakerListDtos, Has.Count.EqualTo(2));
+        Assert.That(result.FilmmakerListDtos.First().FullName, Is.EqualTo(&quot;Ivan Petrov&quot;));
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.GetFilmmakersPagedAsync(0, DefaultPeoplePerPage, null, null, null),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetFilmmakersAsync_WhenPageNumberIsLessThanOne_UsesSafePageOne()
+    {
+        // Arrange
+        IReadOnlyCollection&lt;FilmmakerListDto&gt; filmmakers = Array.Empty&lt;FilmmakerListDto&gt;();
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.GetFilmmakersPagedAsync(0, 8, &quot;john&quot;, CrewRoleType.Director, null))
+            .ReturnsAsync((filmmakers, 0));
+
+        // Act
+        FindFilmmakersDto result = await findPeopleService.GetFilmmakersAsync(
+            pageNumber: 0,
+            search: &quot;john&quot;,
+            roleType: CrewRoleType.Director,
+            productionId: null,
+            peoplePerPage: 8);
+
+        // Assert
+        Assert.That(result.TotalCount, Is.EqualTo(0));
+        Assert.That(result.FilmmakerListDtos, Is.Empty);
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.GetFilmmakersPagedAsync(0, 8, &quot;john&quot;, CrewRoleType.Director, null),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetFilmmakersAsync_WhenCalledWithFiltersAndLaterPage_PassesCorrectSkipAndArguments()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        int pageNumber = 3;
+        int peoplePerPage = 10;
+        int expectedSkip = 20;
+
+        IReadOnlyCollection&lt;FilmmakerListDto&gt; filmmakers =
+        [
+            new()
+            {
+                CrewId = Guid.NewGuid(),
+                ProfileImagePath = &quot;/img/profile/geo.webp&quot;,
+                FullName = &quot;Georgi Dimitrov&quot;,
+                Nickname = &quot;Gogo&quot;,
+                Role = CrewRoleType.DirectorOfPhotography.ToString(),
+                IsAlreadyInProduction = false
+            }
+        ];
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.GetFilmmakersPagedAsync(
+                expectedSkip,
+                peoplePerPage,
+                &quot;geo&quot;,
+                CrewRoleType.DirectorOfPhotography,
+                productionId))
+            .ReturnsAsync((filmmakers, 11));
+
+        // Act
+        FindFilmmakersDto result = await findPeopleService.GetFilmmakersAsync(
+            pageNumber,
+            &quot;geo&quot;,
+            CrewRoleType.DirectorOfPhotography,
+            productionId,
+            peoplePerPage);
+
+        // Assert
+        Assert.That(result.TotalCount, Is.EqualTo(11));
+        Assert.That(result.FilmmakerListDtos, Has.Count.EqualTo(1));
+        Assert.That(result.FilmmakerListDtos.Single().FullName, Is.EqualTo(&quot;Georgi Dimitrov&quot;));
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.GetFilmmakersPagedAsync(
+                expectedSkip,
+                peoplePerPage,
+                &quot;geo&quot;,
+                CrewRoleType.DirectorOfPhotography,
+                productionId),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetActorsAsync_WhenCalledWithDefaults_UsesPageOneAndReturnsDto()
+    {
+        // Arrange
+        IReadOnlyCollection&lt;ActorListDto&gt; actors =
+        [
+            new()
+            {
+                CastId = Guid.NewGuid(),
+                ProfileImagePath = &quot;/img/profile/actor1.webp&quot;,
+                FullName = &quot;Petar Petrov&quot;,
+                Nickname = &quot;Pepi&quot;,
+                Age = 25,
+                Gender = &quot;Male&quot;,
+                IsAlreadyInProduction = false
+            }
+        ];
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.GetActorsPagedAsync(0, DefaultPeoplePerPage, null, null, null, null))
+            .ReturnsAsync((actors, 1));
+
+        // Act
+        FindActorsDto result = await findPeopleService.GetActorsAsync();
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.TotalCount, Is.EqualTo(1));
+        Assert.That(result.ActorListDtos, Has.Count.EqualTo(1));
+        Assert.That(result.ActorListDtos.Single().FullName, Is.EqualTo(&quot;Petar Petrov&quot;));
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.GetActorsPagedAsync(0, DefaultPeoplePerPage, null, null, null, null),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetActorsAsync_WhenPageNumberIsLessThanOne_UsesSafePageOne()
+    {
+        // Arrange
+        IReadOnlyCollection&lt;ActorListDto&gt; actors = Array.Empty&lt;ActorListDto&gt;();
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.GetActorsPagedAsync(0, 12, &quot;anna&quot;, 22, &quot;Female&quot;, null))
+            .ReturnsAsync((actors, 0));
+
+        // Act
+        FindActorsDto result = await findPeopleService.GetActorsAsync(
+            pageNumber: -5,
+            search: &quot;anna&quot;,
+            age: 22,
+            gender: &quot;Female&quot;,
+            productionId: null,
+            peoplePerPage: 12);
+
+        // Assert
+        Assert.That(result.TotalCount, Is.EqualTo(0));
+        Assert.That(result.ActorListDtos, Is.Empty);
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.GetActorsPagedAsync(0, 12, &quot;anna&quot;, 22, &quot;Female&quot;, null),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetActorsAsync_WhenCalledWithFiltersAndLaterPage_PassesCorrectSkipAndArguments()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        int pageNumber = 4;
+        int peoplePerPage = 5;
+        int expectedSkip = 15;
+
+        IReadOnlyCollection&lt;ActorListDto&gt; actors =
+        [
+            new()
+            {
+                CastId = Guid.NewGuid(),
+                ProfileImagePath = &quot;/img/profile/elena.webp&quot;,
+                FullName = &quot;Elena Koleva&quot;,
+                Nickname = null,
+                Age = 30,
+                Gender = &quot;Female&quot;,
+                IsAlreadyInProduction = true
+            }
+        ];
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.GetActorsPagedAsync(
+                expectedSkip,
+                peoplePerPage,
+                &quot;el&quot;,
+                30,
+                &quot;Female&quot;,
+                productionId))
+            .ReturnsAsync((actors, 9));
+
+        // Act
+        FindActorsDto result = await findPeopleService.GetActorsAsync(
+            pageNumber,
+            &quot;el&quot;,
+            30,
+            &quot;Female&quot;,
+            productionId,
+            peoplePerPage);
+
+        // Assert
+        Assert.That(result.TotalCount, Is.EqualTo(9));
+        Assert.That(result.ActorListDtos, Has.Count.EqualTo(1));
+        Assert.That(result.ActorListDtos.Single().FullName, Is.EqualTo(&quot;Elena Koleva&quot;));
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.GetActorsPagedAsync(
+                expectedSkip,
+                peoplePerPage,
+                &quot;el&quot;,
+                30,
+                &quot;Female&quot;,
+                productionId),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CanManageProductionAsync_WhenUserIdIsNull_ReturnsFalse()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        // Act
+        bool result = await findPeopleService.CanManageProductionAsync(productionId, null!);
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CanManageProductionAsync_WhenUserIdIsInvalidGuid_ReturnsFalse()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        // Act
+        bool result = await findPeopleService.CanManageProductionAsync(productionId, &quot;not-a-guid&quot;);
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CanManageProductionAsync_WhenRepositoryReturnsFalse_ReturnsFalse()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(repo =&gt; repo.IsUserProductionLeaderAsync(productionId, userId))
+            .ReturnsAsync(false);
+
+        // Act
+        bool result = await findPeopleService.CanManageProductionAsync(productionId, userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.Verify(
+            repo =&gt; repo.IsUserProductionLeaderAsync(productionId, userId),
+            Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CanManageProductionAsync_WhenRepositoryReturnsTrue_ReturnsTrue()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(repo =&gt; repo.IsUserProductionLeaderAsync(productionId, userId))
+            .ReturnsAsync(true);
+
+        // Act
+        bool result = await findPeopleService.CanManageProductionAsync(productionId, userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.True);
+
+        productionRepositoryMock.Verify(
+            repo =&gt; repo.IsUserProductionLeaderAsync(productionId, userId),
+            Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task AddCrewAsync_WhenCalled_AddsCrewToProductionAndSavesChanges()
+    {
+        // Arrange
+        AddFilmmakerDto dto = new AddFilmmakerDto
+        {
+            ProductionId = Guid.NewGuid(),
+            CrewId = Guid.NewGuid(),
+            RoleType = CrewRoleType.Director
+        };
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.AddCrewToProductionAsync(dto.ProductionId, dto.CrewId, dto.RoleType))
+            .Returns(Task.CompletedTask);
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await findPeopleService.AddCrewAsync(dto);
+
+        // Assert
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.AddCrewToProductionAsync(dto.ProductionId, dto.CrewId, dto.RoleType),
+            Times.Once);
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.SaveAllChangesAsync(),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task RemoveCrewAsync_WhenCalled_RemovesCrewFromProductionAndSavesChanges()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        Guid crewId = Guid.NewGuid();
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.RemoveCrewFromProductionAsync(productionId, crewId))
+            .Returns(Task.CompletedTask);
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await findPeopleService.RemoveCrewAsync(productionId, crewId);
+
+        // Assert
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.RemoveCrewFromProductionAsync(productionId, crewId),
+            Times.Once);
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.SaveAllChangesAsync(),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task AddCastAsync_WhenCalled_AddsCastToProductionAndSavesChanges()
+    {
+        // Arrange
+        AddActorDto dto = new AddActorDto
+        {
+            ProductionId = Guid.NewGuid(),
+            CastId = Guid.NewGuid(),
+            RoleName = &quot;Detective&quot;
+        };
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.AddCastToProductionAsync(dto.ProductionId, dto.CastId, dto.RoleName))
+            .Returns(Task.CompletedTask);
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await findPeopleService.AddCastAsync(dto);
+
+        // Assert
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.AddCastToProductionAsync(dto.ProductionId, dto.CastId, dto.RoleName),
+            Times.Once);
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.SaveAllChangesAsync(),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task RemoveCastAsync_WhenCalled_RemovesCastFromProductionAndSavesChanges()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        Guid castId = Guid.NewGuid();
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.RemoveCastFromProductionAsync(productionId, castId))
+            .Returns(Task.CompletedTask);
+
+        findPeopleRepositoryMock
+            .Setup(repo =&gt; repo.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        await findPeopleService.RemoveCastAsync(productionId, castId);
+
+        // Assert
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.RemoveCastFromProductionAsync(productionId, castId),
+            Times.Once);
+
+        findPeopleRepositoryMock.Verify(
+            repo =&gt; repo.SaveAllChangesAsync(),
+            Times.Once);
+
+        findPeopleRepositoryMock.VerifyNoOtherCalls();
+        productionRepositoryMock.VerifyNoOtherCalls();
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,5,17,74,1],[18,5,18,74,1],[20,5,20,58,1],[24,5,24,6,1],[25,9,25,89,1],[26,9,26,89,1],[28,9,30,46,1],[31,5,31,6,1],[35,5,35,6,1],[37,9,57,11,1],[59,9,61,44,1],[64,9,64,81,1],[67,9,67,42,1],[68,9,68,55,1],[69,9,69,69,1],[70,9,70,91,1],[72,9,74,25,1],[76,9,76,55,1],[77,9,77,55,1],[78,5,78,6,1],[82,5,82,6,1],[84,9,84,92,1],[86,9,88,44,1],[91,9,96,31,1],[99,9,99,55,1],[100,9,100,57,1],[102,9,104,25,1],[106,9,106,55,1],[107,9,107,55,1],[108,5,108,6,1],[112,5,112,6,1],[114,9,114,44,1],[115,9,115,28,1],[116,9,116,32,1],[117,9,117,31,1],[119,9,130,11,1],[132,9,139,45,1],[142,9,147,28,1],[150,9,150,56,1],[151,9,151,69,1],[152,9,152,96,1],[154,9,161,25,1],[163,9,163,55,1],[164,9,164,55,1],[165,5,165,6,1],[169,5,169,6,1],[171,9,183,11,1],[185,9,187,40,1],[190,9,190,73,1],[193,9,193,42,1],[194,9,194,55,1],[195,9,195,65,1],[196,9,196,89,1],[198,9,200,25,1],[202,9,202,55,1],[203,9,203,55,1],[204,5,204,6,1],[208,5,208,6,1],[210,9,210,80,1],[212,9,214,40,1],[217,9,223,32,1],[226,9,226,55,1],[227,9,227,53,1],[229,9,231,25,1],[233,9,233,55,1],[234,9,234,55,1],[235,5,235,6,1],[239,5,239,6,1],[241,9,241,44,1],[242,9,242,28,1],[243,9,243,31,1],[244,9,244,31,1],[246,9,258,11,1],[260,9,268,40,1],[271,9,277,28,1],[280,9,280,55,1],[281,9,281,65,1],[282,9,282,89,1],[284,9,292,25,1],[294,9,294,55,1],[295,9,295,55,1],[296,5,296,6,1],[300,5,300,6,1],[302,9,302,44,1],[305,9,305,93,1],[308,9,308,39,1],[310,9,310,55,1],[311,9,311,55,1],[312,5,312,6,1],[316,5,316,6,1],[318,9,318,44,1],[321,9,321,100,1],[324,9,324,39,1],[326,9,326,55,1],[327,9,327,55,1],[328,5,328,6,1],[332,5,332,6,1],[334,9,334,44,1],[335,9,335,38,1],[337,9,339,34,1],[342,9,342,105,1],[345,9,345,39,1],[347,9,349,25,1],[351,9,351,55,1],[352,9,352,55,1],[353,5,353,6,1],[357,5,357,6,1],[359,9,359,44,1],[360,9,360,38,1],[362,9,364,33,1],[367,9,367,105,1],[370,9,370,38,1],[372,9,374,25,1],[376,9,376,55,1],[377,9,377,55,1],[378,5,378,6,1],[382,5,382,6,1],[384,9,389,11,1],[391,9,393,42,1],[395,9,397,30,1],[400,9,400,51,1],[403,9,405,25,1],[407,9,409,25,1],[411,9,411,55,1],[412,9,412,55,1],[413,5,413,6,1],[417,5,417,6,1],[419,9,419,44,1],[420,9,420,38,1],[422,9,424,42,1],[426,9,428,30,1],[431,9,431,71,1],[434,9,436,25,1],[438,9,440,25,1],[442,9,442,55,1],[443,9,443,55,1],[444,5,444,6,1],[448,5,448,6,1],[450,9,455,11,1],[457,9,459,42,1],[461,9,463,30,1],[466,9,466,51,1],[469,9,471,25,1],[473,9,475,25,1],[477,9,477,55,1],[478,9,478,55,1],[479,5,479,6,1],[483,5,483,6,1],[485,9,485,44,1],[486,9,486,38,1],[488,9,490,42,1],[492,9,494,30,1],[497,9,497,71,1],[500,9,502,25,1],[504,9,506,25,1],[508,9,508,55,1],[509,9,509,55,1],[510,5,510,6,1]]);
+    </script>
+  </body>
+</html>

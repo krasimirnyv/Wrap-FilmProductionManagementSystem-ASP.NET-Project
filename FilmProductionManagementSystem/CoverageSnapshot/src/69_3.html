@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/Utilities/ImageLogic/ProfileImageStrategy.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core.Utilities.ImageLogic;
+
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Webp;
+
+using Interfaces;
+
+using static GCommon.DataFormat;
+
+public class ProfileImageStrategy : IVariantImageStrategy
+{
+    public string FolderName =&gt; ProfileFolderName;
+    
+    public string DefaultPath =&gt; DefaultProfilePath;
+    
+    public ushort Width =&gt; OutputSizeProfileImage;
+    
+    public ushort Height =&gt; OutputSizeProfileImage;
+    
+    public ushort Quality =&gt; WebpQuality;
+    
+    public ResizeMode ResizeMode =&gt; ResizeMode.Crop;
+    
+    public AnchorPositionMode AnchorPosition =&gt; AnchorPositionMode.Center;
+    
+    public WebpFileFormatType FileFormat =&gt; WebpFileFormatType.Lossy;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,33,12,50,1],[14,34,14,52,1],[16,28,16,50,1],[18,29,18,51,1],[20,30,20,41,1],[22,37,22,52,1],[24,49,24,74,1],[26,45,26,69,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Repository/NavBarRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Repository;
+
+using Microsoft.EntityFrameworkCore;
+
+using Interfaces;
+using Models;
+
+public class NavBarRepository(FilmProductionDbContext dbContext) 
+    : BaseRepository(dbContext), INavBarRepository
+{
+    public async Task&lt;Crew?&gt; GetCrewUserAsync(Guid userId)
+    {
+        Crew? crew = await Context!
+            .CrewMembers
+            .Include(cm =&gt; cm.User)
+            .AsNoTracking()
+            .SingleOrDefaultAsync(c =&gt; c.UserId == userId);
+        
+        return crew;
+    }
+
+    public async Task&lt;Cast?&gt; GetCastUserAsync(Guid userId)
+    {
+        Cast? cast = await Context!
+            .CastMembers
+            .Include(cm =&gt; cm.User)
+            .AsNoTracking()
+            .SingleOrDefaultAsync(c =&gt; c.UserId == userId);
+        
+        return cast;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,7,9,32,0],[12,5,12,6,0],[13,9,17,60,0],[19,9,19,21,0],[20,5,20,6,0],[23,5,23,6,0],[24,9,28,60,0],[30,9,30,21,0],[31,5,31,6,0]]);
+    </script>
+  </body>
+</html>

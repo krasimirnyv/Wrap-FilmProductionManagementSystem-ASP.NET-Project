@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Shared/Components/NavBarUserComponent/Default.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model NavBarUserViewModel
+
+&lt;ul class=&quot;navbar-nav me-auto mb-2 mb-lg-0&quot;&gt;
+&lt;li class=&quot;nav-item&quot;&gt;
+    &lt;a class=&quot;nav-link&quot; asp-area=&quot;&quot; asp-controller=&quot;Home&quot; asp-action=&quot;Dashboard&quot;&gt;Home&lt;/a&gt;
+&lt;/li&gt;
+
+&lt;li class=&quot;nav-item&quot;&gt;
+    &lt;a class=&quot;nav-link&quot; asp-area=&quot;&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Index&quot;&gt;Productions&lt;/a&gt;
+&lt;/li&gt;
+
+&lt;li class=&quot;nav-item&quot;&gt;
+    &lt;a class=&quot;nav-link&quot; asp-area=&quot;&quot; asp-controller=&quot;Scripts&quot; asp-action=&quot;Index&quot;&gt;Scripts&lt;/a&gt;
+&lt;/li&gt;
+
+&lt;li class=&quot;nav-item&quot;&gt;
+    &lt;a class=&quot;nav-link&quot; asp-area=&quot;&quot; asp-controller=&quot;Schedule&quot; asp-action=&quot;Index&quot;&gt;Shooting Schedule&lt;/a&gt;
+&lt;/li&gt;
+
+&lt;li class=&quot;nav-item&quot;&gt;
+    &lt;a class=&quot;nav-link&quot; asp-area=&quot;&quot; asp-controller=&quot;Assets&quot; asp-action=&quot;Index&quot;&gt;Assets&lt;/a&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+
+@* &lt;form class=&quot;wrap-search me-4&quot; role=&quot;search&quot; asp-controller=&quot;Search&quot; asp-action=&quot;Index&quot;&gt; *@
+@*     &lt;div class=&quot;wrap-search__group&quot;&gt; *@
+@*         &lt;button type=&quot;submit&quot; class=&quot;wrap-search__icon&quot; aria-label=&quot;Search&quot;&gt; *@
+@*             &lt;i class=&quot;bi bi-search&quot;&gt;&lt;/i&gt; *@
+@*         &lt;/button&gt; *@
+@* *@
+@*         &lt;input class=&quot;wrap-search__input&quot; *@
+@*                type=&quot;search&quot; *@
+@*                name=&quot;query&quot; *@
+@*                placeholder=&quot;Search projects, crew, scripts...&quot; *@
+@*                aria-label=&quot;Search&quot; /&gt; *@
+@*     &lt;/div&gt; *@
+@* &lt;/form&gt; *@
+
+@if (User.Identity is { IsAuthenticated: true })
+{
+    &lt;ul class=&quot;navbar-nav&quot;&gt;
+
+        &lt;li class=&quot;nav-item navbar-brand dropdown&quot;&gt;
+            &lt;a class=&quot;nav-link dropdown-toggle d-flex align-items-center&quot;
+               data-bs-toggle=&quot;dropdown&quot; role=&quot;button&quot; style=&quot;cursor:pointer;&quot;&gt;
+
+                &lt;span class=&quot;me-2&quot;&gt;@Model.UserName&lt;/span&gt;
+
+                &lt;img src=&quot;@Model.ProfileImagePath&quot;
+                     alt=&quot;Profile&quot;
+                     class=&quot;rounded-circle&quot;
+                     style=&quot;width:32px;height:32px;object-fit:cover&quot;/&gt;
+            &lt;/a&gt;
+
+            &lt;ul class=&quot;dropdown-menu dropdown-menu-end&quot;&gt;
+                &lt;li&gt;
+                    &lt;a class=&quot;dropdown-item&quot; asp-controller=&quot;Profile&quot; asp-action=&quot;Index&quot; asp-route-username=&quot;@Model.UserName&quot; &gt;
+                        &lt;i class=&quot;bi bi-person me-2&quot;&gt;&lt;/i&gt;Profile
+                    &lt;/a&gt;
+                &lt;/li&gt;
+                &lt;li&gt;
+                    &lt;a class=&quot;dropdown-item&quot; asp-controller=&quot;Profile&quot; asp-action=&quot;Edit&quot;&gt;
+                        &lt;i class=&quot;bi bi-gear me-2&quot;&gt;&lt;/i&gt;Edit
+                    &lt;/a&gt;
+                &lt;/li&gt;
+                &lt;li&gt;&lt;hr class=&quot;dropdown-divider&quot;/&gt;&lt;/li&gt;
+                &lt;li&gt;
+                    &lt;form asp-controller=&quot;LoginRegister&quot; asp-action=&quot;Logout&quot; method=&quot;post&quot;&gt;
+                        &lt;button type=&quot;submit&quot; class=&quot;dropdown-item text-danger&quot;&gt;
+                            &lt;i class=&quot;bi bi-box-arrow-right me-2&quot;&gt;&lt;/i&gt;Logout
+                        &lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[39,2,39,49,0],[40,1,40,2,0],[77,1,77,2,0]]);
+    </script>
+  </body>
+</html>

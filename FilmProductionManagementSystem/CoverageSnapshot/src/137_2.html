@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Controllers/BaseController.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace FilmProductionManagementSystem.Web.Controllers;
+
+using System.Security.Claims;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
+[Authorize]
+public class BaseController : Controller
+{
+    protected string? GetUserId()
+        =&gt; User?.FindFirstValue(ClaimTypes.NameIdentifier);
+    
+    protected string? GetUsername()
+        =&gt; User.Identity?.Name;
+    
+    protected bool IsAuthenticated()
+        =&gt; User.Identity?.IsAuthenticated ?? false;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,12,12,59,0],[15,12,15,31,0],[18,12,18,51,0]]);
+    </script>
+  </body>
+</html>

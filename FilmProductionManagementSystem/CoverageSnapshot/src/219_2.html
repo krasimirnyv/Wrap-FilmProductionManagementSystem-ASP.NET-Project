@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Home/FindActors.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model FindActorsViewModel
+
+@{
+    ViewData[TitleDataKey] = &quot;Find Actors&quot;;
+
+    string? productionId = Model.ProductionId;
+    string? search = Model.Search;
+    byte? age = Model.Age;
+    string? gender = Model.Gender;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/profile.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;div class=&quot;production-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+
+        &lt;partial name=&quot;_TempDataPartial&quot;&gt;&lt;/partial&gt;
+
+        @* ── Header ── *@
+        &lt;div class=&quot;production-header-card d-flex justify-content-between align-items-center flex-wrap gap-3&quot;&gt;
+            &lt;div&gt;
+                &lt;h1 class=&quot;fw-bold mb-1&quot; style=&quot;color: var(--wrap-dark-blue);&quot;&gt;
+                    &lt;i class=&quot;bi bi-person-video3 me-2&quot; style=&quot;color: var(--wrap-blue);&quot;&gt;&lt;/i&gt;
+                    Find Actors
+                &lt;/h1&gt;
+                &lt;p class=&quot;text-muted mb-0&quot;&gt;
+                    Browse actors and filter by name, age or gender.
+                &lt;/p&gt;
+
+                @if (!string.IsNullOrWhiteSpace(productionId))
+                {
+                    &lt;div class=&quot;mt-2&quot;&gt;
+                        &lt;span class=&quot;badge bg-secondary&quot;&gt;Context: Production&lt;/span&gt;
+
+                        @if (Model.CanManageProduction)
+                        {
+                            &lt;span class=&quot;badge bg-success ms-2&quot;&gt;You can manage this production&lt;/span&gt;
+                        }
+                        else
+                        {
+                            &lt;span class=&quot;badge bg-warning text-dark ms-2&quot;&gt;Read-only (no permission to add)&lt;/span&gt;
+                        }
+                    &lt;/div&gt;
+                }
+            &lt;/div&gt;
+
+            &lt;div class=&quot;d-flex gap-2 flex-wrap&quot;&gt;
+                @if (!string.IsNullOrWhiteSpace(productionId))
+                {
+                    &lt;a asp-area=&quot;&quot;
+                       asp-controller=&quot;Production&quot;
+                       asp-action=&quot;Details&quot;
+                       asp-route-productionId=&quot;@productionId&quot;
+                       class=&quot;btn btn-production-secondary&quot;&gt;
+                        &lt;i class=&quot;bi bi-arrow-left me-1&quot;&gt;&lt;/i&gt;Back to production
+                    &lt;/a&gt;
+                }
+                else
+                {
+                    &lt;a asp-area=&quot;&quot;
+                       asp-controller=&quot;Home&quot;
+                       asp-action=&quot;Dashboard&quot;
+                       class=&quot;btn btn-production-secondary&quot;&gt;
+                        &lt;i class=&quot;bi bi-arrow-left me-1&quot;&gt;&lt;/i&gt;Back
+                    &lt;/a&gt;
+                }
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        @* ── Filters row ── *@
+        &lt;div class=&quot;section-card py-3 px-4&quot;&gt;
+            &lt;form method=&quot;get&quot;
+                  asp-area=&quot;&quot;
+                  asp-controller=&quot;Home&quot;
+                  asp-action=&quot;FindActors&quot;&gt;
+
+                &lt;input type=&quot;hidden&quot; name=&quot;ProductionId&quot; value=&quot;@productionId&quot; /&gt;
+
+                &lt;div class=&quot;row g-2 align-items-center&quot;&gt;
+                    &lt;div class=&quot;col-md-6&quot;&gt;
+                        &lt;div class=&quot;input-group&quot;&gt;
+                            &lt;span class=&quot;input-group-text&quot;
+                                  style=&quot;border-color: var(--wrap-blue); color: var(--wrap-blue);&quot;&gt;
+                                &lt;i class=&quot;bi bi-search&quot;&gt;&lt;/i&gt;
+                            &lt;/span&gt;
+                            &lt;input type=&quot;text&quot;
+                                   name=&quot;Search&quot;
+                                   value=&quot;@search&quot;
+                                   class=&quot;form-control&quot;
+                                   placeholder=&quot;Search by first name / last name / nickname…&quot; /&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;col-md-1&quot;&gt;
+                        &lt;input type=&quot;number&quot;
+                               name=&quot;Age&quot;
+                               value=&quot;@(age?.ToString() ?? string.Empty)&quot;
+                               class=&quot;form-control&quot;
+                               min=&quot;0&quot; max=&quot;120&quot;
+                               placeholder=&quot;Age&quot; /&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;col-md-2&quot;&gt;
+                        &lt;select name=&quot;Gender&quot; class=&quot;form-select&quot;&gt;
+                            &lt;option value=&quot;&quot; selected=&quot;@(string.IsNullOrWhiteSpace(gender))&quot;&gt;All genders&lt;/option&gt;
+                            &lt;option value=&quot;Male&quot; selected=&quot;@(string.Equals(gender, &quot;Male&quot;, StringComparison.OrdinalIgnoreCase))&quot;&gt;Male&lt;/option&gt;
+                            &lt;option value=&quot;Female&quot; selected=&quot;@(string.Equals(gender, &quot;Female&quot;, StringComparison.OrdinalIgnoreCase))&quot;&gt;Female&lt;/option&gt;
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;div class=&quot;col-md-2 d-flex ms-auto justify-content-end gap-2&quot;&gt;
+                        &lt;button type=&quot;submit&quot; class=&quot;btn btn-sm btn-production&quot; &gt;
+                            &lt;i class=&quot;bi bi-funnel-fill me-1&quot;&gt;&lt;/i&gt;Apply
+                        &lt;/button&gt;
+
+                        &lt;a class=&quot;btn btn-sm btn-production-secondary&quot;
+                           asp-area=&quot;&quot;
+                           asp-controller=&quot;Home&quot;
+                           asp-action=&quot;FindActors&quot;
+                           asp-route-ProductionId=&quot;@productionId&quot;&gt;
+                            &lt;i class=&quot;bi bi-x-circle me-1&quot;&gt;&lt;/i&gt;Clear
+                        &lt;/a&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2&quot;&gt;
+                    &lt;span class=&quot;text-muted small&quot;&gt;
+                        @Model.TotalCount @(Model.TotalCount == 1 ? &quot;actor&quot; : &quot;actors&quot;) found
+                    &lt;/span&gt;
+
+                    &lt;partial name=&quot;_ActorsPaginationPartial&quot; model=&quot;Model&quot; /&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+
+        @* ── Results ── *@
+        @if (!Model.ActorList.Any())
+        {
+            &lt;div class=&quot;section-card mt-4&quot;&gt;
+                &lt;div class=&quot;empty-state&quot;&gt;
+                    &lt;i class=&quot;bi bi-person-video3&quot;&gt;&lt;/i&gt;
+                    &lt;p class=&quot;mt-2&quot;&gt;No actors match your filters.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        }
+        else
+        {
+            &lt;div class=&quot;row mt-4&quot;&gt;
+                @foreach (ActorListViewModel actor in Model.ActorList)
+                {
+                    &lt;div class=&quot;col-md-6 col-lg-4 mb-4&quot;&gt;
+                        &lt;div class=&quot;section-card h-100&quot;&gt;
+                            &lt;div class=&quot;d-flex align-items-center gap-3&quot;&gt;
+                                &lt;img src=&quot;@actor.ProfileImagePath&quot;
+                                     alt=&quot;@actor.FullName&quot;
+                                     style=&quot;width:70px; height:70px; object-fit:cover; border-radius:16px;&quot; /&gt;
+                                &lt;div class=&quot;flex-grow-1&quot;&gt;
+                                    &lt;div class=&quot;fw-bold&quot; style=&quot;color:var(--wrap-dark-blue);&quot;&gt;
+                                        @actor.FullName
+                                    &lt;/div&gt;
+                                    @if (!string.IsNullOrWhiteSpace(actor.Nickname))
+                                    {
+                                        &lt;div class=&quot;text-muted small&quot;&gt;@actor.Nickname&lt;/div&gt;
+                                    }
+                                    &lt;div class=&quot;badge bg-secondary mt-2&quot;&gt;
+                                        Age @actor.Age &#183; @actor.Gender
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+
+                            &lt;hr class=&quot;my-3&quot; /&gt;
+
+                            @* Add-to-production (only when in production context + permission) *@
+                            @if (!string.IsNullOrWhiteSpace(productionId) &amp;&amp; Model.CanManageProduction)
+                            {
+                                @if (actor.IsAlreadyInProduction)
+                                {
+                                    &lt;div class=&quot;alert alert-info mb-0 d-flex gap-2 align-items-center&quot;&gt;
+                                        &lt;i class=&quot;bi bi-check-circle-fill&quot;&gt;&lt;/i&gt;
+                                        &lt;span&gt;Already in this production.&lt;/span&gt;
+                                    &lt;/div&gt;
+                                }
+                                else
+                                {
+                                    &lt;form asp-area=&quot;Filmmaker&quot;
+                                          asp-controller=&quot;Production&quot;
+                                          asp-action=&quot;AddActorToProduction&quot;
+                                          method=&quot;post&quot;
+                                          class=&quot;d-flex flex-column gap-2&quot;&gt;
+
+                                        @Html.AntiForgeryToken()
+
+                                        &lt;input type=&quot;hidden&quot; name=&quot;ProductionId&quot; value=&quot;@productionId&quot; /&gt;
+                                        &lt;input type=&quot;hidden&quot; name=&quot;CastId&quot; value=&quot;@actor.CastId&quot; /&gt;
+
+                                        &lt;div&gt;
+                                            &lt;label class=&quot;form-label small text-muted mb-1&quot;&gt;Role in production&lt;/label&gt;
+                                            &lt;input type=&quot;text&quot;
+                                                   name=&quot;RoleName&quot;
+                                                   class=&quot;form-control&quot;
+                                                   placeholder=&quot;e.g. Detective Ivanov&quot;
+                                                   maxlength=&quot;80&quot;
+                                                   required /&gt;
+                                            &lt;div class=&quot;form-text&quot;&gt;This is the character / role name (free text).&lt;/div&gt;
+                                        &lt;/div&gt;
+
+                                        &lt;button type=&quot;submit&quot; class=&quot;btn btn-production w-100 mt-2&quot;&gt;
+                                            &lt;i class=&quot;bi bi-person-plus-fill me-1&quot;&gt;&lt;/i&gt;Add to production
+                                        &lt;/button&gt;
+                                    &lt;/form&gt;
+                                }
+                            }
+                            else
+                            {
+                                &lt;div class=&quot;text-muted small&quot;&gt;
+                                    @if (!string.IsNullOrWhiteSpace(productionId))
+                                    {
+                                        &lt;span&gt;You don’t have permission to add members.&lt;/span&gt;
+                                    }
+                                    else
+                                    {
+                                        &lt;span&gt;Select a production (context) to add members.&lt;/span&gt;
+                                    }
+                                &lt;/div&gt;
+                            }
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                }
+            &lt;/div&gt;
+
+            &lt;partial name=&quot;_ActorsPaginationPartial&quot; model=&quot;Model&quot; /&gt;
+        }
+    &lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,44,0],[6,5,6,47,0],[7,5,7,35,0],[8,5,8,27,0],[9,5,9,35,0],[33,18,33,63,0],[34,17,34,18,0],[38,26,38,56,0],[39,25,39,26,0],[41,25,41,26,0],[43,25,43,26,0],[45,25,45,26,0],[47,17,47,18,0],[51,18,51,63,0],[52,17,52,18,0],[60,17,60,18,0],[62,17,62,18,0],[69,17,69,18,0],[140,10,140,37,0],[141,9,141,10,0],[148,9,148,10,0],[150,9,150,10,0],[152,18,152,25,0],[152,27,152,51,0],[152,52,152,54,0],[152,55,152,70,0],[153,17,153,18,0],[164,38,164,85,0],[165,37,165,38,0],[167,37,167,38,0],[177,30,177,104,0],[178,29,178,30,0],[179,34,179,66,0],[180,33,180,34,0],[185,33,185,34,0],[187,33,187,34,0],[214,33,214,34,0],[215,29,215,30,0],[217,29,217,30,0],[219,38,219,83,0],[220,37,220,38,0],[222,37,222,38,0],[224,37,224,38,0],[226,37,226,38,0],[228,29,228,30,0],[231,17,231,18,0],[235,9,235,10,0]]);
+    </script>
+  </body>
+</html>

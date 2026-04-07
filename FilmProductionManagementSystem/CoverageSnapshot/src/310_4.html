@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/Script.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+
+using GCommon.Enums;
+
+using static GCommon.EntityConstants.Script;
+using static GCommon.DataFormat;
+
+/// &lt;summary&gt;
+/// Entity за сценарий, който принадлежи към дадена продукция
+/// &lt;/summary&gt;
+public class Script
+{
+    [Key]
+    public Guid Id { get; set; }
+
+    [Required]
+    [Unicode]
+    [MaxLength(TitleMaxLength)]
+    public string Title { get; set; } = null!;
+    
+    [Column(TypeName = DateTimeTypeFormat)]
+    public DateTime LastEditedAt { get; set; }
+    
+    [Required]
+    public ScriptStageType StageType { get; set; }
+    
+    public ScriptRevisionType?  RevisionType { get; set; }
+    
+    [Required]
+    [ForeignKey(nameof(Production))]
+    public Guid ProductionId { get; set; }  
+    
+    public virtual Production Production { get; set; } = null!;
+    
+    public virtual ICollection&lt;ScriptBlock&gt; ScriptBlocks { get; set; }
+        = new HashSet&lt;ScriptBlock&gt;();
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[24,41,24,46,1],[38,58,38,63,1],[41,11,41,37,1]]);
+    </script>
+  </body>
+</html>

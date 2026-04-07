@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/ProductionServiceTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using System.Collections.ObjectModel;
+
+using Microsoft.AspNetCore.Http;
+
+using Moq;
+using NUnit.Framework;
+
+using Data.Models;
+using Data.Models.Infrastructure;
+using Data.Models.MappingEntities;
+using Data.Repository.Interfaces;
+using GCommon.Enums;
+using GCommon.UI;
+using Core;
+using Core.Utilities.ImageLogic.Interfaces;
+using Models.Production;
+using Models.Production.NestedDtos;
+
+using static GCommon.DataFormat;
+using static GCommon.ApplicationConstants;
+using static GCommon.OutputMessages.Production;
+
+[TestFixture]
+public class ProductionServiceTests
+{
+    private Mock&lt;IProductionRepository&gt; productionRepositoryMock = null!;
+    private Mock&lt;IImageService&gt; imageServiceMock = null!;
+    private Mock&lt;IVariantImageStrategyResolver&gt; imageStrategyResolverMock = null!;
+
+    private ProductionService productionService = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        productionRepositoryMock = new Mock&lt;IProductionRepository&gt;(MockBehavior.Strict);
+        imageServiceMock = new Mock&lt;IImageService&gt;(MockBehavior.Strict);
+        imageStrategyResolverMock = new Mock&lt;IVariantImageStrategyResolver&gt;(MockBehavior.Strict);
+
+        productionService = new ProductionService(
+            productionRepositoryMock.Object,
+            imageServiceMock.Object,
+            imageStrategyResolverMock.Object);
+    }
+
+    [Test]
+    public async Task GetAllProductionsAsync_WhenCalledWithoutFilters_UsesPagingAndMapsDtosAndSetsStatusClass()
+    {
+        // Arrange
+        int pageNumber = 2;
+        int productionsPerPage = 5;
+        int expectedSkip = (pageNumber - 1) * productionsPerPage;
+
+        ProductionStatusType statusType = GetStatusFromCatalogOrFallback();
+
+        IReadOnlyCollection&lt;Production&gt; productions = new List&lt;Production&gt;
+        {
+            CreateProduction(Guid.NewGuid(), &quot;p1&quot;, &quot;/img/productions/p1.webp&quot;, statusType),
+            CreateProduction(Guid.NewGuid(), &quot;p2&quot;, &quot;/img/productions/p2.webp&quot;, statusType)
+        }.AsReadOnly();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetAllAsync(expectedSkip, productionsPerPage, null, null))
+            .ReturnsAsync(productions);
+
+        // Act
+        IReadOnlyCollection&lt;ProductionDto&gt; result =
+            await productionService.GetAllProductionsAsync(pageNumber, null, null, productionsPerPage);
+
+        // Assert
+        Assert.That(result, Has.Count.EqualTo(2));
+
+        ProductionDto dto1 = result.First(p =&gt; p.Title == &quot;p1&quot;);
+        Assert.That(dto1.ThumbnailPath, Is.EqualTo(&quot;/img/productions/p1.webp&quot;));
+        Assert.That(dto1.StatusType, Is.EqualTo(statusType));
+        Assert.That(dto1.StatusAbstractClass, Is.Not.Empty);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetAllAsync(expectedSkip, productionsPerPage, null, null), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetAllProductionsAsync_WhenStatusAndIsActiveProvided_PassesFiltersToRepository()
+    {
+        // Arrange
+        int pageNumber = 1;
+        int productionsPerPage = 6;
+        const string status = &quot;Production&quot;;
+        const bool isActive = true;
+
+        IReadOnlyCollection&lt;ProductionStatusType&gt; expectedStatuses =
+            ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction()[status];
+
+        IReadOnlyCollection&lt;Production&gt; productions =
+        [
+            CreateProduction(Guid.NewGuid(), &quot;p1&quot;, &quot;/img/productions/p1.webp&quot;, expectedStatuses.First())
+        ];
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetAllAsync(
+                0,
+                productionsPerPage,
+                It.Is&lt;IReadOnlyCollection&lt;ProductionStatusType&gt;&gt;(s =&gt; s.SequenceEqual(expectedStatuses)),
+                isActive))
+            .ReturnsAsync(productions);
+
+        // Act
+        IReadOnlyCollection&lt;ProductionDto&gt; result =
+            await productionService.GetAllProductionsAsync(pageNumber, status, isActive, productionsPerPage);
+
+        // Assert
+        Assert.That(result, Has.Count.EqualTo(1));
+        Assert.That(result.First().Title, Is.EqualTo(&quot;p1&quot;));
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetAllAsync(
+            0,
+            productionsPerPage,
+            It.Is&lt;IReadOnlyCollection&lt;ProductionStatusType&gt;&gt;(s =&gt; s.SequenceEqual(expectedStatuses)),
+            isActive), Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetProductionsCountAsync_WhenRepositoryReturnsCountWithoutFilters_ReturnsSameCount()
+    {
+        // Arrange
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.CountAsync(null, null))
+            .ReturnsAsync(42);
+
+        // Act
+        int result = await productionService.GetProductionsCountAsync();
+
+        // Assert
+        Assert.That(result, Is.EqualTo(42));
+
+        productionRepositoryMock.Verify(pr =&gt; pr.CountAsync(null, null), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetProductionsCountAsync_WhenStatusAndIsActiveProvided_PassesFiltersToRepository()
+    {
+        // Arrange
+        const string status = &quot;Production&quot;;
+        const bool isActive = true;
+
+        IReadOnlyCollection&lt;ProductionStatusType&gt; expectedStatuses =
+            ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction()[status];
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.CountAsync(
+                It.Is&lt;IReadOnlyCollection&lt;ProductionStatusType&gt;&gt;(s =&gt; s.SequenceEqual(expectedStatuses)),
+                isActive))
+            .ReturnsAsync(7);
+
+        // Act
+        int result = await productionService.GetProductionsCountAsync(status, isActive);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(7));
+
+        productionRepositoryMock.Verify(pr =&gt; pr.CountAsync(
+            It.Is&lt;IReadOnlyCollection&lt;ProductionStatusType&gt;&gt;(s =&gt; s.SequenceEqual(expectedStatuses)),
+            isActive), Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetProductionDetailsAsync_WhenIdIsNullOrWhitespace_ReturnsNull()
+    {
+        // Act
+        DetailsProductionDto? result1 = await productionService.GetProductionDetailsAsync(null);
+        DetailsProductionDto? result2 = await productionService.GetProductionDetailsAsync(&quot;   &quot;);
+
+        // Assert
+        Assert.That(result1, Is.Null);
+        Assert.That(result2, Is.Null);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetProductionDetailsAsync_WhenIdIsInvalidGuid_ReturnsNull()
+    {
+        // Act
+        DetailsProductionDto? result = await productionService.GetProductionDetailsAsync(&quot;not-a-guid&quot;);
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetProductionDetailsAsync_WhenRepositoryReturnsAllNullTuple_ReturnsNull()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetDetailsAsync(productionId))
+            .ReturnsAsync((production: null,
+                productionCrews: null,
+                productionCasts: null,
+                productionScenes: null,
+                productionAssets: null,
+                productionShootingDays: null));
+
+        // Act
+        DetailsProductionDto? result = await productionService.GetProductionDetailsAsync(productionId.ToString());
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetDetailsAsync(productionId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetProductionDetailsAsync_WhenDataExists_MapsAllNestedCollectionsAndStatusClass()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        ProductionStatusType statusType = GetStatusFromCatalogOrFallback();
+
+        Production production = new Production
+        {
+            Id = productionId,
+            Title = &quot;My Production&quot;,
+            Description = &quot;desc&quot;,
+            Budget = 1000m,
+            Thumbnail = &quot;/img/productions/thumb.webp&quot;,
+            StatusType = statusType,
+            StatusStartDate = new DateTime(2026, 1, 1),
+            StatusEndDate = new DateTime(2026, 2, 1),
+            Script = new Script { Id = Guid.NewGuid() }
+        };
+
+        Crew crew = new Crew
+        {
+            Id = Guid.NewGuid(),
+            FirstName = &quot;CrewFirst&quot;,
+            LastName = &quot;CrewLast&quot;,
+            ProfileImagePath = &quot;/img/profile/crew.webp&quot;,
+            User = new ApplicationUser
+            {
+                UserName = &quot;crew.user&quot;,
+                Email = &quot;crew@wrap.local&quot;,
+                PhoneNumber = &quot;+359&quot;
+            }
+        };
+
+        Cast cast = new Cast
+        {
+            Id = Guid.NewGuid(),
+            FirstName = &quot;CastFirst&quot;,
+            LastName = &quot;CastLast&quot;,
+            ProfileImagePath = &quot;/img/profile/cast.webp&quot;,
+            BirthDate = new DateTime(2000, 1, 1),
+            Gender = GenderType.Male,
+            User = new ApplicationUser
+            {
+                UserName = &quot;cast.user&quot;,
+                Email = &quot;cast@wrap.local&quot;,
+                PhoneNumber = &quot;+359&quot;
+            }
+        };
+
+        ProductionCrew productionCrew = new ProductionCrew
+        {
+            ProductionId = productionId,
+            Production = production,
+            CrewMemberId = crew.Id,
+            CrewMember = crew,
+            RoleType = CrewRoleType.Director
+        };
+
+        ProductionCast productionCast = new ProductionCast
+        {
+            ProductionId = productionId,
+            Production = production,
+            CastMemberId = cast.Id,
+            CastMember = cast,
+            Role = &quot;Detective&quot;
+        };
+
+        Scene scene = new Scene
+        {
+            Id = Guid.NewGuid(),
+            SceneNumber = 1,
+            SceneType = SceneType.Interior,
+            SceneName = &quot;SceneName&quot;,
+            Location = &quot;Location&quot;,
+            ProductionId = productionId,
+            Production = production
+        };
+
+        ProductionAsset asset = new ProductionAsset
+        {
+            Id = Guid.NewGuid(),
+            ProductionId = productionId,
+            Production = production,
+            AssetType = ProductionAssetType.Storyboard,
+            Title = &quot;Storyboard&quot;
+        };
+
+        ShootingDay shootingDay = new ShootingDay
+        {
+            Id = Guid.NewGuid(),
+            ProductionId = productionId,
+            Production = production,
+            Date = new DateTime(2026, 3, 31)
+        };
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetDetailsAsync(productionId))
+            .ReturnsAsync((
+                production: production,
+                productionCrews: new List&lt;ProductionCrew&gt; { productionCrew }.AsReadOnly(),
+                productionCasts: new List&lt;ProductionCast&gt; { productionCast }.AsReadOnly(),
+                productionScenes: new List&lt;Scene&gt; { scene }.AsReadOnly(),
+                productionAssets: new List&lt;ProductionAsset&gt; { asset }.AsReadOnly(),
+                productionShootingDays: new List&lt;ShootingDay&gt; { shootingDay }.AsReadOnly()
+            ));
+
+        // Act
+        DetailsProductionDto? result = await productionService.GetProductionDetailsAsync(productionId.ToString());
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Id, Is.EqualTo(productionId));
+        Assert.That(result.Title, Is.EqualTo(&quot;My Production&quot;));
+        Assert.That(result.Thumbnail, Is.EqualTo(&quot;/img/productions/thumb.webp&quot;));
+        Assert.That(result.Description, Is.EqualTo(&quot;desc&quot;));
+        Assert.That(result.Budget, Is.EqualTo(1000m));
+        Assert.That(result.StatusType, Is.EqualTo(statusType));
+        Assert.That(result.StatusAbstractClass, Is.Not.Empty);
+        Assert.That(result.ScriptId, Is.EqualTo(production.Script!.Id));
+
+        Assert.That(result.ProductionCrewMembers.Count, Is.EqualTo(1));
+        ProductionCrewMemberDto crewDto = result.ProductionCrewMembers.Single();
+        Assert.That(crewDto.FirstName, Is.EqualTo(&quot;CrewFirst&quot;));
+        Assert.That(crewDto.LastName, Is.EqualTo(&quot;CrewLast&quot;));
+        Assert.That(crewDto.ProfileImagePath, Is.EqualTo(&quot;/img/profile/crew.webp&quot;));
+        Assert.That(crewDto.Role, Is.EqualTo(CrewRoleType.Director));
+
+        Assert.That(result.ProductionCastMembers.Count, Is.EqualTo(1));
+        ProductionCastMemberDto castDto = result.ProductionCastMembers.Single();
+        Assert.That(castDto.FirstName, Is.EqualTo(&quot;CastFirst&quot;));
+        Assert.That(castDto.LastName, Is.EqualTo(&quot;CastLast&quot;));
+        Assert.That(castDto.ProfileImagePath, Is.EqualTo(&quot;/img/profile/cast.webp&quot;));
+        Assert.That(castDto.Role, Is.EqualTo(&quot;Detective&quot;));
+        Assert.That(castDto.Gender, Is.EqualTo(GenderType.Male));
+
+        Assert.That(result.ProductionScenes.Count, Is.EqualTo(1));
+        ProductionSceneDto sceneDto = result.ProductionScenes.Single();
+        Assert.That(sceneDto.SceneNumber, Is.EqualTo(1));
+        Assert.That(sceneDto.SceneType, Is.EqualTo(SceneType.Interior));
+        Assert.That(sceneDto.SceneName, Is.EqualTo(&quot;SceneName&quot;));
+        Assert.That(sceneDto.Location, Is.EqualTo(&quot;Location&quot;));
+
+        Assert.That(result.ProductionAssets.Count, Is.EqualTo(1));
+        ProductionAssetDto assetDto = result.ProductionAssets.Single();
+        Assert.That(assetDto.Title, Is.EqualTo(&quot;Storyboard&quot;));
+        Assert.That(assetDto.AssetType, Is.EqualTo(ProductionAssetType.Storyboard));
+
+        Assert.That(result.ProductionShootingDays.Count, Is.EqualTo(1));
+        ProductionShootingDayDto sdDto = result.ProductionShootingDays.Single();
+        Assert.That(sdDto.Date, Is.EqualTo(new DateTime(2026, 3, 31)));
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetDetailsAsync(productionId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CreateProductionAsync_WhenCreatorIsNotCrew_ReturnsNull()
+    {
+        // Arrange
+        Guid creatorId = Guid.NewGuid();
+
+        CreateProductionDto dto = new CreateProductionDto
+        {
+            CreatorId = creatorId,
+            ThumbnailImage = CreateFormFile(&quot;thumb.png&quot;, [1, 2, 3]),
+            Title = &quot;New Production&quot;,
+            Description = &quot;desc&quot;,
+            Budget = 500m,
+            StatusType = ProductionStatusType.Production,
+            StatusStartDate = new DateTime(2026, 3, 1),
+            StatusEndDate = null
+        };
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        const string savedThumbnailPath = &quot;/img/productions/saved.webp&quot;;
+
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ThumbnailFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.SaveImageAsync(dto.ThumbnailImage, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ReturnsAsync(savedThumbnailPath);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUserIdAsync(creatorId))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        string? result = await productionService.CreateProductionAsync(dto);
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ThumbnailFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(dto.ThumbnailImage, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.GetCrewByUserIdAsync(creatorId), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.AddAsync(It.IsAny&lt;Production&gt;()), Times.Never);
+        productionRepositoryMock.Verify(pr =&gt; pr.AddDirectorToProductionAsync(It.IsAny&lt;Guid&gt;(), It.IsAny&lt;Crew&gt;(), It.IsAny&lt;CrewRoleType&gt;()), Times.Never);
+        productionRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Never);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CreateProductionAsync_WhenValidDto_SavesImage_AddsProduction_AddsDirector_SavesChanges_ReturnsId()
+    {
+        // Arrange
+        Guid creatorId = Guid.NewGuid();
+        IFormFile thumbnailFile = CreateFormFile(&quot;thumb.png&quot;, [1, 2, 3]);
+
+        CreateProductionDto dto = new CreateProductionDto
+        {
+            CreatorId = creatorId,
+            ThumbnailImage = thumbnailFile,
+            Title = &quot;New Production&quot;,
+            Description = &quot;desc&quot;,
+            Budget = 500m,
+            StatusType = ProductionStatusType.Production,
+            StatusStartDate = new DateTime(2026, 3, 1),
+            StatusEndDate = null
+        };
+
+        Crew creator = new Crew
+        {
+            Id = Guid.NewGuid(),
+            UserId = creatorId,
+            FirstName = &quot;Crew&quot;,
+            LastName = &quot;User&quot;,
+            ProfileImagePath = &quot;/img/profile/crew.webp&quot;
+        };
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        const string savedThumbnailPath = &quot;/img/productions/saved.webp&quot;;
+
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ThumbnailFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.SaveImageAsync(dto.ThumbnailImage, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ReturnsAsync(savedThumbnailPath);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUserIdAsync(creatorId))
+            .ReturnsAsync(creator);
+
+        Production? captured = null;
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.AddAsync(It.IsAny&lt;Production&gt;()))
+            .Callback&lt;Production&gt;(p =&gt; captured = p)
+            .Returns(Task.CompletedTask);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.AddDirectorToProductionAsync(It.IsAny&lt;Guid&gt;(), creator, CrewRoleType.Director))
+            .Returns(Task.CompletedTask);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        string? resultId = await productionService.CreateProductionAsync(dto);
+
+        // Assert
+        Assert.That(resultId, Is.Not.Null);
+        Assert.That(Guid.TryParse(resultId, out _), Is.True);
+
+        Assert.That(captured, Is.Not.Null);
+        Assert.That(captured!.Id, Is.Not.EqualTo(Guid.Empty));
+        Assert.That(captured.Title, Is.EqualTo(dto.Title));
+        Assert.That(captured.Description, Is.EqualTo(dto.Description));
+        Assert.That(captured.Budget, Is.EqualTo(dto.Budget));
+        Assert.That(captured.StatusType, Is.EqualTo(dto.StatusType));
+        Assert.That(captured.StatusStartDate, Is.EqualTo(dto.StatusStartDate));
+        Assert.That(captured.StatusEndDate, Is.EqualTo(dto.StatusEndDate));
+        Assert.That(captured.Thumbnail, Is.EqualTo(savedThumbnailPath));
+        Assert.That(captured.CreatedByUserId, Is.EqualTo(dto.CreatorId));
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ThumbnailFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(dto.ThumbnailImage, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.GetCrewByUserIdAsync(creatorId), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.AddAsync(It.IsAny&lt;Production&gt;()), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.AddDirectorToProductionAsync(captured.Id, creator, CrewRoleType.Director), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetEditProductionAsync_WhenIdInvalid_ReturnsNull()
+    {
+        // Act
+        EditProductionDto? result1 = await productionService.GetEditProductionAsync(null);
+        EditProductionDto? result2 = await productionService.GetEditProductionAsync(&quot;not-guid&quot;);
+
+        // Assert
+        Assert.That(result1, Is.Null);
+        Assert.That(result2, Is.Null);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetEditProductionAsync_WhenProductionNotFound_ReturnsNull()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsNoTrackingAsync(productionId))
+            .ReturnsAsync((Production?)null);
+
+        // Act
+        EditProductionDto? result = await productionService.GetEditProductionAsync(productionId.ToString());
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsNoTrackingAsync(productionId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetEditProductionAsync_WhenProductionExists_MapsDtoCorrectly()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        Production production = CreateProduction(
+            productionId,
+            &quot;Title&quot;,
+            &quot;/img/productions/old.webp&quot;,
+            ProductionStatusType.Preproduction,
+            &quot;desc&quot;,
+            123m,
+            new DateTime(2026, 1, 1),
+            new DateTime(2026, 2, 1));
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsNoTrackingAsync(productionId))
+            .ReturnsAsync(production);
+
+        // Act
+        EditProductionDto? result = await productionService.GetEditProductionAsync(productionId.ToString());
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.ProductionId, Is.EqualTo(productionId));
+        Assert.That(result.Title, Is.EqualTo(&quot;Title&quot;));
+        Assert.That(result.Description, Is.EqualTo(&quot;desc&quot;));
+        Assert.That(result.Budget, Is.EqualTo(123m));
+        Assert.That(result.StatusType, Is.EqualTo(ProductionStatusType.Preproduction));
+        Assert.That(result.StatusStartDate, Is.EqualTo(new DateTime(2026, 1, 1)));
+        Assert.That(result.StatusEndDate, Is.EqualTo(new DateTime(2026, 2, 1)));
+        Assert.That(result.CurrentThumbnailPath, Is.EqualTo(&quot;/img/productions/old.webp&quot;));
+        Assert.That(result.ThumbnailImage, Is.Null);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsNoTrackingAsync(productionId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task UpdateProductionAsync_WhenProductionNotFound_ReturnsFalse()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        EditProductionDto dto = new EditProductionDto
+        {
+            ProductionId = productionId,
+            Title = &quot;New&quot;,
+            Budget = 1,
+            StatusType = ProductionStatusType.Production,
+            StatusStartDate = new DateTime(2026, 1, 1),
+            CurrentThumbnailPath = &quot;/img/productions/old.webp&quot;,
+            ThumbnailImage = null
+        };
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsync(productionId))
+            .ReturnsAsync((Production?)null);
+
+        // Act
+        bool result = await productionService.UpdateProductionAsync(dto);
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task UpdateProductionAsync_WhenNoNewThumbnail_UpdatesFields_SavesAndReturnsTrue()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        Production production = CreateProduction(
+            productionId,
+            &quot;Old&quot;,
+            &quot;/img/productions/old.webp&quot;,
+            ProductionStatusType.Concept,
+            &quot;old desc&quot;,
+            10m,
+            new DateTime(2026, 1, 1),
+            null);
+
+        EditProductionDto dto = new EditProductionDto
+        {
+            ProductionId = productionId,
+            Title = &quot;New Title&quot;,
+            Description = &quot;new desc&quot;,
+            Budget = 99m,
+            StatusType = ProductionStatusType.Production,
+            StatusStartDate = new DateTime(2026, 3, 1),
+            StatusEndDate = new DateTime(2026, 4, 1),
+            CurrentThumbnailPath = &quot;/img/productions/old.webp&quot;,
+            ThumbnailImage = null
+        };
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsync(productionId))
+            .ReturnsAsync(production);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        bool result = await productionService.UpdateProductionAsync(dto);
+
+        // Assert
+        Assert.That(result, Is.True);
+        Assert.That(production.Title, Is.EqualTo(&quot;New Title&quot;));
+        Assert.That(production.Description, Is.EqualTo(&quot;new desc&quot;));
+        Assert.That(production.Budget, Is.EqualTo(99m));
+        Assert.That(production.StatusType, Is.EqualTo(ProductionStatusType.Production));
+        Assert.That(production.StatusStartDate, Is.EqualTo(new DateTime(2026, 3, 1)));
+        Assert.That(production.StatusEndDate, Is.EqualTo(new DateTime(2026, 4, 1)));
+        Assert.That(production.Thumbnail, Is.EqualTo(&quot;/img/productions/old.webp&quot;));
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task UpdateProductionAsync_WhenNewThumbnailProvided_ReplacesThumbnail_SavesAndReturnsTrue()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        Production production = CreateProduction(
+            productionId,
+            &quot;Old&quot;,
+            &quot;/img/productions/old.webp&quot;,
+            ProductionStatusType.Concept);
+
+        IFormFile newThumb = CreateFormFile(&quot;new.png&quot;, [1, 2, 3]);
+
+        EditProductionDto dto = new EditProductionDto
+        {
+            ProductionId = productionId,
+            Title = &quot;New&quot;,
+            Description = null,
+            Budget = 1m,
+            StatusType = ProductionStatusType.Production,
+            StatusStartDate = new DateTime(2026, 3, 1),
+            StatusEndDate = null,
+            CurrentThumbnailPath = production.Thumbnail,
+            ThumbnailImage = newThumb
+        };
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        const string replacedPath = &quot;/img/productions/replaced.webp&quot;;
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsync(productionId))
+            .ReturnsAsync(production);
+
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ThumbnailFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.ReplaceAsync(dto.CurrentThumbnailPath, dto.ThumbnailImage, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ReturnsAsync(replacedPath);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        bool result = await productionService.UpdateProductionAsync(dto);
+
+        // Assert
+        Assert.That(result, Is.True);
+        Assert.That(production.Thumbnail, Is.EqualTo(replacedPath));
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ThumbnailFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.ReplaceAsync(dto.CurrentThumbnailPath, dto.ThumbnailImage, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDeleteProductionAsync_WhenIdInvalid_ReturnsNull()
+    {
+        // Act
+        DeleteProductionDto? result1 = await productionService.GetDeleteProductionAsync(null);
+        DeleteProductionDto? result2 = await productionService.GetDeleteProductionAsync(&quot;not-guid&quot;);
+
+        // Assert
+        Assert.That(result1, Is.Null);
+        Assert.That(result2, Is.Null);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDeleteProductionAsync_WhenProductionNotFound_ReturnsNull()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsync(productionId))
+            .ReturnsAsync((Production?)null);
+
+        // Act
+        DeleteProductionDto? result = await productionService.GetDeleteProductionAsync(productionId.ToString());
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDeleteProductionAsync_WhenProductionExists_MapsCountsCorrectly()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        Production production = CreateProduction(
+            productionId,
+            &quot;Title&quot;,
+            &quot;/img/productions/t.webp&quot;,
+            ProductionStatusType.Production,
+            &quot;desc&quot;,
+            100m);
+
+        production.ProductionCrewMembers = new List&lt;ProductionCrew&gt;
+        {
+            new()
+            {
+                ProductionId = productionId,
+                CrewMemberId = Guid.NewGuid(),
+                RoleType = CrewRoleType.Director,
+                Production = production,
+                CrewMember = new Crew()
+            }
+        };
+
+        production.ProductionCastMembers = new List&lt;ProductionCast&gt;
+        {
+            new()
+            {
+                ProductionId = productionId,
+                CastMemberId = Guid.NewGuid(),
+                Role = &quot;Role&quot;,
+                Production = production,
+                CastMember = new Cast()
+            }
+        };
+
+        production.Scenes = new List&lt;Scene&gt;
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                SceneName = &quot;S1&quot;,
+                Location = &quot;L&quot;,
+                SceneType = SceneType.Interior,
+                Production = production,
+                ProductionId = productionId
+            }
+        };
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsync(productionId))
+            .ReturnsAsync(production);
+
+        // Act
+        DeleteProductionDto? result = await productionService.GetDeleteProductionAsync(productionId.ToString());
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Id, Is.EqualTo(productionId));
+        Assert.That(result.Title, Is.EqualTo(&quot;Title&quot;));
+        Assert.That(result.Thumbnail, Is.EqualTo(&quot;/img/productions/t.webp&quot;));
+        Assert.That(result.Description, Is.EqualTo(&quot;desc&quot;));
+        Assert.That(result.StatusType, Is.EqualTo(ProductionStatusType.Production));
+        Assert.That(result.Budget, Is.EqualTo(100m));
+        Assert.That(result.CrewMembersCount, Is.EqualTo(1));
+        Assert.That(result.CastMembersCount, Is.EqualTo(1));
+        Assert.That(result.ScenesCount, Is.EqualTo(1));
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void DeleteProductionAsync_WhenIdInvalid_ThrowsArgumentExceptionWithMessage()
+    {
+        // Arrange
+        const string invalidId = &quot;not-guid&quot;;
+
+        // Act
+        ArgumentException? ex = Assert.ThrowsAsync&lt;ArgumentException&gt;(
+            () =&gt; productionService.DeleteProductionAsync(invalidId));
+
+        // Assert
+        Assert.That(ex, Is.Not.Null);
+        Assert.That(ex!.Message, Does.Contain(string.Format(IdIsNullOrEmptyMessage, invalidId)));
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task DeleteProductionAsync_WhenProductionNotFound_ReturnsFalse()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsync(productionId))
+            .ReturnsAsync((Production?)null);
+
+        // Act
+        bool result = await productionService.DeleteProductionAsync(productionId.ToString());
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task DeleteProductionAsync_WhenProductionExists_DeletesImageAndEntity_SavesAndReturnsTrue()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+
+        Production production = CreateProduction(
+            productionId,
+            &quot;Title&quot;,
+            &quot;/img/productions/t.webp&quot;,
+            ProductionStatusType.Production);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetByIdAsync(productionId))
+            .ReturnsAsync(production);
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ThumbnailFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.DeleteAsync(production.Thumbnail, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .Returns(Task.CompletedTask);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.DeleteAsync(production))
+            .Returns(Task.CompletedTask);
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        // Act
+        bool result = await productionService.DeleteProductionAsync(productionId.ToString());
+
+        // Assert
+        Assert.That(result, Is.True);
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ThumbnailFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.DeleteAsync(production.Thumbnail, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.DeleteAsync(production), Times.Once);
+        productionRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetUserIdIfIsCrewAsync_WhenUserIdIsInvalid_ReturnsNull()
+    {
+        // Act
+        Guid? result1 = await productionService.GetUserIdIfIsCrewAsync(null);
+        Guid? result2 = await productionService.GetUserIdIfIsCrewAsync(&quot;not-a-guid&quot;);
+
+        // Assert
+        Assert.That(result1, Is.Null);
+        Assert.That(result2, Is.Null);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetUserIdIfIsCrewAsync_WhenUserIsNotCrew_ReturnsNull()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUserIdAsync(userId))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        Guid? result = await productionService.GetUserIdIfIsCrewAsync(userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetCrewByUserIdAsync(userId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetUserIdIfIsCrewAsync_WhenUserIsCrew_ReturnsUserId()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUserIdAsync(userId))
+            .ReturnsAsync(new Crew
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                FirstName = &quot;Crew&quot;,
+                LastName = &quot;User&quot;,
+                ProfileImagePath = &quot;/img/profile/crew.webp&quot;
+            });
+
+        // Act
+        Guid? result = await productionService.GetUserIdIfIsCrewAsync(userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.EqualTo(userId));
+
+        productionRepositoryMock.Verify(pr =&gt; pr.GetCrewByUserIdAsync(userId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserAllowedToManageProductionAsync_WhenProductionIdIsInvalid_ReturnsFalse()
+    {
+        // Act
+        bool result = await productionService.IsUserAllowedToManageProductionAsync(&quot;bad-id&quot;, Guid.NewGuid().ToString());
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserAllowedToManageProductionAsync_WhenUserIdIsInvalid_ReturnsFalse()
+    {
+        // Act
+        bool result = await productionService.IsUserAllowedToManageProductionAsync(Guid.NewGuid().ToString(), &quot;bad-id&quot;);
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserAllowedToManageProductionAsync_WhenRepositoryReturnsFalse_ReturnsFalse()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.IsUserProductionLeaderAsync(productionId, userId))
+            .ReturnsAsync(false);
+
+        // Act
+        bool result = await productionService.IsUserAllowedToManageProductionAsync(productionId.ToString(), userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.IsUserProductionLeaderAsync(productionId, userId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserAllowedToManageProductionAsync_WhenRepositoryReturnsTrue_ReturnsTrue()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr =&gt; pr.IsUserProductionLeaderAsync(productionId, userId))
+            .ReturnsAsync(true);
+
+        // Act
+        bool result = await productionService.IsUserAllowedToManageProductionAsync(productionId.ToString(), userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.True);
+
+        productionRepositoryMock.Verify(pr =&gt; pr.IsUserProductionLeaderAsync(productionId, userId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    private static Production CreateProduction(Guid id, string title, string? thumbnail, ProductionStatusType statusType,
+        string? description = null, decimal budget = 0m, DateTime? statusStart = null, DateTime? statusEnd = null)
+    {
+        Production newProduction = new Production
+        {
+            Id = id,
+            Title = title,
+            Description = description,
+            Budget = budget,
+            Thumbnail = thumbnail,
+            StatusType = statusType,
+            StatusStartDate = statusStart ?? new DateTime(2026, 1, 1),
+            StatusEndDate = statusEnd
+        };
+
+        return newProduction;
+    }
+
+    private static IFormFile CreateFormFile(string fileName, byte[] content)
+    {
+        MemoryStream stream = new MemoryStream(content);
+        IFormFile file = new FormFile(stream, 0, content.Length, &quot;file&quot;, fileName);
+        
+        return file;
+    }
+
+    private static ProductionStatusType GetStatusFromCatalogOrFallback()
+    {
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; catalog =
+            ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
+
+        if (catalog.TryGetValue(PreProductionKey, out IReadOnlyCollection&lt;ProductionStatusType&gt;? preProdStatuses) &amp;&amp;
+            preProdStatuses.Count &gt; 0)
+            return preProdStatuses.First();
+
+        if (catalog.TryGetValue(ProductionKey, out IReadOnlyCollection&lt;ProductionStatusType&gt;? prodStatuses) &amp;&amp;
+            prodStatuses.Count &gt; 0)
+            return prodStatuses.First();
+
+        if (catalog.TryGetValue(PostProductionKey, out IReadOnlyCollection&lt;ProductionStatusType&gt;? postStatuses) &amp;&amp;
+            postStatuses.Count &gt; 0)
+            return postStatuses.First();
+
+        if (catalog.TryGetValue(DistributionKey, out IReadOnlyCollection&lt;ProductionStatusType&gt;? distStatuses) &amp;&amp;
+            distStatuses.Count &gt; 0)
+            return distStatuses.First();
+
+        return ProductionStatusType.Production;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[28,5,28,74,1],[29,5,29,58,1],[30,5,30,83,1],[32,5,32,57,1],[36,5,36,6,1],[37,9,37,89,1],[38,9,38,73,1],[39,9,39,98,1],[41,9,44,47,1],[45,5,45,6,1],[49,5,49,6,1],[51,9,51,28,1],[52,9,52,36,1],[53,9,53,66,1],[55,9,55,76,1],[57,9,61,24,1],[63,9,65,40,1],[68,9,69,104,1],[72,9,72,51,1],[74,9,74,48,1],[74,48,74,63,1],[74,63,74,65,1],[75,9,75,81,1],[76,9,76,62,1],[77,9,77,61,1],[79,9,79,121,1],[80,9,80,55,1],[81,9,81,47,1],[82,9,82,56,1],[83,5,83,6,1],[87,5,87,6,1],[89,9,89,28,1],[90,9,90,36,1],[94,9,95,85,1],[97,9,100,11,1],[102,9,108,40,1],[111,9,112,110,1],[115,9,115,51,1],[116,9,116,61,1],[118,9,122,36,1],[124,9,124,55,1],[125,9,125,47,1],[126,9,126,56,1],[127,5,127,6,1],[131,5,131,6,1],[133,9,135,31,1],[138,9,138,73,1],[141,9,141,45,1],[143,9,143,86,1],[144,9,144,55,1],[145,9,145,47,1],[146,9,146,56,1],[147,5,147,6,1],[151,5,151,6,1],[156,9,157,85,1],[159,9,163,30,1],[166,9,166,89,1],[169,9,169,44,1],[171,9,173,36,1],[175,9,175,55,1],[176,9,176,47,1],[177,9,177,56,1],[178,5,178,6,1],[182,5,182,6,1],[184,9,184,97,1],[185,9,185,98,1],[188,9,188,39,1],[189,9,189,39,1],[191,9,191,55,1],[192,9,192,47,1],[193,9,193,56,1],[194,5,194,6,1],[198,5,198,6,1],[200,9,200,104,1],[203,9,203,38,1],[205,9,205,55,1],[206,9,206,47,1],[207,9,207,56,1],[208,5,208,6,1],[212,5,212,6,1],[214,9,214,44,1],[216,9,223,48,1],[226,9,226,115,1],[229,9,229,38,1],[231,9,231,93,1],[232,9,232,55,1],[233,9,233,47,1],[234,9,234,56,1],[235,5,235,6,1],[239,5,239,6,1],[241,9,241,44,1],[242,9,242,76,1],[244,9,255,11,1],[257,9,269,11,1],[271,9,285,11,1],[287,9,294,11,1],[296,9,303,11,1],[305,9,314,11,1],[316,9,323,11,1],[325,9,331,11,1],[333,9,342,16,1],[345,9,345,115,1],[348,9,348,42,1],[349,9,349,59,1],[350,9,350,64,1],[351,9,351,82,1],[352,9,352,61,1],[353,9,353,55,1],[354,9,354,64,1],[355,9,355,63,1],[356,9,356,73,1],[358,9,358,72,1],[359,9,359,81,1],[360,9,360,65,1],[361,9,361,63,1],[362,9,362,85,1],[363,9,363,70,1],[365,9,365,72,1],[366,9,366,81,1],[367,9,367,65,1],[368,9,368,63,1],[369,9,369,85,1],[370,9,370,60,1],[371,9,371,66,1],[373,9,373,67,1],[374,9,374,72,1],[375,9,375,58,1],[376,9,376,73,1],[377,9,377,66,1],[378,9,378,64,1],[380,9,380,67,1],[381,9,381,72,1],[382,9,382,63,1],[383,9,383,85,1],[385,9,385,73,1],[386,9,386,81,1],[387,9,387,72,1],[389,9,389,93,1],[390,9,390,55,1],[391,9,391,47,1],[392,9,392,56,1],[393,5,393,6,1],[397,5,397,6,1],[399,9,399,41,1],[401,9,411,11,1],[413,9,413,75,1],[416,9,418,32,1],[420,9,422,47,1],[424,9,426,40,1],[429,9,429,77,1],[432,9,432,38,1],[434,9,434,95,1],[435,9,435,133,1],[436,9,436,95,1],[437,9,437,97,1],[438,9,438,155,1],[439,9,439,86,1],[441,9,441,55,1],[442,9,442,47,1],[443,9,443,56,1],[444,5,444,6,1],[448,5,448,6,1],[450,9,450,41,1],[451,9,451,74,1],[453,9,463,11,1],[465,9,472,11,1],[474,9,474,75,1],[477,9,479,32,1],[481,9,483,47,1],[485,9,487,36,1],[489,9,489,37,1],[490,9,492,40,1],[492,40,492,52,1],[492,52,493,42,1],[495,9,497,42,1],[499,9,501,30,1],[504,9,504,79,1],[507,9,507,44,1],[508,9,508,62,1],[510,9,510,44,1],[511,9,511,63,1],[512,9,512,60,1],[513,9,513,72,1],[514,9,514,62,1],[515,9,515,70,1],[516,9,516,80,1],[517,9,517,76,1],[518,9,518,73,1],[519,9,519,74,1],[521,9,521,95,1],[522,9,522,133,1],[523,9,523,95,1],[524,9,524,96,1],[525,9,525,137,1],[526,9,526,85,1],[528,9,528,55,1],[529,9,529,47,1],[530,9,530,56,1],[531,5,531,6,1],[535,5,535,6,1],[537,9,537,91,1],[538,9,538,97,1],[541,9,541,39,1],[542,9,542,39,1],[544,9,544,55,1],[545,9,545,47,1],[546,9,546,56,1],[547,5,547,6,1],[551,5,551,6,1],[553,9,553,44,1],[555,9,557,46,1],[560,9,560,109,1],[563,9,563,38,1],[565,9,565,102,1],[566,9,566,55,1],[567,9,567,47,1],[568,9,568,56,1],[569,5,569,6,1],[573,5,573,6,1],[575,9,575,44,1],[577,9,585,39,1],[587,9,589,39,1],[592,9,592,109,1],[595,9,595,42,1],[596,9,596,69,1],[597,9,597,56,1],[598,9,598,61,1],[599,9,599,54,1],[600,9,600,88,1],[601,9,601,83,1],[602,9,602,81,1],[603,9,603,91,1],[604,9,604,53,1],[606,9,606,102,1],[607,9,607,55,1],[608,9,608,47,1],[609,9,609,56,1],[610,5,610,6,1],[614,5,614,6,1],[616,9,616,44,1],[618,9,627,11,1],[629,9,631,46,1],[634,9,634,74,1],[637,9,637,39,1],[639,9,639,90,1],[640,9,640,55,1],[641,9,641,47,1],[642,9,642,56,1],[643,5,643,6,1],[647,5,647,6,1],[649,9,649,44,1],[651,9,659,19,1],[661,9,672,11,1],[674,9,676,39,1],[678,9,680,30,1],[683,9,683,74,1],[686,9,686,38,1],[687,9,687,64,1],[688,9,688,69,1],[689,9,689,57,1],[690,9,690,89,1],[691,9,691,87,1],[692,9,692,85,1],[693,9,693,84,1],[695,9,695,90,1],[696,9,696,85,1],[697,9,697,55,1],[698,9,698,47,1],[699,9,699,56,1],[700,5,700,6,1],[704,5,704,6,1],[706,9,706,44,1],[708,9,712,43,1],[714,9,714,67,1],[716,9,727,11,1],[729,9,729,75,1],[732,9,734,39,1],[736,9,738,32,1],[740,9,742,41,1],[744,9,746,30,1],[749,9,749,74,1],[752,9,752,38,1],[753,9,753,69,1],[755,9,755,95,1],[756,9,756,157,1],[757,9,757,90,1],[758,9,758,85,1],[760,9,760,55,1],[761,9,761,47,1],[762,9,762,56,1],[763,5,763,6,1],[767,5,767,6,1],[769,9,769,95,1],[770,9,770,101,1],[773,9,773,39,1],[774,9,774,39,1],[776,9,776,55,1],[777,9,777,47,1],[778,9,778,56,1],[779,5,779,6,1],[783,5,783,6,1],[785,9,785,44,1],[787,9,789,46,1],[792,9,792,113,1],[795,9,795,38,1],[797,9,797,90,1],[798,9,798,55,1],[799,9,799,47,1],[800,9,800,56,1],[801,5,801,6,1],[805,5,805,6,1],[807,9,807,44,1],[809,9,815,19,1],[817,9,827,11,1],[829,9,839,11,1],[841,9,852,11,1],[854,9,856,39,1],[859,9,859,113,1],[862,9,862,42,1],[863,9,863,59,1],[864,9,864,56,1],[865,9,865,78,1],[866,9,866,61,1],[867,9,867,85,1],[868,9,868,54,1],[869,9,869,61,1],[870,9,870,61,1],[871,9,871,56,1],[873,9,873,90,1],[874,9,874,55,1],[875,9,875,47,1],[876,9,876,56,1],[877,5,877,6,1],[881,5,881,6,1],[886,9,887,71,1],[890,9,890,38,1],[891,9,891,98,1],[893,9,893,55,1],[894,9,894,47,1],[895,9,895,56,1],[896,5,896,6,1],[900,5,900,6,1],[902,9,902,44,1],[904,9,906,46,1],[909,9,909,94,1],[912,9,912,39,1],[914,9,914,90,1],[915,9,915,55,1],[916,9,916,47,1],[917,9,917,56,1],[918,5,918,6,1],[922,5,922,6,1],[924,9,924,44,1],[926,9,930,46,1],[932,9,934,39,1],[936,9,936,75,1],[938,9,940,32,1],[942,9,944,42,1],[946,9,948,42,1],[950,9,952,30,1],[955,9,955,94,1],[958,9,958,38,1],[960,9,960,95,1],[961,9,961,132,1],[962,9,962,90,1],[963,9,963,87,1],[964,9,964,85,1],[966,9,966,55,1],[967,9,967,47,1],[968,9,968,56,1],[969,5,969,6,1],[973,5,973,6,1],[975,9,975,78,1],[976,9,976,86,1],[979,9,979,39,1],[980,9,980,39,1],[982,9,982,55,1],[983,9,983,47,1],[984,9,984,56,1],[985,5,985,6,1],[989,5,989,6,1],[991,9,991,38,1],[993,9,995,40,1],[998,9,998,90,1],[1001,9,1001,38,1],[1003,9,1003,92,1],[1004,9,1004,55,1],[1005,9,1005,47,1],[1006,9,1006,56,1],[1007,5,1007,6,1],[1011,5,1011,6,1],[1013,9,1013,38,1],[1015,9,1024,16,1],[1027,9,1027,90,1],[1030,9,1030,49,1],[1032,9,1032,92,1],[1033,9,1033,55,1],[1034,9,1034,47,1],[1035,9,1035,56,1],[1036,5,1036,6,1],[1040,5,1040,6,1],[1042,9,1042,121,1],[1045,9,1045,39,1],[1047,9,1047,55,1],[1048,9,1048,47,1],[1049,9,1049,56,1],[1050,5,1050,6,1],[1054,5,1054,6,1],[1056,9,1056,121,1],[1059,9,1059,39,1],[1061,9,1061,55,1],[1062,9,1062,47,1],[1063,9,1063,56,1],[1064,5,1064,6,1],[1068,5,1068,6,1],[1070,9,1070,44,1],[1071,9,1071,38,1],[1073,9,1075,34,1],[1078,9,1078,128,1],[1081,9,1081,39,1],[1083,9,1083,113,1],[1084,9,1084,55,1],[1085,9,1085,47,1],[1086,9,1086,56,1],[1087,5,1087,6,1],[1091,5,1091,6,1],[1093,9,1093,44,1],[1094,9,1094,38,1],[1096,9,1098,33,1],[1101,9,1101,128,1],[1104,9,1104,38,1],[1106,9,1106,113,1],[1107,9,1107,55,1],[1108,9,1108,47,1],[1109,9,1109,56,1],[1110,5,1110,6,1],[1114,5,1114,6,1],[1115,9,1125,11,1],[1127,9,1127,30,1],[1128,5,1128,6,1],[1131,5,1131,6,1],[1132,9,1132,57,1],[1133,9,1133,84,1],[1135,9,1135,21,1],[1136,5,1136,6,1],[1139,5,1139,6,1],[1140,9,1141,77,1],[1143,9,1144,39,1],[1145,13,1145,44,1],[1147,9,1148,36,0],[1149,13,1149,41,0],[1151,9,1152,36,0],[1153,13,1153,41,0],[1155,9,1156,36,0],[1157,13,1157,41,0],[1159,9,1159,48,0],[1160,5,1160,6,1]]);
+    </script>
+  </body>
+</html>

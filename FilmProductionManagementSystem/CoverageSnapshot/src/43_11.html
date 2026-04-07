@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Repository/BaseRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Repository;
+
+public class BaseRepository : IDisposable
+{
+    private bool isDisposed = false;
+    private readonly FilmProductionDbContext? dbContext;
+
+    protected BaseRepository(FilmProductionDbContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
+
+    protected FilmProductionDbContext? Context 
+        =&gt; dbContext;
+
+    protected async Task&lt;int&gt; SaveChangesAsync()
+    {
+        int affectedRows = await Context!.SaveChangesAsync();
+        return affectedRows;
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected void Dispose(bool disposing)
+    {
+        if (!isDisposed)
+        {
+            if (disposing)
+            {
+                dbContext?.Dispose();
+            }
+        }
+
+        isDisposed = true;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[5,5,5,37,0],[8,5,8,64,0],[9,5,9,6,0],[10,9,10,36,0],[11,5,11,6,0],[14,12,14,21,0],[17,5,17,6,0],[18,9,18,62,0],[19,9,19,29,0],[20,5,20,6,0],[23,5,23,6,0],[24,9,24,23,0],[25,9,25,35,0],[26,5,26,6,0],[29,5,29,6,0],[30,9,30,25,0],[31,9,31,10,0],[32,13,32,27,0],[33,13,33,14,0],[34,17,34,38,0],[35,13,35,14,0],[36,9,36,10,0],[38,9,38,27,0],[39,5,39,6,0]]);
+    </script>
+  </body>
+</html>

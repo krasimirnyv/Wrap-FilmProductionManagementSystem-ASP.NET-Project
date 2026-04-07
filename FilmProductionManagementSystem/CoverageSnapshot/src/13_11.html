@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ApplicationUserConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models.Infrastructure;
+
+using static Common.EntityIdentificationConstants;
+
+public class ApplicationUserConfiguration : IEntityTypeConfiguration&lt;ApplicationUser&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;ApplicationUser&gt; entity)
+    {
+        entity.HasData(ApplicationUsersSeed);
+    }
+    
+    private static readonly ApplicationUser[] ApplicationUsersSeed =
+    [
+        // CrewMembers
+        new()
+        {
+            Id = CrewUserId1,
+            UserName = &quot;alex.petrov&quot;,
+            NormalizedUserName = &quot;ALEX.PETROV&quot;,
+            Email = &quot;alex.petrov@wrap.local&quot;,
+            NormalizedEmail = &quot;ALEX.PETROV@WRAP.LOCAL&quot;,
+            EmailConfirmed = true,
+            SecurityStamp = &quot;seed-crew-sec-1&quot;,
+            ConcurrencyStamp = &quot;seed-crew-con-1&quot;,
+            PhoneNumber = &quot;+359888000001&quot;,
+            PhoneNumberConfirmed = true,
+            PasswordHash = null
+        },
+        new()
+        {
+            Id = CrewUserId2,
+            UserName = &quot;maria.georgieva&quot;,
+            NormalizedUserName = &quot;MARIA.GEORGIEVA&quot;,
+            Email = &quot;maria.georgieva@wrap.local&quot;,
+            NormalizedEmail = &quot;MARIA.GEORGIEVA@WRAP.LOCAL&quot;,
+            EmailConfirmed = true,
+            SecurityStamp = &quot;seed-crew-sec-2&quot;,
+            ConcurrencyStamp = &quot;seed-crew-con-2&quot;,
+            PhoneNumber = &quot;+359888000002&quot;,
+            PhoneNumberConfirmed = true,
+            PasswordHash = null
+        },
+        new()
+        {
+            Id = CrewUserId3,
+            UserName = &quot;ivan.dimitrov&quot;,
+            NormalizedUserName = &quot;IVAN.DIMITROV&quot;,
+            Email = &quot;ivan.dimitrov@wrap.local&quot;,
+            NormalizedEmail = &quot;IVAN.DIMITROV@WRAP.LOCAL&quot;,
+            EmailConfirmed = true,
+            SecurityStamp = &quot;seed-crew-sec-3&quot;,
+            ConcurrencyStamp = &quot;seed-crew-con-3&quot;,
+            PhoneNumber = &quot;+359888000003&quot;,
+            PhoneNumberConfirmed = true,
+            PasswordHash = null
+        },
+        
+        // CastMembers
+        new()
+        {
+            Id = CastUserId1,
+            UserName = &quot;elena.stoyanova&quot;,
+            NormalizedUserName = &quot;ELENA.STOYANOVA&quot;,
+            Email = &quot;elena.stoyanova@wrap.local&quot;,
+            NormalizedEmail = &quot;ELENA.STOYANOVA@WRAP.LOCAL&quot;,
+            EmailConfirmed = true,
+            PhoneNumber = &quot;+359888100001&quot;,
+            PhoneNumberConfirmed = true,
+            SecurityStamp = &quot;seed-cast-sec-1&quot;,
+            ConcurrencyStamp = &quot;seed-cast-con-1&quot;,
+            PasswordHash = null
+        },
+        new()
+        {
+            Id = CastUserId2,
+            UserName = &quot;georgi.ivanov&quot;,
+            NormalizedUserName = &quot;GEORGI.IVANOV&quot;,
+            Email = &quot;georgi.ivanov@wrap.local&quot;,
+            NormalizedEmail = &quot;GEORGI.IVANOV@WRAP.LOCAL&quot;,
+            EmailConfirmed = true,
+            PhoneNumber = &quot;+359888100002&quot;,
+            PhoneNumberConfirmed = true,
+            SecurityStamp = &quot;seed-cast-sec-2&quot;,
+            ConcurrencyStamp = &quot;seed-cast-con-2&quot;,
+            PasswordHash = null
+        },
+        new()
+        {
+            Id = CastUserId3,
+            UserName = &quot;siyana.petrova&quot;,
+            NormalizedUserName = &quot;SIYANA.PETROVA&quot;,
+            Email = &quot;siyana.petrova@wrap.local&quot;,
+            NormalizedEmail = &quot;SIYANA.PETROVA@WRAP.LOCAL&quot;,
+            EmailConfirmed = true,
+            PhoneNumber = &quot;+359888100003&quot;,
+            PhoneNumberConfirmed = true,
+            SecurityStamp = &quot;seed-cast-sec-3&quot;,
+            ConcurrencyStamp = &quot;seed-cast-con-3&quot;,
+            PasswordHash = null
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,5,13,6,0],[14,9,14,46,0],[15,5,15,6,0],[17,5,106,7,0]]);
+    </script>
+  </body>
+</html>

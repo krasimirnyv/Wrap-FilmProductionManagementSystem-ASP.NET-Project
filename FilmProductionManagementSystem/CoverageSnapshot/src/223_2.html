@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/LoginRegister/RegisterCast.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model CastRegistrationInputModel
+
+@{
+    ViewData[TitleDataKey] = &quot;Join as Actor&quot;;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/registration.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;section class=&quot;container-fluid home-hero&quot; xmlns=&quot;http://www.w3.org/1999/html&quot;&gt;
+    &lt;div class=&quot;registration-container&quot;&gt;
+        &lt;div class=&quot;registration-card&quot;&gt;
+            &lt;!-- Header --&gt;
+            &lt;div class=&quot;registration-header&quot;&gt;
+                &lt;h2 class=&quot;text-center&quot;&gt;&#127917; Join as &lt;span class=&quot;text-wrap-red&quot;&gt;Actor&lt;/span&gt;&lt;/h2&gt;
+                &lt;p class=&quot;text-center text-muted&quot;&gt;Tell us about yourself&lt;/p&gt;
+
+                &lt;!-- Progress Steps --&gt;
+                &lt;div class=&quot;progress-steps&quot;&gt;
+                    &lt;div class=&quot;step active&quot;&gt;
+                        &lt;div class=&quot;step-circle&quot;&gt;1&lt;/div&gt;
+                        &lt;div class=&quot;step-label&quot;&gt;Basic Info&lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Form --&gt;
+            &lt;form asp-area=&quot;&quot; asp-controller=&quot;LoginRegister&quot; asp-action=&quot;RegisterCast&quot; method=&quot;post&quot; enctype=&quot;multipart/form-data&quot; class=&quot;registration-form&quot;&gt;
+                &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;text-danger mb-3&quot;&gt;&lt;/div&gt;
+                
+                &lt;!-- Profile Image Upload --&gt;
+                &lt;div class=&quot;form-group mb-4 text-center&quot;&gt;
+                    &lt;label class=&quot;form-label d-block&quot;&gt;Profile Image&lt;/label&gt;
+                    &lt;div class=&quot;image-upload-container&quot;&gt;
+                        &lt;label class=&quot;image-preview&quot; id=&quot;imagePreview&quot; for=&quot;profileImageInput&quot;&gt;
+                            &lt;span class=&quot;placeholder-text&quot;&gt;&#128248; Click to upload photo (required)&lt;/span&gt;
+                            &lt;img src=&quot;~/img/profile/default-profile.png&quot; id=&quot;previewImg&quot; style=&quot;display: none;&quot; alt=&quot;Default profile picture&quot;/&gt;
+                        &lt;/label&gt;
+                        &lt;input type=&quot;file&quot;
+                               asp-for=&quot;ProfilePicture&quot;
+                               class=&quot;form-control d-none&quot;
+                               id=&quot;profileImageInput&quot;
+                               accept=&quot;image/*&quot; /&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;span asp-validation-for=&quot;ProfilePicture&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+
+                &lt;/div&gt;
+            
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;!-- Username --&gt;
+                    &lt;div class=&quot;form-group mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;UserName&quot; class=&quot;form-label&quot;&gt;Username&lt;/label&gt;
+                        &lt;input asp-for=&quot;UserName&quot; class=&quot;form-control&quot; placeholder=&quot;john.doe&quot; autofocus /&gt;
+                        &lt;span asp-validation-for=&quot;UserName&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;!-- Email --&gt;
+                    &lt;div class=&quot;form-group mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;Email&quot; class=&quot;form-label&quot;&gt;Email address&lt;/label&gt;
+                        &lt;input asp-for=&quot;Email&quot; class=&quot;form-control&quot; placeholder=&quot;john.doe@gmail.com&quot; autofocus /&gt;
+                        &lt;span asp-validation-for=&quot;Email&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;!-- Phone number--&gt;
+                    &lt;div class=&quot;form-group mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;PhoneNumber&quot; class=&quot;form-label&quot;&gt;Phone number&lt;/label&gt;
+                        &lt;input asp-for=&quot;PhoneNumber&quot; class=&quot;form-control&quot; placeholder=&quot;0878123456&quot; autofocus /&gt;
+                        &lt;span asp-validation-for=&quot;PhoneNumber&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;!-- Password --&gt;
+                    &lt;div class=&quot;form-group mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;Password&quot; class=&quot;form-label&quot;&gt;Password&lt;/label&gt;
+                        &lt;input type=&quot;password&quot; asp-for=&quot;Password&quot; class=&quot;form-control&quot; placeholder=&quot;Strong password&quot; autofocus /&gt;
+                        &lt;span asp-validation-for=&quot;Password&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;!-- First Name --&gt;
+                    &lt;div class=&quot;form-group mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;FirstName&quot; class=&quot;form-label&quot;&gt;First name&lt;/label&gt;
+                        &lt;input asp-for=&quot;FirstName&quot; class=&quot;form-control&quot; placeholder=&quot;John&quot; autofocus /&gt;
+                        &lt;span asp-validation-for=&quot;FirstName&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;!-- Last Name --&gt;
+                    &lt;div class=&quot;form-group mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;LastName&quot; class=&quot;form-label&quot;&gt;Last name&lt;/label&gt;
+                        &lt;input asp-for=&quot;LastName&quot; class=&quot;form-control&quot; placeholder=&quot;Doe&quot; /&gt;
+                        &lt;span asp-validation-for=&quot;LastName&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            
+                &lt;!-- Nickname --&gt;
+                &lt;div class=&quot;form-group mb-3&quot;&gt;
+                    &lt;label asp-for=&quot;Nickname&quot; class=&quot;form-label&quot;&gt;Nickname&lt;/label&gt;
+                    &lt;input asp-for=&quot;Nickname&quot; class=&quot;form-control&quot; placeholder=&quot;JD (Optional)&quot; /&gt;
+                    &lt;span asp-validation-for=&quot;Nickname&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                &lt;/div&gt;
+            
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;!-- Birth Date --&gt;
+                    &lt;div class=&quot;col-md-6 mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;BirthDate&quot; class=&quot;form-label&quot;&gt;Birthdate&lt;/label&gt;
+                        &lt;input asp-for=&quot;BirthDate&quot;
+                               type=&quot;date&quot;
+                               value=&quot;@DateTime.Now&quot;
+                               class=&quot;form-control&quot;/&gt;
+                        &lt;span asp-validation-for=&quot;BirthDate&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+
+                    &lt;!-- Gender --&gt;
+                    &lt;div class=&quot;col-md-6 mb-3&quot;&gt;
+                        &lt;label asp-for=&quot;Gender&quot; class=&quot;form-label&quot;&gt;Gender&lt;/label&gt;
+                        &lt;div class=&quot;gender-selection&quot;&gt;
+                            &lt;div class=&quot;form-check form-check-inline&quot;&gt;
+                                &lt;input class=&quot;form-check-input&quot;
+                                       type=&quot;radio&quot;
+                                       asp-for=&quot;Gender&quot;
+                                       value=&quot;1&quot;
+                                       id=&quot;genderMale&quot; /&gt;
+                                &lt;label class=&quot;form-check-label&quot; for=&quot;genderMale&quot;&gt;
+                                    Male
+                                &lt;/label&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&quot;form-check form-check-inline&quot;&gt;
+                                &lt;input class=&quot;form-check-input&quot;
+                                       type=&quot;radio&quot;
+                                       asp-for=&quot;Gender&quot;
+                                       value=&quot;2&quot;
+                                       id=&quot;genderFemale&quot; /&gt;
+                                &lt;label class=&quot;form-check-label&quot; for=&quot;genderFemale&quot;&gt;
+                                    Female
+                                &lt;/label&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;span asp-validation-for=&quot;Gender&quot; class=&quot;text-danger d-block&quot;&gt;&lt;/span&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            
+                &lt;!-- Biography --&gt;
+                &lt;div class=&quot;form-group mb-4&quot;&gt;
+                    &lt;label asp-for=&quot;Biography&quot; class=&quot;form-label&quot;&gt;Biography&lt;/label&gt;
+                    &lt;textarea asp-for=&quot;Biography&quot;
+                          class=&quot;form-control&quot;
+                          rows=&quot;5&quot;
+                          placeholder=&quot;Share your experience, passion for filmmaking, and what drives you as a creator...&quot;
+                          maxlength=&quot;4000&quot;&gt;&lt;/textarea&gt;
+                    &lt;span asp-validation-for=&quot;Biography&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+                    &lt;small class=&quot;form-text text-muted&quot;&gt;
+                        &lt;span id=&quot;bioCharCount&quot;&gt;0&lt;/span&gt; / 4000 characters
+                    &lt;/small&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Actions --&gt;
+                &lt;div class=&quot;d-flex justify-content-between&quot;&gt;
+                    &lt;a asp-area=&quot;&quot; asp-controller=&quot;Home&quot; asp-action=&quot;Index&quot; class=&quot;btn btn-outline-secondary&quot;&gt;
+                        ← Back to Home
+                    &lt;/a&gt;
+                    &lt;button type=&quot;submit&quot; class=&quot;btn btn-wrap-primary&quot; id=&quot;submitBtn&quot; value=&quot;Upload&quot;&gt;
+                        Complete Registration
+                    &lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/section&gt;
+
+@section Scripts {
+    &lt;partial name=&quot;_ValidationScriptsPartial&quot;/&gt;
+    
+    &lt;script src=&quot;~/js/registration/registration.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,46,0]]);
+    </script>
+  </body>
+</html>

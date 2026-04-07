@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.Infrastructure/Extensions/ConventionRegistrationExtensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.Infrastructure.Extensions;
+
+using System.Reflection;
+
+using Microsoft.Extensions.DependencyInjection;
+
+using static GCommon.OutputMessages;
+
+public static class ConventionRegistrationExtensions
+{
+    public static IServiceCollection RegisterByConvention(this IServiceCollection services, Assembly assembly, Func&lt;Type, bool&gt; interfaceFilter, ServiceLifetime lifetime)
+    {
+        Type[] allTypes = assembly.GetTypes();
+
+        Type[] interfaceTypes = allTypes
+            .Where(interfaceFilter)
+            .ToArray();
+
+        foreach (Type interfaceType in interfaceTypes)
+        {
+            Type[] implementationTypes = allTypes
+                .Where(type =&gt; type is { IsClass: true, IsAbstract: false } &amp;&amp;
+                               interfaceType.IsAssignableFrom(type))
+                .ToArray();
+
+            if (implementationTypes.Length == 0)
+                continue;
+
+            if (implementationTypes.Length &gt; 1)
+                throw new InvalidOperationException(string.Format(MultiImplementationException, interfaceType.FullName, string.Join(&quot;, &quot;, implementationTypes.Select(t =&gt; t.FullName))));
+
+            services.Add(new ServiceDescriptor(interfaceType, implementationTypes[0], lifetime));
+        }
+
+        return services;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,5,12,6,1],[13,9,13,47,1],[15,9,17,24,1],[19,9,19,16,1],[19,18,19,36,1],[19,37,19,39,1],[19,40,19,54,1],[20,9,20,10,1],[21,13,22,32,1],[22,32,23,68,1],[23,68,24,28,1],[26,13,26,49,1],[27,17,27,26,1],[29,13,29,48,1],[30,17,30,171,1],[30,171,30,181,1],[30,181,30,186,1],[32,13,32,98,1],[33,9,33,10,1],[35,9,35,25,1],[36,5,36,6,1]]);
+    </script>
+  </body>
+</html>

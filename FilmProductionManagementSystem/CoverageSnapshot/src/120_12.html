@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Infrastructure.Tests/DataServiceCollectionExtensionsTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Infrastructure.Tests;
+
+using System.Reflection;
+
+using Microsoft.Extensions.DependencyInjection;
+using NUnit.Framework;
+
+using Data.Repository;
+using Data.Seeding;
+using Web.Infrastructure.Extensions;
+
+[TestFixture]
+public class DataServiceCollectionExtensionsTests
+{
+    private static Assembly DataAssembly =&gt; typeof(LoginRegisterRepository).Assembly;
+    private static Assembly SeedingAssembly =&gt; typeof(ApplicationRoleSeeder).Assembly;
+
+    private static Type[] GetRepositoryInterfaces()
+        =&gt; DataAssembly.GetTypes()
+            .Where(type =&gt; type is { IsInterface: true } &amp;&amp;
+                           type.Name.StartsWith(&quot;I&quot;, StringComparison.Ordinal) &amp;&amp;
+                           type.Name.EndsWith(&quot;Repository&quot;, StringComparison.Ordinal))
+            .ToArray();
+
+    private static Type[] GetSeederInterfaces()
+        =&gt; SeedingAssembly.GetTypes()
+            .Where(type =&gt; type is { IsInterface: true } &amp;&amp;
+                           type.Name.StartsWith(&quot;I&quot;, StringComparison.Ordinal) &amp;&amp;
+                           type.Name.EndsWith(&quot;Seeder&quot;, StringComparison.Ordinal))
+            .ToArray();
+
+    public static IEnumerable&lt;TestCaseData&gt; RepositoryInterfacesCases()
+        =&gt; GetRepositoryInterfaces()
+            .Select(repoInterface =&gt; new TestCaseData(repoInterface)
+                .SetName($&quot;AddDataRepositories registers {repoInterface.Name} as Scoped&quot;));
+
+    public static IEnumerable&lt;TestCaseData&gt; SeederInterfacesCases()
+        =&gt; GetSeederInterfaces()
+            .Select(seederInterface =&gt; new TestCaseData(seederInterface)
+                .SetName($&quot;AddApplicationRoleSeeding registers {seederInterface.Name} as Transient&quot;));
+
+    [Test]
+    public void AddDataRepositories_WhenCalled_RegistersAllRepositoryInterfaces()
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act
+        services.AddDataRepositories();
+
+        // Assert
+        Type[] repoInterfaces = GetRepositoryInterfaces();
+        Assert.That(repoInterfaces.Length, Is.GreaterThan(0), &quot;No IRepository interfaces found in data assembly.&quot;);
+
+        foreach (Type repoInterface in repoInterfaces)
+        {
+            ServiceDescriptor[] matches = services.Where(sd =&gt; sd.ServiceType == repoInterface).ToArray();
+
+            Assert.That(matches.Length, Is.EqualTo(1), $&quot;Expected exactly 1 registration for {repoInterface.FullName}&quot;);
+            Assert.That(matches[0].Lifetime, Is.EqualTo(ServiceLifetime.Scoped), $&quot;Expected Scoped for {repoInterface.FullName}&quot;);
+            Assert.That(matches[0].ImplementationType, Is.Not.Null, $&quot;Expected concrete implementation type for {repoInterface.FullName}&quot;);
+        }
+    }
+
+    [TestCaseSource(nameof(RepositoryInterfacesCases))]
+    public void AddDataRepositories_ForEachRepositoryInterface_RegistersExactlyOnceAsScoped(Type repoInterface)
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act
+        services.AddDataRepositories();
+
+        // Assert
+        ServiceDescriptor[] matches = services.Where(sd =&gt; sd.ServiceType == repoInterface).ToArray();
+
+        Assert.That(matches.Length, Is.EqualTo(1), $&quot;Expected exactly 1 registration for {repoInterface.FullName}&quot;);
+        Assert.That(matches[0].Lifetime, Is.EqualTo(ServiceLifetime.Scoped), $&quot;Expected Scoped for {repoInterface.FullName}&quot;);
+        Assert.That(matches[0].ImplementationType, Is.Not.Null, $&quot;Expected concrete implementation type for {repoInterface.FullName}&quot;);
+
+        Assert.That(matches[0].ImplementationType!.Assembly, Is.EqualTo(DataAssembly),
+            $&quot;Implementation for {repoInterface.FullName} should be in {DataAssembly.GetName().Name}&quot;);
+    }
+
+    [Test]
+    public void AddDataRepositories_WhenCalledTwice_DoesNotThrow()
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act + Assert
+        Assert.DoesNotThrow(() =&gt;
+        {
+            services.AddDataRepositories();
+            services.AddDataRepositories();
+        });
+    }
+
+    [Test]
+    public void AddApplicationRoleSeeding_WhenCalled_RegistersAllSeederInterfaces()
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act
+        services.AddApplicationRoleSeeding();
+
+        // Assert
+        Type[] seederInterfaces = GetSeederInterfaces();
+        Assert.That(seederInterfaces.Length, Is.GreaterThan(0), &quot;No ISeeder interfaces found in seeding assembly.&quot;);
+
+        foreach (Type seederInterface in seederInterfaces)
+        {
+            ServiceDescriptor[] matches = services.Where(sd =&gt; sd.ServiceType == seederInterface).ToArray();
+
+            Assert.That(matches.Length, Is.EqualTo(1), $&quot;Expected exactly 1 registration for {seederInterface.FullName}&quot;);
+            Assert.That(matches[0].Lifetime, Is.EqualTo(ServiceLifetime.Transient), $&quot;Expected Transient for {seederInterface.FullName}&quot;);
+            Assert.That(matches[0].ImplementationType, Is.Not.Null, $&quot;Expected concrete implementation type for {seederInterface.FullName}&quot;);
+        }
+    }
+
+    [TestCaseSource(nameof(SeederInterfacesCases))]
+    public void AddApplicationRoleSeeding_ForEachSeederInterface_RegistersExactlyOnceAsTransient(Type seederInterface)
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act
+        services.AddApplicationRoleSeeding();
+
+        // Assert
+        ServiceDescriptor[] matches = services.Where(sd =&gt; sd.ServiceType == seederInterface).ToArray();
+
+        Assert.That(matches.Length, Is.EqualTo(1), $&quot;Expected exactly 1 registration for {seederInterface.FullName}&quot;);
+        Assert.That(matches[0].Lifetime, Is.EqualTo(ServiceLifetime.Transient), $&quot;Expected Transient for {seederInterface.FullName}&quot;);
+        Assert.That(matches[0].ImplementationType, Is.Not.Null, $&quot;Expected concrete implementation type for {seederInterface.FullName}&quot;);
+
+        Assert.That(matches[0].ImplementationType!.Assembly, Is.EqualTo(SeedingAssembly),
+            $&quot;Implementation for {seederInterface.FullName} should be in {SeedingAssembly.GetName().Name}&quot;);
+    }
+
+    [Test]
+    public void AddApplicationRoleSeeding_WhenCalledTwice_DoesNotThrow()
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act + Assert
+        Assert.DoesNotThrow(() =&gt;
+        {
+            services.AddApplicationRoleSeeding();
+            services.AddApplicationRoleSeeding();
+        });
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,45,15,85,1],[16,48,16,86,1],[19,12,20,28,1],[20,28,22,86,1],[22,86,23,23,1],[26,12,27,28,1],[27,28,29,82,1],[29,82,30,23,1],[33,12,34,38,1],[34,38,35,90,1],[35,90,35,91,1],[38,12,39,40,1],[39,40,40,101,1],[40,101,40,102,1],[44,5,44,6,1],[46,9,46,63,1],[49,9,49,40,1],[52,9,52,59,1],[53,9,53,116,1],[55,9,55,16,1],[55,18,55,36,1],[55,37,55,39,1],[55,40,55,54,1],[56,9,56,10,1],[57,13,57,64,1],[57,64,57,95,1],[57,95,57,107,1],[59,13,59,121,1],[60,13,60,131,1],[61,13,61,140,1],[62,9,62,10,1],[63,5,63,6,1],[67,5,67,6,1],[69,9,69,63,1],[72,9,72,40,1],[75,9,75,60,1],[75,60,75,91,1],[75,91,75,103,1],[77,9,77,117,1],[78,9,78,127,1],[79,9,79,136,1],[81,9,82,104,1],[83,5,83,6,1],[87,5,87,6,1],[89,9,89,63,1],[92,9,93,9,1],[93,9,93,10,1],[93,10,94,13,1],[94,13,94,44,1],[94,44,95,13,1],[95,13,95,44,1],[95,44,96,9,1],[96,9,96,10,1],[96,10,96,12,1],[97,5,97,6,1],[101,5,101,6,1],[103,9,103,63,1],[106,9,106,46,1],[109,9,109,57,1],[110,9,110,117,1],[112,9,112,16,1],[112,18,112,38,1],[112,39,112,41,1],[112,42,112,58,1],[113,9,113,10,1],[114,13,114,64,1],[114,64,114,97,1],[114,97,114,109,1],[116,13,116,123,1],[117,13,117,139,1],[118,13,118,142,1],[119,9,119,10,1],[120,5,120,6,1],[124,5,124,6,1],[126,9,126,63,1],[129,9,129,46,1],[132,9,132,60,1],[132,60,132,93,1],[132,93,132,105,1],[134,9,134,119,1],[135,9,135,135,1],[136,9,136,138,1],[138,9,139,109,1],[140,5,140,6,1],[144,5,144,6,1],[146,9,146,63,1],[149,9,150,9,1],[150,9,150,10,1],[150,10,151,13,1],[151,13,151,50,1],[151,50,152,13,1],[152,13,152,50,1],[152,50,153,9,1],[153,9,153,10,1],[153,10,153,12,1],[154,5,154,6,1]]);
+    </script>
+  </body>
+</html>

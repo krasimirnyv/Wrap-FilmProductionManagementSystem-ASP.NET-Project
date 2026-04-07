@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ProductionConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+using GCommon.Enums;
+
+using static GCommon.DataFormat;
+using static Common.EntityIdentificationConstants;
+
+public class ProductionConfiguration : IEntityTypeConfiguration&lt;Production&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;Production&gt; entity)
+    {
+        entity
+            .HasOne(p =&gt; p.Script)
+            .WithOne(s =&gt; s.Production)
+            .HasForeignKey&lt;Script&gt;(s =&gt; s.ProductionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity
+            .HasOne(p =&gt; p.CreatedByUser)
+            .WithMany()
+            .HasForeignKey(p =&gt; p.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        entity.HasData(ProductionsSeed);
+    }
+
+    private static readonly Production[] ProductionsSeed =
+    [
+        new()
+        {
+            Id = ProductionIdTestFilm,
+            Title = &quot;Test Film&quot;,
+            Description = &quot;This is a test&quot;,
+            Budget = 1000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Concept,
+            StatusStartDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 06, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdMidnightDreams,
+            Title = &quot;Midnight Dreams&quot;,
+            Description = &quot;A neo-noir mystery unfolding over one sleepless night.&quot;,
+            Budget = 250000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Development,
+            StatusStartDate = new DateTime(2026, 01, 10, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 02, 15, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdPaperPlanes,
+            Title = &quot;Paper Planes&quot;,
+            Description = &quot;A coming-of-age drama about ambition, fear, and first love.&quot;,
+            Budget = 120000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Casting,
+            StatusStartDate = new DateTime(2026, 02, 20, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 20, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdTheLastTake,
+            Title = &quot;The Last Take&quot;,
+            Description = &quot;A comedic behind-the-scenes story about a cursed film set.&quot;,
+            Budget = 180000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Preproduction,
+            StatusStartDate = new DateTime(2026, 03, 05, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 04, 05, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdNeonSkyline,
+            Title = &quot;Neon Skyline&quot;,
+            Description = &quot;A sci-fi thriller set in a near-future megacity.&quot;,
+            Budget = 750000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Financing,
+            StatusStartDate = new DateTime(2025, 12, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 01, 25, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdWildTracks,
+            Title = &quot;Wild Tracks&quot;,
+            Description = &quot;A documentary journey following musicians on the road.&quot;,
+            Budget = 90000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.LocationScouting,
+            StatusStartDate = new DateTime(2026, 02, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 02, 18, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdOnHold,
+            Title = &quot;On Hold&quot;,
+            Description = &quot;A character study about burnout and reinvention.&quot;,
+            Budget = 60000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.OnHold,
+            StatusStartDate = new DateTime(2026, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdReshootSeason,
+            Title = &quot;Reshoot Season&quot;,
+            Description = &quot;A tense drama about fixing a film before the deadline.&quot;,
+            Budget = 320000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Reshoots,
+            StatusStartDate = new DateTime(2026, 04, 10, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 04, 25, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdColorAndNoise,
+            Title = &quot;Color &amp; Noise&quot;,
+            Description = &quot;An art-house film exploring memory through sound and color.&quot;,
+            Budget = 140000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.ColorGrading,
+            StatusStartDate = new DateTime(2026, 05, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 05, 20, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdFestivalRun,
+            Title = &quot;Festival Run&quot;,
+            Description = &quot;A finished film preparing for its festival circuit debut.&quot;,
+            Budget = 210000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.FestivalCircuit,
+            StatusStartDate = new DateTime(2026, 06, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 09, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+
+        new()
+        {
+            Id = ProductionIdSilentEcho,
+            Title = &quot;Silent Echo&quot;,
+            Description = &quot;A psychological drama about memory, guilt, and unresolved loss.&quot;,
+            Budget = 175000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Financing,
+            StatusStartDate = new DateTime(2026, 01, 12, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 02, 05, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdGlassHorizon,
+            Title = &quot;Glass Horizon&quot;,
+            Description = &quot;A visually driven sci-fi drama set on the edge of a collapsing city.&quot;,
+            Budget = 540000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Casting,
+            StatusStartDate = new DateTime(2026, 01, 08, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 01, 28, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdAshesOfSummer,
+            Title = &quot;Ashes of Summer&quot;,
+            Description = &quot;A nostalgic indie drama about friendship fractured by a long-buried secret.&quot;,
+            Budget = 130000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Cancelled,
+            StatusStartDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 28, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdVelvetSignal,
+            Title = &quot;Velvet Signal&quot;,
+            Description = &quot;A stylish thriller following a late-night radio host drawn into a conspiracy.&quot;,
+            Budget = 280000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.LocationScouting,
+            StatusStartDate = new DateTime(2026, 02, 10, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 02, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdFadingLights,
+            Title = &quot;Fading Lights&quot;,
+            Description = &quot;A bittersweet romance between two artists during the final week of summer.&quot;,
+            Budget = 95000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Preproduction,
+            StatusStartDate = new DateTime(2026, 03, 15, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 04, 10, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdBrokenFrame,
+            Title = &quot;Broken Frame&quot;,
+            Description = &quot;A crime thriller in which a photographer uncovers evidence hidden in old negatives.&quot;,
+            Budget = 410000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Reshoots,
+            StatusStartDate = new DateTime(2026, 04, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 05, 12, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdNorthbound,
+            Title = &quot;Northbound&quot;,
+            Description = &quot;A road movie about estranged siblings forced to travel together across the country.&quot;,
+            Budget = 160000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.LocationScouting,
+            StatusStartDate = new DateTime(2026, 02, 14, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdAfterTheRain,
+            Title = &quot;After the Rain&quot;,
+            Description = &quot;A quiet character-driven story of renewal in a small coastal town.&quot;,
+            Budget = 110000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.PostProduction,
+            StatusStartDate = new DateTime(2026, 05, 18, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 06, 15, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdParallelVoices,
+            Title = &quot;Parallel Voices&quot;,
+            Description = &quot;An experimental ensemble film weaving together intersecting monologues.&quot;,
+            Budget = 145000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.SoundDesign,
+            StatusStartDate = new DateTime(2026, 06, 05, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 06, 28, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdFinalArrangement,
+            Title = &quot;Final Arrangement&quot;,
+            Description = &quot;A chamber drama centered on family tension during the reading of a final will.&quot;,
+            Budget = 85000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Distribution,
+            StatusStartDate = new DateTime(2026, 07, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 08, 10, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdCrimsonHarbor,
+            Title = &quot;Crimson Harbor&quot;,
+            Description = &quot;A noir thriller about a detective uncovering corruption in a decaying port city.&quot;,
+            Budget = 430000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Development,
+            StatusStartDate = new DateTime(2026, 01, 18, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 02, 22, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdShatteredSilence,
+            Title = &quot;Shattered Silence&quot;,
+            Description = &quot;A courtroom drama about a musician fighting to reclaim her voice and reputation.&quot;,
+            Budget = 275000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Financing,
+            StatusStartDate = new DateTime(2026, 01, 05, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 02, 10, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdGoldenHour,
+            Title = &quot;Golden Hour&quot;,
+            Description = &quot;A heartfelt drama following a family photographer confronting the passage of time.&quot;,
+            Budget = 95000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Casting,
+            StatusStartDate = new DateTime(2026, 02, 08, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdVelvetAshes,
+            Title = &quot;Velvet Ashes&quot;,
+            Description = &quot;An intimate psychological drama about fame, obsession, and self-destruction.&quot;,
+            Budget = 210000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Preproduction,
+            StatusStartDate = new DateTime(2026, 02, 25, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 25, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdFrozenLetters,
+            Title = &quot;Frozen Letters&quot;,
+            Description = &quot;A winter mystery centered around a box of unsent letters discovered in an abandoned house.&quot;,
+            Budget = 150000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.LocationScouting,
+            StatusStartDate = new DateTime(2026, 01, 22, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 02, 06, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdIronVeil,
+            Title = &quot;Iron Veil&quot;,
+            Description = &quot;A historical war drama about espionage, sacrifice, and impossible choices.&quot;,
+            Budget = 980000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Rehearsals,
+            StatusStartDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 18, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdSummerRewind,
+            Title = &quot;Summer Rewind&quot;,
+            Description = &quot;A light coming-of-age dramedy about three friends reliving their last summer together.&quot;,
+            Budget = 120000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Production,
+            StatusStartDate = new DateTime(2026, 04, 05, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 05, 02, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdHollowCity,
+            Title = &quot;Hollow City&quot;,
+            Description = &quot;A dystopian thriller about a journalist navigating a city emptied by fear and surveillance.&quot;,
+            Budget = 650000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.OnHold,
+            StatusStartDate = new DateTime(2026, 02, 14, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 04, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdBlueStatic,
+            Title = &quot;Blue Static&quot;,
+            Description = &quot;A mystery-thriller where eerie radio transmissions begin predicting violent events.&quot;,
+            Budget = 360000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Reshoots,
+            StatusStartDate = new DateTime(2026, 05, 10, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 05, 24, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdPaperMoonlight,
+            Title = &quot;Paper Moonlight&quot;,
+            Description = &quot;A poetic indie romance unfolding over a single night in Sofia.&quot;,
+            Budget = 80000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.PostProduction,
+            StatusStartDate = new DateTime(2026, 05, 15, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 06, 12, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdDustAndNeon,
+            Title = &quot;Dust and Neon&quot;,
+            Description = &quot;A road thriller about a failed musician and a runaway chasing redemption.&quot;,
+            Budget = 240000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.PictureLock,
+            StatusStartDate = new DateTime(2026, 06, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 06, 14, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdSecondExposure,
+            Title = &quot;Second Exposure&quot;,
+            Description = &quot;A suspense drama in which a photographer discovers incriminating details in developed film.&quot;,
+            Budget = 185000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.SoundDesign,
+            StatusStartDate = new DateTime(2026, 06, 10, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 06, 28, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdQuietSignal,
+            Title = &quot;Quiet Signal&quot;,
+            Description = &quot;A subtle sci-fi drama about loneliness, distance, and first contact.&quot;,
+            Budget = 410000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.VisualEffects,
+            StatusStartDate = new DateTime(2026, 06, 20, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 07, 18, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdTheOpenWindow,
+            Title = &quot;The Open Window&quot;,
+            Description = &quot;A chamber drama about neighbors whose lives intersect after a tragic accident.&quot;,
+            Budget = 105000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Marketing,
+            StatusStartDate = new DateTime(2026, 07, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 07, 30, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdLastDeparture,
+            Title = &quot;Last Departure&quot;,
+            Description = &quot;A tense airport-set drama about missed chances, final goodbyes, and unexpected reunions.&quot;,
+            Budget = 195000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Distribution,
+            StatusStartDate = new DateTime(2026, 07, 15, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 08, 20, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        },
+        new()
+        {
+            Id = ProductionIdEchoLine,
+            Title = &quot;Echo Line&quot;,
+            Description = &quot;A minimalist drama about two strangers connected by a late-night emergency call.&quot;,
+            Budget = 70000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Released,
+            StatusStartDate = new DateTime(2026, 08, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 08, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
+        },
+        new()
+        {
+            Id = ProductionIdBurningCanvas,
+            Title = &quot;Burning Canvas&quot;,
+            Description = &quot;An artist spirals into obsession while preparing the final exhibition of his career.&quot;,
+            Budget = 155000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Completed,
+            StatusStartDate = new DateTime(2026, 09, 10, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 09, 10, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
+        },
+        new()
+        {
+            Id = ProductionIdNoSignalTomorrow,
+            Title = &quot;No Signal Tomorrow&quot;,
+            Description = &quot;A post-apocalyptic survival story abandoned after loss of primary financing.&quot;,
+            Budget = 500000.00M,
+            Thumbnail = DefaultThumbnailPath,
+            StatusType = ProductionStatusType.Cancelled,
+            StatusStartDate = new DateTime(2026, 02, 01, 0, 0, 0, DateTimeKind.Utc),
+            StatusEndDate = new DateTime(2026, 03, 12, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,5,15,6,0],[16,9,20,47,0],[22,9,26,48,0],[28,9,28,41,0],[29,5,29,6,0],[31,5,490,7,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Profile/FilmmakerProfile.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model CrewProfileViewModel
+
+@inject ISlugGenerator SlugGenerator;
+
+@{
+    string fullName = $&quot;{Model.FirstName} {Model.LastName}&quot;;
+    ViewData[TitleDataKey] = $&quot;{fullName} - Filmmaker Profile&quot;;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/profile.css&quot; asp-append-version=&quot;true&quot;/&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+
+}
+
+&lt;div class=&quot;profile-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+    
+        &lt;partial name=&quot;_TempDataPartial&quot;&gt;&lt;/partial&gt;
+        
+        &lt;!-- Profile Header Card --&gt;
+        &lt;div class=&quot;profile-header-card&quot;&gt;
+            &lt;div class=&quot;row align-items-center&quot;&gt;
+                &lt;!-- Left: Profile Image --&gt;
+                &lt;div class=&quot;col-md-4 text-center&quot;&gt;
+                    &lt;div class=&quot;profile-image-container&quot;&gt;
+                        &lt;img src=&quot;@Model.ProfileImagePath&quot;
+                             alt=&quot;@Model.FirstName @Model.LastName&quot;
+                             class=&quot;profile-image&quot;&gt;
+                        &lt;div class=&quot;edit-icon-overlay&quot; title=&quot;Edit Profile&quot;&gt;
+                            &lt;a asp-area=&quot;&quot; asp-controller=&quot;Profile&quot; asp-action=&quot;EditFilmmaker&quot; asp-route-slug=&quot;@SlugGenerator.GenerateSlug(fullName)&quot;
+                               class=&quot;text-white&quot; style=&quot;text-decoration: none;&quot;&gt;
+                                &lt;i class=&quot;bi bi-pencil-fill&quot;&gt;&lt;/i&gt;
+                            &lt;/a&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;!-- Role Badge --&gt;
+                    &lt;div class=&quot;role-badge filmmaker-badge mt-3&quot;&gt;
+                        &#127916; Filmmaker
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Right: Personal Information --&gt;
+                &lt;div class=&quot;col-md-8&quot;&gt;
+                    &lt;div class=&quot;profile-info&quot;&gt;
+                        &lt;!-- Name &amp; Username --&gt;
+                        &lt;div class=&quot;profile-name-section mb-4&quot;&gt;
+                            &lt;h1 class=&quot;profile-name&quot;&gt;@Model.FirstName @Model.LastName&lt;/h1&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Info Grid --&gt;
+                        &lt;div class=&quot;row&quot;&gt;
+                            &lt;!-- Left Column --&gt;
+                            &lt;div class=&quot;col-md-6&quot;&gt;
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Name&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.FirstName @Model.LastName&lt;/div&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Email address&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.Email&lt;/div&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Phone number&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.PhoneNumber&lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Username&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.UserName&lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+
+                            &lt;!-- Right Column --&gt;
+                            &lt;div class=&quot;col-md-6&quot;&gt;
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Nickname&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.Nickname&lt;/div&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Total Skills&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.SkillsCount&lt;/div&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Status&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;
+                                        &lt;span class=&quot;badge @(Model.IsActive ? ActiveStyle : InactiveStyle) badge-custom&quot;&gt;
+                                            @(Model.IsActive ? Active : Inactive)
+                                        &lt;/span&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Biography Section --&gt;
+        @if (!string.IsNullOrWhiteSpace(Model.Biography))
+        {
+            &lt;div class=&quot;section-card mt-4&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-person-lines-fill me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Biography&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;biography-content&quot;&gt;
+                    @Model.Biography
+                &lt;/div&gt;
+            &lt;/div&gt;
+        }
+
+        &lt;!-- Skills Section --&gt;
+        &lt;div class=&quot;section-card mt-4&quot;&gt;
+            &lt;div class=&quot;section-header&quot;&gt;
+                &lt;i class=&quot;bi bi-star-fill me-2&quot;&gt;&lt;/i&gt;
+                &lt;h3&gt;Skills &amp; Expertise @Model.SkillsCount&lt;/h3&gt;
+            &lt;/div&gt;
+
+            @if (Model.DepartmentSkills.Any())
+            {
+                &lt;div class=&quot;row&quot;&gt;
+                    @foreach (KeyValuePair&lt;string, ICollection&lt;CrewRoleType&gt;&gt; department in Model.DepartmentSkills)
+                    {
+                        &lt;div class=&quot;col-md-6 mb-4&quot;&gt;
+                            &lt;div class=&quot;department-section&quot;&gt;
+                                &lt;h5 class=&quot;department-title&quot;&gt;
+                                    @department.Key
+                                    &lt;span class=&quot;badge bg-info ms-2&quot; style=&quot;color: var(--wrap-dark-blue)&quot;&gt;@department.Value.Count&lt;/span&gt;
+                                &lt;/h5&gt;
+                                &lt;div class=&quot;skills-container&quot;&gt;
+                                    @foreach (CrewRoleType skill in department.Value)
+                                    {
+                                        &lt;span class=&quot;skill-badge&quot;&gt;
+                                            @GetDisplayName(skill)
+                                        &lt;/span&gt;
+                                    }
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    }
+                &lt;/div&gt;
+            }
+            else
+            {
+                &lt;div class=&quot;text-center py-4 text-muted&quot;&gt;
+                    &lt;i class=&quot;bi bi-tools&quot; style=&quot;font-size: 3rem;&quot;&gt;&lt;/i&gt;
+                    &lt;p class=&quot;mt-2&quot;&gt;No skills added yet&lt;/p&gt;
+                &lt;/div&gt;
+            }
+            &lt;div class=&quot;text-center py-4 text-muted&quot;&gt;
+                &lt;a asp-area=&quot;&quot; asp-controller=&quot;Profile&quot; asp-action=&quot;EditSkills&quot; asp-route-slug=&quot;@SlugGenerator.GenerateSlug(fullName)&quot;
+                   class=&quot;btn btn-custom mt-2&quot;&gt;
+                    &lt;i class=&quot;bi bi-plus-circle me-2&quot;&gt;&lt;/i&gt;Edit Skills
+                &lt;/a&gt;
+            &lt;/div&gt;
+
+        &lt;/div&gt;
+
+        &lt;!-- Productions Section --&gt;
+        &lt;div class=&quot;section-card mt-4&quot;&gt;
+            &lt;div class=&quot;section-header&quot;&gt;
+                &lt;i class=&quot;bi bi-film me-2&quot;&gt;&lt;/i&gt;
+                &lt;h3&gt;Productions (@Model.CrewMemberProductionsCount)&lt;/h3&gt;
+            &lt;/div&gt;
+
+            @if (Model.CrewMemberProductions is not null &amp;&amp; Model.CrewMemberProductions.Any())
+            {
+                &lt;div class=&quot;row&quot;&gt;
+                    @foreach (CrewMemberProduction productionCrew in Model.CrewMemberProductions)
+                    {
+                        &lt;div class=&quot;col-md-6 mb-3&quot;&gt;
+                            &lt;div class=&quot;production-card&quot;&gt;
+                                &lt;div class=&quot;d-flex justify-content-between align-items-start&quot;&gt;
+                                    &lt;div&gt;
+                                        &lt;h5 class=&quot;production-title&quot;&gt;@productionCrew.ProductionTitle&lt;/h5&gt;
+                                        &lt;p class=&quot;production-role&quot;&gt;
+                                            &lt;span class=&quot;role-badge-small&quot;&gt;@productionCrew.RoleType&lt;/span&gt;
+                                        &lt;/p&gt;
+                                        &lt;small class=&quot;text-muted&quot;&gt;Project status: @productionCrew.ProjectStatus&lt;/small&gt;
+                                    &lt;/div&gt;
+                                    &lt;a asp-area=&quot;&quot; 
+                                       asp-controller=&quot;Production&quot;
+                                       asp-action=&quot;Details&quot;
+                                       asp-route-productionId=&quot;@productionCrew.ProductionId&quot;
+                                       asp-route-slug=&quot;@SlugGenerator.GenerateSlug(productionCrew.ProductionTitle!)&quot;
+                                       class=&quot;btn btn-sm btn-outline-primary&quot;&gt;
+                                        View
+                                    &lt;/a&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    }
+                &lt;/div&gt;
+            }
+            else
+            {
+                &lt;div class=&quot;text-center py-4 text-muted&quot;&gt;
+                    &lt;i class=&quot;bi bi-film&quot; style=&quot;font-size: 3rem;&quot;&gt;&lt;/i&gt;
+                    &lt;p class=&quot;mt-2&quot;&gt;No productions yet&lt;/p&gt;
+                &lt;/div&gt;
+            }
+        &lt;/div&gt;
+
+        &lt;!-- Scenes Section --&gt;
+        @if ((Model.CrewMemberScenes is not null &amp;&amp; Model.CrewMemberScenes.Any()))
+        {
+            &lt;div class=&quot;section-card mt-4&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-camera-reels me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Scenes (@Model.CrewMemberScenesCount)&lt;/h3&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;table-responsive&quot;&gt;
+                    &lt;table class=&quot;table table-hover&quot;&gt;
+                        &lt;thead&gt;
+                        &lt;tr&gt;
+                            &lt;th&gt;Scene&lt;/th&gt;
+                            &lt;th&gt;Production&lt;/th&gt;
+                            &lt;th&gt;Role&lt;/th&gt;
+                            &lt;th&gt;Action&lt;/th&gt;
+                        &lt;/tr&gt;
+                        &lt;/thead&gt;
+                        &lt;tbody&gt;
+                        @foreach (CrewMemberScene sceneCrew in Model.CrewMemberScenes)
+                        {
+                            &lt;tr&gt;
+                                &lt;td&gt;@sceneCrew.SceneName&lt;/td&gt;
+                                &lt;td&gt;@sceneCrew.ProductionTitle&lt;/td&gt;
+                                &lt;td&gt;
+                                    &lt;span class=&quot;badge bg-info badge-custom&quot;&gt;@sceneCrew.RoleType&lt;/span&gt;
+                                &lt;/td&gt;
+                                &lt;td&gt;
+                                    &lt;a asp-area=&quot;&quot; 
+                                       asp-controller=&quot;Scene&quot;
+                                       asp-action=&quot;Details&quot;
+                                       asp-route-id=&quot;@sceneCrew.SceneId&quot;
+                                       asp-route-slug=&quot;@SlugGenerator.GenerateSlug(sceneCrew.SceneName!)&quot;
+                                       class=&quot;btn btn-sm btn-link&quot;&gt;
+                                        View Details
+                                    &lt;/a&gt;
+                                &lt;/td&gt;
+                            &lt;/tr&gt;
+                        }
+                        &lt;/tbody&gt;
+                    &lt;/table&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        }
+        
+        &lt;div class=&quot;py-4 d-flex justify-content-center flex-wrap gap-5&quot;&gt;
+            &lt;a asp-area=&quot;&quot;
+               asp-controller=&quot;Profile&quot;
+               asp-action=&quot;DeleteFilmmakerOverview&quot;
+               asp-route-slug=&quot;@SlugGenerator.GenerateSlug(fullName)&quot;
+               class=&quot;btn btn-custom-1 btn-lg&quot;&gt;
+                &lt;i class=&quot;bi bi-trash3-fill me-2&quot;&gt;&lt;/i&gt;Delete Profile
+            &lt;/a&gt;
+
+            &lt;a asp-area=&quot;&quot;
+               asp-controller=&quot;Profile&quot;
+               asp-action=&quot;DownloadFilmmakerPersonalData&quot;
+               class=&quot;btn btn-production-success btn-lg&quot;&gt;
+                &lt;i class=&quot;bi bi-download me-2&quot;&gt;&lt;/i&gt;Download Personal Data (JSON)
+            &lt;/a&gt;
+            
+            &lt;a asp-area=&quot;Identity&quot;
+               asp-page=&quot;/Account/Manage/Email&quot;
+               class=&quot;btn btn-custom btn-lg&quot;&gt;
+                &lt;i class=&quot;bi bi-gear&quot;&gt;&lt;/i&gt; Manage your account
+            &lt;/a&gt;
+        &lt;/div&gt;
+        
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;script src=&quot;~/js/profile/profile.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[6,5,6,61,0],[7,5,7,64,0],[105,10,105,58,0],[106,9,106,10,0],[116,9,116,10,0],[125,14,125,47,0],[126,13,126,14,0],[128,22,128,29,0],[128,31,128,89,0],[128,90,128,92,0],[128,93,128,115,0],[129,21,129,22,0],[137,38,137,45,0],[137,47,137,65,0],[137,66,137,68,0],[137,69,137,85,0],[138,37,138,38,0],[142,37,142,38,0],[146,21,146,22,0],[148,13,148,14,0],[150,13,150,14,0],[155,13,155,14,0],[172,14,172,95,0],[173,13,173,14,0],[175,22,175,29,0],[175,31,175,66,0],[175,67,175,69,0],[175,70,175,97,0],[176,21,176,22,0],[198,21,198,22,0],[200,13,200,14,0],[202,13,202,14,0],[207,13,207,14,0],[211,10,211,83,0],[212,9,212,10,0],[230,26,230,33,0],[230,35,230,60,0],[230,61,230,63,0],[230,64,230,86,0],[231,25,231,26,0],[249,25,249,26,0],[254,9,254,10,0]]);
+    </script>
+  </body>
+</html>

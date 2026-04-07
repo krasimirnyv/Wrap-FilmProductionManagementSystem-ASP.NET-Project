@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Filmmaker/Views/Production/Delete.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model DeleteProductionViewModel
+
+@inject ISlugGenerator SlugGenerator;
+
+@{
+    ViewData[TitleDataKey] = &quot;Delete Production&quot;;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;div class=&quot;production-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+
+        @* ── Danger Header ── *@
+        &lt;div class=&quot;production-header-card text-center&quot;&gt;
+            &lt;i class=&quot;bi bi-exclamation-triangle-fill&quot;
+               style=&quot;font-size:2.5rem; color:#e53935;&quot;&gt;&lt;/i&gt;
+            &lt;h2 class=&quot;fw-bold mt-3 mb-1&quot; style=&quot;color:#c62828;&quot;&gt;Delete Production&lt;/h2&gt;
+            &lt;p class=&quot;text-muted mb-0&quot;&gt;This action is permanent and cannot be undone.&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;row g-4&quot;&gt;
+
+            @* ── Left: Production preview ── *@
+            &lt;div class=&quot;col-lg-5&quot;&gt;
+                &lt;div class=&quot;section-card h-100&quot;&gt;
+                    &lt;div class=&quot;section-header&quot;&gt;
+                        &lt;i class=&quot;bi bi-film me-2&quot;&gt;&lt;/i&gt;
+                        &lt;h3&gt;Production to Delete&lt;/h3&gt;
+                    &lt;/div&gt;
+
+                    &lt;img src=&quot;@Model.Thumbnail&quot; alt=&quot;@Model.Title&quot;
+                         class=&quot;production-thumbnail mb-4&quot;&gt;
+
+                    &lt;h4 class=&quot;fw-bold mb-3&quot; style=&quot;color:var(--wrap-dark-blue);&quot;&gt;@Model.Title&lt;/h4&gt;
+
+                    &lt;div class=&quot;info-item&quot;&gt;
+                        &lt;div class=&quot;info-label&quot;&gt;Status&lt;/div&gt;
+                        &lt;div class=&quot;info-value&quot;&gt;
+                            &lt;span class=&quot;status-badge status-default&quot;&gt;@GetDisplayName(Model.StatusType)&lt;/span&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;info-item&quot;&gt;
+                        &lt;div class=&quot;info-label&quot;&gt;Budget&lt;/div&gt;
+                        &lt;div class=&quot;info-value&quot;&gt;@Model.Budget&lt;/div&gt;
+                    &lt;/div&gt;
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        &lt;div class=&quot;info-item&quot;&gt;
+                            &lt;div class=&quot;info-label&quot;&gt;Description&lt;/div&gt;
+                            &lt;div class=&quot;info-value text-muted&quot; style=&quot;font-size:0.95rem;&quot;&gt;
+                                @Model.Description
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    }
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            @* ── Right: Warnings + Confirm ── *@
+            &lt;div class=&quot;col-lg-7 d-flex flex-column gap-4&quot;&gt;
+
+                @* Associated data warning *@
+                &lt;div class=&quot;danger-zone-card&quot;&gt;
+                    &lt;div class=&quot;section-header&quot;&gt;
+                        &lt;i class=&quot;bi bi-database-exclamation me-2&quot;&gt;&lt;/i&gt;
+                        &lt;h3&gt;Associated Data&lt;/h3&gt;
+                    &lt;/div&gt;
+
+                    &lt;p class=&quot;text-muted mb-3&quot;&gt;
+                        The following data is linked to this production.
+                        Deleting it will remove all associations — but will &lt;strong&gt;not&lt;/strong&gt; delete
+                        the crew, cast, or scenes themselves.
+                    &lt;/p&gt;
+
+                    &lt;div class=&quot;associated-data-item&quot;&gt;
+                        &lt;i class=&quot;bi bi-people-fill&quot;&gt;&lt;/i&gt;
+                        &lt;div class=&quot;flex-grow-1&quot;&gt;Crew Members&lt;/div&gt;
+                        &lt;span class=&quot;associated-count&quot;&gt;@Model.CrewMembersCount&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;associated-data-item&quot;&gt;
+                        &lt;i class=&quot;bi bi-person-video3&quot;&gt;&lt;/i&gt;
+                        &lt;div class=&quot;flex-grow-1&quot;&gt;Cast Members&lt;/div&gt;
+                        &lt;span class=&quot;associated-count&quot;&gt;@Model.CastMembersCount&lt;/span&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;associated-data-item&quot;&gt;
+                        &lt;i class=&quot;bi bi-camera-video-fill&quot;&gt;&lt;/i&gt;
+                        &lt;div class=&quot;flex-grow-1&quot;&gt;Scenes&lt;/div&gt;
+                        &lt;span class=&quot;associated-count&quot;&gt;@Model.ScenesCount&lt;/span&gt;
+                    &lt;/div&gt;
+
+                    @if (Model.CrewMembersCount &gt; 0 || Model.CastMembersCount &gt; 0 || Model.ScenesCount &gt; 0)
+                    {
+                        &lt;div class=&quot;alert alert-warning mt-3 mb-0 d-flex gap-2 align-items-center&quot;&gt;
+                            &lt;i class=&quot;bi bi-exclamation-triangle-fill flex-shrink-0&quot;&gt;&lt;/i&gt;
+                            &lt;span&gt;All associations above will be permanently removed.&lt;/span&gt;
+                        &lt;/div&gt;
+                    }
+                &lt;/div&gt;
+
+                @* Final confirmation ── *@
+                &lt;div class=&quot;section-card&quot;&gt;
+                    &lt;div class=&quot;section-header&quot;&gt;
+                        &lt;i class=&quot;bi bi-shield-exclamation me-2&quot;&gt;&lt;/i&gt;
+                        &lt;h3&gt;Confirm Deletion&lt;/h3&gt;
+                    &lt;/div&gt;
+
+                    &lt;p class=&quot;text-muted mb-4&quot;&gt;
+                        Type &lt;strong class=&quot;text-danger&quot;&gt;DELETE&lt;/strong&gt; below to confirm you want to
+                        permanently remove &lt;strong&gt;@Model.Title&lt;/strong&gt;.
+                    &lt;/p&gt;
+
+                    &lt;div class=&quot;mb-4&quot;&gt;
+                        &lt;input type=&quot;text&quot; id=&quot;confirmInput&quot; class=&quot;form-control form-control-lg&quot;
+                               placeholder=&quot;Type DELETE to confirm&quot;
+                               autocomplete=&quot;off&quot; /&gt;
+                    &lt;/div&gt;
+
+                    &lt;form asp-area=&quot;Filmmaker&quot; asp-controller=&quot;Production&quot; asp-action=&quot;DeleteConfirmed&quot; asp-route-productionId=&quot;@Model.Id&quot; method=&quot;post&quot;
+                          asp-route-slug=&quot;@SlugGenerator.GenerateSlug(Model.Title)&quot;&gt;
+                        @Html.AntiForgeryToken()
+
+                        &lt;div class=&quot;d-flex justify-content-between flex-wrap gap-3&quot;&gt;
+                            &lt;a asp-area=&quot;&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Details&quot; asp-route-productionId=&quot;@Model.Id&quot;
+                               asp-route-slug=&quot;@SlugGenerator.GenerateSlug(Model.Title)&quot;
+                               class=&quot;btn btn-production-secondary btn-lg&quot;&gt;
+                                &lt;i class=&quot;bi bi-arrow-left me-2&quot;&gt;&lt;/i&gt;Cancel, Keep It
+                            &lt;/a&gt;
+                            &lt;button type=&quot;submit&quot; class=&quot;btn btn-production-danger btn-lg&quot;
+                                    id=&quot;deleteButton&quot; disabled&gt;
+                                &lt;i class=&quot;bi bi-trash-fill me-2&quot;&gt;&lt;/i&gt;Yes, Delete Permanently
+                            &lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/form&gt;
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;script src=&quot;~/js/production/production-delete.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[6,5,6,50,0],[51,22,51,72,0],[52,21,52,22,0],[59,21,59,22,0],[95,22,95,108,0],[96,21,96,22,0],[101,21,101,22,0]]);
+    </script>
+  </body>
+</html>

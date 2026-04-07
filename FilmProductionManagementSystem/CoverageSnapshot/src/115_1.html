@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/CastRegistrationHandlerTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+using Moq;
+using NUnit.Framework;
+
+using Data.Models;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+using Core.Handlers;
+using Core.Utilities.ImageLogic.Interfaces;
+using Models.LoginAndRegistration;
+
+using static GCommon.OutputMessages.Register;
+using static GCommon.DataFormat;
+using static GCommon.ApplicationConstants.IdentityRoles;
+
+[TestFixture]
+public class CastRegistrationHandlerTests
+{
+    private Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; userManagerMock = null!;
+    private Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; signInManagerMock = null!;
+    private Mock&lt;IImageService&gt; imageServiceMock = null!;
+    private Mock&lt;IVariantImageStrategyResolver&gt; imageStrategyResolverMock = null!;
+    private Mock&lt;ILoginRegisterRepository&gt; loginRegisterRepositoryMock = null!;
+    private Mock&lt;ILogger&lt;CastRegistrationHandler&gt;&gt; loggerMock = null!;
+
+    private CastRegistrationHandler castHandler = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        userManagerMock = CreateUserManagerMock();
+        signInManagerMock = CreateSignInManagerMock(userManagerMock.Object);
+
+        imageServiceMock = new Mock&lt;IImageService&gt;(MockBehavior.Strict);
+        imageStrategyResolverMock = new Mock&lt;IVariantImageStrategyResolver&gt;(MockBehavior.Strict);
+        loginRegisterRepositoryMock = new Mock&lt;ILoginRegisterRepository&gt;(MockBehavior.Strict);
+
+        loggerMock = new Mock&lt;ILogger&lt;CastRegistrationHandler&gt;&gt;(MockBehavior.Loose);
+
+        castHandler = new CastRegistrationHandler
+        (
+            userManagerMock.Object,
+            signInManagerMock.Object,
+            imageServiceMock.Object,
+            imageStrategyResolverMock.Object,
+            loginRegisterRepositoryMock.Object,
+            loggerMock.Object
+        );
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenDtoIsNull_ReturnsFailedAndDoesNotTouchInfrastructure()
+    {
+        // Arrange
+        CastRegistrationDto? dto = null;
+
+        // Act
+        IdentityResult result = await castHandler.CompleteRegistrationAsync(dto!);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.False);
+        Assert.That(result.Errors.Select(e =&gt; e.Description), Does.Contain(ErrorCreatingCrew));
+
+        loginRegisterRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenIdentityCreateFails_RollsBackAndReturnsIdentityResult()
+    {
+        // Arrange
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        CastRegistrationDto dto = ValidCastDto();
+
+        IdentityResult createFail = IdentityResult.Failed(new IdentityError { Description = &quot;create failed&quot; });
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.BeginTransactionAsync())
+            .ReturnsAsync(transactionMock.Object);
+
+        userManagerMock
+            .Setup(um =&gt; um.CreateAsync(It.IsAny&lt;ApplicationUser&gt;(), dto.Password))
+            .ReturnsAsync(createFail);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.RollbackTransactionAsync(transactionMock.Object))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        IdentityResult result = await castHandler.CompleteRegistrationAsync(dto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.False);
+        Assert.That(result.Errors.Select(e =&gt; e.Description), Does.Contain(&quot;create failed&quot;));
+
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.BeginTransactionAsync(), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CreateAsync(It.IsAny&lt;ApplicationUser&gt;(), dto.Password), Times.Once);
+        loginRegisterRepositoryMock.Verify(repo =&gt; repo.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+
+        userManagerMock.Verify(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;string&gt;()), Times.Never);
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(It.IsAny&lt;string&gt;()), Times.Never);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(It.IsAny&lt;IFormFile?&gt;(), It.IsAny&lt;IVariantImageStrategy&gt;(), It.IsAny&lt;CancellationToken&gt;()), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CreateCastAsync(It.IsAny&lt;Cast&gt;()), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.SaveAllChangesAsync(), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CommitTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+        signInManagerMock.Verify(sm =&gt; sm.SignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;bool&gt;(), It.IsAny&lt;string?&gt;()), Times.Never);
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenRoleAssignmentFails_RollsBackDeletesUserAndReturnsIdentityResult()
+    {
+        // Arrange
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        CastRegistrationDto dto = ValidCastDto();
+
+        IdentityResult roleFail = IdentityResult.Failed(new IdentityError { Description = &quot;role failed&quot; });
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.BeginTransactionAsync())
+            .ReturnsAsync(transactionMock.Object);
+
+        userManagerMock
+            .Setup(um =&gt; um.CreateAsync(It.IsAny&lt;ApplicationUser&gt;(), dto.Password))
+            .ReturnsAsync(IdentityResult.Success);
+
+        userManagerMock
+            .Setup(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), Actor))
+            .ReturnsAsync(roleFail);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.RollbackTransactionAsync(transactionMock.Object))
+            .Returns(Task.CompletedTask);
+
+        userManagerMock
+            .Setup(um =&gt; um.DeleteAsync(It.IsAny&lt;ApplicationUser&gt;()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        IdentityResult result = await castHandler.CompleteRegistrationAsync(dto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.False);
+        Assert.That(result.Errors.Select(e =&gt; e.Description), Does.Contain(&quot;role failed&quot;));
+
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.BeginTransactionAsync(), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CreateAsync(It.IsAny&lt;ApplicationUser&gt;(), dto.Password), Times.Once);
+        userManagerMock.Verify(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), Actor), Times.Once);
+        loginRegisterRepositoryMock.Verify(repo =&gt; repo.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+        userManagerMock.Verify(um =&gt; um.DeleteAsync(It.IsAny&lt;ApplicationUser&gt;()), Times.Once);
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(It.IsAny&lt;string&gt;()), Times.Never);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(It.IsAny&lt;IFormFile?&gt;(), It.IsAny&lt;IVariantImageStrategy&gt;(), It.IsAny&lt;CancellationToken&gt;()), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CreateCastAsync(It.IsAny&lt;Cast&gt;()), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.SaveAllChangesAsync(), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CommitTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+        signInManagerMock.Verify(sm =&gt; sm.SignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;bool&gt;(), It.IsAny&lt;string?&gt;()), Times.Never);
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenSaveAllChangesLessThanExpected_RollsBackDeletesUserAndReturnsFailed()
+    {
+        // Arrange
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        CastRegistrationDto dto = ValidCastDto();
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        const string savedPath = &quot;/img/profile/cast.webp&quot;;
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.BeginTransactionAsync())
+            .ReturnsAsync(transactionMock.Object);
+
+        userManagerMock
+            .Setup(um =&gt; um.CreateAsync(It.IsAny&lt;ApplicationUser&gt;(), dto.Password))
+            .ReturnsAsync(IdentityResult.Success);
+
+        userManagerMock
+            .Setup(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), Actor))
+            .ReturnsAsync(IdentityResult.Success);
+
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ProfileFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ReturnsAsync(savedPath);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CreateCastAsync(It.IsAny&lt;Cast&gt;()))
+            .Returns(Task.CompletedTask);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.SaveAllChangesAsync())
+            .ReturnsAsync(0);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.RollbackTransactionAsync(transactionMock.Object))
+            .Returns(Task.CompletedTask);
+
+        userManagerMock
+            .Setup(um =&gt; um.DeleteAsync(It.IsAny&lt;ApplicationUser&gt;()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        IdentityResult result = await castHandler.CompleteRegistrationAsync(dto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.False);
+        Assert.That(result.Errors.Select(e =&gt; e.Description), Does.Contain(RegistrationTransactionFailure));
+
+        userManagerMock.Verify(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), Actor), Times.Once);
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.BeginTransactionAsync(), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CreateCastAsync(It.IsAny&lt;Cast&gt;()), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.SaveAllChangesAsync(), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+
+        userManagerMock.Verify(um =&gt; um.DeleteAsync(It.IsAny&lt;ApplicationUser&gt;()), Times.Once);
+
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CommitTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+        signInManagerMock.Verify(sm =&gt; sm.SignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;bool&gt;(), It.IsAny&lt;string?&gt;()), Times.Never);
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenAllStepsSucceed_CommitsAndSignsIn_ReturnsSuccess()
+    {
+        // Arrange
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        CastRegistrationDto dto = ValidCastDto();
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        const string savedPath = &quot;/img/profile/cast.webp&quot;;
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.BeginTransactionAsync())
+            .ReturnsAsync(transactionMock.Object);
+
+        userManagerMock
+            .Setup(um =&gt; um.CreateAsync(It.IsAny&lt;ApplicationUser&gt;(), dto.Password))
+            .ReturnsAsync(IdentityResult.Success);
+
+        userManagerMock
+            .Setup(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), Actor))
+            .ReturnsAsync(IdentityResult.Success);
+
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ProfileFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ReturnsAsync(savedPath);
+
+        Cast? capturedCast = null;
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CreateCastAsync(It.IsAny&lt;Cast&gt;()))
+            .Callback&lt;Cast&gt;(c =&gt; capturedCast = c)
+            .Returns(Task.CompletedTask);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CommitTransactionAsync(transactionMock.Object))
+            .Returns(Task.CompletedTask);
+
+        signInManagerMock
+            .Setup(sm =&gt; sm.SignInAsync(It.IsAny&lt;ApplicationUser&gt;(), false, null))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        IdentityResult result = await castHandler.CompleteRegistrationAsync(dto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.True);
+
+        userManagerMock.Verify(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), Actor), Times.Once);
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.BeginTransactionAsync(), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CreateCastAsync(It.IsAny&lt;Cast&gt;()), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.SaveAllChangesAsync(), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CommitTransactionAsync(transactionMock.Object), Times.Once);
+
+        signInManagerMock.Verify(sm =&gt; sm.SignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;bool&gt;(), It.IsAny&lt;string?&gt;()), Times.Once);
+
+        Assert.That(capturedCast, Is.Not.Null);
+        Assert.That(capturedCast.Id, Is.Not.EqualTo(Guid.Empty));
+        Assert.That(capturedCast.UserId, Is.EqualTo(Guid.Empty));
+        Assert.That(capturedCast.ProfileImagePath, Is.EqualTo(savedPath));
+        Assert.That(capturedCast.FirstName, Is.EqualTo(dto.FirstName));
+        Assert.That(capturedCast.LastName, Is.EqualTo(dto.LastName));
+        Assert.That(capturedCast.Nickname, Is.EqualTo(dto.Nickname));
+        Assert.That(capturedCast.Biography, Is.EqualTo(dto.Biography));
+        Assert.That(capturedCast.BirthDate, Is.EqualTo(dto.BirthDate));
+        Assert.That(capturedCast.Gender, Is.EqualTo(dto.Gender));
+        Assert.That(capturedCast.IsActive, Is.False);
+        Assert.That(capturedCast.IsDeleted, Is.False);
+
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.RollbackTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+        userManagerMock.Verify(um =&gt; um.DeleteAsync(It.IsAny&lt;ApplicationUser&gt;()), Times.Never);
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenPersistDomainThrows_RollsBackDeletesUserAndReturnsFailed()
+    {
+        // Arrange
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        CastRegistrationDto dto = ValidCastDto();
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.BeginTransactionAsync())
+            .ReturnsAsync(transactionMock.Object);
+
+        userManagerMock
+            .Setup(um =&gt; um.CreateAsync(It.IsAny&lt;ApplicationUser&gt;(), dto.Password))
+            .ReturnsAsync(IdentityResult.Success);
+
+        userManagerMock
+            .Setup(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), Actor))
+            .ReturnsAsync(IdentityResult.Success);
+
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ProfileFolderName))
+            .Throws(new InvalidOperationException(&quot;boom&quot;));
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.RollbackTransactionAsync(transactionMock.Object))
+            .Returns(Task.CompletedTask);
+
+        userManagerMock
+            .Setup(um =&gt; um.DeleteAsync(It.IsAny&lt;ApplicationUser&gt;()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        IdentityResult result = await castHandler.CompleteRegistrationAsync(dto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.False);
+        Assert.That(result.Errors.Select(e =&gt; e.Description), Does.Contain(RegistrationTransactionFailure));
+
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.BeginTransactionAsync(), Times.Once);
+        userManagerMock.Verify(um =&gt; um.AddToRoleAsync(It.IsAny&lt;ApplicationUser&gt;(), Actor), Times.Once);
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+        userManagerMock.Verify(um =&gt; um.DeleteAsync(It.IsAny&lt;ApplicationUser&gt;()), Times.Once);
+
+        loginRegisterRepositoryMock.Verify(repo =&gt; repo.CommitTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+        signInManagerMock.Verify(sm =&gt; sm.SignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;bool&gt;(), It.IsAny&lt;string?&gt;()), Times.Never);
+    }
+
+    private static CastRegistrationDto ValidCastDto()
+    {
+        CastRegistrationDto dto = new CastRegistrationDto
+        {
+            UserName = &quot;cast.user&quot;,
+            Email = &quot;cast@wrap.local&quot;,
+            PhoneNumber = &quot;+359888000111&quot;,
+            Password = &quot;Pass123!&quot;,
+            FirstName = &quot;A&quot;,
+            LastName = &quot;B&quot;,
+            Nickname = &quot;N&quot;,
+            BirthDate = new DateTime(2000, 1, 1),
+            Gender = GCommon.Enums.GenderType.Male,
+            ProfilePicture = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3]),
+            Biography = &quot;bio&quot;
+        };
+        
+        return dto;
+    }
+
+    private static IFormFile CreateFormFile(string fileName, byte[] content)
+    {
+        MemoryStream stream = new MemoryStream(content);
+        IFormFile file = new FormFile(stream, 0, content.Length, &quot;file&quot;, fileName);
+
+        return file;
+    }
+
+    private static Mock&lt;IDbContextTransaction&gt; CreateTransactionMock()
+    {
+        Mock&lt;IDbContextTransaction&gt; transactionMock = new Mock&lt;IDbContextTransaction&gt;(MockBehavior.Strict);
+
+        transactionMock
+            .Setup(tx =&gt; tx.DisposeAsync())
+            .Returns(ValueTask.CompletedTask);
+
+        return transactionMock;
+    }
+
+    private static Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; CreateUserManagerMock()
+    {
+        Mock&lt;IUserStore&lt;ApplicationUser&gt;&gt; store = new Mock&lt;IUserStore&lt;ApplicationUser&gt;&gt;();
+
+        Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; userManagerMock = new Mock&lt;UserManager&lt;ApplicationUser&gt;&gt;
+        (
+            store.Object,
+            Mock.Of&lt;IOptions&lt;IdentityOptions&gt;&gt;(),
+            Mock.Of&lt;IPasswordHasher&lt;ApplicationUser&gt;&gt;(),
+            Array.Empty&lt;IUserValidator&lt;ApplicationUser&gt;&gt;(),
+            Array.Empty&lt;IPasswordValidator&lt;ApplicationUser&gt;&gt;(),
+            Mock.Of&lt;ILookupNormalizer&gt;(),
+            Mock.Of&lt;IdentityErrorDescriber&gt;(),
+            Mock.Of&lt;IServiceProvider&gt;(),
+            Mock.Of&lt;ILogger&lt;UserManager&lt;ApplicationUser&gt;&gt;&gt;()
+        );
+
+        return userManagerMock;
+    }
+
+    private static Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; CreateSignInManagerMock(UserManager&lt;ApplicationUser&gt; userManager)
+    {
+        Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; signInManagerMock = new Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt;
+        (
+            userManager,
+            Mock.Of&lt;IHttpContextAccessor&gt;(),
+            Mock.Of&lt;IUserClaimsPrincipalFactory&lt;ApplicationUser&gt;&gt;(),
+            Mock.Of&lt;IOptions&lt;IdentityOptions&gt;&gt;(),
+            Mock.Of&lt;ILogger&lt;SignInManager&lt;ApplicationUser&gt;&gt;&gt;(),
+            Mock.Of&lt;IAuthenticationSchemeProvider&gt;(),
+            Mock.Of&lt;IUserConfirmation&lt;ApplicationUser&gt;&gt;()
+        );
+
+        return signInManagerMock;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[27,5,27,72,1],[28,5,28,76,1],[29,5,29,58,1],[30,5,30,83,1],[31,5,31,80,1],[32,5,32,71,1],[34,5,34,57,1],[38,5,38,6,1],[39,9,39,51,1],[40,9,40,77,1],[42,9,42,73,1],[43,9,43,98,1],[44,9,44,95,1],[46,9,46,85,1],[48,9,56,11,1],[57,5,57,6,1],[61,5,61,6,1],[63,9,63,41,1],[66,9,66,83,1],[69,9,69,49,1],[70,9,70,47,1],[70,47,70,60,1],[70,60,70,96,1],[72,9,72,58,1],[73,9,73,47,1],[74,9,74,56,1],[75,5,75,6,1],[79,5,79,6,1],[81,9,81,79,1],[83,9,83,50,1],[85,9,85,112,1],[87,9,89,51,1],[91,9,93,39,1],[95,9,97,42,1],[100,9,100,82,1],[103,9,103,49,1],[104,9,104,47,1],[104,47,104,60,1],[104,60,104,94,1],[106,9,106,92,1],[107,9,107,109,1],[108,9,108,119,1],[110,9,110,119,1],[111,9,111,95,1],[112,9,112,163,1],[113,9,113,103,1],[114,9,114,91,1],[115,9,115,127,1],[116,9,116,137,1],[117,5,117,6,1],[121,5,121,6,1],[123,9,123,79,1],[125,9,125,50,1],[127,9,127,108,1],[129,9,131,51,1],[133,9,135,51,1],[137,9,139,37,1],[141,9,143,42,1],[145,9,147,51,1],[150,9,150,82,1],[153,9,153,49,1],[154,9,154,47,1],[154,47,154,60,1],[154,60,154,92,1],[156,9,156,92,1],[157,9,157,109,1],[158,9,158,105,1],[159,9,159,119,1],[160,9,160,95,1],[162,9,162,95,1],[163,9,163,163,1],[164,9,164,103,1],[165,9,165,91,1],[166,9,166,127,1],[167,9,167,137,1],[168,5,168,6,1],[172,5,172,6,1],[174,9,174,79,1],[176,9,176,50,1],[178,9,178,75,1],[181,9,183,51,1],[185,9,187,51,1],[189,9,191,51,1],[193,9,195,32,1],[197,9,199,38,1],[201,9,203,42,1],[205,9,207,30,1],[209,9,211,42,1],[213,9,215,51,1],[218,9,218,82,1],[221,9,221,49,1],[222,9,222,47,1],[222,47,222,60,1],[222,60,222,109,1],[224,9,224,105,1],[225,9,225,93,1],[226,9,226,133,1],[228,9,228,92,1],[229,9,229,102,1],[230,9,230,90,1],[231,9,231,117,1],[233,9,233,95,1],[235,9,235,127,1],[236,9,236,137,1],[237,5,237,6,1],[241,5,241,6,1],[243,9,243,79,1],[245,9,245,50,1],[247,9,247,75,1],[250,9,252,51,1],[254,9,256,51,1],[258,9,260,51,1],[262,9,264,32,1],[266,9,268,38,1],[270,9,270,35,1],[271,9,273,34,1],[273,34,273,50,1],[273,50,274,42,1],[276,9,278,30,1],[280,9,282,42,1],[284,9,286,42,1],[289,9,289,82,1],[292,9,292,48,1],[294,9,294,105,1],[295,9,295,93,1],[296,9,296,133,1],[298,9,298,92,1],[299,9,299,102,1],[300,9,300,90,1],[301,9,301,115,1],[303,9,303,136,1],[305,9,305,48,1],[306,9,306,66,1],[307,9,307,66,1],[308,9,308,75,1],[309,9,309,72,1],[310,9,310,70,1],[311,9,311,70,1],[312,9,312,72,1],[313,9,313,72,1],[314,9,314,66,1],[315,9,315,54,1],[316,9,316,55,1],[318,9,318,129,1],[319,9,319,96,1],[320,5,320,6,1],[324,5,324,6,1],[326,9,326,79,1],[328,9,328,50,1],[330,9,332,51,1],[334,9,336,51,1],[338,9,340,51,1],[342,9,344,60,1],[346,9,348,42,1],[350,9,352,51,1],[355,9,355,82,1],[358,9,358,49,1],[359,9,359,47,1],[359,47,359,60,1],[359,60,359,109,1],[361,9,361,92,1],[362,9,362,105,1],[363,9,363,93,1],[365,9,365,117,1],[366,9,366,95,1],[368,9,368,129,1],[369,9,369,137,1],[370,5,370,6,1],[373,5,373,6,1],[374,9,387,11,1],[389,9,389,20,1],[390,5,390,6,1],[393,5,393,6,1],[394,9,394,57,1],[395,9,395,84,1],[397,9,397,21,1],[398,5,398,6,1],[401,5,401,6,1],[402,9,402,108,1],[404,9,406,47,1],[408,9,408,32,1],[409,5,409,6,1],[412,5,412,6,1],[413,9,413,91,1],[415,9,426,11,1],[428,9,428,32,1],[429,5,429,6,1],[432,5,432,6,1],[433,9,442,11,1],[444,9,444,34,1],[445,5,445,6,1]]);
+    </script>
+  </body>
+</html>

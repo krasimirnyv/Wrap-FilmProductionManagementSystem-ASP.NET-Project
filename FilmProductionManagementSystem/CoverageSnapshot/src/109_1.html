@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/HomeServiceTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using Moq;
+using NUnit.Framework;
+
+using Core;
+using Core.Interfaces;
+using Core.Utilities.Providers.Interfaces;
+using Models.General;
+using Data.Models;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+using GCommon.Enums;
+
+[TestFixture]
+public class HomeServiceTests
+{
+    private Mock&lt;IHomeRepository&gt; homeRepositoryMock = null!;
+    private Mock&lt;IDateTimeProvider&gt; dateTimeProviderMock = null!;
+    private IHomeService homeService = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        homeRepositoryMock = new Mock&lt;IHomeRepository&gt;(MockBehavior.Strict);
+        dateTimeProviderMock = new Mock&lt;IDateTimeProvider&gt;(MockBehavior.Strict);
+
+        homeService = new HomeService(homeRepositoryMock.Object, dateTimeProviderMock.Object);
+    }
+
+    [Test]
+    public void GetDashboardDataAsync_WhenUserIdIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        string? userId = null;
+
+        dateTimeProviderMock.SetupGet(dtp =&gt; dtp.Now).Returns(new DateTime(2026, 3, 31, 12, 0, 0));
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewCountAsync()).ReturnsAsync(0);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCastCountAsync()).ReturnsAsync(0);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetProductionsAsync()).ReturnsAsync(Array.Empty&lt;Production&gt;());
+
+        // Act + Assert
+        Assert.ThrowsAsync&lt;ArgumentNullException&gt;(() =&gt; homeService.GetDashboardDataAsync(userId!));
+
+        dateTimeProviderMock.VerifyGet(dtp =&gt; dtp.Now, Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCastCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetProductionsAsync(), Times.Once);
+
+        homeRepositoryMock.VerifyNoOtherCalls();
+        dateTimeProviderMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void GetDashboardDataAsync_WhenUserIdIsWhitespace_ThrowsArgumentNullException()
+    {
+        // Arrange
+        string userId = &quot; &quot;;
+
+        dateTimeProviderMock.SetupGet(dtp =&gt; dtp.Now).Returns(new DateTime(2026, 3, 31, 12, 0, 0));
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewCountAsync()).ReturnsAsync(0);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCastCountAsync()).ReturnsAsync(0);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetProductionsAsync()).ReturnsAsync(Array.Empty&lt;Production&gt;());
+
+        // Act + Assert
+        Assert.ThrowsAsync&lt;ArgumentNullException&gt;(() =&gt; homeService.GetDashboardDataAsync(userId));
+
+        dateTimeProviderMock.VerifyGet(dtp =&gt; dtp.Now, Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCastCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetProductionsAsync(), Times.Once);
+
+        homeRepositoryMock.VerifyNoOtherCalls();
+        dateTimeProviderMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void GetDashboardDataAsync_WhenUserIdIsInvalidGuid_ThrowsArgumentNullException()
+    {
+        // Arrange
+        string userId = &quot;not-a-guid&quot;;
+
+        dateTimeProviderMock.SetupGet(dtp =&gt; dtp.Now).Returns(new DateTime(2026, 3, 31, 12, 0, 0));
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewCountAsync()).ReturnsAsync(0);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCastCountAsync()).ReturnsAsync(0);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetProductionsAsync()).ReturnsAsync(Array.Empty&lt;Production&gt;());
+
+        // Act + Assert
+        Assert.ThrowsAsync&lt;ArgumentNullException&gt;(() =&gt; homeService.GetDashboardDataAsync(userId));
+
+        dateTimeProviderMock.VerifyGet(dtp =&gt; dtp.Now, Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCastCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetProductionsAsync(), Times.Once);
+
+        homeRepositoryMock.VerifyNoOtherCalls();
+        dateTimeProviderMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDashboardDataAsync_WhenRepositoryReturnsEmptyProductions_ReturnsDashboardWithZeroUpcomingAndEmptyProductions()
+    {
+        // Arrange
+        DateTime now = new DateTime(2026, 3, 31, 12, 0, 0);
+        Guid userGuid = Guid.NewGuid();
+        string userId = userGuid.ToString();
+
+        dateTimeProviderMock.SetupGet(dtp =&gt; dtp.Now).Returns(now);
+
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewCountAsync()).ReturnsAsync(5);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCastCountAsync()).ReturnsAsync(7);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetProductionsAsync()).ReturnsAsync(Array.Empty&lt;Production&gt;());
+        homeRepositoryMock.Setup(hr =&gt; hr.GetApplicationUserDataAsync(userGuid)).ReturnsAsync((ApplicationUser?)null);
+        homeRepositoryMock.Setup(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid)).ReturnsAsync(false);
+
+        // Act
+        DashboardDataDto result = await homeService.GetDashboardDataAsync(userId);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.CrewMembersCount, Is.EqualTo(5));
+        Assert.That(result.CastMembersCount, Is.EqualTo(7));
+        Assert.That(result.UpcomingScenesTotal, Is.Zero);
+        Assert.That(result.Productions, Is.Not.Null);
+        Assert.That(result.Productions.Count, Is.Zero);
+        Assert.That(result.IsUserCrew, Is.False);
+        Assert.That(result.HasOwnProductions, Is.False);
+
+        dateTimeProviderMock.VerifyGet(dtp =&gt; dtp.Now, Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCastCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetProductionsAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetApplicationUserDataAsync(userGuid), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid), Times.Once);
+
+        homeRepositoryMock.VerifyNoOtherCalls();
+        dateTimeProviderMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDashboardDataAsync_WhenProductionsContainUpcomingAndPastScenes_MapsAndCountsUpcomingScenesCorrectly()
+    {
+        // Arrange
+        DateTime now = new DateTime(2026, 3, 31, 12, 0, 0);
+        Guid userGuid = Guid.NewGuid();
+        string userId = userGuid.ToString();
+
+        dateTimeProviderMock.SetupGet(dtp =&gt; dtp.Now).Returns(now);
+
+        Production production1 = CreateProduction(
+            title: &quot;production1&quot;,
+            description: &quot;description&quot;,
+            scenes:
+            [
+                CreateSceneWithShootingDays(
+                    CreateShootingDay(now.AddDays(1)),
+                    CreateShootingDay(now.AddDays(-1))
+                ),
+                CreateSceneWithShootingDays(
+                    CreateShootingDay(now.AddHours(1))
+                )
+            ]);
+
+        Production production2 = CreateProduction(
+            title: &quot;production2&quot;,
+            description: null,
+            scenes:
+            [
+                CreateSceneWithShootingDays(
+                    CreateShootingDay(now),
+                    CreateShootingDay(now.AddMinutes(-5))
+                )
+            ]);
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = userGuid,
+            UserName = &quot;user&quot;
+        };
+
+        Crew crew = new Crew
+        {
+            Id = Guid.NewGuid(),
+            UserId = userGuid,
+            FirstName = &quot;Crew&quot;,
+            LastName = &quot;User&quot;,
+            ProfileImagePath = &quot;/img/profile/crew.webp&quot;,
+            IsActive = true,
+            IsDeleted = false,
+            User = user
+        };
+
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewCountAsync()).ReturnsAsync(10);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCastCountAsync()).ReturnsAsync(20);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetProductionsAsync()).ReturnsAsync([production1, production2]);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetApplicationUserDataAsync(userGuid)).ReturnsAsync(user);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewByUserIdAsync(userGuid)).ReturnsAsync(crew);
+        homeRepositoryMock.Setup(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid)).ReturnsAsync(true);
+
+        // Act
+        DashboardDataDto result = await homeService.GetDashboardDataAsync(userId);
+
+        // Assert
+        Assert.That(result.CrewMembersCount, Is.EqualTo(10));
+        Assert.That(result.CastMembersCount, Is.EqualTo(20));
+        Assert.That(result.IsUserCrew, Is.True);
+        Assert.That(result.HasOwnProductions, Is.True);
+
+        Assert.That(result.Productions, Has.Count.EqualTo(2));
+
+        ProductionDashboardDto dto1 = result.Productions.Single(pdd =&gt; pdd.Title == &quot;production1&quot;);
+        Assert.That(dto1.Description, Is.EqualTo(&quot;description&quot;));
+        Assert.That(dto1.StatusType, Is.EqualTo(production1.StatusType));
+        Assert.That(dto1.UpcomingScenesCount, Is.EqualTo(2));
+
+        ProductionDashboardDto dto2 = result.Productions.Single(pdd =&gt; pdd.Title == &quot;production2&quot;);
+        Assert.That(dto2.Description, Is.Null);
+        Assert.That(dto2.StatusType, Is.EqualTo(production2.StatusType));
+        Assert.That(dto2.UpcomingScenesCount, Is.Zero);
+
+        Assert.That(result.UpcomingScenesTotal, Is.EqualTo(2));
+
+        dateTimeProviderMock.VerifyGet(dtp =&gt; dtp.Now, Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCastCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetProductionsAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetApplicationUserDataAsync(userGuid), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewByUserIdAsync(userGuid), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid), Times.Once);
+
+        homeRepositoryMock.VerifyNoOtherCalls();
+        dateTimeProviderMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDashboardDataAsync_WhenMultipleProductionsHaveUpcomingScenes_SumsUpcomingScenesTotalCorrectly()
+    {
+        // Arrange
+        DateTime now = new DateTime(2026, 3, 31, 12, 0, 0);
+        Guid userGuid = Guid.NewGuid();
+        string userId = userGuid.ToString();
+
+        dateTimeProviderMock.SetupGet(dtp =&gt; dtp.Now).Returns(now);
+
+        Production production1 = CreateProduction(
+            title: &quot;production1&quot;,
+            description: &quot;description1&quot;,
+            scenes:
+            [
+                CreateSceneWithShootingDays(CreateShootingDay(now.AddDays(2)))
+            ]);
+
+        Production production2 = CreateProduction(
+            title: &quot;production2&quot;,
+            description: &quot;description2&quot;,
+            scenes:
+            [
+                CreateSceneWithShootingDays(CreateShootingDay(now.AddMinutes(1))),
+                CreateSceneWithShootingDays(
+                    CreateShootingDay(now.AddMinutes(2)),
+                    CreateShootingDay(now.AddMinutes(3))
+                )
+            ]);
+
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewCountAsync()).ReturnsAsync(1);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCastCountAsync()).ReturnsAsync(2);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetProductionsAsync()).ReturnsAsync([production1, production2]);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetApplicationUserDataAsync(userGuid)).ReturnsAsync((ApplicationUser?)null);
+        homeRepositoryMock.Setup(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid)).ReturnsAsync(false);
+
+        // Act
+        DashboardDataDto result = await homeService.GetDashboardDataAsync(userId);
+
+        // Assert
+        Assert.That(result.Productions.Single(pdd =&gt; pdd.Title == &quot;production1&quot;).UpcomingScenesCount, Is.EqualTo(1));
+        Assert.That(result.Productions.Single(pdd =&gt; pdd.Title == &quot;production2&quot;).UpcomingScenesCount, Is.EqualTo(3));
+        Assert.That(result.UpcomingScenesTotal, Is.EqualTo(4));
+        Assert.That(result.IsUserCrew, Is.False);
+        Assert.That(result.HasOwnProductions, Is.False);
+
+        dateTimeProviderMock.VerifyGet(dtp =&gt; dtp.Now, Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCastCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetProductionsAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetApplicationUserDataAsync(userGuid), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid), Times.Once);
+
+        homeRepositoryMock.VerifyNoOtherCalls();
+        dateTimeProviderMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDashboardDataAsync_WhenRepositoryReturnsCounts_ReturnsThoseCountsInDashboard()
+    {
+        // Arrange
+        DateTime now = new DateTime(2026, 3, 31, 12, 0, 0);
+        Guid userGuid = Guid.NewGuid();
+        string userId = userGuid.ToString();
+
+        dateTimeProviderMock.SetupGet(dtp =&gt; dtp.Now).Returns(now);
+
+        Production production = CreateProduction(
+            title: &quot;production&quot;,
+            description: &quot;desc&quot;,
+            scenes: [CreateSceneWithShootingDays(CreateShootingDay(now.AddDays(1)))]);
+
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewCountAsync()).ReturnsAsync(123);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCastCountAsync()).ReturnsAsync(456);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetProductionsAsync()).ReturnsAsync([production]);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetApplicationUserDataAsync(userGuid)).ReturnsAsync((ApplicationUser?)null);
+        homeRepositoryMock.Setup(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid)).ReturnsAsync(true);
+
+        // Act
+        DashboardDataDto result = await homeService.GetDashboardDataAsync(userId);
+
+        // Assert
+        Assert.That(result.CrewMembersCount, Is.EqualTo(123));
+        Assert.That(result.CastMembersCount, Is.EqualTo(456));
+        Assert.That(result.HasOwnProductions, Is.True);
+        Assert.That(result.IsUserCrew, Is.False);
+
+        dateTimeProviderMock.VerifyGet(dtp =&gt; dtp.Now, Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCastCountAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetProductionsAsync(), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetApplicationUserDataAsync(userGuid), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid), Times.Once);
+
+        homeRepositoryMock.VerifyNoOtherCalls();
+        dateTimeProviderMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDashboardDataAsync_WhenUserExistsButIsNotCrew_ReturnsIsUserCrewFalse()
+    {
+        // Arrange
+        DateTime now = new DateTime(2026, 3, 31, 12, 0, 0);
+        Guid userGuid = Guid.NewGuid();
+        string userId = userGuid.ToString();
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = userGuid,
+            UserName = &quot;user&quot;
+        };
+
+        dateTimeProviderMock.SetupGet(dtp =&gt; dtp.Now).Returns(now);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewCountAsync()).ReturnsAsync(1);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCastCountAsync()).ReturnsAsync(1);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetProductionsAsync()).ReturnsAsync(Array.Empty&lt;Production&gt;());
+        homeRepositoryMock.Setup(hr =&gt; hr.GetApplicationUserDataAsync(userGuid)).ReturnsAsync(user);
+        homeRepositoryMock.Setup(hr =&gt; hr.GetCrewByUserIdAsync(userGuid)).ReturnsAsync((Crew?)null);
+        homeRepositoryMock.Setup(hr =&gt; hr.IsUserOwnsProductionsAsync(userGuid)).ReturnsAsync(false);
+
+        // Act
+        DashboardDataDto result = await homeService.GetDashboardDataAsync(userId);
+
+        // Assert
+        Assert.That(result.IsUserCrew, Is.False);
+        Assert.That(result.HasOwnProductions, Is.False);
+
+        homeRepositoryMock.Verify(hr =&gt; hr.GetApplicationUserDataAsync(userGuid), Times.Once);
+        homeRepositoryMock.Verify(hr =&gt; hr.GetCrewByUserIdAsync(userGuid), Times.Once);
+    }
+
+    private static Production CreateProduction(string title, string? description, IEnumerable&lt;Scene&gt; scenes)
+    {
+        Production production = new Production
+        {
+            Id = Guid.NewGuid(),
+            Title = title,
+            Description = description,
+            StatusType = ProductionStatusType.Concept,
+            StatusStartDate = DateTime.UtcNow,
+            Scenes = scenes.ToList()
+        };
+
+        return production;
+    }
+
+    private static Scene CreateSceneWithShootingDays(params ShootingDay[] shootingDays)
+    {
+        Scene scene = new Scene
+        {
+            Id = Guid.NewGuid(),
+            SceneNumber = 1,
+            SceneType = SceneType.Interior,
+            SceneName = &quot;SceneName&quot;,
+            Location = &quot;Location&quot;,
+            ProductionId = Guid.NewGuid(),
+            Production = new Production
+            {
+                Id = Guid.NewGuid(),
+                Title = &quot;dummy-production&quot;,
+                StatusType = ProductionStatusType.Concept,
+                StatusStartDate = DateTime.UtcNow
+            }
+        };
+
+        int order = 1;
+        foreach (ShootingDay shootingDay in shootingDays)
+        {
+            scene.ShootingDayScenes.Add(new ShootingDayScene
+            {
+                Id = Guid.NewGuid(),
+                Order = order++,
+                ShootingDayId = shootingDay.Id,
+                ShootingDay = shootingDay,
+                SceneId = scene.Id,
+                Scene = scene
+            });
+        }
+
+        return scene;
+    }
+
+    private static ShootingDay CreateShootingDay(DateTime date)
+    {
+        ShootingDay newShootingDay = new ShootingDay
+        {
+            Id = Guid.NewGuid(),
+            Date = date,
+            Notes = null,
+            ProductionId = Guid.NewGuid(),
+            Production = new Production
+            {
+                Id = Guid.NewGuid(),
+                Title = &quot;dummy-production&quot;,
+                StatusType = ProductionStatusType.Concept,
+                StatusStartDate = DateTime.UtcNow
+            }
+        };
+
+        return newShootingDay;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,5,18,62,1],[19,5,19,66,1],[20,5,20,46,1],[24,5,24,6,1],[25,9,25,77,1],[26,9,26,81,1],[28,9,28,95,1],[29,5,29,6,1],[33,5,33,6,1],[35,9,35,31,1],[37,9,37,100,1],[38,9,38,80,1],[39,9,39,80,1],[40,9,40,106,1],[43,9,43,57,1],[43,57,43,99,1],[43,99,43,101,1],[45,9,45,68,1],[46,9,46,77,1],[47,9,47,77,1],[48,9,48,79,1],[50,9,50,49,1],[51,9,51,51,1],[52,5,52,6,1],[56,5,56,6,1],[58,9,58,29,1],[60,9,60,100,1],[61,9,61,80,1],[62,9,62,80,1],[63,9,63,106,1],[66,9,66,57,1],[66,57,66,98,1],[66,98,66,100,1],[68,9,68,68,1],[69,9,69,77,1],[70,9,70,77,1],[71,9,71,79,1],[73,9,73,49,1],[74,9,74,51,1],[75,5,75,6,1],[79,5,79,6,1],[81,9,81,38,1],[83,9,83,100,1],[84,9,84,80,1],[85,9,85,80,1],[86,9,86,106,1],[89,9,89,57,1],[89,57,89,98,1],[89,98,89,100,1],[91,9,91,68,1],[92,9,92,77,1],[93,9,93,77,1],[94,9,94,79,1],[96,9,96,49,1],[97,9,97,51,1],[98,5,98,6,1],[102,5,102,6,1],[104,9,104,60,1],[105,9,105,40,1],[106,9,106,45,1],[108,9,108,68,1],[110,9,110,80,1],[111,9,111,80,1],[112,9,112,106,1],[113,9,113,119,1],[114,9,114,101,1],[117,9,117,83,1],[120,9,120,42,1],[121,9,121,61,1],[122,9,122,61,1],[123,9,123,58,1],[124,9,124,54,1],[125,9,125,56,1],[126,9,126,50,1],[127,9,127,57,1],[129,9,129,68,1],[130,9,130,77,1],[131,9,131,77,1],[132,9,132,79,1],[133,9,133,95,1],[134,9,134,94,1],[136,9,136,49,1],[137,9,137,51,1],[138,5,138,6,1],[142,5,142,6,1],[144,9,144,60,1],[145,9,145,40,1],[146,9,146,45,1],[148,9,148,68,1],[150,9,162,16,1],[164,9,173,16,1],[175,9,179,11,1],[181,9,191,11,1],[193,9,193,81,1],[194,9,194,81,1],[195,9,195,107,1],[196,9,196,101,1],[197,9,197,94,1],[198,9,198,100,1],[201,9,201,83,1],[204,9,204,62,1],[205,9,205,62,1],[206,9,206,49,1],[207,9,207,56,1],[209,9,209,63,1],[211,9,211,72,1],[211,72,211,98,1],[211,98,211,100,1],[212,9,212,66,1],[213,9,213,74,1],[214,9,214,62,1],[216,9,216,72,1],[216,72,216,98,1],[216,98,216,100,1],[217,9,217,48,1],[218,9,218,74,1],[219,9,219,56,1],[221,9,221,64,1],[223,9,223,68,1],[224,9,224,77,1],[225,9,225,77,1],[226,9,226,79,1],[227,9,227,95,1],[228,9,228,88,1],[229,9,229,94,1],[231,9,231,49,1],[232,9,232,51,1],[233,5,233,6,1],[237,5,237,6,1],[239,9,239,60,1],[240,9,240,40,1],[241,9,241,45,1],[243,9,243,68,1],[245,9,251,16,1],[253,9,263,16,1],[265,9,265,80,1],[266,9,266,80,1],[267,9,267,107,1],[268,9,268,119,1],[269,9,269,101,1],[272,9,272,83,1],[275,9,275,54,1],[275,54,275,80,1],[275,80,275,118,1],[276,9,276,54,1],[276,54,276,80,1],[276,80,276,118,1],[277,9,277,64,1],[278,9,278,50,1],[279,9,279,57,1],[281,9,281,68,1],[282,9,282,77,1],[283,9,283,77,1],[284,9,284,79,1],[285,9,285,95,1],[286,9,286,94,1],[288,9,288,49,1],[289,9,289,51,1],[290,5,290,6,1],[294,5,294,6,1],[296,9,296,60,1],[297,9,297,40,1],[298,9,298,45,1],[300,9,300,68,1],[302,9,305,87,1],[307,9,307,82,1],[308,9,308,82,1],[309,9,309,93,1],[310,9,310,119,1],[311,9,311,100,1],[314,9,314,83,1],[317,9,317,63,1],[318,9,318,63,1],[319,9,319,56,1],[320,9,320,50,1],[322,9,322,68,1],[323,9,323,77,1],[324,9,324,77,1],[325,9,325,79,1],[326,9,326,95,1],[327,9,327,94,1],[329,9,329,49,1],[330,9,330,51,1],[331,5,331,6,1],[335,5,335,6,1],[337,9,337,60,1],[338,9,338,40,1],[339,9,339,45,1],[341,9,345,11,1],[347,9,347,68,1],[348,9,348,80,1],[349,9,349,80,1],[350,9,350,106,1],[351,9,351,101,1],[352,9,352,101,1],[353,9,353,101,1],[356,9,356,83,1],[359,9,359,50,1],[360,9,360,57,1],[362,9,362,95,1],[363,9,363,88,1],[364,5,364,6,1],[367,5,367,6,1],[368,9,376,11,1],[378,9,378,27,1],[379,5,379,6,1],[382,5,382,6,1],[383,9,398,11,1],[400,9,400,23,1],[401,9,401,16,1],[401,18,401,41,1],[401,42,401,44,1],[401,45,401,57,1],[402,9,402,10,1],[403,13,411,16,1],[412,9,412,10,1],[414,9,414,22,1],[415,5,415,6,1],[418,5,418,6,1],[419,9,432,11,1],[434,9,434,31,1],[435,5,435,6,1]]);
+    </script>
+  </body>
+</html>

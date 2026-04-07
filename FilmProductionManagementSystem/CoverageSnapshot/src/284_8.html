@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/Profile/DeleteProfileInputModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.Profile;
+
+using System.ComponentModel.DataAnnotations;
+
+public class DeleteProfileInputModel
+{
+    [Required]
+    public string Password { get; set; } = null!;
+    
+    [Required]
+    public bool IsConfirmed { get; set; }
+    
+    // Read-only properties
+    public string FirstName { get; set; } = null!;
+    
+    public string LastName { get; set; } = null!;
+    
+    public string ProfileImagePath { get; set; } = null!;
+    
+    public string UserName { get; set; } = null!;
+    
+    public string Email { get; set; } = null!;
+    
+    public string PhoneNumber { get; set; } = null!;
+
+    public int ProductionsCount { get; set; }
+    
+    public int ScenesCount { get; set; }
+    
+    public int? SkillsCount { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,44,8,49,0],[14,45,14,50,0],[16,44,16,49,0],[18,52,18,57,0],[20,44,20,49,0],[22,41,22,46,0],[24,47,24,52,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/ShootingDay.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+
+using static GCommon.EntityConstants.ShootingDay;
+using static GCommon.DataFormat;
+
+/// &lt;summary&gt;
+/// Това entity ще се изпозлва за по-нататък, когато се започне изграждането на план-график възможност в апликацията
+/// &lt;/summary&gt;
+public class ShootingDay
+{
+    [Key]
+    public Guid Id { get; set; }
+
+    [Column(TypeName = DateTimeTypeFormat)]
+    public DateTime Date { get; set; }
+
+    [Unicode]
+    [MaxLength(NotesMaxLength)]
+    public string? Notes { get; set; }
+    
+    [ForeignKey(nameof(Production))]
+    public Guid ProductionId { get; set; }
+
+    public virtual Production Production { get; set; } = null!;
+
+    public virtual ICollection&lt;ShootingDayScene&gt; ShootingDayScenes { get; set; }
+        = new HashSet&lt;ShootingDayScene&gt;();
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[29,58,29,63,1],[32,11,32,42,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/LoginRegister/RegisterCrewStepTwo.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model CrewRegistrationStepTwoInputModel
+
+@{
+    ViewData[TitleDataKey] = &quot;Join as Filmmaker&quot;;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/registration.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;section class=&quot;home-hero&quot; xmlns=&quot;http://www.w3.org/1999/html&quot;&gt;
+    &lt;div class=&quot;registration-container&quot;&gt;
+        &lt;div class=&quot;registration-card skills-selection&quot;&gt;
+            &lt;!-- Header --&gt;
+            &lt;div class=&quot;registration-header&quot;&gt;
+                &lt;h2 class=&quot;text-center&quot;&gt;&#127919; Select Your &lt;span class=&quot;text-wrap-red&quot;&gt;Skills&lt;/span&gt;&lt;/h2&gt;
+                &lt;p class=&quot;text-center text-muted&quot;&gt;Choose all the roles you&#39;re capable of&lt;/p&gt;
+
+                &lt;!-- Progress Steps --&gt;
+                &lt;div class=&quot;progress-steps&quot;&gt;
+                    &lt;div class=&quot;step completed&quot;&gt;
+                        &lt;div class=&quot;step-circle&quot;&gt;✓&lt;/div&gt;
+                        &lt;div class=&quot;step-label&quot;&gt;Basic Info&lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;step-connector active&quot;&gt;&lt;/div&gt;
+                    &lt;div class=&quot;step active&quot;&gt;
+                        &lt;div class=&quot;step-circle&quot;&gt;2&lt;/div&gt;
+                        &lt;div class=&quot;step-label&quot;&gt;Skills&lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Selected Skills Count --&gt;
+            &lt;div class=&quot;selected-count mb-3&quot;&gt;
+                &lt;span id=&quot;selectedCount&quot;&gt;0&lt;/span&gt; skills selected
+            &lt;/div&gt;
+
+            &lt;!-- Form --&gt;
+            &lt;form asp-area=&quot;&quot; asp-controller=&quot;LoginRegister&quot; asp-action=&quot;RegisterCrewStepTwo&quot; method=&quot;post&quot; id=&quot;skillsForm&quot;&gt;
+                &lt;input type=&quot;hidden&quot; name=&quot;SelectedSkills&quot; id=&quot;hiddenSelectedSkills&quot; /&gt;
+
+                &lt;!-- Accordion --&gt;
+                &lt;div class=&quot;accordion&quot; id=&quot;departmentsAccordion&quot;&gt;
+                    @{
+                        int index = 0;
+                        foreach (KeyValuePair&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; department in Model.SkillsByDepartment)
+                        {
+                            string departmentId = $&quot;department{index}&quot;;
+                            bool isFirstDepartment = index == 0;
+
+                            &lt;div class=&quot;accordion-item&quot;&gt;
+                                &lt;h2 class=&quot;accordion-header&quot;&gt;
+                                    &lt;button class=&quot;accordion-button @(isFirstDepartment ? string.Empty : &quot;collapsed&quot;)&quot;
+                                            type=&quot;button&quot;
+                                            data-bs-toggle=&quot;collapse&quot;
+                                            data-bs-target=&quot;#@departmentId&quot;
+                                            aria-expanded=&quot;@(isFirstDepartment ? &quot;true&quot; : &quot;false&quot;)&quot;&gt;
+                                        &lt;span class=&quot;department-name&quot;&gt;@department.Key&lt;/span&gt;
+                                        &lt;span class=&quot;department-count&quot; id=&quot;count-@departmentId&quot;&gt;0&lt;/span&gt;
+                                    &lt;/button&gt;
+                                &lt;/h2&gt;
+                                &lt;div id=&quot;@departmentId&quot;
+                                     class=&quot;accordion-collapse collapse @(isFirstDepartment ? &quot;show&quot; : string.Empty)&quot;
+                                     data-bs-parent=&quot;#departmentsAccordion&quot;&gt;
+                                    &lt;div class=&quot;accordion-body&quot;&gt;
+                                        &lt;div class=&quot;skills-grid&quot;&gt;
+                                            @foreach (CrewRoleType skill in department.Value)
+                                            {
+                                                string skillName = GetDisplayName(skill);
+                                                string skillValue = ((int)skill).ToString();
+
+                                                &lt;button type=&quot;button&quot;
+                                                        class=&quot;skill-bubble&quot;
+                                                        data-skill=&quot;@skillValue&quot;
+                                                        data-department=&quot;@departmentId&quot;&gt;
+                                                    @skillName
+                                                &lt;/button&gt;
+                                            }
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+
+                            index++;
+                        }
+                    }
+                &lt;/div&gt;
+
+                &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;text-danger mt-3&quot;&gt;&lt;/div&gt;
+
+                &lt;!-- Actions --&gt;
+                &lt;div class=&quot;d-flex justify-content-between mt-4&quot;&gt;
+                    &lt;a asp-area=&quot;&quot; asp-controller=&quot;LoginRegister&quot; asp-action=&quot;RegisterCrewStepOne&quot; class=&quot;btn btn-outline-secondary&quot;&gt;
+                        ← Back
+                    &lt;/a&gt;
+                    &lt;button type=&quot;submit&quot; class=&quot;btn btn-wrap-primary&quot; id=&quot;submitBtn&quot;&gt;
+                        Complete Registration
+                    &lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/section&gt;
+
+@section Scripts {
+    &lt;script src=&quot;~/js/registration/registration-crew-step-two.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,50,0]]);
+    </script>
+  </body>
+</html>

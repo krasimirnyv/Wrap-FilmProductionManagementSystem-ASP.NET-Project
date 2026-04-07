@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/SceneCrewConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models.MappingEntities;
+using GCommon.Enums;
+
+using static Common.EntityIdentificationConstants;
+
+public class SceneCrewConfiguration : IEntityTypeConfiguration&lt;SceneCrew&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;SceneCrew&gt; entity)
+    {
+        entity.HasKey(sc =&gt; new { sc.SceneId, sc.CrewMemberId });
+
+        entity
+            .HasOne(sc =&gt; sc.Scene)
+            .WithMany(s =&gt; s.SceneCrewMembers)
+            .HasForeignKey(sc =&gt; sc.SceneId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity
+            .HasOne(sc =&gt; sc.CrewMember)
+            .WithMany(c =&gt; c.CrewMemberScenes)
+            .HasForeignKey(sc =&gt; sc.CrewMemberId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasQueryFilter(sc =&gt; !sc.CrewMember.IsDeleted);
+        
+        entity.HasData(SceneCrewSeed);
+    }
+    
+    private static readonly SceneCrew[] SceneCrewSeed =
+    [
+        // Test Film – Scene 01
+        new() { SceneId = SceneId_TestFilm_01, CrewMemberId = CrewId1, RoleType = CrewRoleType.Director },
+        new() { SceneId = SceneId_TestFilm_01, CrewMemberId = CrewId2, RoleType = CrewRoleType.DirectorOfPhotography },
+        new() { SceneId = SceneId_TestFilm_01, CrewMemberId = CrewId3, RoleType = CrewRoleType.ProductionSoundMixer },
+
+        // Test Film – Scene 02
+        new() { SceneId = SceneId_TestFilm_02, CrewMemberId = CrewId1, RoleType = CrewRoleType.Director },
+        new() { SceneId = SceneId_TestFilm_02, CrewMemberId = CrewId2, RoleType = CrewRoleType.CameraOperator },
+
+        // Test Film – Scene 03
+        new() { SceneId = SceneId_TestFilm_03, CrewMemberId = CrewId2, RoleType = CrewRoleType.FirstAssistantCamera },
+        new() { SceneId = SceneId_TestFilm_03, CrewMemberId = CrewId3, RoleType = CrewRoleType.BoomOperator },
+
+        // Midnight Dreams – Scene 01
+        new() { SceneId = SceneId_MidnightDreams_01, CrewMemberId = CrewId1, RoleType = CrewRoleType.Director },
+        new() { SceneId = SceneId_MidnightDreams_01, CrewMemberId = CrewId2, RoleType = CrewRoleType.DirectorOfPhotography },
+
+        // Midnight Dreams – Scene 02
+        new() { SceneId = SceneId_MidnightDreams_02, CrewMemberId = CrewId2, RoleType = CrewRoleType.Gaffer },
+        new() { SceneId = SceneId_MidnightDreams_02, CrewMemberId = CrewId3, RoleType = CrewRoleType.SoundRecordist },
+
+        // Paper Planes – Scene 01
+        new() { SceneId = SceneId_PaperPlanes_01, CrewMemberId = CrewId1, RoleType = CrewRoleType.Producer },
+        new() { SceneId = SceneId_PaperPlanes_01, CrewMemberId = CrewId2, RoleType = CrewRoleType.DirectorOfPhotography },
+
+        // Paper Planes – Scene 02
+        new() { SceneId = SceneId_PaperPlanes_02, CrewMemberId = CrewId1, RoleType = CrewRoleType.FirstAssistantDirector },
+        new() { SceneId = SceneId_PaperPlanes_02, CrewMemberId = CrewId3, RoleType = CrewRoleType.ProductionSoundMixer },
+
+        // The Last Take – Scene 01
+        new() { SceneId = SceneId_TheLastTake_01, CrewMemberId = CrewId2, RoleType = CrewRoleType.CameraOperator },
+        new() { SceneId = SceneId_TheLastTake_01, CrewMemberId = CrewId3, RoleType = CrewRoleType.BoomOperator },
+
+        // The Last Take – Scene 02
+        new() { SceneId = SceneId_TheLastTake_02, CrewMemberId = CrewId1, RoleType = CrewRoleType.Director },
+        new() { SceneId = SceneId_TheLastTake_02, CrewMemberId = CrewId2, RoleType = CrewRoleType.DirectorOfPhotography },
+
+        // The Last Take – Scene 03
+        new() { SceneId = SceneId_TheLastTake_03, CrewMemberId = CrewId1, RoleType = CrewRoleType.Producer },
+        new() { SceneId = SceneId_TheLastTake_03, CrewMemberId = CrewId3, RoleType = CrewRoleType.SoundDesigner },
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,6,0],[15,9,15,66,0],[17,9,21,47,0],[23,9,27,47,0],[29,9,29,63,0],[31,9,31,39,0],[32,5,32,6,0],[34,5,76,7,0]]);
+    </script>
+  </body>
+</html>

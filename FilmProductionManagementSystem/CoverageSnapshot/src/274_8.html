@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/Production/DetailsProductionViewModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.Production;
+
+using NestedViewModels;
+
+using static GCommon.ApplicationConstants;
+
+public class DetailsProductionViewModel
+{
+    public string Id { get; set; } = null!;
+    
+    public string Thumbnail { get; set; } = null!;
+    
+    public string Title { get; set; } = null!;
+    
+    public string? Description { get; set; }
+
+    public string Budget { get; set; } = null!;
+
+    public string StatusType { get; set; } = null!;
+    
+    public string StatusAbstractClass { get; set; } = DefaultStatus;
+
+    public string StatusStartDate { get; set; } = null!;
+
+    public string? StatusEndDate { get; set; }
+    
+    public string? ScriptId { get; set; }
+    
+    public IReadOnlyCollection&lt;ProductionCrewMemberViewModel&gt; ProductionCrewMembers { get; set; }
+        = new List&lt;ProductionCrewMemberViewModel&gt;();
+
+    public IReadOnlyCollection&lt;ProductionCastMemberViewModel&gt; ProductionCastMembers { get; set; }
+        = new List&lt;ProductionCastMemberViewModel&gt;();
+
+    public IReadOnlyCollection&lt;ProductionSceneViewModel&gt; ProductionScenes { get; set; }
+        = new List&lt;ProductionSceneViewModel&gt;();
+    
+    public IReadOnlyCollection&lt;ProductionAssetViewModel&gt; ProductionAssets { get; set; }
+        = new List&lt;ProductionAssetViewModel&gt;();
+    
+    public IReadOnlyCollection&lt;ProductionShootingDayViewModel&gt; ProductionShootingDays { get; set; }
+        = new List&lt;ProductionShootingDayViewModel&gt;();
+    
+    public bool CanManage { get; set; } = false;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[9,38,9,43,0],[11,45,11,50,0],[13,41,13,46,0],[17,42,17,47,0],[19,46,19,51,0],[21,55,21,68,0],[23,51,23,56,0],[30,11,30,52,0],[33,11,33,52,0],[36,11,36,47,0],[39,11,39,47,0],[42,11,42,53,0],[44,43,44,48,0]]);
+    </script>
+  </body>
+</html>

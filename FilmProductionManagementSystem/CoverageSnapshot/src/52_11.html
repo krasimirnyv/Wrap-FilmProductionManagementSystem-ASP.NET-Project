@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Repository/LoginRegisterRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Repository;
+
+using Interfaces;
+using Models;
+using GCommon.Enums;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+
+public class LoginRegisterRepository(FilmProductionDbContext dbContext) 
+    : BaseRepository(dbContext), ILoginRegisterRepository
+{
+    public async Task&lt;bool&gt; CrewExistsByUserIdAsync(Guid userId)
+    { 
+        return await Context!
+            .CrewMembers
+            .AnyAsync(c =&gt; c.UserId == userId);
+    }
+
+    public async Task&lt;bool&gt; CastExistsByUserIdAsync(Guid userId)
+    {
+        return await Context!
+            .CastMembers
+            .AnyAsync(c =&gt; c.UserId == userId);
+    }
+
+    public async Task CreateCrewAsync(Crew crew)
+    {
+        await Context!.CrewMembers.AddAsync(crew);
+    }
+
+    public async Task CreateCastAsync(Cast cast)
+    {
+        await Context!.CastMembers.AddAsync(cast);
+    }
+
+    public async Task AddCrewSkillsAsync(Guid crewId, IReadOnlyCollection&lt;int&gt; skills)
+    {
+        foreach (int skillNumber in skills)
+        {
+            CrewRoleType skill = (CrewRoleType)skillNumber;
+
+            CrewSkill newSkill = new CrewSkill
+            {
+                Id = Guid.NewGuid(),
+                CrewMemberId = crewId,
+                RoleType = skill
+            };
+            
+            await Context!.CrewSkills.AddAsync(newSkill);
+        }
+    }
+    
+    public async Task&lt;IDbContextTransaction&gt; BeginTransactionAsync()
+    {
+        return await Context!.Database.BeginTransactionAsync();
+    }
+    
+    public async Task CommitTransactionAsync(IDbContextTransaction transaction)
+    { 
+        await transaction.CommitAsync();
+    }
+
+    public async Task RollbackTransactionAsync(IDbContextTransaction transaction)
+    {
+        await transaction.RollbackAsync();
+    }
+
+    public async Task&lt;int&gt; SaveAllChangesAsync()
+    { 
+        int affectedRows = await SaveChangesAsync();
+        return affectedRows;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,7,11,32,0],[14,5,14,6,0],[15,9,17,48,0],[18,5,18,6,0],[21,5,21,6,0],[22,9,24,48,0],[25,5,25,6,0],[28,5,28,6,0],[29,9,29,51,0],[30,5,30,6,0],[33,5,33,6,0],[34,9,34,51,0],[35,5,35,6,0],[38,5,38,6,0],[39,9,39,16,0],[39,18,39,33,0],[39,34,39,36,0],[39,37,39,43,0],[40,9,40,10,0],[41,13,41,60,0],[43,13,48,15,0],[50,13,50,58,0],[51,9,51,10,0],[52,5,52,6,0],[55,5,55,6,0],[56,9,56,64,0],[57,5,57,6,0],[60,5,60,6,0],[61,9,61,41,0],[62,5,62,6,0],[65,5,65,6,0],[66,9,66,43,0],[67,5,67,6,0],[70,5,70,6,0],[71,9,71,53,0],[72,9,72,29,0],[73,5,73,6,0]]);
+    </script>
+  </body>
+</html>

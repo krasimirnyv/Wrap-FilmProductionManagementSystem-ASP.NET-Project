@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/ScriptBlock.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+
+using GCommon.Enums;
+
+using static GCommon.DataFormat;
+
+/// &lt;summary&gt;
+/// Това Entity представлява единичен блок от сценария (име на сцена, дейсвие, диалог, транзишън и тн.)
+/// Съхранява структурираното съдържание на сценария за правилно запазване и манипулиране
+/// &lt;/summary&gt;
+public class ScriptBlock
+{
+    [Key]
+    public Guid Id { get; set; }
+    
+    public int OrderIndex { get; set; }
+    
+    [Required]
+    public ScriptBlockType BlockType { get; set; }
+    
+    [Unicode]
+    [Column(TypeName = TextTypeFormat)]
+    public string? Content { get; set; }
+
+    /// &lt;summary&gt;
+    /// Незадължителни метаданни (име на герой за автоматично довършване, номера на сцени и др.)
+    /// Съхранява се като JSON string
+    /// &lt;/summary&gt;
+    [Unicode]
+    [Column(TypeName = TextTypeFormat)]
+    public string? Metadata { get; set; }
+
+    [Required]
+    [Column(TypeName = DateTimeTypeFormat)]
+    public DateTime CreatedAt { get; set; }
+
+    [Required]
+    [Column(TypeName = DateTimeTypeFormat)]
+    public DateTime LastModifiedAt { get; set; }
+    
+    [Required]
+    [ForeignKey(nameof(Script))]
+    public Guid ScriptId { get; set; }
+
+    public virtual Script Script { get; set; } = null!;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[50,50,50,55,0]]);
+    </script>
+  </body>
+</html>

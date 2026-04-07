@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/LoginAndRegistration/CastRegistrationInputModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.LoginAndRegistration;
+
+using System.ComponentModel.DataAnnotations;
+
+using Microsoft.AspNetCore.Http;
+
+using GCommon.Enums;
+using static GCommon.EntityConstants.Cast;
+
+/// &lt;summary&gt;
+/// Step 1: Complete Registration for Cast (Actor)
+/// All required fields in one step
+/// &lt;/summary&gt;
+public class CastRegistrationInputModel
+{
+    [Required]
+    public string UserName { get; set; } = null!;
+
+    [Required]
+    public string Email { get; set; } = null!;
+
+    [Required]
+    public string PhoneNumber { get; set; } = null!;
+
+    [Required]
+    public string Password { get; set; } = null!;
+    
+    [Required]
+    [StringLength(FirstNameMaxLength, MinimumLength = FirstNameMinLength)]
+    public string FirstName { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(LastNameMaxLength, MinimumLength = LastNameMinLength)]
+    public string LastName { get; set; } = string.Empty;
+
+    [StringLength(NicknameMaxLength)]
+    public string? Nickname { get; set; }
+
+    [Required]
+    public DateTime BirthDate { get; set; }
+
+    [Required]
+    public GenderType Gender { get; set; }
+
+    [Required]
+    public IFormFile ProfilePicture { get; set; } = null!;
+    
+    [StringLength(BiographyMaxLength)]
+    [DataType(DataType.MultilineText)]
+    public string? Biography { get; set; }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,44,17,49,0],[20,41,20,46,0],[23,47,23,52,0],[26,44,26,49,0],[30,45,30,57,0],[34,44,34,56,0],[46,53,46,58,0]]);
+    </script>
+  </body>
+</html>

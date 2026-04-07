@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.Infrastructure/Extensions/DataServiceCollectionExtensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using Wrap.Data.Seeding;
+
+namespace Wrap.Web.Infrastructure.Extensions;
+
+using Microsoft.Extensions.DependencyInjection;
+
+using Data.Repository;
+
+public static class DataServiceCollectionExtensions
+{
+    public static IServiceCollection AddDataRepositories(this IServiceCollection services)
+    {
+        IServiceCollection repositories = services
+            .RegisterByConvention(
+                typeof(LoginRegisterRepository).Assembly, 
+                interfaceFilter: type =&gt; type is { IsInterface: true } &amp;&amp; (type.Name.StartsWith(&quot;I&quot;) &amp;&amp; type.Name.EndsWith(&quot;Repository&quot;)), 
+                lifetime: ServiceLifetime.Scoped);
+
+        return repositories;
+    }
+
+    public static IServiceCollection AddApplicationRoleSeeding(this IServiceCollection services)
+    {
+        IServiceCollection identitySeeder = services
+            .RegisterByConvention(
+                typeof(ApplicationRoleSeeder).Assembly,
+                interfaceFilter: type =&gt;
+                    type is { IsInterface: true } &amp;&amp; (type.Name.StartsWith(&quot;I&quot;) &amp;&amp; type.Name.EndsWith(&quot;Seeder&quot;)),
+                lifetime: ServiceLifetime.Transient);
+        
+        return identitySeeder;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[12,5,12,6,1],[13,9,16,42,1],[16,42,16,138,1],[16,138,17,51,1],[19,9,19,29,1],[20,5,20,6,1],[23,5,23,6,1],[24,9,28,21,1],[28,21,28,113,1],[28,113,29,54,1],[31,9,31,31,1],[32,5,32,6,1]]);
+    </script>
+  </body>
+</html>

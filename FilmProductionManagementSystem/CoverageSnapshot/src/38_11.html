@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Migrations/20260331120759_InitialMigrationWithDataSeeding.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace Wrap.Data.Migrations
+{
+    /// &lt;inheritdoc /&gt;
+    public partial class InitialMigrationWithDataSeeding : Migration
+    {
+        /// &lt;inheritdoc /&gt;
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: &quot;AspNetRoles&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    Role = table.Column&lt;string&gt;(type: &quot;nvarchar(27)&quot;, maxLength: 27, nullable: true),
+                    Name = table.Column&lt;string&gt;(type: &quot;nvarchar(256)&quot;, maxLength: 256, nullable: true),
+                    NormalizedName = table.Column&lt;string&gt;(type: &quot;nvarchar(256)&quot;, maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_AspNetRoles&quot;, x =&gt; x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;AspNetUsers&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    UserName = table.Column&lt;string&gt;(type: &quot;nvarchar(256)&quot;, maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column&lt;string&gt;(type: &quot;nvarchar(256)&quot;, maxLength: 256, nullable: true),
+                    Email = table.Column&lt;string&gt;(type: &quot;nvarchar(256)&quot;, maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column&lt;string&gt;(type: &quot;nvarchar(256)&quot;, maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column&lt;bool&gt;(type: &quot;bit&quot;, nullable: false),
+                    PasswordHash = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true),
+                    SecurityStamp = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true),
+                    ConcurrencyStamp = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true),
+                    PhoneNumber = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true),
+                    PhoneNumberConfirmed = table.Column&lt;bool&gt;(type: &quot;bit&quot;, nullable: false),
+                    TwoFactorEnabled = table.Column&lt;bool&gt;(type: &quot;bit&quot;, nullable: false),
+                    LockoutEnd = table.Column&lt;DateTimeOffset&gt;(type: &quot;datetimeoffset&quot;, nullable: true),
+                    LockoutEnabled = table.Column&lt;bool&gt;(type: &quot;bit&quot;, nullable: false),
+                    AccessFailedCount = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_AspNetUsers&quot;, x =&gt; x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;Productions&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    Title = table.Column&lt;string&gt;(type: &quot;nvarchar(200)&quot;, maxLength: 200, nullable: false),
+                    Description = table.Column&lt;string&gt;(type: &quot;nvarchar(2000)&quot;, maxLength: 2000, nullable: true),
+                    Budget = table.Column&lt;decimal&gt;(type: &quot;DECIMAL(18,2)&quot;, nullable: false),
+                    Thumbnail = table.Column&lt;string&gt;(type: &quot;nvarchar(500)&quot;, maxLength: 500, nullable: true),
+                    StatusType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    StatusStartDate = table.Column&lt;DateTime&gt;(type: &quot;DATETIME2&quot;, nullable: false),
+                    StatusEndDate = table.Column&lt;DateTime&gt;(type: &quot;DATETIME2&quot;, nullable: true)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_Productions&quot;, x =&gt; x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;AspNetRoleClaims&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false)
+                        .Annotation(&quot;SqlServer:Identity&quot;, &quot;1, 1&quot;),
+                    RoleId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    ClaimType = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true),
+                    ClaimValue = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_AspNetRoleClaims&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_AspNetRoleClaims_AspNetRoles_RoleId&quot;,
+                        column: x =&gt; x.RoleId,
+                        principalTable: &quot;AspNetRoles&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;AspNetUserClaims&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false)
+                        .Annotation(&quot;SqlServer:Identity&quot;, &quot;1, 1&quot;),
+                    UserId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    ClaimType = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true),
+                    ClaimValue = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_AspNetUserClaims&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_AspNetUserClaims_AspNetUsers_UserId&quot;,
+                        column: x =&gt; x.UserId,
+                        principalTable: &quot;AspNetUsers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;AspNetUserLogins&quot;,
+                columns: table =&gt; new
+                {
+                    LoginProvider = table.Column&lt;string&gt;(type: &quot;nvarchar(128)&quot;, maxLength: 128, nullable: false),
+                    ProviderKey = table.Column&lt;string&gt;(type: &quot;nvarchar(128)&quot;, maxLength: 128, nullable: false),
+                    ProviderDisplayName = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true),
+                    UserId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_AspNetUserLogins&quot;, x =&gt; new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: &quot;FK_AspNetUserLogins_AspNetUsers_UserId&quot;,
+                        column: x =&gt; x.UserId,
+                        principalTable: &quot;AspNetUsers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;AspNetUserRoles&quot;,
+                columns: table =&gt; new
+                {
+                    UserId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    RoleId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_AspNetUserRoles&quot;, x =&gt; new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: &quot;FK_AspNetUserRoles_AspNetRoles_RoleId&quot;,
+                        column: x =&gt; x.RoleId,
+                        principalTable: &quot;AspNetRoles&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: &quot;FK_AspNetUserRoles_AspNetUsers_UserId&quot;,
+                        column: x =&gt; x.UserId,
+                        principalTable: &quot;AspNetUsers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;AspNetUserTokens&quot;,
+                columns: table =&gt; new
+                {
+                    UserId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    LoginProvider = table.Column&lt;string&gt;(type: &quot;nvarchar(128)&quot;, maxLength: 128, nullable: false),
+                    Name = table.Column&lt;string&gt;(type: &quot;nvarchar(128)&quot;, maxLength: 128, nullable: false),
+                    Value = table.Column&lt;string&gt;(type: &quot;nvarchar(max)&quot;, nullable: true)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_AspNetUserTokens&quot;, x =&gt; new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: &quot;FK_AspNetUserTokens_AspNetUsers_UserId&quot;,
+                        column: x =&gt; x.UserId,
+                        principalTable: &quot;AspNetUsers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;CastMembers&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    ProfileImagePath = table.Column&lt;string&gt;(type: &quot;nvarchar(500)&quot;, maxLength: 500, nullable: true),
+                    FirstName = table.Column&lt;string&gt;(type: &quot;nvarchar(150)&quot;, maxLength: 150, nullable: false),
+                    LastName = table.Column&lt;string&gt;(type: &quot;nvarchar(150)&quot;, maxLength: 150, nullable: false),
+                    Nickname = table.Column&lt;string&gt;(type: &quot;nvarchar(100)&quot;, maxLength: 100, nullable: true),
+                    BirthDate = table.Column&lt;DateTime&gt;(type: &quot;DATETIME2&quot;, nullable: false),
+                    Gender = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    Biography = table.Column&lt;string&gt;(type: &quot;nvarchar(4000)&quot;, maxLength: 4000, nullable: true),
+                    IsActive = table.Column&lt;bool&gt;(type: &quot;bit&quot;, nullable: false),
+                    IsDeleted = table.Column&lt;bool&gt;(type: &quot;bit&quot;, nullable: false),
+                    UserId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_CastMembers&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_CastMembers_AspNetUsers_UserId&quot;,
+                        column: x =&gt; x.UserId,
+                        principalTable: &quot;AspNetUsers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;CrewMembers&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    ProfileImagePath = table.Column&lt;string&gt;(type: &quot;nvarchar(500)&quot;, maxLength: 500, nullable: true),
+                    FirstName = table.Column&lt;string&gt;(type: &quot;nvarchar(150)&quot;, maxLength: 150, nullable: false),
+                    LastName = table.Column&lt;string&gt;(type: &quot;nvarchar(150)&quot;, maxLength: 150, nullable: false),
+                    Nickname = table.Column&lt;string&gt;(type: &quot;nvarchar(100)&quot;, maxLength: 100, nullable: true),
+                    Biography = table.Column&lt;string&gt;(type: &quot;nvarchar(4000)&quot;, maxLength: 4000, nullable: true),
+                    IsActive = table.Column&lt;bool&gt;(type: &quot;bit&quot;, nullable: false),
+                    IsDeleted = table.Column&lt;bool&gt;(type: &quot;bit&quot;, nullable: false),
+                    UserId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_CrewMembers&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_CrewMembers_AspNetUsers_UserId&quot;,
+                        column: x =&gt; x.UserId,
+                        principalTable: &quot;AspNetUsers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;ProductionsAssets&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    AssetType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    Title = table.Column&lt;string&gt;(type: &quot;nvarchar(200)&quot;, maxLength: 200, nullable: false),
+                    Description = table.Column&lt;string&gt;(type: &quot;nvarchar(500)&quot;, maxLength: 500, nullable: true),
+                    FilePath = table.Column&lt;string&gt;(type: &quot;nvarchar(500)&quot;, maxLength: 500, nullable: false),
+                    UploadedAt = table.Column&lt;DateTime&gt;(type: &quot;DATETIME2&quot;, nullable: false),
+                    ProductionId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_ProductionsAssets&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_ProductionsAssets_Productions_ProductionId&quot;,
+                        column: x =&gt; x.ProductionId,
+                        principalTable: &quot;Productions&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;Scenes&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    SceneNumber = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    SceneType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    SceneName = table.Column&lt;string&gt;(type: &quot;nvarchar(200)&quot;, maxLength: 200, nullable: false),
+                    Location = table.Column&lt;string&gt;(type: &quot;nvarchar(300)&quot;, maxLength: 300, nullable: false),
+                    Description = table.Column&lt;string&gt;(type: &quot;nvarchar(2000)&quot;, maxLength: 2000, nullable: true),
+                    ProductionId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_Scenes&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_Scenes_Productions_ProductionId&quot;,
+                        column: x =&gt; x.ProductionId,
+                        principalTable: &quot;Productions&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;Scripts&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    Title = table.Column&lt;string&gt;(type: &quot;nvarchar(200)&quot;, maxLength: 200, nullable: false),
+                    LastEditedAt = table.Column&lt;DateTime&gt;(type: &quot;DATETIME2&quot;, nullable: false),
+                    StageType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    RevisionType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: true),
+                    ProductionId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_Scripts&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_Scripts_Productions_ProductionId&quot;,
+                        column: x =&gt; x.ProductionId,
+                        principalTable: &quot;Productions&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;ShootingDays&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    Date = table.Column&lt;DateTime&gt;(type: &quot;DATETIME2&quot;, nullable: false),
+                    Notes = table.Column&lt;string&gt;(type: &quot;nvarchar(400)&quot;, maxLength: 400, nullable: true),
+                    ProductionId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_ShootingDays&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_ShootingDays_Productions_ProductionId&quot;,
+                        column: x =&gt; x.ProductionId,
+                        principalTable: &quot;Productions&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;ProductionsCastMembers&quot;,
+                columns: table =&gt; new
+                {
+                    ProductionId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    CastMemberId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    Role = table.Column&lt;string&gt;(type: &quot;nvarchar(200)&quot;, maxLength: 200, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_ProductionsCastMembers&quot;, x =&gt; new { x.ProductionId, x.CastMemberId });
+                    table.ForeignKey(
+                        name: &quot;FK_ProductionsCastMembers_CastMembers_CastMemberId&quot;,
+                        column: x =&gt; x.CastMemberId,
+                        principalTable: &quot;CastMembers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: &quot;FK_ProductionsCastMembers_Productions_ProductionId&quot;,
+                        column: x =&gt; x.ProductionId,
+                        principalTable: &quot;Productions&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;CrewSkills&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    RoleType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    CrewMemberId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_CrewSkills&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_CrewSkills_CrewMembers_CrewMemberId&quot;,
+                        column: x =&gt; x.CrewMemberId,
+                        principalTable: &quot;CrewMembers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;ProductionsCrewMembers&quot;,
+                columns: table =&gt; new
+                {
+                    ProductionId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    CrewMemberId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    RoleType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_ProductionsCrewMembers&quot;, x =&gt; new { x.ProductionId, x.CrewMemberId });
+                    table.ForeignKey(
+                        name: &quot;FK_ProductionsCrewMembers_CrewMembers_CrewMemberId&quot;,
+                        column: x =&gt; x.CrewMemberId,
+                        principalTable: &quot;CrewMembers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: &quot;FK_ProductionsCrewMembers_Productions_ProductionId&quot;,
+                        column: x =&gt; x.ProductionId,
+                        principalTable: &quot;Productions&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;ScenesCastMembers&quot;,
+                columns: table =&gt; new
+                {
+                    SceneId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    CastMemberId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    Role = table.Column&lt;string&gt;(type: &quot;nvarchar(200)&quot;, maxLength: 200, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_ScenesCastMembers&quot;, x =&gt; new { x.SceneId, x.CastMemberId });
+                    table.ForeignKey(
+                        name: &quot;FK_ScenesCastMembers_CastMembers_CastMemberId&quot;,
+                        column: x =&gt; x.CastMemberId,
+                        principalTable: &quot;CastMembers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: &quot;FK_ScenesCastMembers_Scenes_SceneId&quot;,
+                        column: x =&gt; x.SceneId,
+                        principalTable: &quot;Scenes&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;ScenesCrewMembers&quot;,
+                columns: table =&gt; new
+                {
+                    SceneId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    CrewMemberId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    RoleType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_ScenesCrewMembers&quot;, x =&gt; new { x.SceneId, x.CrewMemberId });
+                    table.ForeignKey(
+                        name: &quot;FK_ScenesCrewMembers_CrewMembers_CrewMemberId&quot;,
+                        column: x =&gt; x.CrewMemberId,
+                        principalTable: &quot;CrewMembers&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: &quot;FK_ScenesCrewMembers_Scenes_SceneId&quot;,
+                        column: x =&gt; x.SceneId,
+                        principalTable: &quot;Scenes&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;ScriptBlocks&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    OrderIndex = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    BlockType = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    Content = table.Column&lt;string&gt;(type: &quot;NVARCHAR(MAX)&quot;, nullable: true),
+                    Metadata = table.Column&lt;string&gt;(type: &quot;NVARCHAR(MAX)&quot;, nullable: true),
+                    CreatedAt = table.Column&lt;DateTime&gt;(type: &quot;DATETIME2&quot;, nullable: false),
+                    LastModifiedAt = table.Column&lt;DateTime&gt;(type: &quot;DATETIME2&quot;, nullable: false),
+                    ScriptId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_ScriptBlocks&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_ScriptBlocks_Scripts_ScriptId&quot;,
+                        column: x =&gt; x.ScriptId,
+                        principalTable: &quot;Scripts&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: &quot;ShootingDaysScenes&quot;,
+                columns: table =&gt; new
+                {
+                    Id = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    Order = table.Column&lt;int&gt;(type: &quot;int&quot;, nullable: false),
+                    ShootingDayId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false),
+                    SceneId = table.Column&lt;Guid&gt;(type: &quot;uniqueidentifier&quot;, nullable: false)
+                },
+                constraints: table =&gt;
+                {
+                    table.PrimaryKey(&quot;PK_ShootingDaysScenes&quot;, x =&gt; x.Id);
+                    table.ForeignKey(
+                        name: &quot;FK_ShootingDaysScenes_Scenes_SceneId&quot;,
+                        column: x =&gt; x.SceneId,
+                        principalTable: &quot;Scenes&quot;,
+                        principalColumn: &quot;Id&quot;);
+                    table.ForeignKey(
+                        name: &quot;FK_ShootingDaysScenes_ShootingDays_ShootingDayId&quot;,
+                        column: x =&gt; x.ShootingDayId,
+                        principalTable: &quot;ShootingDays&quot;,
+                        principalColumn: &quot;Id&quot;,
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;AspNetUsers&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;AccessFailedCount&quot;, &quot;ConcurrencyStamp&quot;, &quot;Email&quot;, &quot;EmailConfirmed&quot;, &quot;LockoutEnabled&quot;, &quot;LockoutEnd&quot;, &quot;NormalizedEmail&quot;, &quot;NormalizedUserName&quot;, &quot;PasswordHash&quot;, &quot;PhoneNumber&quot;, &quot;PhoneNumberConfirmed&quot;, &quot;SecurityStamp&quot;, &quot;TwoFactorEnabled&quot;, &quot;UserName&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;47a394d7-2ddb-4511-8355-a489dc8ea3f5&quot;), 0, &quot;seed-cast-con-2&quot;, &quot;georgi.ivanov@wrap.local&quot;, true, false, null, &quot;GEORGI.IVANOV@WRAP.LOCAL&quot;, &quot;GEORGI.IVANOV&quot;, null, &quot;+359888100002&quot;, true, &quot;seed-cast-sec-2&quot;, false, &quot;georgi.ivanov&quot; },
+                    { new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;), 0, &quot;seed-crew-con-3&quot;, &quot;ivan.dimitrov@wrap.local&quot;, true, false, null, &quot;IVAN.DIMITROV@WRAP.LOCAL&quot;, &quot;IVAN.DIMITROV&quot;, null, &quot;+359888000003&quot;, true, &quot;seed-crew-sec-3&quot;, false, &quot;ivan.dimitrov&quot; },
+                    { new Guid(&quot;5f279043-b38f-4f5f-b990-12fd90dcc30e&quot;), 0, &quot;seed-cast-con-1&quot;, &quot;elena.stoyanova@wrap.local&quot;, true, false, null, &quot;ELENA.STOYANOVA@WRAP.LOCAL&quot;, &quot;ELENA.STOYANOVA&quot;, null, &quot;+359888100001&quot;, true, &quot;seed-cast-sec-1&quot;, false, &quot;elena.stoyanova&quot; },
+                    { new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;), 0, &quot;seed-crew-con-1&quot;, &quot;alex.petrov@wrap.local&quot;, true, false, null, &quot;ALEX.PETROV@WRAP.LOCAL&quot;, &quot;ALEX.PETROV&quot;, null, &quot;+359888000001&quot;, true, &quot;seed-crew-sec-1&quot;, false, &quot;alex.petrov&quot; },
+                    { new Guid(&quot;a77cc134-28f3-45d3-8e46-ba041a5371d0&quot;), 0, &quot;seed-cast-con-3&quot;, &quot;siyana.petrova@wrap.local&quot;, true, false, null, &quot;SIYANA.PETROVA@WRAP.LOCAL&quot;, &quot;SIYANA.PETROVA&quot;, null, &quot;+359888100003&quot;, true, &quot;seed-cast-sec-3&quot;, false, &quot;siyana.petrova&quot; },
+                    { new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;), 0, &quot;seed-crew-con-2&quot;, &quot;maria.georgieva@wrap.local&quot;, true, false, null, &quot;MARIA.GEORGIEVA@WRAP.LOCAL&quot;, &quot;MARIA.GEORGIEVA&quot;, null, &quot;+359888000002&quot;, true, &quot;seed-crew-sec-2&quot;, false, &quot;maria.georgieva&quot; }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;Productions&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;Budget&quot;, &quot;Description&quot;, &quot;StatusEndDate&quot;, &quot;StatusStartDate&quot;, &quot;StatusType&quot;, &quot;Thumbnail&quot;, &quot;Title&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;019aa8c4-7b21-4b93-a1b4-18228fa10027&quot;), 155000.00m, &quot;An artist spirals into obsession while preparing the final exhibition of his career.&quot;, new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 9, 10, 0, 0, 0, 0, DateTimeKind.Utc), 21, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Burning Canvas&quot; },
+                    { new Guid(&quot;12abb9d5-8c32-4ca4-b2c5-293390b20028&quot;), 500000.00m, &quot;A post-apocalyptic survival story abandoned after loss of primary financing.&quot;, new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc), 22, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;No Signal Tomorrow&quot; },
+                    { new Guid(&quot;1e57a6d4-7f88-41bb-a836-83bb97b89008&quot;), 110000.00m, &quot;A quiet character-driven story of renewal in a small coastal town.&quot;, new DateTime(2026, 6, 15, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 5, 18, 0, 0, 0, 0, DateTimeKind.Utc), 11, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;After the Rain&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;), 250000.00m, &quot;A neo-noir mystery unfolding over one sleepless night.&quot;, new DateTime(2026, 2, 15, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc), 2, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Midnight Dreams&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), 120000.00m, &quot;A coming-of-age drama about ambition, fear, and first love.&quot;, new DateTime(2026, 3, 20, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 20, 0, 0, 0, 0, DateTimeKind.Utc), 5, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Paper Planes&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), 180000.00m, &quot;A comedic behind-the-scenes story about a cursed film set.&quot;, new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc), 3, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;The Last Take&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d04&quot;), 750000.00m, &quot;A sci-fi thriller set in a near-future megacity.&quot;, new DateTime(2026, 1, 25, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2025, 12, 1, 0, 0, 0, 0, DateTimeKind.Utc), 4, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Neon Skyline&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d05&quot;), 90000.00m, &quot;A documentary journey following musicians on the road.&quot;, new DateTime(2026, 2, 18, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc), 6, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Wild Tracks&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d06&quot;), 60000.00m, &quot;A character study about burnout and reinvention.&quot;, new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc), 9, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;On Hold&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d07&quot;), 320000.00m, &quot;A tense drama about fixing a film before the deadline.&quot;, new DateTime(2026, 4, 25, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc), 10, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Reshoot Season&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d08&quot;), 140000.00m, &quot;An art-house film exploring memory through sound and color.&quot;, new DateTime(2026, 5, 20, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Utc), 14, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Color &amp; Noise&quot; },
+                    { new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;), 210000.00m, &quot;A finished film preparing for its festival circuit debut.&quot;, new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc), 19, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Festival Run&quot; },
+                    { new Guid(&quot;3e8a1c57-6d21-4bcb-8dc4-2f6b42a19002&quot;), 540000.00m, &quot;A visually driven sci-fi drama set on the edge of a collapsing city.&quot;, new DateTime(2026, 1, 28, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 8, 0, 0, 0, 0, DateTimeKind.Utc), 5, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Glass Horizon&quot; },
+                    { new Guid(&quot;5b7f9e22-8a11-47c1-bf28-47db53d49004&quot;), 280000.00m, &quot;A stylish thriller following a late-night radio host drawn into a conspiracy.&quot;, new DateTime(2026, 3, 2, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc), 6, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Velvet Signal&quot; },
+                    { new Guid(&quot;6d91c8f4-5e21-4b69-8a5d-61ed75f69006&quot;), 410000.00m, &quot;A crime thriller in which a photographer uncovers evidence hidden in old negatives.&quot;, new DateTime(2026, 5, 12, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc), 10, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Broken Frame&quot; },
+                    { new Guid(&quot;7c5c7d63-1f42-4d89-9b91-1b5d1f3a9001&quot;), 175000.00m, &quot;A psychological drama about memory, guilt, and unresolved loss.&quot;, new DateTime(2026, 2, 5, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc), 4, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Silent Echo&quot; },
+                    { new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), 1000.00m, &quot;This is a test&quot;, new DateTime(2026, 3, 6, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Test Film&quot; },
+                    { new Guid(&quot;9f2d8a11-3c4e-4d7b-a2d4-38ce72c39003&quot;), 130000.00m, &quot;A nostalgic indie drama about friendship fractured by a long-buried secret.&quot;, new DateTime(2026, 3, 28, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), 22, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Ashes of Summer&quot; },
+                    { new Guid(&quot;a13e4b90-2c74-4d3a-91c8-5cfc64e59005&quot;), 95000.00m, &quot;A bittersweet romance between two artists during the final week of summer.&quot;, new DateTime(2026, 4, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc), 3, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Fading Lights&quot; },
+                    { new Guid(&quot;a5d7ecf8-bf65-4fd7-d5e8-55b6c4e50015&quot;), 150000.00m, &quot;A winter mystery centered around a box of unsent letters discovered in an abandoned house.&quot;, new DateTime(2026, 2, 6, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 22, 0, 0, 0, 0, DateTimeKind.Utc), 6, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Frozen Letters&quot; },
+                    { new Guid(&quot;ab34425e-15cb-453d-b45e-b21c2a4b0021&quot;), 240000.00m, &quot;A road thriller about a failed musician and a runaway chasing redemption.&quot;, new DateTime(2026, 6, 14, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc), 12, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Dust and Neon&quot; },
+                    { new Guid(&quot;b6e8fd09-c076-40e8-e6f9-66c7d5f60016&quot;), 980000.00m, &quot;A historical war drama about espionage, sacrifice, and impossible choices.&quot;, new DateTime(2026, 3, 18, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), 7, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Iron Veil&quot; },
+                    { new Guid(&quot;bc45536f-26dc-464e-c56f-c32d3b5c0022&quot;), 185000.00m, &quot;A suspense drama in which a photographer discovers incriminating details in developed film.&quot;, new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 10, 0, 0, 0, 0, DateTimeKind.Utc), 13, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Second Exposure&quot; },
+                    { new Guid(&quot;bc6f0d83-9a52-43de-bc71-72aa86a79007&quot;), 160000.00m, &quot;A road movie about estranged siblings forced to travel together across the country.&quot;, new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc), 6, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Northbound&quot; },
+                    { new Guid(&quot;c1f3a8d4-7b21-4b93-91a4-11d2f0a10011&quot;), 430000.00m, &quot;A noir thriller about a detective uncovering corruption in a decaying port city.&quot;, new DateTime(2026, 2, 22, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 18, 0, 0, 0, 0, DateTimeKind.Utc), 2, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Crimson Harbor&quot; },
+                    { new Guid(&quot;c7f90e1a-d187-41f9-f70a-77d8e6070017&quot;), 120000.00m, &quot;A light coming-of-age dramedy about three friends reliving their last summer together.&quot;, new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Utc), 8, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Summer Rewind&quot; },
+                    { new Guid(&quot;cd566480-37ed-475f-d670-d43e4c6d0023&quot;), 410000.00m, &quot;A subtle sci-fi drama about loneliness, distance, and first contact.&quot;, new DateTime(2026, 7, 18, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 20, 0, 0, 0, 0, DateTimeKind.Utc), 15, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Quiet Signal&quot; },
+                    { new Guid(&quot;d2a4b9e5-8c32-4ca4-a2b5-22e3f1b20012&quot;), 275000.00m, &quot;A courtroom drama about a musician fighting to reclaim her voice and reputation.&quot;, new DateTime(2026, 2, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 1, 5, 0, 0, 0, 0, DateTimeKind.Utc), 4, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Shattered Silence&quot; },
+                    { new Guid(&quot;d2c49f75-0b33-4a2f-96a1-94cc08c99009&quot;), 145000.00m, &quot;An experimental ensemble film weaving together intersecting monologues.&quot;, new DateTime(2026, 6, 28, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 6, 5, 0, 0, 0, 0, DateTimeKind.Utc), 13, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Parallel Voices&quot; },
+                    { new Guid(&quot;d8011f2b-e298-420a-812b-88e9f7180018&quot;), 650000.00m, &quot;A dystopian thriller about a journalist navigating a city emptied by fear and surveillance.&quot;, new DateTime(2026, 4, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 14, 0, 0, 0, 0, DateTimeKind.Utc), 9, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Hollow City&quot; },
+                    { new Guid(&quot;de677591-48fe-4860-e781-e54f5d7e0024&quot;), 105000.00m, &quot;A chamber drama about neighbors whose lives intersect after a tragic accident.&quot;, new DateTime(2026, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc), 17, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;The Open Window&quot; },
+                    { new Guid(&quot;e3b5cad6-9d43-4db5-b3c6-33f4a2c30013&quot;), 95000.00m, &quot;A heartfelt drama following a family photographer confronting the passage of time.&quot;, new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 8, 0, 0, 0, 0, DateTimeKind.Utc), 5, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Golden Hour&quot; },
+                    { new Guid(&quot;e912203c-f3a9-431b-923c-99fa08290019&quot;), 360000.00m, &quot;A mystery-thriller where eerie radio transmissions begin predicting violent events.&quot;, new DateTime(2026, 5, 24, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Utc), 10, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Blue Static&quot; },
+                    { new Guid(&quot;ef7886a2-590f-4971-f892-f6606e8f0025&quot;), 195000.00m, &quot;A tense airport-set drama about missed chances, final goodbyes, and unexpected reunions.&quot;, new DateTime(2026, 8, 20, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 7, 15, 0, 0, 0, 0, DateTimeKind.Utc), 18, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Last Departure&quot; },
+                    { new Guid(&quot;f08997b3-6a10-4a82-90a3-07117f900026&quot;), 70000.00m, &quot;A minimalist drama about two strangers connected by a late-night emergency call.&quot;, new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc), 20, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Echo Line&quot; },
+                    { new Guid(&quot;f4c6dbe7-ae54-4ec6-c4d7-44a5b3d40014&quot;), 210000.00m, &quot;An intimate psychological drama about fame, obsession, and self-destruction.&quot;, new DateTime(2026, 3, 25, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 2, 25, 0, 0, 0, 0, DateTimeKind.Utc), 3, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Velvet Ashes&quot; },
+                    { new Guid(&quot;f84a72b1-6c95-45ad-b417-a5dd19da9010&quot;), 85000.00m, &quot;A chamber drama centered on family tension during the reading of a final will.&quot;, new DateTime(2026, 8, 10, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 7, 1, 0, 0, 0, 0, DateTimeKind.Utc), 18, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Final Arrangement&quot; },
+                    { new Guid(&quot;fa23314d-04ba-442c-a34d-a10b193a0020&quot;), 80000.00m, &quot;A poetic indie romance unfolding over a single night in Sofia.&quot;, new DateTime(2026, 6, 12, 0, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 5, 15, 0, 0, 0, 0, DateTimeKind.Utc), 11, &quot;/img/thumbnail/default-thumbnail.png&quot;, &quot;Paper Moonlight&quot; }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;CastMembers&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;Biography&quot;, &quot;BirthDate&quot;, &quot;FirstName&quot;, &quot;Gender&quot;, &quot;IsActive&quot;, &quot;IsDeleted&quot;, &quot;LastName&quot;, &quot;Nickname&quot;, &quot;ProfileImagePath&quot;, &quot;UserId&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;), &quot;Stage and screen actor, passionate about drama and indie productions.&quot;, new DateTime(1998, 4, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), &quot;Elena&quot;, 2, true, false, &quot;Stoyanova&quot;, &quot;Eli&quot;, &quot;/img/profile/default-profile.png&quot;, new Guid(&quot;5f279043-b38f-4f5f-b990-12fd90dcc30e&quot;) },
+                    { new Guid(&quot;80e32159-612c-4f6d-9eee-fe91afe5f619&quot;), &quot;Aspiring actor, experienced in commercials and short films.&quot;, new DateTime(2001, 1, 25, 0, 0, 0, 0, DateTimeKind.Unspecified), &quot;Siyana&quot;, 2, true, false, &quot;Petrova&quot;, &quot;Sisi&quot;, &quot;/img/profile/default-profile.png&quot;, new Guid(&quot;a77cc134-28f3-45d3-8e46-ba041a5371d0&quot;) },
+                    { new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;), &quot;Film actor with a focus on action and thrillers.&quot;, new DateTime(1995, 9, 3, 0, 0, 0, 0, DateTimeKind.Unspecified), &quot;Georgi&quot;, 1, true, false, &quot;Ivanov&quot;, null, &quot;/img/profile/default-profile.png&quot;, new Guid(&quot;47a394d7-2ddb-4511-8355-a489dc8ea3f5&quot;) }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;CrewMembers&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;Biography&quot;, &quot;FirstName&quot;, &quot;IsActive&quot;, &quot;IsDeleted&quot;, &quot;LastName&quot;, &quot;Nickname&quot;, &quot;ProfileImagePath&quot;, &quot;UserId&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), &quot;Production coordinator with experience in budgeting, call sheets and logistics.&quot;, &quot;Maria&quot;, true, false, &quot;Georgieva&quot;, &quot;Maya&quot;, &quot;/img/profile/default-profile.png&quot;, new Guid(&quot;f704cf4b-b01a-4b5d-a052-7043caffd93e&quot;) },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), &quot;Director of Photography focused on natural light and handheld storytelling.&quot;, &quot;Alex&quot;, true, false, &quot;Petrov&quot;, &quot;AP/DP&quot;, &quot;/img/profile/default-profile.png&quot;, new Guid(&quot;a1093e45-6993-4d59-8e3f-4fe0b29e7dc5&quot;) },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), &quot;Sound recordist and boom operator. Location sound, ADR planning, and on-set workflow.&quot;, &quot;Ivan&quot;, true, false, &quot;Dimitrov&quot;, null, &quot;/img/profile/default-profile.png&quot;, new Guid(&quot;5150238b-cd37-482d-ab11-ef66bae0128f&quot;) }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;ProductionsAssets&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;AssetType&quot;, &quot;Description&quot;, &quot;FilePath&quot;, &quot;ProductionId&quot;, &quot;Title&quot;, &quot;UploadedAt&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;11111111-cccc-cccc-cccc-111111111111&quot;), 1, &quot;Basic scene coverage and camera beats.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), &quot;Storyboard v1&quot;, new DateTime(2026, 3, 1, 10, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;22222222-cccc-cccc-cccc-222222222222&quot;), 2, &quot;Lighting references and overall vibe.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), &quot;Moodboard - Visual Tone&quot;, new DateTime(2026, 3, 1, 10, 0, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;33333333-cccc-cccc-cccc-333333333333&quot;), 3, &quot;Primary palette for day interiors.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), &quot;Color Palette - Day Scenes&quot;, new DateTime(2026, 3, 2, 11, 15, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;44444444-cccc-cccc-cccc-444444444444&quot;), 4, &quot;Reference stills for framing and composition.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;), &quot;Reference Frames Pack&quot;, new DateTime(2026, 3, 2, 11, 15, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;55555555-cccc-cccc-cccc-555555555555&quot;), 1, &quot;Action sequence beats and movement.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;), &quot;Storyboard - Chase Sequence&quot;, new DateTime(2026, 3, 3, 9, 40, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;66666666-cccc-cccc-cccc-666666666666&quot;), 99, &quot;Draft PDF with lens &amp; shot notes.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;), &quot;Shot List Draft&quot;, new DateTime(2026, 3, 3, 9, 40, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;77777777-cccc-cccc-cccc-777777777777&quot;), 2, &quot;Neon, fog, wet streets.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), &quot;Moodboard - Night Atmosphere&quot;, new DateTime(2026, 3, 3, 9, 40, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;88888888-cccc-cccc-cccc-888888888888&quot;), 3, &quot;Cold shadows with warm practicals.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), &quot;Color Palette - Night Scenes&quot;, new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;99999999-cccc-cccc-cccc-999999999999&quot;), 4, &quot;Props and set dressing ideas.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), &quot;Set Dressing References&quot;, new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;aaaaaaaa-cccc-cccc-cccc-aaaaaaaaaaaa&quot;), 1, &quot;Final sequence beats and transitions.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), &quot;Storyboard - Finale&quot;, new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;bbbbbbbb-cccc-cccc-cccc-bbbbbbbbbbbb&quot;), 99, &quot;Scouting photos for final location.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), &quot;Location Photos&quot;, new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc) },
+                    { new Guid(&quot;cccccccc-cccc-cccc-cccc-cccccccccccc&quot;), 4, &quot;Wardrobe references for key characters.&quot;, &quot;/img/assets/default-asset.png&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), &quot;Costume References&quot;, new DateTime(2026, 3, 4, 14, 5, 0, 0, DateTimeKind.Utc) }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;Scenes&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;Description&quot;, &quot;Location&quot;, &quot;ProductionId&quot;, &quot;SceneName&quot;, &quot;SceneNumber&quot;, &quot;SceneType&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;), &quot;A tense meeting sets the stakes for the story.&quot;, &quot;Downtown Coffee Shop&quot;, new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), &quot;Coffee Shop Conversation&quot;, 1, 1 },
+                    { new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;), &quot;Fast-paced pursuit through the city streets.&quot;, &quot;Main Boulevard&quot;, new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), &quot;Street Chase&quot;, 2, 2 },
+                    { new Guid(&quot;33333333-bbbb-bbbb-bbbb-333333333333&quot;), &quot;Key evidence is discovered.&quot;, &quot;Character A Apartment&quot;, new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), &quot;Apartment Reveal&quot;, 3, 3 },
+                    { new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;), &quot;A suspect breaks under pressure.&quot;, &quot;Police Station&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;), &quot;Interrogation Room&quot;, 1, 1 },
+                    { new Guid(&quot;55555555-bbbb-bbbb-bbbb-555555555555&quot;), &quot;Conflict escalates with a dramatic skyline backdrop.&quot;, &quot;Office Building Rooftop&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;), &quot;Rooftop Argument&quot;, 2, 2 },
+                    { new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;), &quot;A mysterious figure appears in the shadows.&quot;, &quot;Old Town Alley&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), &quot;Night Alley Encounter&quot;, 1, 2 },
+                    { new Guid(&quot;77777777-bbbb-bbbb-bbbb-777777777777&quot;), &quot;The team plans the next move.&quot;, &quot;Garage Workshop&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), &quot;Workshop Planning&quot;, 2, 1 },
+                    { new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;), &quot;Emotional turning point for the lead character.&quot;, &quot;City Hospital&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), &quot;Hospital Corridor&quot;, 1, 1 },
+                    { new Guid(&quot;99999999-bbbb-bbbb-bbbb-999999999999&quot;), &quot;Two characters reconcile after a fallout.&quot;, &quot;Central Park&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), &quot;Park Reunion&quot;, 2, 2 },
+                    { new Guid(&quot;aaaaaaaa-bbbb-bbbb-bbbb-aaaaaaaaaaaa&quot;), &quot;Closing moment with a hopeful sunrise.&quot;, &quot;Cliffside Overlook&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), &quot;Finale: Sunrise Cliff&quot;, 3, 2 }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;Scripts&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;LastEditedAt&quot;, &quot;ProductionId&quot;, &quot;RevisionType&quot;, &quot;StageType&quot;, &quot;Title&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;11111111-2222-3333-4444-555555555555&quot;), new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;), null, 2, &quot;Midnight Dreams — Draft&quot; },
+                    { new Guid(&quot;22222222-3333-4444-5555-666666666666&quot;), new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), 3, 7, &quot;Paper Planes — Shooting Script&quot; },
+                    { new Guid(&quot;33333333-4444-5555-6666-777777777777&quot;), new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), 2, 8, &quot;The Last Take — Blue Revision&quot; },
+                    { new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;), new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc), new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), null, 2, &quot;Test Screenplay&quot; },
+                    { new Guid(&quot;44444444-5555-6666-7777-888888888888&quot;), new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d04&quot;), null, 1, &quot;Neon Skyline — Outline&quot; },
+                    { new Guid(&quot;55555555-6666-7777-8888-999999999999&quot;), new DateTime(2026, 3, 26, 13, 22, 5, 0, DateTimeKind.Utc), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d05&quot;), 4, 4, &quot;Wild Tracks — Polish&quot; }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;ShootingDays&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;Date&quot;, &quot;Notes&quot;, &quot;ProductionId&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000001&quot;), new DateTime(2026, 3, 20, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Day 1: Coffee shop scene coverage.&quot;, new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;) },
+                    { new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000002&quot;), new DateTime(2026, 3, 21, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Day 2: Pickups and insert shots.&quot;, new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;) },
+                    { new Guid(&quot;20000000-aaaa-aaaa-aaaa-200000000001&quot;), new DateTime(2026, 3, 23, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Night exterior sequence.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;) },
+                    { new Guid(&quot;20000000-aaaa-aaaa-aaaa-200000000002&quot;), new DateTime(2026, 3, 24, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Studio interiors + dialogue scenes.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;) },
+                    { new Guid(&quot;30000000-aaaa-aaaa-aaaa-300000000001&quot;), new DateTime(2026, 3, 26, 8, 0, 0, 0, DateTimeKind.Utc), &quot;School hallway + classroom scenes.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;) },
+                    { new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000001&quot;), new DateTime(2026, 3, 28, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Stage scenes and rehearsal coverage.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;) },
+                    { new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000002&quot;), new DateTime(2026, 3, 29, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Close-ups, alt takes, safety shots.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;) },
+                    { new Guid(&quot;50000000-aaaa-aaaa-aaaa-500000000001&quot;), new DateTime(2026, 3, 31, 8, 0, 0, 0, DateTimeKind.Utc), &quot;City night montage (neon locations).&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d04&quot;) },
+                    { new Guid(&quot;60000000-aaaa-aaaa-aaaa-600000000001&quot;), new DateTime(2026, 4, 2, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Outdoor travel sequence.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d05&quot;) },
+                    { new Guid(&quot;70000000-aaaa-aaaa-aaaa-700000000001&quot;), new DateTime(2026, 4, 4, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Planned shoot (project currently on hold).&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d06&quot;) },
+                    { new Guid(&quot;80000000-aaaa-aaaa-aaaa-800000000001&quot;), new DateTime(2026, 4, 6, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Reshoot day: continuity fixes + inserts.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d07&quot;) },
+                    { new Guid(&quot;90000000-aaaa-aaaa-aaaa-900000000001&quot;), new DateTime(2026, 4, 8, 8, 0, 0, 0, DateTimeKind.Utc), &quot;B-roll day for post-production needs.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d08&quot;) },
+                    { new Guid(&quot;a0000000-aaaa-aaaa-aaaa-a00000000001&quot;), new DateTime(2026, 4, 10, 8, 0, 0, 0, DateTimeKind.Utc), &quot;Press / promo shoot day.&quot;, new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;) }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;CrewSkills&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;CrewMemberId&quot;, &quot;RoleType&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000001&quot;), new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), 1 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000002&quot;), new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), 2 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000003&quot;), new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), 20 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000004&quot;), new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), 21 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000005&quot;), new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), 50 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000006&quot;), new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), 51 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000007&quot;), new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), 60 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000008&quot;), new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), 62 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000009&quot;), new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), 70 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000010&quot;), new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), 71 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000011&quot;), new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), 80 },
+                    { new Guid(&quot;a0000000-0000-0000-0000-000000000012&quot;), new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), 82 }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;ProductionsCastMembers&quot;,
+                columns: new[] { &quot;CastMemberId&quot;, &quot;ProductionId&quot;, &quot;Role&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;80e32159-612c-4f6d-9eee-fe91afe5f619&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d01&quot;), &quot;Lead Actress&quot; },
+                    { new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), &quot;Private Investigator&quot; },
+                    { new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d02&quot;), &quot;Antagonist&quot; },
+                    { new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), &quot;Supporting Role&quot; },
+                    { new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;), new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), &quot;Detective Ivanov&quot; },
+                    { new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;), new Guid(&quot;819f7100-5b1d-4eee-8b82-8e4084ef0928&quot;), &quot;Witness&quot; }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;ProductionsCrewMembers&quot;,
+                columns: new[] { &quot;CrewMemberId&quot;, &quot;ProductionId&quot;, &quot;RoleType&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), 82 },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d03&quot;), 71 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d05&quot;), 21 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d06&quot;), 1 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;), 20 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;), 1 },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), new Guid(&quot;2a6d6e6d-5a3a-4b7c-9e9a-0b0f5e5c4d09&quot;), 70 }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;ScenesCastMembers&quot;,
+                columns: new[] { &quot;CastMemberId&quot;, &quot;SceneId&quot;, &quot;Role&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;), new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;), &quot;Detective Ivanov&quot; },
+                    { new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;), new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;), &quot;Witness&quot; },
+                    { new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;), new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;), &quot;Detective Ivanov&quot; },
+                    { new Guid(&quot;80e32159-612c-4f6d-9eee-fe91afe5f619&quot;), new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;), &quot;Lead Actress&quot; },
+                    { new Guid(&quot;076fd414-bd51-44a5-9d19-1f0a321e4d8e&quot;), new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;), &quot;Private Investigator&quot; },
+                    { new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;), new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;), &quot;Antagonist&quot; },
+                    { new Guid(&quot;dd6182e2-0e3b-4a74-8386-fdcfa8522a1f&quot;), new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;), &quot;Supporting Role&quot; }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;ScenesCrewMembers&quot;,
+                columns: new[] { &quot;CrewMemberId&quot;, &quot;SceneId&quot;, &quot;RoleType&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;), 20 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;), 1 },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;), 70 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;), 21 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;), 1 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;33333333-bbbb-bbbb-bbbb-333333333333&quot;), 22 },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), new Guid(&quot;33333333-bbbb-bbbb-bbbb-333333333333&quot;), 71 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;), 20 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;), 1 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;55555555-bbbb-bbbb-bbbb-555555555555&quot;), 30 },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), new Guid(&quot;55555555-bbbb-bbbb-bbbb-555555555555&quot;), 72 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;), 20 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;), 7 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;77777777-bbbb-bbbb-bbbb-777777777777&quot;), 2 },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), new Guid(&quot;77777777-bbbb-bbbb-bbbb-777777777777&quot;), 70 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;), 21 },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;), 71 },
+                    { new Guid(&quot;5bc88034-ac2f-49cf-b39c-20a54ae09c50&quot;), new Guid(&quot;99999999-bbbb-bbbb-bbbb-999999999999&quot;), 20 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;99999999-bbbb-bbbb-bbbb-999999999999&quot;), 1 },
+                    { new Guid(&quot;8019d5fc-23a7-49d8-80ac-b3edd8a7e398&quot;), new Guid(&quot;aaaaaaaa-bbbb-bbbb-bbbb-aaaaaaaaaaaa&quot;), 7 },
+                    { new Guid(&quot;ec228657-ad62-4e57-a749-8becaccce6dd&quot;), new Guid(&quot;aaaaaaaa-bbbb-bbbb-bbbb-aaaaaaaaaaaa&quot;), 73 }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;ScriptBlocks&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;BlockType&quot;, &quot;Content&quot;, &quot;CreatedAt&quot;, &quot;LastModifiedAt&quot;, &quot;Metadata&quot;, &quot;OrderIndex&quot;, &quot;ScriptId&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;3bed994a-cbee-4d60-b22f-a922b82eb841&quot;), 7, &quot;I&#39;ll have a double espresso. Make it strong.&quot;, new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc), new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc), null, 3, new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;) },
+                    { new Guid(&quot;65a5a61f-204d-4274-be48-bf4b440ff6a1&quot;), 1, &quot;INT. COFFEE SHOP - DAY&quot;, new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc), new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc), null, 0, new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;) },
+                    { new Guid(&quot;befd3f37-d237-4e46-8a21-e08704c6ef00&quot;), 4, &quot;JOHN&quot;, new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc), new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc), null, 2, new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;) },
+                    { new Guid(&quot;c5cc8272-c35d-4b4b-bb31-137df7fe86d5&quot;), 3, &quot;A bustling morning crowd. Steam rises from espresso machines.&quot;, new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc), new DateTime(2026, 3, 9, 13, 22, 5, 0, DateTimeKind.Utc), null, 1, new Guid(&quot;36ca9b58-d902-4195-bf80-2e6518ad3c6d&quot;) }
+                });
+
+            migrationBuilder.InsertData(
+                table: &quot;ShootingDaysScenes&quot;,
+                columns: new[] { &quot;Id&quot;, &quot;Order&quot;, &quot;SceneId&quot;, &quot;ShootingDayId&quot; },
+                values: new object[,]
+                {
+                    { new Guid(&quot;b1000000-cccc-cccc-cccc-b10000000001&quot;), 1, new Guid(&quot;11111111-bbbb-bbbb-bbbb-111111111111&quot;), new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000001&quot;) },
+                    { new Guid(&quot;b1000000-cccc-cccc-cccc-b10000000002&quot;), 2, new Guid(&quot;22222222-bbbb-bbbb-bbbb-222222222222&quot;), new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000001&quot;) },
+                    { new Guid(&quot;b1000000-cccc-cccc-cccc-b10000000003&quot;), 1, new Guid(&quot;33333333-bbbb-bbbb-bbbb-333333333333&quot;), new Guid(&quot;10000000-aaaa-aaaa-aaaa-100000000002&quot;) },
+                    { new Guid(&quot;b2000000-cccc-cccc-cccc-b20000000001&quot;), 1, new Guid(&quot;44444444-bbbb-bbbb-bbbb-444444444444&quot;), new Guid(&quot;20000000-aaaa-aaaa-aaaa-200000000001&quot;) },
+                    { new Guid(&quot;b2000000-cccc-cccc-cccc-b20000000002&quot;), 1, new Guid(&quot;55555555-bbbb-bbbb-bbbb-555555555555&quot;), new Guid(&quot;20000000-aaaa-aaaa-aaaa-200000000002&quot;) },
+                    { new Guid(&quot;b3000000-cccc-cccc-cccc-b30000000001&quot;), 1, new Guid(&quot;66666666-bbbb-bbbb-bbbb-666666666666&quot;), new Guid(&quot;30000000-aaaa-aaaa-aaaa-300000000001&quot;) },
+                    { new Guid(&quot;b3000000-cccc-cccc-cccc-b30000000002&quot;), 2, new Guid(&quot;77777777-bbbb-bbbb-bbbb-777777777777&quot;), new Guid(&quot;30000000-aaaa-aaaa-aaaa-300000000001&quot;) },
+                    { new Guid(&quot;b4000000-cccc-cccc-cccc-b40000000001&quot;), 1, new Guid(&quot;88888888-bbbb-bbbb-bbbb-888888888888&quot;), new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000001&quot;) },
+                    { new Guid(&quot;b4000000-cccc-cccc-cccc-b40000000002&quot;), 2, new Guid(&quot;99999999-bbbb-bbbb-bbbb-999999999999&quot;), new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000001&quot;) },
+                    { new Guid(&quot;b4000000-cccc-cccc-cccc-b40000000003&quot;), 1, new Guid(&quot;aaaaaaaa-bbbb-bbbb-bbbb-aaaaaaaaaaaa&quot;), new Guid(&quot;40000000-aaaa-aaaa-aaaa-400000000002&quot;) }
+                });
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_AspNetRoleClaims_RoleId&quot;,
+                table: &quot;AspNetRoleClaims&quot;,
+                column: &quot;RoleId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;RoleNameIndex&quot;,
+                table: &quot;AspNetRoles&quot;,
+                column: &quot;NormalizedName&quot;,
+                unique: true,
+                filter: &quot;[NormalizedName] IS NOT NULL&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_AspNetUserClaims_UserId&quot;,
+                table: &quot;AspNetUserClaims&quot;,
+                column: &quot;UserId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_AspNetUserLogins_UserId&quot;,
+                table: &quot;AspNetUserLogins&quot;,
+                column: &quot;UserId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_AspNetUserRoles_RoleId&quot;,
+                table: &quot;AspNetUserRoles&quot;,
+                column: &quot;RoleId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;EmailIndex&quot;,
+                table: &quot;AspNetUsers&quot;,
+                column: &quot;NormalizedEmail&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;UserNameIndex&quot;,
+                table: &quot;AspNetUsers&quot;,
+                column: &quot;NormalizedUserName&quot;,
+                unique: true,
+                filter: &quot;[NormalizedUserName] IS NOT NULL&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_CastMembers_UserId&quot;,
+                table: &quot;CastMembers&quot;,
+                column: &quot;UserId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_CrewMembers_UserId&quot;,
+                table: &quot;CrewMembers&quot;,
+                column: &quot;UserId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_CrewSkills_CrewMemberId&quot;,
+                table: &quot;CrewSkills&quot;,
+                column: &quot;CrewMemberId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ProductionsAssets_ProductionId_AssetType&quot;,
+                table: &quot;ProductionsAssets&quot;,
+                columns: new[] { &quot;ProductionId&quot;, &quot;AssetType&quot; });
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ProductionsCastMembers_CastMemberId&quot;,
+                table: &quot;ProductionsCastMembers&quot;,
+                column: &quot;CastMemberId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ProductionsCrewMembers_CrewMemberId&quot;,
+                table: &quot;ProductionsCrewMembers&quot;,
+                column: &quot;CrewMemberId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_Scenes_ProductionId_SceneNumber&quot;,
+                table: &quot;Scenes&quot;,
+                columns: new[] { &quot;ProductionId&quot;, &quot;SceneNumber&quot; });
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ScenesCastMembers_CastMemberId&quot;,
+                table: &quot;ScenesCastMembers&quot;,
+                column: &quot;CastMemberId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ScenesCrewMembers_CrewMemberId&quot;,
+                table: &quot;ScenesCrewMembers&quot;,
+                column: &quot;CrewMemberId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ScriptBlocks_ScriptId_OrderIndex&quot;,
+                table: &quot;ScriptBlocks&quot;,
+                columns: new[] { &quot;ScriptId&quot;, &quot;OrderIndex&quot; },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_Scripts_ProductionId&quot;,
+                table: &quot;Scripts&quot;,
+                column: &quot;ProductionId&quot;,
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ShootingDays_ProductionId&quot;,
+                table: &quot;ShootingDays&quot;,
+                column: &quot;ProductionId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ShootingDaysScenes_SceneId&quot;,
+                table: &quot;ShootingDaysScenes&quot;,
+                column: &quot;SceneId&quot;);
+
+            migrationBuilder.CreateIndex(
+                name: &quot;IX_ShootingDaysScenes_ShootingDayId_SceneId&quot;,
+                table: &quot;ShootingDaysScenes&quot;,
+                columns: new[] { &quot;ShootingDayId&quot;, &quot;SceneId&quot; },
+                unique: true);
+        }
+
+        /// &lt;inheritdoc /&gt;
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: &quot;AspNetRoleClaims&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;AspNetUserClaims&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;AspNetUserLogins&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;AspNetUserRoles&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;AspNetUserTokens&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;CrewSkills&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;ProductionsAssets&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;ProductionsCastMembers&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;ProductionsCrewMembers&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;ScenesCastMembers&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;ScenesCrewMembers&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;ScriptBlocks&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;ShootingDaysScenes&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;AspNetRoles&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;CastMembers&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;CrewMembers&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;Scripts&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;Scenes&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;ShootingDays&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;AspNetUsers&quot;);
+
+            migrationBuilder.DropTable(
+                name: &quot;Productions&quot;);
+        }
+    }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,9,15,10,0],[16,13,18,35,0],[18,35,25,18,0],[25,18,27,17,0],[27,17,27,18,0],[27,18,28,21,0],[28,21,28,67,0],[28,67,29,17,0],[29,17,29,18,0],[29,18,29,20,0],[31,13,33,35,0],[33,35,50,18,0],[50,18,52,17,0],[52,17,52,18,0],[52,18,53,21,0],[53,21,53,67,0],[53,67,54,17,0],[54,17,54,18,0],[54,18,54,20,0],[56,13,58,35,0],[58,35,68,18,0],[68,18,70,17,0],[70,17,70,18,0],[70,18,71,21,0],[71,21,71,67,0],[71,67,72,17,0],[72,17,72,18,0],[72,18,72,20,0],[74,13,76,35,0],[76,35,83,18,0],[83,18,85,17,0],[85,17,85,18,0],[85,18,86,21,0],[86,21,86,72,0],[86,72,87,21,0],[87,21,92,62,0],[92,62,93,17,0],[93,17,93,18,0],[93,18,93,20,0],[95,13,97,35,0],[97,35,104,18,0],[104,18,106,17,0],[106,17,106,18,0],[106,18,107,21,0],[107,21,107,72,0],[107,72,108,21,0],[108,21,113,62,0],[113,62,114,17,0],[114,17,114,18,0],[114,18,114,20,0],[116,13,118,35,0],[118,35,124,18,0],[124,18,126,17,0],[126,17,126,18,0],[126,18,127,21,0],[127,21,127,106,0],[127,106,128,21,0],[128,21,133,62,0],[133,62,134,17,0],[134,17,134,18,0],[134,18,134,20,0],[136,13,138,35,0],[138,35,142,18,0],[142,18,144,17,0],[144,17,144,18,0],[144,18,145,21,0],[145,21,145,93,0],[145,93,146,21,0],[146,21,151,62,0],[151,62,152,21,0],[152,21,157,62,0],[157,62,158,17,0],[158,17,158,18,0],[158,18,158,20,0],[160,13,162,35,0],[162,35,168,18,0],[168,18,170,17,0],[170,17,170,18,0],[170,18,171,21,0],[171,21,171,109,0],[171,109,172,21,0],[172,21,177,62,0],[177,62,178,17,0],[178,17,178,18,0],[178,18,178,20,0],[180,13,182,35,0],[182,35,195,18,0],[195,18,197,17,0],[197,17,197,18,0],[197,18,198,21,0],[198,21,198,67,0],[198,67,199,21,0],[199,21,204,62,0],[204,62,205,17,0],[205,17,205,18,0],[205,18,205,20,0],[207,13,209,35,0],[209,35,220,18,0],[220,18,222,17,0],[222,17,222,18,0],[222,18,223,21,0],[223,21,223,67,0],[223,67,224,21,0],[224,21,229,62,0],[229,62,230,17,0],[230,17,230,18,0],[230,18,230,20,0],[232,13,234,35,0],[234,35,243,18,0],[243,18,245,17,0],[245,17,245,18,0],[245,18,246,21,0],[246,21,246,73,0],[246,73,247,21,0],[247,21,252,62,0],[252,62,253,17,0],[253,17,253,18,0],[253,18,253,20,0],[255,13,257,35,0],[257,35,266,18,0],[266,18,268,17,0],[268,17,268,18,0],[268,18,269,21,0],[269,21,269,62,0],[269,62,270,21,0],[270,21,275,62,0],[275,62,276,17,0],[276,17,276,18,0],[276,18,276,20,0],[278,13,280,35,0],[280,35,288,18,0],[288,18,290,17,0],[290,17,290,18,0],[290,18,291,21,0],[291,21,291,63,0],[291,63,292,21,0],[292,21,297,62,0],[297,62,298,17,0],[298,17,298,18,0],[298,18,298,20,0],[300,13,302,35,0],[302,35,308,18,0],[308,18,310,17,0],[310,17,310,18,0],[310,18,311,21,0],[311,21,311,68,0],[311,68,312,21,0],[312,21,317,62,0],[317,62,318,17,0],[318,17,318,18,0],[318,18,318,20,0],[320,13,322,35,0],[322,35,327,18,0],[327,18,329,17,0],[329,17,329,18,0],[329,18,330,21,0],[330,21,330,112,0],[330,112,331,21,0],[331,21,336,62,0],[336,62,337,21,0],[337,21,342,62,0],[342,62,343,17,0],[343,17,343,18,0],[343,18,343,20,0],[345,13,347,35,0],[347,35,352,18,0],[352,18,354,17,0],[354,17,354,18,0],[354,18,355,21,0],[355,21,355,66,0],[355,66,356,21,0],[356,21,361,62,0],[361,62,362,17,0],[362,17,362,18,0],[362,18,362,20,0],[364,13,366,35,0],[366,35,371,18,0],[371,18,373,17,0],[373,17,373,18,0],[373,18,374,21,0],[374,21,374,112,0],[374,112,375,21,0],[375,21,380,62,0],[380,62,381,21,0],[381,21,386,62,0],[386,62,387,17,0],[387,17,387,18,0],[387,18,387,20,0],[389,13,391,35,0],[391,35,396,18,0],[396,18,398,17,0],[398,17,398,18,0],[398,18,399,21,0],[399,21,399,102,0],[399,102,400,21,0],[400,21,405,62,0],[405,62,406,21,0],[406,21,411,62,0],[411,62,412,17,0],[412,17,412,18,0],[412,18,412,20,0],[414,13,416,35,0],[416,35,421,18,0],[421,18,423,17,0],[423,17,423,18,0],[423,18,424,21,0],[424,21,424,102,0],[424,102,425,21,0],[425,21,430,62,0],[430,62,431,21,0],[431,21,436,62,0],[436,62,437,17,0],[437,17,437,18,0],[437,18,437,20,0],[439,13,441,35,0],[441,35,451,18,0],[451,18,453,17,0],[453,17,453,18,0],[453,18,454,21,0],[454,21,454,68,0],[454,68,455,21,0],[455,21,460,62,0],[460,62,461,17,0],[461,17,461,18,0],[461,18,461,20,0],[463,13,465,35,0],[465,35,471,18,0],[471,18,473,17,0],[473,17,473,18,0],[473,18,474,21,0],[474,21,474,74,0],[474,74,475,21,0],[475,21,479,48,0],[479,48,480,21,0],[480,21,485,62,0],[485,62,486,17,0],[486,17,486,18,0],[486,18,486,20,0],[488,13,499,20,0],[501,13,544,20,0],[546,13,554,20,0],[556,13,564,20,0],[566,13,583,20,0],[585,13,600,20,0],[602,13,613,20,0],[615,13,633,20,0],[635,13,652,20,0],[654,13,665,20,0],[667,13,679,20,0],[681,13,693,20,0],[695,13,721,20,0],[723,13,732,20,0],[734,13,749,20,0],[751,13,754,35,0],[756,13,761,57,0],[763,13,766,35,0],[768,13,771,35,0],[773,13,776,35,0],[778,13,781,44,0],[783,13,788,61,0],[790,13,793,35,0],[795,13,798,35,0],[800,13,803,41,0],[805,13,808,65,0],[810,13,813,41,0],[815,13,818,41,0],[820,13,823,67,0],[825,13,828,41,0],[830,13,833,41,0],[835,13,839,31,0],[841,13,845,31,0],[847,13,850,41,0],[852,13,855,36,0],[857,13,861,31,0],[862,9,862,10,0],[866,9,866,10,0],[867,13,868,43,0],[870,13,871,43,0],[873,13,874,43,0],[876,13,877,42,0],[879,13,880,43,0],[882,13,883,37,0],[885,13,886,44,0],[888,13,889,49,0],[891,13,892,49,0],[894,13,895,44,0],[897,13,898,44,0],[900,13,901,39,0],[903,13,904,45,0],[906,13,907,38,0],[909,13,910,38,0],[912,13,913,38,0],[915,13,916,34,0],[918,13,919,33,0],[921,13,922,39,0],[924,13,925,38,0],[927,13,928,38,0],[929,9,929,10,0]]);
+    </script>
+  </body>
+</html>

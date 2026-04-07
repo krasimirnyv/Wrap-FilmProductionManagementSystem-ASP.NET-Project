@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/FilmProductionDbContext.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data;
+
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+using Models;
+using Models.MappingEntities;
+using Models.Infrastructure;
+
+public class FilmProductionDbContext : IdentityDbContext&lt;ApplicationUser, ApplicationRole, Guid&gt;
+{
+    public FilmProductionDbContext(DbContextOptions&lt;FilmProductionDbContext&gt; options)
+        : base(options)
+    {
+    }
+    
+    public virtual DbSet&lt;Crew&gt; CrewMembers { get; set; } = null!;
+    public virtual DbSet&lt;CrewSkill&gt; CrewSkills { get; set; } = null!;
+    public virtual DbSet&lt;Cast&gt; CastMembers { get; set; } = null!;
+    
+    public virtual DbSet&lt;Production&gt; Productions { get; set; } = null!;
+    public virtual DbSet&lt;Scene&gt; Scenes { get; set; } = null!;
+    public virtual DbSet&lt;ProductionAsset&gt; ProductionsAssets { get; set; } = null!;
+
+    public virtual DbSet&lt;Script&gt; Scripts { get; set; } = null!;
+    public virtual DbSet&lt;ScriptBlock&gt; ScriptBlocks { get; set; } = null!;
+
+    public virtual DbSet&lt;ShootingDay&gt; ShootingDays { get; set; } = null!;
+    public virtual DbSet&lt;ShootingDayScene&gt; ShootingDaysScenes { get; set; } = null!;
+
+    public virtual DbSet&lt;ProductionCrew&gt; ProductionsCrewMembers { get; set; } = null!;
+    public virtual DbSet&lt;ProductionCast&gt; ProductionsCastMembers { get; set; } = null!;
+
+    public virtual DbSet&lt;SceneCrew&gt; ScenesCrewMembers { get; set; } = null!;
+    public virtual DbSet&lt;SceneCast&gt; ScenesCastMembers { get; set; } = null!;
+    
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        
+        builder.ApplyConfigurationsFromAssembly(typeof(FilmProductionDbContext).Assembly);
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,11,13,24,0],[14,5,14,6,0],[15,5,15,6,0],[17,60,17,65,0],[18,64,18,69,0],[19,60,19,65,0],[21,66,21,71,0],[22,56,22,61,0],[23,77,23,82,0],[25,58,25,63,0],[26,68,26,73,0],[28,68,28,73,0],[29,79,29,84,0],[31,81,31,86,0],[32,81,32,86,0],[34,71,34,76,0],[35,71,35,76,0],[38,5,38,6,0],[39,9,39,39,0],[41,9,41,91,0],[42,5,42,6,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.GCommon/Text/DisplayNameFormatter.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.GCommon.Text;
+
+using System.Text.RegularExpressions;
+
+using static ApplicationConstants;
+
+public static class DisplayNameFormatter
+{
+    public static string ToDisplayName(string value)
+        =&gt; Regex.Replace(value, DisplayNameRegEx, DisplayNameReplacement).Trim();
+
+    public static string ToDisplayName(Enum value)
+        =&gt; ToDisplayName(value.ToString());
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,12,10,81,1],[13,12,13,43,1]]);
+    </script>
+  </body>
+</html>

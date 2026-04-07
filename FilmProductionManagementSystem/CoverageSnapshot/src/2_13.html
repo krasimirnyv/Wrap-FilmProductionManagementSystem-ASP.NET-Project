@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.Infrastructure/Extensions/CoreServiceCollectionExtensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.Infrastructure.Extensions;
+
+using System.Reflection;
+
+using Microsoft.Extensions.DependencyInjection;
+
+using Services.Core;
+using Services.Core.Handlers.Interfaces;
+using Services.Core.Utilities.ImageLogic.Interfaces;
+
+public static class CoreServiceCollectionExtensions
+{
+    public static IServiceCollection AddCoreServices(this IServiceCollection services)
+    {
+        Assembly coreAssembly = typeof(LoginRegisterService).Assembly;
+
+        services.RegisterByConvention(
+            coreAssembly,
+            interfaceFilter: type =&gt; type is { IsInterface: true } &amp;&amp; (type.Name.StartsWith(&quot;I&quot;) &amp;&amp; type.Name.EndsWith(&quot;Service&quot;)),
+            lifetime: ServiceLifetime.Scoped);
+
+        services.RegisterByConvention(
+            coreAssembly,
+            interfaceFilter: type =&gt; type is { IsInterface: true } &amp;&amp; (type.Name.StartsWith(&quot;I&quot;) &amp;&amp; type.Name.EndsWith(&quot;Resolver&quot;)),
+            lifetime: ServiceLifetime.Scoped);
+
+        services.RegisterByConvention(
+            coreAssembly,
+            interfaceFilter: type =&gt; type is { IsInterface: true } &amp;&amp; (type.Name.StartsWith(&quot;I&quot;) &amp;&amp; type.Name.EndsWith(&quot;Provider&quot;)),
+            lifetime: ServiceLifetime.Singleton);
+
+        services.RegisterRegistrationHandlers(coreAssembly);
+        services.RegisterImageStrategies(coreAssembly);
+
+        return services;
+    }
+
+    private static IServiceCollection RegisterRegistrationHandlers(this IServiceCollection services, Assembly assembly)
+    {
+        Type openGenericHandlerInterface = typeof(IRegistrationHandler&lt;&gt;);
+
+        Type[] implementationTypes = assembly
+            .GetTypes()
+            .Where(type =&gt; type is { IsClass: true, IsAbstract: false } &amp;&amp;
+                           type.GetInterfaces()
+                               .Any(i =&gt; i.IsGenericType &amp;&amp; i.GetGenericTypeDefinition() == openGenericHandlerInterface))
+            .ToArray();
+
+        foreach (Type implementationType in implementationTypes)
+        {
+            Type[] closedInterfaces = implementationType
+                .GetInterfaces()
+                .Where(i =&gt; i.IsGenericType &amp;&amp; i.GetGenericTypeDefinition() == openGenericHandlerInterface)
+                .ToArray();
+
+            foreach (Type closedInterface in closedInterfaces)
+            {
+                services.AddScoped(closedInterface, implementationType);
+            }
+        }
+
+        return services;
+    }
+
+    private static IServiceCollection RegisterImageStrategies(this IServiceCollection services, Assembly assembly)
+    {
+        Type strategyInterfaceType = typeof(IVariantImageStrategy);
+
+        Type[] strategyImplementationTypes = assembly
+            .GetTypes()
+            .Where(type =&gt; type is { IsClass: true, IsAbstract: false } &amp;&amp; 
+                           strategyInterfaceType.IsAssignableFrom(type))
+            .ToArray();
+
+        foreach (Type strategyImplementationType in strategyImplementationTypes)
+        {
+            services.AddScoped(strategyInterfaceType, strategyImplementationType);
+        }
+
+        return services;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,6,1],[15,9,15,71,1],[17,9,19,38,1],[19,38,19,131,1],[19,131,20,47,1],[22,9,24,38,1],[24,38,24,132,1],[24,132,25,47,1],[27,9,29,38,1],[29,38,29,132,1],[29,132,30,50,1],[32,9,32,61,1],[33,9,33,56,1],[35,9,35,25,1],[36,5,36,6,1],[39,5,39,6,1],[40,9,40,75,1],[42,9,44,28,1],[44,28,46,42,1],[46,42,46,120,1],[46,120,46,121,1],[46,121,47,24,1],[49,9,49,16,1],[49,18,49,41,1],[49,42,49,44,1],[49,45,49,64,1],[50,9,50,10,1],[51,13,53,29,1],[53,29,53,107,1],[53,107,54,28,1],[56,13,56,20,1],[56,22,56,42,1],[56,43,56,45,1],[56,46,56,62,1],[57,13,57,14,1],[58,17,58,73,1],[59,13,59,14,1],[60,9,60,10,1],[62,9,62,25,1],[63,5,63,6,1],[66,5,66,6,1],[67,9,67,68,1],[69,9,71,28,1],[71,28,72,72,1],[72,72,73,24,1],[75,9,75,16,1],[75,18,75,49,1],[75,50,75,52,1],[75,53,75,80,1],[76,9,76,10,1],[77,13,77,83,1],[78,9,78,10,1],[80,9,80,25,1],[81,5,81,6,1]]);
+    </script>
+  </body>
+</html>

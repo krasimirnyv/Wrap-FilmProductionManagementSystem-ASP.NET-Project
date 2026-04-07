@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/CastConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+using GCommon.Enums;
+
+using static GCommon.DataFormat;
+using static Common.EntityIdentificationConstants;
+
+public class CastConfiguration : IEntityTypeConfiguration&lt;Cast&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;Cast&gt; entity)
+    {
+        entity.HasQueryFilter(c =&gt; !c.IsDeleted);
+
+        entity.HasData(CastMembersSeed);
+    }
+    
+    private static readonly Cast[] CastMembersSeed =
+    [
+        new()
+        {
+            Id = CastId1,
+            UserId = CastUserId1,
+            ProfileImagePath = DefaultProfilePath,
+            FirstName = &quot;Elena&quot;,
+            LastName = &quot;Stoyanova&quot;,
+            Nickname = &quot;Eli&quot;,
+            BirthDate = new DateTime(1998, 4, 12),
+            Gender = GenderType.Female,
+            Biography = &quot;Stage and screen actor, passionate about drama and indie productions.&quot;,
+            IsActive = true,
+            IsDeleted = false
+        },
+        new()
+        {
+            Id = CastId2,
+            UserId = CastUserId2,
+            ProfileImagePath = DefaultProfilePath,
+            FirstName = &quot;Georgi&quot;,
+            LastName = &quot;Ivanov&quot;,
+            Nickname = null,
+            BirthDate = new DateTime(1995, 9, 3),
+            Gender = GenderType.Male,
+            Biography = &quot;Film actor with a focus on action and thrillers.&quot;,
+            IsActive = true,
+            IsDeleted = false
+        },
+        new()
+        {
+            Id = CastId3,
+            UserId = CastUserId3,
+            ProfileImagePath = DefaultProfilePath,
+            FirstName = &quot;Siyana&quot;,
+            LastName = &quot;Petrova&quot;,
+            Nickname = &quot;Sisi&quot;,
+            BirthDate = new DateTime(2001, 1, 25),
+            Gender = GenderType.Female,
+            Biography = &quot;Aspiring actor, experienced in commercials and short films.&quot;,
+            IsActive = true,
+            IsDeleted = false
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,5,15,6,0],[16,9,16,50,0],[18,9,18,41,0],[19,5,19,6,0],[21,5,65,7,0]]);
+    </script>
+  </body>
+</html>

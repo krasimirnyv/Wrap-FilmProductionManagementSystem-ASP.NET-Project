@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Infrastructure.Tests/SlugGeneratorTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Infrastructure.Tests;
+
+using NUnit.Framework;
+
+using Wrap.Web.Infrastructure.Utilities;
+
+[TestFixture]
+public class SlugGeneratorTests
+{
+    private SlugGenerator slugGenerator = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        slugGenerator = new SlugGenerator();
+    }
+
+    [TestCase(null, &quot;&quot;)]
+    [TestCase(&quot;&quot;, &quot;&quot;)]
+    [TestCase(&quot;   &quot;, &quot;&quot;)]
+    [TestCase(&quot;   Hello World   &quot;, &quot;hello-world&quot;)]
+    [TestCase(&quot;Hello    World\t\tAgain\nHere&quot;, &quot;hello-world-again-here&quot;)]
+    [TestCase(&quot;Hello, World! @2026 #Wrap&quot;, &quot;hello-world-2026-wrap&quot;)]
+    [TestCase(&quot;hello---world----again&quot;, &quot;hello-world-again&quot;)]
+    [TestCase(&quot;   --- Hello World ---   &quot;, &quot;hello-world&quot;)]
+    [TestCase(&quot;!!!@@@###$$$&quot;, &quot;&quot;)]
+    [TestCase(&quot;My-Slug_Already-OK&quot;, &quot;my-slugalready-ok&quot;)]
+    public void GenerateSlug_WhenCalled_ReturnsExpected(string? input, string expected)
+    {
+        // Act
+        string result = slugGenerator.GenerateSlug(input!);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(expected));
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,5,10,49,1],[14,5,14,6,1],[15,9,15,45,1],[16,5,16,6,1],[29,5,29,6,1],[31,9,31,60,1],[34,9,34,51,1],[35,5,35,6,1]]);
+    </script>
+  </body>
+</html>

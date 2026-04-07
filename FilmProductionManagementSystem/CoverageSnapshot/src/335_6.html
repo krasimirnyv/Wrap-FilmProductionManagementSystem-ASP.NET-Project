@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Models/Production/DetailsProductionDto.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Models.Production;
+
+using NestedDtos;
+using GCommon.Enums;
+
+public class DetailsProductionDto
+{
+    public Guid Id { get; set; }
+
+    public string Thumbnail { get; set; } = null!;
+
+    public string Title { get; set; } = null!;
+
+    public string? Description { get; set; }
+
+    public decimal Budget { get; set; }
+
+    public ProductionStatusType StatusType { get; set; }
+
+    public string StatusAbstractClass { get; set; } = string.Empty;
+
+    public DateTime StatusStartDate { get; set; }
+
+    public DateTime? StatusEndDate { get; set; }
+
+    public Guid? ScriptId { get; set; }
+
+    public IReadOnlyCollection&lt;ProductionCrewMemberDto&gt; ProductionCrewMembers { get; set; } = [];
+
+    public IReadOnlyCollection&lt;ProductionCastMemberDto&gt; ProductionCastMembers { get; set; } = [];
+
+    public IReadOnlyCollection&lt;ProductionSceneDto&gt; ProductionScenes { get; set; } = [];
+
+    public IReadOnlyCollection&lt;ProductionAssetDto&gt; ProductionAssets { get; set; } = [];
+
+    public IReadOnlyCollection&lt;ProductionShootingDayDto&gt; ProductionShootingDays { get; set; } = [];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,45,10,50,1],[12,41,12,46,1],[20,55,20,67,1],[28,95,28,97,1],[30,95,30,97,1],[32,85,32,87,1],[34,85,34,87,1],[36,97,36,99,1]]);
+    </script>
+  </body>
+</html>

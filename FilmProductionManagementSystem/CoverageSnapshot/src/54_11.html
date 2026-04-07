@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Repository/ProductionRepository.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Repository;
+
+using Microsoft.EntityFrameworkCore;
+
+using Interfaces;
+using Models;
+using Models.MappingEntities;
+using GCommon.Enums;
+
+public class ProductionRepository(FilmProductionDbContext dbContext) 
+    : BaseRepository(dbContext), IProductionRepository
+{
+    public async Task&lt;IReadOnlyCollection&lt;Production&gt;&gt; GetAllAsync
+        (int? skipCount = null, int? takeCount = null, IReadOnlyCollection&lt;ProductionStatusType&gt;? statuses = null, bool? isActive = null)
+    {
+        IQueryable&lt;Production&gt; productionsQuery = Context!
+            .Productions
+            .AsNoTracking()
+            .OrderBy(p =&gt; p.Title)
+            .ThenBy(p =&gt; p.StatusType)
+            .ThenBy(p =&gt; p.Id);
+
+        productionsQuery = ProductionsQuery(statuses, isActive, productionsQuery);
+        
+        if (skipCount.HasValue &amp;&amp; skipCount &gt; 0)
+            productionsQuery = productionsQuery.Skip(skipCount.Value);
+
+        if (takeCount.HasValue &amp;&amp; takeCount &gt; 0)
+            productionsQuery = productionsQuery.Take(takeCount.Value);
+
+        IReadOnlyCollection&lt;Production&gt; productions = await productionsQuery.ToArrayAsync();
+        
+        return productions;
+    }
+
+    public async Task&lt;int&gt; CountAsync(IReadOnlyCollection&lt;ProductionStatusType&gt;? statuses = null, bool? isActive = null)
+    {
+        IQueryable&lt;Production&gt; productionsQuery = Context!
+            .Productions
+            .AsNoTracking();
+        
+        productionsQuery = ProductionsQuery(statuses, isActive, productionsQuery);
+        
+        int productionsCount = await productionsQuery.CountAsync();
+        
+        return productionsCount;
+    }
+
+    public async Task&lt;Production?&gt; GetByIdAsNoTrackingAsync(Guid productionId)
+    {
+        Production? production = await Context!
+            .Productions
+            .AsNoTracking()
+            .SingleOrDefaultAsync(p =&gt; p.Id == productionId);
+        
+        return production;
+    }
+    
+    public async Task&lt;Production?&gt; GetByIdAsync(Guid productionId)
+    {
+        Production? production = await Context!
+            .Productions
+            .SingleOrDefaultAsync(p =&gt; p.Id == productionId);
+        
+        return production;
+    }
+
+    public async Task&lt;(Production?       production, 
+   IReadOnlyCollection&lt;ProductionCrew&gt;?  productionCrews,
+   IReadOnlyCollection&lt;ProductionCast&gt;?  productionCasts,
+   IReadOnlyCollection&lt;Scene&gt;?           productionScenes,
+   IReadOnlyCollection&lt;ProductionAsset&gt;? productionAssets,
+   IReadOnlyCollection&lt;ShootingDay&gt;?     productionShootingDays)&gt;
+        GetDetailsAsync(Guid productionId)
+    {
+        Production? production = await Context!
+            .Productions
+            .Include(p =&gt; p.Script)
+            .AsNoTracking()
+            .SingleOrDefaultAsync(p =&gt; p.Id == productionId);
+        
+        if (production is null)
+            return (production:             null,
+                    productionCrews:        null,
+                    productionCasts:        null, 
+                    productionScenes:       null,
+                    productionAssets:       null, 
+                    productionShootingDays: null);
+
+        IReadOnlyCollection&lt;ProductionCrew&gt; productionCrews = await Context!
+            .ProductionsCrewMembers
+            .Include(pc =&gt; pc.CrewMember)
+            .AsNoTracking()
+            .Where(pc =&gt; pc.ProductionId == productionId)
+            .ToArrayAsync();
+        
+        IReadOnlyCollection&lt;ProductionCast&gt; productionCasts = await Context!
+            .ProductionsCastMembers
+            .Include(pc =&gt; pc.CastMember)
+            .AsNoTracking()
+            .Where(pc =&gt; pc.ProductionId == productionId)
+            .ToArrayAsync();
+
+        IReadOnlyCollection&lt;Scene&gt; productionScenes = await Context!
+            .Scenes
+            .AsNoTracking()
+            .Where(s =&gt; s.ProductionId == productionId)
+            .ToArrayAsync();
+        
+        IReadOnlyCollection&lt;ProductionAsset&gt; productionAssets = await Context!
+            .ProductionsAssets
+            .AsNoTracking()
+            .Where(pa =&gt; pa.ProductionId == productionId)
+            .ToArrayAsync();
+
+        IReadOnlyCollection&lt;ShootingDay&gt; productionShootingDays = await Context!
+            .ShootingDays
+            .AsNoTracking()
+            .Where(sd =&gt; sd.ProductionId == productionId)
+            .ToArrayAsync();
+        
+        return (production, productionCrews, productionCasts, productionScenes, productionAssets, productionShootingDays);
+    }
+
+    public async Task AddAsync(Production production)
+    {
+        await Context!.Productions.AddAsync(production);
+    }
+
+    public Task DeleteAsync(Production production)
+    {
+        Context!.Productions.Remove(production);
+        return Task.CompletedTask;
+    }
+
+    public async Task&lt;Crew?&gt; GetCrewByUserIdAsync(Guid applicationUserId)
+    {
+        Crew? crew = await Context!
+            .CrewMembers
+            .AsNoTracking()
+            .SingleOrDefaultAsync(c =&gt; c.UserId == applicationUserId);
+        
+        return crew;
+    }
+
+    public async Task AddDirectorToProductionAsync(Guid productionId, Crew creator, CrewRoleType roleType)
+    {
+        ProductionCrew newProductionCrew = new ProductionCrew
+        {
+            ProductionId = productionId,
+            CrewMemberId = creator.Id,
+            RoleType = roleType
+        };
+        
+        await Context!.ProductionsCrewMembers.AddAsync(newProductionCrew);
+    }
+
+    public async Task&lt;bool&gt; IsUserProductionLeaderAsync(Guid productionId, Guid applicationUserId)
+    {
+        Guid? crewId = await Context!
+            .CrewMembers
+            .AsNoTracking()
+            .Where(c =&gt; c.UserId == applicationUserId &amp;&amp; !c.IsDeleted)
+            .Select(c =&gt; c.Id)
+            .SingleOrDefaultAsync();
+
+        if (crewId == Guid.Empty)
+            return false;
+
+        CrewRoleType[] allowedLeaderRoles =
+        [
+            CrewRoleType.Director,
+            CrewRoleType.Producer,
+        ];
+
+        bool isLeader = await Context
+                            .Productions
+                            .AsNoTracking()
+                            .Where(p =&gt; p.Id == productionId)
+                            .AnyAsync(p =&gt; p.CreatedByUserId == applicationUserId) ||
+                        await Context
+                            .ProductionsCrewMembers
+                            .AsNoTracking()
+                            .AnyAsync(pc =&gt; pc.ProductionId == productionId
+                                            &amp;&amp; pc.CrewMemberId == crewId
+                                            &amp;&amp; allowedLeaderRoles.Contains(pc.RoleType));
+        return isLeader;
+    }
+
+    public async Task&lt;int&gt; SaveAllChangesAsync()
+    {
+        int affectedRows = await SaveChangesAsync();
+        return affectedRows;
+    }
+    
+    private static IQueryable&lt;Production&gt; ProductionsQuery(IReadOnlyCollection&lt;ProductionStatusType&gt;? statuses, bool? isActive, IQueryable&lt;Production&gt; productionsQuery)
+    {
+        if (statuses is not null &amp;&amp; statuses.Count &gt; 0)
+        {
+            productionsQuery = productionsQuery
+                .Where(p =&gt; statuses.Contains(p.StatusType));
+        }
+        else if (isActive.HasValue)
+        { 
+            productionsQuery = productionsQuery
+                .Where(p =&gt;
+                    p.StatusType == ProductionStatusType.Production ||
+                    p.StatusType == ProductionStatusType.OnHold ||
+                    p.StatusType == ProductionStatusType.Reshoots);
+        } 
+
+        return productionsQuery;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,7,11,32,0],[15,5,15,6,0],[16,9,21,32,0],[23,9,23,83,0],[25,9,25,49,0],[26,13,26,71,0],[28,9,28,49,0],[29,13,29,71,0],[31,9,31,93,0],[33,9,33,28,0],[34,5,34,6,0],[37,5,37,6,0],[38,9,40,29,0],[42,9,42,83,0],[44,9,44,68,0],[46,9,46,33,0],[47,5,47,6,0],[50,5,50,6,0],[51,9,54,62,0],[56,9,56,27,0],[57,5,57,6,0],[60,5,60,6,0],[61,9,63,62,0],[65,9,65,27,0],[66,5,66,6,0],[75,5,75,6,0],[76,9,80,62,0],[82,9,82,32,0],[83,13,88,51,0],[90,9,95,29,0],[97,9,102,29,0],[104,9,108,29,0],[110,9,114,29,0],[116,9,120,29,0],[122,9,122,123,0],[123,5,123,6,0],[126,5,126,6,0],[127,9,127,57,0],[128,5,128,6,0],[131,5,131,6,0],[132,9,132,49,0],[133,9,133,35,0],[134,5,134,6,0],[137,5,137,6,0],[138,9,141,71,0],[143,9,143,21,0],[144,5,144,6,0],[147,5,147,6,0],[148,9,153,11,0],[155,9,155,75,0],[156,5,156,6,0],[159,5,159,6,0],[160,9,165,37,0],[167,9,167,34,0],[168,13,168,26,0],[170,9,174,11,0],[176,9,186,90,0],[187,9,187,25,0],[188,5,188,6,0],[191,5,191,6,0],[192,9,192,53,0],[193,9,193,29,0],[194,5,194,6,0],[197,5,197,6,0],[198,9,198,56,0],[199,9,199,10,0],[200,13,201,62,0],[202,9,202,10,0],[203,14,203,36,0],[204,9,204,10,0],[205,13,209,68,0],[210,9,210,10,0],[212,9,212,33,0],[213,5,213,6,0]]);
+    </script>
+  </body>
+</html>

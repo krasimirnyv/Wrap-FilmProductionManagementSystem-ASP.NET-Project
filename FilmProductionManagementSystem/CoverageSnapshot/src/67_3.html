@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/Utilities/ImageLogic/VariantImageStrategyResolver.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core.Utilities.ImageLogic;
+
+using Interfaces;
+
+using static GCommon.OutputMessages;
+
+public class VariantImageStrategyResolver (IEnumerable&lt;IVariantImageStrategy&gt; strategies) : IVariantImageStrategyResolver
+{
+    private readonly IReadOnlyDictionary&lt;string, IVariantImageStrategy&gt; strategiesByKey =
+        strategies.ToDictionary(vis =&gt; vis.FolderName, StringComparer.OrdinalIgnoreCase);
+
+    public IVariantImageStrategy Resolve(string variantKey)
+    {
+        bool isValidKey = strategiesByKey.TryGetValue(variantKey, out IVariantImageStrategy? strategy);
+        if (isValidKey &amp;&amp; strategy is not null) 
+            return strategy;
+
+        throw new NotSupportedException(string.Format(NoImageStrategyFound, variantKey));
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,14,7,90,1],[9,5,10,40,1],[10,40,10,54,1],[10,54,10,90,1],[13,5,13,6,1],[14,9,14,104,1],[15,9,15,48,1],[16,13,16,29,1],[18,9,18,90,1],[19,5,19,6,1]]);
+    </script>
+  </body>
+</html>

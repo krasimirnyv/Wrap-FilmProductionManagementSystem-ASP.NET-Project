@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/ProductionAsset.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+
+using GCommon.Enums;
+
+using static GCommon.EntityConstants.ProductionAsset;
+using static GCommon.DataFormat;
+
+/// &lt;summary&gt;
+/// Entity представляващо различни аудио-визални инструменти, които се представят по сходен начин в апликацията
+/// Примери за тези инструметни са storyboard, moodboard, color pallete и тн.
+/// &lt;/summary&gt;
+public class ProductionAsset
+{
+    [Key]
+    public Guid Id { get; set; }
+
+    [Required]
+    public ProductionAssetType AssetType { get; set; }
+
+    [Required]
+    [Unicode]
+    [MaxLength(TitleMaxLength)]
+    public string Title { get; set; } = null!;
+
+    [Unicode]
+    [MaxLength(DescriptionMaxLength)]
+    public string? Description { get; set; }
+    
+    [Required]
+    [Unicode]
+    [MaxLength(FilePathMaxLength)]
+    public string FilePath { get; set; } = null!;
+
+    [Required]
+    [Column(TypeName = DateTimeTypeFormat)]
+    public DateTime UploadedAt { get; set; }
+    
+    [Required]
+    [ForeignKey(nameof(Production))]
+    public Guid ProductionId { get; set; }
+
+    public virtual Production Production { get; set; } = null!;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[28,41,28,46,1],[37,44,37,49,1],[47,58,47,63,1]]);
+    </script>
+  </body>
+</html>

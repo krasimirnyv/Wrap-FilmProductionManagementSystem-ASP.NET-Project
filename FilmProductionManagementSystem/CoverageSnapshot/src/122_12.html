@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Infrastructure.Tests/IsAfterTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Infrastructure.Tests;
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+using NUnit.Framework;
+
+using GCommon.ValidationAttributes;
+
+using static GCommon.OutputMessages;
+
+[TestFixture]
+public class IsAfterAttributeTests
+{
+    private sealed class ModelWithDates
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+
+        public object? StartObj { get; set; }
+    }
+
+    private static ValidationContext CreateContext(object instance) =&gt; new(instance);
+
+    private static ValidationResult? Validate(IsAfter attribute, object? value, object instance)
+        =&gt; attribute.GetValidationResult(value, CreateContext(instance));
+    
+    private static IEnumerable&lt;TestCaseData&gt; DateComparisonCases()
+    {
+        yield return new TestCaseData(
+                new DateTime(2026, 1, 2), // end
+                new DateTime(2026, 1, 1), // start
+                true)                                     // isSucceeded
+            .SetName(&quot;IsValid_WhenEndIsAfterStart_ReturnsSuccess&quot;);
+
+        yield return new TestCaseData(
+                new DateTime(2026, 1, 1), // end
+                new DateTime(2026, 1, 1), // start
+                false)                                    // isSucceeded
+            .SetName(&quot;IsValid_WhenEndEqualsStart_ReturnsError&quot;);
+
+        yield return new TestCaseData(
+                new DateTime(2025, 12, 31), // end
+                new DateTime(2026, 1, 1),   // start
+                false)                                      // isSucceeded
+            .SetName(&quot;IsValid_WhenEndIsBeforeStart_ReturnsError&quot;);
+    }
+
+    [TestCaseSource(nameof(DateComparisonCases))]
+    public void IsValid_WhenEndComparedToStart_BehavesCorrectly(DateTime end, DateTime start, bool isSuccess)
+    {
+        // Arrange
+        ModelWithDates model = new ModelWithDates
+        {
+            Start = start,
+            End = end
+        };
+
+        IsAfter attribute = new IsAfter(nameof(ModelWithDates.Start));
+
+        // Act
+        ValidationResult? result = Validate(attribute, model.End, model);
+
+        // Assert
+        if (isSuccess)
+        {
+            Assert.That(result, Is.EqualTo(ValidationResult.Success));
+        }
+        else
+        {
+            Assert.That(result, Is.Not.EqualTo(ValidationResult.Success));
+            Assert.That(result!.ErrorMessage, Is.EqualTo(string.Format(IsAfterExceptionMessage, start)));
+        }
+    }
+    
+    [Test]
+    public void IsValid_WhenInvalidAndCustomErrorMessageProvided_ReturnsCustomMessage()
+    {
+        // Arrange
+        ModelWithDates model = new ModelWithDates
+        {
+            Start = new DateTime(2026, 1, 1),
+            End = new DateTime(2026, 1, 1)
+        };
+
+        IsAfter attribute = new IsAfter(nameof(ModelWithDates.Start))
+        {
+            ErrorMessage = &quot;Custom message&quot;
+        };
+
+        // Act
+        ValidationResult? result = Validate(attribute, model.End, model);
+
+        // Assert
+        Assert.That(result, Is.Not.EqualTo(ValidationResult.Success));
+        Assert.That(result!.ErrorMessage, Is.EqualTo(&quot;Custom message&quot;));
+    }
+    
+    private static IEnumerable&lt;TestCaseData&gt; NonDateCases()
+    {
+        yield return new TestCaseData(null).SetName(&quot;IsValid_WhenValueIsNull_ReturnsSuccess&quot;);
+        yield return new TestCaseData(&quot;2026-01-01&quot;).SetName(&quot;IsValid_WhenValueIsNotDateTime_ReturnsSuccess&quot;);
+        yield return new TestCaseData(123).SetName(&quot;IsValid_WhenValueIsInt_ReturnsSuccess&quot;);
+    }
+
+    [TestCaseSource(nameof(NonDateCases))]
+    public void IsValid_WhenValueIsNullOrNotDateTime_ReturnsSuccess(object? value)
+    {
+        // Arrange
+        ModelWithDates model = new ModelWithDates { Start = new DateTime(2026, 1, 1) };
+        IsAfter attribute = new IsAfter(nameof(ModelWithDates.Start));
+
+        // Act
+        ValidationResult? result = Validate(attribute, value, model);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(ValidationResult.Success));
+    }
+    
+    [Test]
+    public void IsValid_WhenComparisonPropertyDoesNotExist_ReturnsSuccess()
+    {
+        // Arrange
+        ModelWithDates model = new ModelWithDates
+        {
+            Start = new DateTime(2026, 1, 1),
+            End = new DateTime(2026, 1, 2)
+        };
+
+        IsAfter attribute = new IsAfter(&quot;MissingProperty&quot;);
+
+        // Act
+        ValidationResult? result = Validate(attribute, model.End, model);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(ValidationResult.Success));
+    }
+    
+    [Test]
+    public void IsValid_WhenComparisonPropertyIsNotDateTime_ReturnsSuccess()
+    {
+        // Arrange
+        ModelWithDates model = new ModelWithDates { StartObj = &quot;not a date&quot; };
+        IsAfter attribute = new IsAfter(nameof(ModelWithDates.StartObj));
+
+        // Act
+        ValidationResult? result = Validate(attribute, new DateTime(2026, 1, 2), model);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(ValidationResult.Success));
+    }
+    
+    [Test]
+    public void IsValid_WhenComparisonPropertyIsNull_ReturnsSuccess()
+    {
+        // Arrange
+        ModelWithDates model = new ModelWithDates { StartObj = null };
+        IsAfter attribute = new IsAfter(nameof(ModelWithDates.StartObj));
+
+        // Act
+        ValidationResult? result = Validate(attribute, new DateTime(2026, 1, 2), model);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(ValidationResult.Success));
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[24,72,24,85,1],[27,12,27,73,1],[30,5,30,6,1],[31,9,35,68,1],[37,9,41,65,1],[43,9,47,67,1],[48,5,48,6,1],[52,5,52,6,1],[54,9,58,11,1],[60,9,60,71,1],[63,9,63,74,1],[66,9,66,23,1],[67,9,67,10,1],[68,13,68,71,1],[69,9,69,10,1],[71,9,71,10,1],[72,13,72,75,1],[73,13,73,106,1],[74,9,74,10,1],[75,5,75,6,1],[79,5,79,6,1],[81,9,85,11,1],[87,9,90,11,1],[93,9,93,74,1],[96,9,96,71,1],[97,9,97,73,1],[98,5,98,6,1],[101,5,101,6,1],[102,9,102,95,1],[103,9,103,110,1],[104,9,104,93,1],[105,5,105,6,1],[109,5,109,6,1],[111,9,111,88,1],[112,9,112,71,1],[115,9,115,70,1],[118,9,118,67,1],[119,5,119,6,1],[123,5,123,6,1],[125,9,129,11,1],[131,9,131,60,1],[134,9,134,74,1],[137,9,137,67,1],[138,5,138,6,1],[142,5,142,6,1],[144,9,144,79,1],[145,9,145,74,1],[148,9,148,89,1],[151,9,151,67,1],[152,5,152,6,1],[156,5,156,6,1],[158,9,158,71,1],[159,9,159,74,1],[162,9,162,89,1],[165,9,165,67,1],[166,5,166,6,1]]);
+    </script>
+  </body>
+</html>

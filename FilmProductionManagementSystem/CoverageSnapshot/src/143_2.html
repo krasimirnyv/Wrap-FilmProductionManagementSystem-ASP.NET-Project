@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/ViewComponents/NavBarUserComponent.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace FilmProductionManagementSystem.Web.ViewComponents;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+using Wrap.Data.Models.Infrastructure;
+using Wrap.Web.ViewModels.NavBar;
+using Wrap.Services.Core.Interfaces;
+using Wrap.Services.Models.NavBar;
+
+using static Wrap.GCommon.OutputMessages.NavBar;
+
+public class NavBarUserComponent(UserManager&lt;ApplicationUser&gt; userManager,
+                                INavBarService navBarService,
+                                ILogger&lt;NavBarUserComponent&gt; logger) : ViewComponent
+{
+    public async Task&lt;IViewComponentResult&gt; InvokeAsync()
+    {
+        string? userId = userManager.GetUserId(HttpContext.User);
+        if (string.IsNullOrEmpty(userId))
+            return View(&quot;BadRequestNavBar&quot;, UserIsNull);
+        
+        bool isValidGuid = Guid.TryParse(userId, out Guid userGuid);
+        if (!isValidGuid)
+            return View(&quot;BadRequestNavBar&quot;, UserIsNull);
+
+        try
+        {
+            NavBarUserDto? dto = await navBarService.GetNavBarUserAsync(userGuid);
+
+            if (dto is null)
+                return View(&quot;BadRequestNavBar&quot;, ModelIsNull);
+
+            NavBarUserViewModel viewModel = MapToNavBarUserViewModelFromDto(dto);
+
+            return View(viewModel);
+        }
+        catch (ArgumentNullException ane)
+        {
+            logger.LogError(string.Format(UserNotFoundMessage, userId) + ane.Message);
+            return View(&quot;BadRequestNavBar&quot;, UserIsNull + ane.Message);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(NavBarFailure + e.Message);
+            return View(&quot;BadRequestNavBar&quot;, NavBarFailure + e.Message);
+        }
+    }
+
+    private static NavBarUserViewModel MapToNavBarUserViewModelFromDto(NavBarUserDto dto)
+    {
+        NavBarUserViewModel viewModel = new NavBarUserViewModel
+        {
+            UserName = dto.UserName,
+            ProfileImagePath = dto.ProfileImagePath,
+            Role = dto.Role,
+        };
+        
+        return viewModel;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,14,15,69,0],[18,5,18,6,0],[19,9,19,66,0],[20,9,20,42,0],[21,13,21,57,0],[23,9,23,69,0],[24,9,24,26,0],[25,13,25,57,0],[28,9,28,10,0],[29,13,29,83,0],[31,13,31,29,0],[32,17,32,62,0],[34,13,34,82,0],[36,13,36,36,0],[38,9,38,42,0],[39,9,39,10,0],[40,13,40,87,0],[41,13,41,71,0],[43,9,43,28,0],[44,9,44,10,0],[45,13,45,56,0],[46,13,46,72,0],[48,5,48,6,0],[51,5,51,6,0],[52,9,57,11,0],[59,9,59,26,0],[60,5,60,6,0]]);
+    </script>
+  </body>
+</html>

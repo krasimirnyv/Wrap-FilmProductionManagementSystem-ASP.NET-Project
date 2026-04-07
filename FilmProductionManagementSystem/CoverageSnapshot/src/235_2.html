@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Shared/Components/NavBarUserComponent/BadRequestNavBar.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model string?
+
+&lt;ul class=&quot;navbar-nav ms-auto flex-row align-items-center gap-2&quot;&gt;
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;span class=&quot;small text-muted&quot; style=&quot;white-space:nowrap;&quot;&gt;
+            @if (Model == &quot;UserNull&quot;)
+            {
+                &lt;span title=&quot;No authenticated user&quot;&gt;You are not signed in&lt;/span&gt;
+            }
+            else if (Model == &quot;ModelNull&quot;)
+            {
+                &lt;span title=&quot;Profile record not found&quot;&gt;Your profile is missing&lt;/span&gt;
+            }
+        &lt;/span&gt;
+    &lt;/li&gt;
+
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;a class=&quot;nav-link&quot; asp-area=&quot;&quot; asp-controller=&quot;Home&quot; asp-action=&quot;Index&quot;&gt;Register&lt;/a&gt;
+    &lt;/li&gt;
+
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;a class=&quot;nav-link&quot; asp-area=&quot;&quot; asp-controller=&quot;LoginRegister&quot; asp-action=&quot;Login&quot;&gt;Log in&lt;/a&gt;
+    &lt;/li&gt;
+
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;a class=&quot;nav-link nav-refresh&quot;
+           href=&quot;#&quot;
+           role=&quot;button&quot;
+           aria-label=&quot;Refresh&quot;
+           title=&quot;Refresh&quot;
+           onclick=&quot;location.reload(); return false;&quot;&gt;
+            &lt;i class=&quot;bi bi-arrow-clockwise&quot;&gt;&lt;/i&gt;
+        &lt;/a&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[6,14,6,38,0],[7,13,7,14,0],[9,13,9,14,0],[10,18,10,43,0],[11,13,11,14,0],[13,13,13,14,0]]);
+    </script>
+  </body>
+</html>

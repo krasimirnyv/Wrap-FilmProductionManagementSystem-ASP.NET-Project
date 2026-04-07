@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/CastProfileService.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
+
+using Interfaces;
+using Utilities.ImageLogic.Interfaces;
+using Data.Models;
+using Data.Models.MappingEntities;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+using Data.Dtos.Cast;
+using Models.Profile;
+using Models.Profile.NestedDtos;
+
+using static GCommon.OutputMessages.Profile;
+using static GCommon.DataFormat;
+
+public class CastProfileService(UserManager&lt;ApplicationUser&gt; userManager, 
+                                SignInManager&lt;ApplicationUser&gt; signInManager,
+                                IProfileRepository profileRepository,
+                                IImageService imageService,
+                                IVariantImageStrategyResolver imageStrategyResolver,
+                                ILogger&lt;CastProfileService&gt; logger) : ICastProfileService
+{
+    public async Task&lt;CastProfileDto&gt; GetCastProfileDataAsync(string username)
+    {
+        Cast? cast = await profileRepository.GetCastByUsernameAsNoTrackingAsync(username);
+        if (cast is null)
+            throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
+
+        IReadOnlyCollection&lt;ProductionCast&gt; productions = await profileRepository.GetCastProductionsAsync(cast.Id);
+        IReadOnlyCollection&lt;SceneCast&gt; scenes = await profileRepository.GetCastScenesAsync(cast.Id);
+        
+        CastProfileDto castProfile = new CastProfileDto
+        {
+            FirstName = cast.FirstName,
+            LastName = cast.LastName,
+            ProfileImagePath = cast.ProfileImagePath!,
+            Nickname = cast.Nickname ?? EmptyNickname,
+            UserName = cast.User.UserName!,
+            Email = cast.User.Email!,
+            PhoneNumber = cast.User.PhoneNumber!,
+            Age = cast.Age.ToString(),
+            Gender = cast.Gender.ToString(),
+            IsActive = cast.IsActive,
+            Biography = cast.Biography,
+            
+            Productions = productions
+                .Select(pc =&gt; new CastMemberProductionDto
+                {
+                    ProductionId = pc.ProductionId.ToString(),
+                    ProductionTitle = pc.Production.Title,
+                    ProjectStatus = pc.Production.StatusType.ToString(),
+                    CharacterName = pc.Role,
+                })
+                .ToArray()
+                .AsReadOnly(),
+            
+            Scenes = scenes
+                .Select(sc =&gt; new CastMemberSceneDto
+                {
+                    SceneId = sc.SceneId.ToString(),
+                    SceneName = sc.Scene.SceneName,
+                    ProductionTitle = sc.Scene.Production.Title,
+                    CharacterName = sc.Role
+                })
+                .ToArray()
+                .AsReadOnly()
+        };
+        
+        return castProfile;
+    }
+
+    public async Task&lt;EditCastProfileDto&gt; GetEditCastProfileAsync(string username)
+    {
+        Cast? cast = await profileRepository.GetCastByUsernameAsNoTrackingAsync(username);
+        if (cast is null)
+            throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
+
+        EditCastProfileDto editCastDto = new EditCastProfileDto
+        {
+            FirstName = cast.FirstName,
+            LastName = cast.LastName,
+            Nickname = cast.Nickname,
+            PhoneNumber = cast.User.PhoneNumber!,
+            Biography = cast.Biography,
+            ProfileImage = null,
+            // Read-only properties
+            Email = cast.User.Email,
+            CurrentProfileImagePath = cast.ProfileImagePath,
+            Age = cast.Age.ToString(),
+            Gender = cast.Gender.ToString(),
+        };
+
+        return editCastDto;
+    }
+    
+    public async Task UpdateCastProfileAsync(string username, EditCastProfileDto castDto)
+    {
+        await using IDbContextTransaction transaction = await profileRepository.BeginTransactionAsync();
+        try
+        {
+            Cast? cast = await profileRepository.GetCastByUsernameAsync(username);
+            if (cast is null)
+                throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
+        
+            cast.FirstName = castDto.FirstName;
+            cast.LastName = castDto.LastName;
+            cast.Nickname = castDto.Nickname;
+            cast.Biography = castDto.Biography;
+            cast.User.PhoneNumber = castDto.PhoneNumber;
+        
+            if (castDto.ProfileImage is not null &amp;&amp; castDto.ProfileImage.Length &gt; 0)
+            {
+                IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+                string newImagePath = await imageService.ReplaceAsync(castDto.CurrentProfileImagePath, castDto.ProfileImage, strategy);
+                cast.ProfileImagePath = newImagePath;
+            }
+        
+            await profileRepository.SaveAllChangesAsync();
+            await profileRepository.CommitTransactionAsync(transaction);
+        }
+        catch (NotSupportedException nse)
+        {
+            await profileRepository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + nse.Message);
+            throw new NotSupportedException(nse.Message, nse);
+        }
+        catch (Exception e)
+        {
+            await profileRepository.RollbackTransactionAsync(transaction);
+            logger.LogError(string.Format(ErrorUpdatingProfile,  username) + e.Message);
+            throw new Exception(e.Message);
+        }
+    }
+    
+    public async Task&lt;DeleteProfileDto&gt; GetDeleteCastProfileAsync(string username)
+    {
+        Cast? cast = await profileRepository.GetCastWithAllDataIncludedByUsernameAsNoTrackingAsync(username);
+        if (cast is null)
+            throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
+
+        DeleteProfileDto deleteCastDto = new DeleteProfileDto
+        {
+            FirstName = cast.FirstName,
+            LastName = cast.LastName,
+            ProfileImagePath = cast.ProfileImagePath!,
+            UserName = cast.User.UserName!,
+            Email = cast.User.Email!,
+            PhoneNumber = cast.User.PhoneNumber!,
+            ProductionsCount = cast.CastMemberProductions.Count,
+            ScenesCount = cast.CastMemberScenes.Count,
+            SkillsCount = null
+        };
+        
+        return deleteCastDto;
+    }
+
+    public async Task&lt;bool&gt; DeleteCastProfileAsync(string username, DeleteProfileDto dto)
+    {
+        Cast? cast = await profileRepository.GetCastByUsernameAsync(username);
+        if (cast is null)
+            throw new ArgumentNullException(string.Format(CastNotFoundMessage, username));
+        
+        ApplicationUser user = cast.User;
+        bool isPasswordValid = await userManager.CheckPasswordAsync(user, dto.Password);
+        if (!isPasswordValid)
+        {
+            logger.LogError(string.Format(FailedPassword, username));
+            return false;
+        }
+        
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+        
+        await imageService.DeleteAsync(cast.ProfileImagePath, strategy);
+        
+        await profileRepository.DeleteCastProfileAsync(cast.Id);
+        await profileRepository.SaveAllChangesAsync();
+        
+        await signInManager.SignOutAsync();
+        return true;
+    }
+
+    public async Task&lt;string&gt; DownloadCastProfileDataAsync(string username)
+    {
+        CastPersonalDataDto[]? castPersonalData = await profileRepository.DownloadCastDataAsync(username);
+        if (castPersonalData is null)
+            throw new ArgumentNullException(string.Format(CrewNotFoundMessage, username));
+
+        string json = JsonConvert
+            .SerializeObject(castPersonalData, Formatting.Indented);
+        
+        return json;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,14,27,68,1],[30,5,30,6,1],[31,9,31,91,1],[32,9,32,26,1],[33,13,33,91,1],[35,9,35,116,1],[36,9,36,101,1],[38,9,53,31,1],[53,31,59,18,1],[59,18,64,31,1],[64,31,70,18,1],[70,18,73,11,1],[75,9,75,28,1],[76,5,76,6,1],[79,5,79,6,1],[80,9,80,91,1],[81,9,81,26,1],[82,13,82,91,1],[84,9,97,11,1],[99,9,99,28,1],[100,5,100,6,1],[103,5,103,6,1],[104,9,104,105,1],[106,9,106,10,1],[107,13,107,83,1],[108,13,108,30,1],[109,17,109,95,1],[111,13,111,48,1],[112,13,112,46,1],[113,13,113,46,1],[114,13,114,48,1],[115,13,115,57,1],[117,13,117,85,1],[118,13,118,14,1],[119,17,119,99,1],[120,17,120,136,1],[121,17,121,54,1],[122,13,122,14,1],[124,13,124,59,1],[125,13,125,73,1],[126,9,126,10,1],[127,9,127,42,1],[128,9,128,10,1],[129,13,129,75,1],[130,13,130,91,1],[131,13,131,63,1],[133,9,133,28,1],[134,9,134,10,1],[135,13,135,75,1],[136,13,136,89,1],[137,13,137,44,1],[139,5,139,6,1],[142,5,142,6,1],[143,9,143,110,1],[144,9,144,26,1],[145,13,145,91,1],[147,9,158,11,1],[160,9,160,30,1],[161,5,161,6,1],[164,5,164,6,1],[165,9,165,79,1],[166,9,166,26,1],[167,13,167,91,1],[169,9,169,42,1],[170,9,170,89,1],[171,9,171,30,1],[172,9,172,10,1],[173,13,173,70,1],[174,13,174,26,1],[177,9,177,91,1],[179,9,179,73,1],[181,9,181,65,1],[182,9,182,55,1],[184,9,184,44,1],[185,9,185,21,1],[186,5,186,6,1],[189,5,189,6,1],[190,9,190,107,1],[191,9,191,38,1],[192,13,192,91,1],[194,9,195,69,1],[197,9,197,21,1],[198,5,198,6,1]]);
+    </script>
+  </body>
+</html>

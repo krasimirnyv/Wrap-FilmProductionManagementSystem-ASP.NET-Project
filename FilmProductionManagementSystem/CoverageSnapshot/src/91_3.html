@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/Handlers/CrewRegistrationHandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core.Handlers;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+
+using Models.LoginAndRegistration;
+using Data.Models;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+
+using static GCommon.OutputMessages.Register;
+using static GCommon.ApplicationConstants.IdentityRoles;
+
+public class CrewRegistrationHandler(UserManager&lt;ApplicationUser&gt; userManager,
+                                     SignInManager&lt;ApplicationUser&gt; signInManager,
+                                     ILoginRegisterRepository loginRegisterRepository,
+                                     ILogger&lt;CrewRegistrationHandler&gt; logger) : RegistrationHandlerBase&lt;CrewRegistrationCompleteDto&gt;(userManager,
+                                                                                                                                     signInManager,
+                                                                                                                                     loginRegisterRepository,
+                                                                                                                                     logger)
+{
+    private readonly UserManager&lt;ApplicationUser&gt; _userManager = userManager;
+    private readonly ILoginRegisterRepository _loginRegisterRepository = loginRegisterRepository;
+
+    protected override IdentityResult ValidateDto(CrewRegistrationCompleteDto? registrationDto)
+    {
+        if (registrationDto is null)
+        {
+            logger.LogError(ErrorCreatingCrew);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = ErrorCreatingCrew
+            });
+        }
+
+        if (registrationDto.Draft is null)
+        {
+            logger.LogError(ErrorFoundingCrewDraft);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = ErrorFoundingCrewDraft
+            });
+        }
+        
+        if (registrationDto.SkillNumbers is null || registrationDto.SkillNumbers.Count == 0)
+        {
+            logger.LogError(NoSelectedSkills);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = NoSelectedSkills
+            });
+        }
+        
+        return IdentityResult.Success;
+    }
+    
+    protected override ApplicationUser BuildUser(CrewRegistrationCompleteDto registrationDto)
+    {
+        CrewRegistrationDraftDto draft = registrationDto.Draft!;
+        
+        ApplicationUser user = new ApplicationUser
+        {
+            UserName = draft.UserName,
+            Email = draft.Email,
+            PhoneNumber = draft.PhoneNumber
+        };
+
+        return user;
+    }
+
+    protected override async Task&lt;IdentityResult&gt; AssignRolesAsync(ApplicationUser user, CrewRegistrationCompleteDto registrationDto)
+        =&gt; await _userManager.AddToRoleAsync(user, Filmmaker);
+    
+    protected override string GetPassword(CrewRegistrationCompleteDto registrationDto)
+    {
+        string password = registrationDto.Draft!.Password;
+        return password;
+    }
+
+    protected override async Task&lt;int&gt; PersistDomainDataAsync(CrewRegistrationCompleteDto registrationDto, ApplicationUser user)
+    {
+        CrewRegistrationDraftDto draft = registrationDto.Draft!;
+        IReadOnlyCollection&lt;int&gt; skills = registrationDto.SkillNumbers!;
+        
+        Crew newCrew = new Crew
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            ProfileImagePath = draft.ProfilePicturePath,
+            FirstName = draft.FirstName,
+            LastName = draft.LastName,
+            Nickname = draft.Nickname,
+            Biography = draft.Biography,
+            IsActive = false,
+            IsDeleted = false
+        };
+        
+        await _loginRegisterRepository.CreateCrewAsync(newCrew);
+        await _loginRegisterRepository.AddCrewSkillsAsync(newCrew.Id, skills);
+        
+        int expectedRows = 1 + skills.Count;
+        return expectedRows;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,81,20,141,1],[22,5,22,78,1],[23,5,23,98,1],[26,5,26,6,1],[27,9,27,37,1],[28,9,28,10,1],[29,13,29,48,1],[30,13,33,16,1],[36,9,36,43,1],[37,9,37,10,1],[38,13,38,53,1],[39,13,42,16,1],[45,9,45,93,1],[46,9,46,10,1],[47,13,47,47,1],[48,13,51,16,1],[54,9,54,39,1],[55,5,55,6,1],[58,5,58,6,1],[59,9,59,65,1],[61,9,66,11,1],[68,9,68,21,1],[69,5,69,6,1],[72,12,72,62,1],[75,5,75,6,1],[76,9,76,59,1],[77,9,77,25,1],[78,5,78,6,1],[81,5,81,6,1],[82,9,82,65,1],[83,9,83,73,1],[85,9,96,11,1],[98,9,98,65,1],[99,9,99,79,1],[101,9,101,45,1],[102,9,102,29,1],[103,5,103,6,1]]);
+    </script>
+  </body>
+</html>

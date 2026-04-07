@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/TwoFactorAuthentication.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@page
+@using Microsoft.AspNetCore.Http.Features
+@model TwoFactorAuthenticationModel
+@{
+    ViewData[&quot;Title&quot;] = &quot;Two-factor authentication (2FA)&quot;;
+    ViewData[&quot;ActivePage&quot;] = ManageNavPages.TwoFactorAuthentication;
+
+    ITrackingConsentFeature? consentFeature = HttpContext.Features.Get&lt;ITrackingConsentFeature&gt;();
+    bool canTrack = consentFeature?.CanTrack ?? true;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/profile.css&quot; asp-append-version=&quot;true&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;div class=&quot;production-wrapper rounded-3&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+
+        &lt;partial name=&quot;_StatusMessage&quot; for=&quot;StatusMessage&quot; /&gt;
+
+        @* Header *@
+        &lt;div class=&quot;production-header-card text-center&quot;&gt;
+            &lt;i class=&quot;bi bi-shield-lock-fill&quot; style=&quot;font-size:2.5rem; color:#1976d2;&quot;&gt;&lt;/i&gt;
+            &lt;h2 class=&quot;fw-bold mt-3 mb-1&quot; style=&quot;color:var(--wrap-dark-blue);&quot;&gt;
+                Two-factor authentication (2FA)
+            &lt;/h2&gt;
+            &lt;p class=&quot;text-muted mb-0&quot;&gt;
+                Add extra security to your account using an authenticator app and recovery codes.
+            &lt;/p&gt;
+        &lt;/div&gt;
+
+        @if (!canTrack)
+        {
+            &lt;div class=&quot;alert-danger mt-4 d-flex gap-2 align-items-center&quot;&gt;
+                &lt;i class=&quot;bi bi-exclamation-octagon-fill flex-shrink-0&quot;&gt;&lt;/i&gt;
+                &lt;div&gt;
+                    &lt;strong&gt;Privacy and cookie policy have not been accepted.&lt;/strong&gt;
+                    &lt;div&gt;You must accept the policy before you can enable two-factor authentication.&lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        }
+        else
+        {
+            &lt;div class=&quot;row g-4 mt-2&quot;&gt;
+
+                @* Left: Status *@
+                &lt;div class=&quot;col-lg-5&quot;&gt;
+                    &lt;div class=&quot;section-card h-100&quot;&gt;
+                        &lt;div class=&quot;section-header&quot;&gt;
+                            &lt;i class=&quot;bi bi-shield-check me-2&quot;&gt;&lt;/i&gt;
+                            &lt;h3&gt;Security Status&lt;/h3&gt;
+                        &lt;/div&gt;
+
+                        &lt;div class=&quot;info-item&quot;&gt;
+                            &lt;div class=&quot;info-label&quot;&gt;2FA Status&lt;/div&gt;
+                            &lt;div class=&quot;info-value&quot;&gt;
+                                @if (Model.Is2faEnabled)
+                                {
+                                    &lt;span class=&quot;badge bg-success badge-custom&quot;&gt;Enabled&lt;/span&gt;
+                                }
+                                else
+                                {
+                                    &lt;span class=&quot;badge bg-secondary badge-custom&quot;&gt;Disabled&lt;/span&gt;
+                                }
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+
+                        &lt;div class=&quot;info-item&quot;&gt;
+                            &lt;div class=&quot;info-label&quot;&gt;Authenticator app&lt;/div&gt;
+                            &lt;div class=&quot;info-value&quot;&gt;
+                                @if (Model.HasAuthenticator)
+                                {
+                                    &lt;span class=&quot;badge bg-info badge-custom&quot;&gt;Configured&lt;/span&gt;
+                                }
+                                else
+                                {
+                                    &lt;span class=&quot;badge bg-warning badge-custom text-dark&quot;&gt;Not configured&lt;/span&gt;
+                                }
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+
+                        @if (Model.Is2faEnabled)
+                        {
+                            &lt;div class=&quot;info-item&quot;&gt;
+                                &lt;div class=&quot;info-label&quot;&gt;Recovery codes left&lt;/div&gt;
+                                &lt;div class=&quot;info-value&quot;&gt;
+                                    &lt;span class=&quot;associated-count&quot;&gt;@Model.RecoveryCodesLeft&lt;/span&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+
+                            @* Recovery code warnings *@
+                            @if (Model.RecoveryCodesLeft == 0)
+                            {
+                                &lt;div class=&quot;alert alert-danger mt-3 mb-0 d-flex gap-2 align-items-center&quot;&gt;
+                                    &lt;i class=&quot;bi bi-exclamation-triangle-fill flex-shrink-0&quot;&gt;&lt;/i&gt;
+                                    &lt;span&gt;
+                                        &lt;strong&gt;You have no recovery codes left.&lt;/strong&gt;
+                                        Generate a new set before you can log in with a recovery code.
+                                    &lt;/span&gt;
+                                &lt;/div&gt;
+                            }
+                            else if (Model.RecoveryCodesLeft == 1)
+                            {
+                                &lt;div class=&quot;alert alert-danger mt-3 mb-0 d-flex gap-2 align-items-center&quot;&gt;
+                                    &lt;i class=&quot;bi bi-exclamation-triangle-fill flex-shrink-0&quot;&gt;&lt;/i&gt;
+                                    &lt;span&gt;
+                                        &lt;strong&gt;You have 1 recovery code left.&lt;/strong&gt;
+                                        Consider generating a new set.
+                                    &lt;/span&gt;
+                                &lt;/div&gt;
+                            }
+                            else if (Model.RecoveryCodesLeft &lt;= 3)
+                            {
+                                &lt;div class=&quot;alert alert-warning mt-3 mb-0 d-flex gap-2 align-items-center&quot;&gt;
+                                    &lt;i class=&quot;bi bi-exclamation-triangle-fill flex-shrink-0&quot;&gt;&lt;/i&gt;
+                                    &lt;span&gt;
+                                        &lt;strong&gt;You have @Model.RecoveryCodesLeft recovery codes left.&lt;/strong&gt;
+                                        Consider generating a new set.
+                                    &lt;/span&gt;
+                                &lt;/div&gt;
+                            }
+                        }
+
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                @* Right: Actions *@
+                &lt;div class=&quot;col-lg-7 d-flex flex-column gap-4&quot;&gt;
+
+                    @* Authenticator actions *@
+                    &lt;div class=&quot;section-card&quot;&gt;
+                        &lt;div class=&quot;section-header&quot;&gt;
+                            &lt;i class=&quot;bi bi-phone-vibrate me-2&quot;&gt;&lt;/i&gt;
+                            &lt;h3&gt;Authenticator App&lt;/h3&gt;
+                        &lt;/div&gt;
+
+                        &lt;p class=&quot;text-muted mb-3&quot;&gt;
+                            Use an authenticator app (e.g. Microsoft Authenticator / Google Authenticator) to generate a time-based code.
+                        &lt;/p&gt;
+
+                        &lt;div class=&quot;d-flex flex-wrap gap-2&quot;&gt;
+                            @if (!Model.HasAuthenticator)
+                            {
+                                &lt;a id=&quot;enable-authenticator&quot;
+                                   asp-page=&quot;./EnableAuthenticator&quot;
+                                   class=&quot;btn btn-production-success btn-lg&quot;&gt;
+                                    &lt;i class=&quot;bi bi-plus-circle me-2&quot;&gt;&lt;/i&gt;Add authenticator app
+                                &lt;/a&gt;
+                            }
+                            else
+                            {
+                                &lt;a id=&quot;enable-authenticator&quot;
+                                   asp-page=&quot;./EnableAuthenticator&quot;
+                                   class=&quot;btn btn-production-success btn-lg&quot;&gt;
+                                    &lt;i class=&quot;bi bi-qr-code me-2&quot;&gt;&lt;/i&gt;Set up authenticator app
+                                &lt;/a&gt;
+
+                                &lt;a id=&quot;reset-authenticator&quot;
+                                   asp-page=&quot;./ResetAuthenticator&quot;
+                                   class=&quot;btn btn-production-secondary btn-lg&quot;&gt;
+                                    &lt;i class=&quot;bi bi-arrow-repeat me-2&quot;&gt;&lt;/i&gt;Reset authenticator app
+                                &lt;/a&gt;
+                            }
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    @* 2FA actions *@
+                    &lt;div class=&quot;danger-zone-card&quot;&gt;
+                        &lt;div class=&quot;section-header&quot;&gt;
+                            &lt;i class=&quot;bi bi-key-fill me-2&quot;&gt;&lt;/i&gt;
+                            &lt;h3&gt;2FA &amp; Recovery&lt;/h3&gt;
+                        &lt;/div&gt;
+
+                        &lt;p class=&quot;text-muted mb-3&quot;&gt;
+                            Manage recovery codes and how your browser is remembered.
+                        &lt;/p&gt;
+
+                        &lt;div class=&quot;d-flex flex-wrap gap-2&quot;&gt;
+                            @if (Model.Is2faEnabled)
+                            {
+                                @if (Model.IsMachineRemembered)
+                                {
+                                    &lt;form method=&quot;post&quot; class=&quot;d-inline&quot;&gt;
+                                        &lt;button type=&quot;submit&quot; class=&quot;btn btn-production-secondary btn-lg&quot;&gt;
+                                            &lt;i class=&quot;bi bi-browser-safari me-2&quot;&gt;&lt;/i&gt;Forget this browser
+                                        &lt;/button&gt;
+                                    &lt;/form&gt;
+                                }
+
+                                &lt;a asp-page=&quot;./GenerateRecoveryCodes&quot;
+                                   class=&quot;btn btn-production-secondary btn-lg&quot;&gt;
+                                    &lt;i class=&quot;bi bi-shield-plus me-2&quot;&gt;&lt;/i&gt;Reset recovery codes
+                                &lt;/a&gt;
+
+                                &lt;a asp-page=&quot;./Disable2fa&quot;
+                                   class=&quot;btn btn-production-danger btn-lg&quot;&gt;
+                                    &lt;i class=&quot;bi bi-shield-x me-2&quot;&gt;&lt;/i&gt;Disable 2-factor auth
+                                &lt;/a&gt;
+                            }
+                            else
+                            {
+                                ///////////////////////////////////////////////////////////////////////////////////////
+                                &lt;div class=&quot;rounded-3 p-5 p-lg-1 mx-3 alert-info mb-0 d-flex gap-2 align-items-center&quot;&gt;
+                                    &lt;i class=&quot;bi bi-info-circle-fill flex-shrink-0&quot;&gt;&lt;/i&gt;
+                                    &lt;span&gt;
+                                        2FA is currently disabled. Configure an authenticator app to enable it.
+                                    &lt;/span&gt;
+                                &lt;/div&gt;
+                            }
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                &lt;/div&gt;
+            &lt;/div&gt;
+        }
+
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;partial name=&quot;_ValidationScriptsPartial&quot; /&gt;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[5,5,5,59,0],[6,5,6,69,0],[8,5,8,99,0],[9,5,9,54,0],[33,10,33,24,0],[34,9,34,10,0],[42,9,42,10,0],[44,9,44,10,0],[58,34,58,57,0],[59,33,59,34,0],[61,33,61,34,0],[63,33,63,34,0],[65,33,65,34,0],[72,34,72,61,0],[73,33,73,34,0],[75,33,75,34,0],[77,33,77,34,0],[79,33,79,34,0],[83,26,83,49,0],[84,25,84,26,0],[93,30,93,63,0],[94,29,94,30,0],[102,29,102,30,0],[103,34,103,67,0],[104,29,104,30,0],[112,29,112,30,0],[113,34,113,67,0],[114,29,114,30,0],[122,29,122,30,0],[123,25,123,26,0],[143,30,143,58,0],[144,29,144,30,0],[150,29,150,30,0],[152,29,152,30,0],[164,29,164,30,0],[180,30,180,53,0],[181,29,181,30,0],[182,34,182,64,0],[183,33,183,34,0],[189,33,189,34,0],[200,29,200,30,0],[202,29,202,30,0],[210,29,210,30,0],[216,9,216,10,0]]);
+    </script>
+  </body>
+</html>

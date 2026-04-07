@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Models/Profile/EditSkillsDto.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Models.Profile;
+
+using GCommon.Enums;
+
+public class EditSkillsDto
+{
+    public IReadOnlyCollection&lt;CrewRoleType&gt; CurrentSkills { get; set; } 
+        = new HashSet&lt;CrewRoleType&gt;();
+
+    public IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; AllDepartments { get; set; }
+        = new Dictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt;();
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,11,8,38,1],[11,11,11,70,1]]);
+    </script>
+  </body>
+</html>

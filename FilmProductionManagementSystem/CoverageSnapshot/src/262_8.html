@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/FindPeople/FindActorsViewModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.FindPeople;
+
+public class FindActorsViewModel
+{
+    public int PageNumber { get; set; } = 1;
+
+    public int TotalPages { get; set; } = 1;
+    
+    public int ShowingPages { get; set; } = 9;
+    
+    public int TotalCount { get; set; }
+
+    public string? Search { get; set; }
+    
+    public byte? Age { get; set; }
+    
+    public string? Gender { get; set; }
+
+    public string? ProductionId { get; set; }
+    
+    public bool CanManageProduction { get; set; }
+    
+    public IReadOnlyCollection&lt;ActorListViewModel&gt; ActorList { get; set; }
+        = new List&lt;ActorListViewModel&gt;();
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[5,43,5,44,0],[7,43,7,44,0],[9,45,9,46,0],[24,11,24,41,0]]);
+    </script>
+  </body>
+</html>

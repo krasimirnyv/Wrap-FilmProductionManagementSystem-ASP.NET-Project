@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.Infrastructure/Extensions/WebInfrastructureServiceCollectionExtensions.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.Infrastructure.Extensions;
+
+using Microsoft.Extensions.DependencyInjection;
+
+using Utilities;
+
+public static class WebInfrastructureServiceCollectionExtensions
+{
+    public static IServiceCollection AddWebInfrastructure(this IServiceCollection services)
+    {
+        IServiceCollection generators = services.RegisterByConvention(
+            typeof(SlugGenerator).Assembly,
+            interfaceFilter: type =&gt; type is { IsInterface: true } &amp;&amp; (type.Name.StartsWith(&quot;I&quot;) &amp;&amp; type.Name.EndsWith(&quot;Generator&quot;)),
+            lifetime: ServiceLifetime.Singleton);
+        
+        return generators;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,5,10,6,1],[11,9,13,38,1],[13,38,13,133,1],[13,133,14,50,1],[16,9,16,27,1],[17,5,17,6,1]]);
+    </script>
+  </body>
+</html>

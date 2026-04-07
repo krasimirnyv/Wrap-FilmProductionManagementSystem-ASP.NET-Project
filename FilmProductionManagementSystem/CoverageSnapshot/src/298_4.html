@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/Cast.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+
+using GCommon.Enums;
+using Infrastructure;
+using MappingEntities;
+
+using static GCommon.EntityConstants.Cast;
+using static GCommon.DataFormat;
+
+/// &lt;summary&gt;
+/// Entity представящо актьор
+/// &lt;/summary&gt;
+public class Cast
+{
+    [Key]
+    public Guid Id { get; set; }
+
+    [Unicode]
+    [MaxLength(ProfileImagePathMaxLength)]
+    public string? ProfileImagePath { get; set; }
+    // Example: &quot;/images/cast/jane-doe.jpg&quot;
+
+    [Required]
+    [Unicode]
+    [MaxLength(FirstNameMaxLength)]
+    public string FirstName { get; set; } = null!;
+
+    [Required]
+    [Unicode]
+    [MaxLength(LastNameMaxLength)]
+    public string LastName { get; set; } = null!;
+
+    [Unicode]
+    [MaxLength(NicknameMaxLength)]
+    public string? Nickname { get; set; }
+
+    [Required]
+    [Column(TypeName = DateTimeTypeFormat)]
+    public DateTime BirthDate { get; set; }
+    
+    [Required]
+    public GenderType Gender { get; set; }
+    
+    [Unicode]
+    [MaxLength(BiographyMaxLength)]
+    public string? Biography { get; set; }
+
+    /// &lt;summary&gt;
+    /// Типът на заплащане и паричната сума ще се импелементират по-нататък
+    /// &lt;/summary&gt;
+    // public PaymentType? PaymentType { get; set; }
+    //
+    // [Column(TypeName = DecimalTypeFormat)]
+    // public decimal? PaymentAmount { get; set; }
+
+    public bool IsActive { get; set; }
+
+    public bool IsDeleted { get; set; }
+    
+    [Required]
+    [ForeignKey(nameof(User))]
+    public Guid UserId { get; set; }
+    
+    public virtual ApplicationUser User { get; set; } = null!;
+
+    public virtual ICollection&lt;ProductionCast&gt; CastMemberProductions { get; set; }
+        = new List&lt;ProductionCast&gt;();
+
+    public virtual ICollection&lt;SceneCast&gt; CastMemberScenes { get; set; }
+        = new List&lt;SceneCast&gt;();
+    
+    [NotMapped]
+    public byte Age =&gt;
+        (byte)(DateTime.Today.Year - BirthDate.Year - 
+               (BirthDate.Date &gt; DateTime.Today.AddYears(
+                   -(DateTime.Today.Year - BirthDate.Year)) ? 1 : 0));
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[31,45,31,50,1],[36,44,36,49,1],[69,57,69,62,1],[72,11,72,37,1],[75,11,75,32,1],[79,9,81,70,1]]);
+    </script>
+  </body>
+</html>

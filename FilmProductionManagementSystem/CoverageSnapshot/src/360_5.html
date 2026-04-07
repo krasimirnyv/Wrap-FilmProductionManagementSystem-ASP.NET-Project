@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.GCommon/DataFormat.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.GCommon;
+
+public static class DataFormat
+{
+    public const string DecimalTypeFormat = &quot;DECIMAL(18,2)&quot;;
+    public const string DateTimeTypeFormat = &quot;DATETIME2&quot;;
+    public const string TextTypeFormat = &quot;NVARCHAR(MAX)&quot;;
+    
+    public const string DateFormat = &quot;dd.MM.yyyy&quot;;
+    public const string CurrencyFormat = &quot;C&quot;;
+    public const string NotAvailableFormat = &quot;N/A&quot;;
+    public const string EmptyNickname = &quot; - &quot;;
+
+    public const char CommaSplitter = &#39;,&#39;;
+
+    public const string DisplayUsername = &quot;Username&quot;;
+    public const string DisplayPassword = &quot;Password&quot;;
+
+    public const string NewFileName = &quot;{0}.webp&quot;;
+    public const string ImageFolderName = &quot;img&quot;;
+    public const string ProfileFolderName = &quot;profile&quot;;
+    public const string ThumbnailFolderName = &quot;thumbnail&quot;;
+    public const string DefaultProfilePath = &quot;/img/profile/default-profile.png&quot;;
+    public const string DefaultThumbnailPath = &quot;/img/thumbnail/default-thumbnail.png&quot;;
+    public const string DefaultAssetPath = &quot;/img/assets/default-asset.png&quot;;
+    
+    public const ushort MaxPixelDimension = 6000;
+    public const ushort OutputSizeProfileImage = 512;
+    public const ushort OutputSizeThumbnailHeight = 512;
+    public const ushort OutputSizeThumbnailWidth = 910;
+
+    public const ushort WebpQuality = 80;
+
+    public static readonly HashSet&lt;string&gt; AllowedExtensions
+        = new(StringComparer.OrdinalIgnoreCase)
+        {
+            &quot;.jpg&quot;, &quot;.jpeg&quot;, &quot;.png&quot;, &quot;.webp&quot;, &quot;.gif&quot;, &quot;.heif&quot;, &quot;.heic&quot;, &quot;.hif&quot;
+        };
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[34,5,38,11,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/LoginRegister/Login.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@using Microsoft.Extensions.Primitives
+
+@model AccountLogInInputModel
+
+@{
+    ViewData[TitleDataKey] = &quot;Log In&quot;;
+
+    StringValues returnUrl = Context.Request.Query[RequestQueryReturnUrl];
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/registration.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;section class=&quot;home-hero&quot;&gt;
+&lt;div class=&quot;registration-container&quot;&gt;
+    &lt;div class=&quot;registration-card&quot;&gt;
+
+        &lt;!-- Header --&gt;
+        &lt;div class=&quot;registration-header&quot;&gt;
+            &lt;h2 class=&quot;text-center&quot;&gt;
+                Log In to &lt;span class=&quot;text-wrap-red&quot;&gt;Wrap&lt;/span&gt;
+            &lt;/h2&gt;
+            &lt;p class=&quot;text-center text-muted&quot;&gt;
+                Access your productions, scripts, and schedules
+            &lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Form --&gt;
+        &lt;form asp-area=&quot;&quot; 
+              asp-controller=&quot;LoginRegister&quot;
+              asp-action=&quot;Login&quot;
+              asp-route-returnUrl=&quot;@returnUrl&quot;
+              method=&quot;post&quot;
+              class=&quot;registration-form&quot;&gt;
+
+            @Html.AntiForgeryToken()
+            &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;text-danger mb-3&quot;&gt;&lt;/div&gt;
+
+            &lt;!-- Username --&gt;
+            &lt;div class=&quot;form-group mb-3&quot;&gt;
+                &lt;label asp-for=&quot;UserName&quot; class=&quot;form-label&quot;&gt;&lt;/label&gt;
+                &lt;input asp-for=&quot;UserName&quot;
+                       class=&quot;form-control&quot;
+                       placeholder=&quot;john.doe&quot;
+                       autofocus /&gt;
+                &lt;span asp-validation-for=&quot;UserName&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Password --&gt;
+            &lt;div class=&quot;form-group mb-4&quot;&gt;
+                &lt;label asp-for=&quot;Password&quot; class=&quot;form-label&quot;&gt;&lt;/label&gt;
+                &lt;input asp-for=&quot;Password&quot;
+                       type=&quot;password&quot;
+                       class=&quot;form-control&quot;
+                       placeholder=&quot;Your password&quot; /&gt;
+                &lt;span asp-validation-for=&quot;Password&quot; class=&quot;text-danger&quot;&gt;&lt;/span&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Role selection --&gt;
+            &lt;div class=&quot;form-group mb-4&quot;&gt;
+                &lt;label class=&quot;form-label&quot;&gt;Log in as&lt;/label&gt;
+
+                &lt;div class=&quot;gender-selection&quot;&gt;
+                    &lt;div class=&quot;form-check form-check-inline&quot;&gt;
+                        &lt;input asp-for=&quot;Role&quot;
+                               class=&quot;form-check-input&quot;
+                               type=&quot;radio&quot;
+                               value=&quot;Crew&quot;
+                               id=&quot;roleCrew&quot;
+                               required /&gt;
+                        &lt;label asp-for=&quot;Role&quot; class=&quot;form-check-label&quot; for=&quot;roleCrew&quot;&gt;
+                            &#127916; Filmmaker
+                        &lt;/label&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;form-check form-check-inline&quot;&gt;
+                        &lt;input asp-for=&quot;Role&quot;
+                               class=&quot;form-check-input&quot;
+                               type=&quot;radio&quot;
+                               value=&quot;Cast&quot;
+                               id=&quot;roleCast&quot; /&gt;
+                        &lt;label asp-for=&quot;Role&quot; class=&quot;form-check-label&quot; for=&quot;roleCast&quot;&gt;
+                            &#127917; Actor
+                        &lt;/label&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;div class=&quot;checkbox form-check form-check-inline mb-3&quot;&gt;
+                &lt;input asp-for=&quot;RememberMe&quot;
+                       class=&quot;form-check-input&quot;
+                       id=&quot;rememberMe&quot; /&gt;
+                &lt;label asp-for=&quot;RememberMe&quot; class=&quot;form-check-label&quot; for=&quot;rememberMe&quot;&gt;
+                    Remember me?
+                &lt;/label&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Actions --&gt;
+            &lt;div class=&quot;d-flex justify-content-between align-items-center&quot;&gt;
+                &lt;a asp-area=&quot;&quot; 
+                   asp-controller=&quot;Home&quot;
+                   asp-action=&quot;Index&quot;
+                   class=&quot;btn btn-outline-secondary&quot;&gt;
+                    ← Back to Home
+                &lt;/a&gt;
+
+                &lt;button type=&quot;submit&quot;
+                        class=&quot;btn btn-wrap-primary&quot;&gt;
+                    Log In
+                &lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/section&gt;
+
+@section Scripts {
+    &lt;partial name=&quot;_ValidationScriptsPartial&quot; /&gt;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[6,5,6,39,0],[8,5,8,75,0]]);
+    </script>
+  </body>
+</html>

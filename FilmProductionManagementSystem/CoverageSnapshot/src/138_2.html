@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Controllers/HomeController.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace FilmProductionManagementSystem.Web.Controllers;
+
+using System.Diagnostics;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
+using Wrap.Web.ViewModels;
+using Wrap.Web.ViewModels.General;
+using Wrap.Web.ViewModels.FindPeople;
+using Wrap.Services.Core.Interfaces;
+using Wrap.Services.Models.General;
+using Wrap.Services.Models.FindPeople;
+using Wrap.GCommon.Enums;
+using Wrap.GCommon.UI;
+
+using static Wrap.GCommon.ApplicationConstants;
+using static Wrap.GCommon.OutputMessages.Home;
+using static Wrap.GCommon.OutputMessages.Profile;
+
+public class HomeController(IHomeService homeService, 
+                            IFindPeopleService findPeopleService, 
+                            ILogger&lt;HomeController&gt; logger) : BaseController
+{
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult Index() =&gt; View();
+    
+    [HttpGet]
+    [Route(&quot;/Home/Dashboard&quot;)]
+    public async Task&lt;IActionResult&gt; Dashboard()
+    {
+        string? userId = GetUserId();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            logger.LogWarning(UsernameIsNullOrEmptyMessage);
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+
+        try
+        {
+            DashboardDataDto dto = await homeService.GetDashboardDataAsync(userId);
+
+            IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; statusMap = 
+                ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
+        
+            DashboardViewModel viewModel = MapToDashboardViewModelFromDto(dto, statusMap);
+        
+            return View(viewModel);
+        }
+        catch (ArgumentNullException ane)
+        {
+            logger.LogError(UsernameIsNullOrEmptyMessage + ane.Message);
+            TempData[ErrorTempDateKey] = UsernameIsNullOrEmptyMessage + ane.Message;
+            return View(nameof(NotFound), UserNotIdentifiedMessage);
+        }
+    }
+
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; FindFilmmakers([FromQuery] FindFilmmakersViewModel viewModel)
+    {
+        Guid? productionGuidId = Guid.TryParse(viewModel.ProductionId, out Guid guidId) ? guidId : null;
+        if (productionGuidId.HasValue)
+        {
+            string? userId = GetUserId();
+            if (!string.IsNullOrWhiteSpace(userId))
+                viewModel.CanManageProduction = await findPeopleService.CanManageProductionAsync(guidId, userId);
+        }
+        
+        CrewRoleType? roleType = null;
+        if (viewModel.RoleType.HasValue &amp;&amp; viewModel.RoleType.Value &gt; 0)
+        {
+            int raw = viewModel.RoleType.Value;
+            if (Enum.IsDefined(typeof(CrewRoleType), raw))
+                roleType = (CrewRoleType)raw;
+        }
+        
+        FindFilmmakersDto dto = await findPeopleService.GetFilmmakersAsync
+        (
+            pageNumber: viewModel.PageNumber,
+            search: viewModel.Search,
+            roleType: roleType,
+            productionId: productionGuidId
+        );
+
+        viewModel.TotalCount = dto.TotalCount;
+        viewModel.TotalPages = (int)Math.Ceiling(dto.TotalCount / (double)DefaultPeoplePerPage);
+
+        if (viewModel.PageNumber &gt; viewModel.TotalPages &amp;&amp; viewModel.TotalPages != 0)
+            viewModel.PageNumber = viewModel.TotalPages;
+        else if (viewModel.PageNumber &lt; 1)
+            viewModel.PageNumber = 1;
+        
+        MapDataToFindFilmmakersViewModel(viewModel, dto);
+        return View(viewModel);
+    }
+    
+    [HttpGet]
+    public async Task&lt;IActionResult&gt; FindActors([FromQuery]  FindActorsViewModel viewModel)
+    {
+        Guid? productionId = Guid.TryParse(viewModel.ProductionId, out Guid guidId) ? guidId : null;
+        if (productionId.HasValue)
+        {
+            string? userId = GetUserId();
+            if (!string.IsNullOrWhiteSpace(userId))
+                viewModel.CanManageProduction = await findPeopleService.CanManageProductionAsync(guidId, userId);
+        }
+        
+        FindActorsDto dto = await findPeopleService.GetActorsAsync
+        (
+            pageNumber: viewModel.PageNumber,
+            search: viewModel.Search,
+            age: viewModel.Age,
+            gender: viewModel.Gender,
+            productionId: productionId
+        );
+        
+        viewModel.TotalCount = dto.TotalCount;
+        viewModel.TotalPages = (int)Math.Ceiling(dto.TotalCount / (double)DefaultPeoplePerPage);
+        
+        if (viewModel.PageNumber &gt; viewModel.TotalPages &amp;&amp; viewModel.TotalPages != 0)
+            viewModel.PageNumber = viewModel.TotalPages;
+        else if (viewModel.PageNumber &lt; 1)
+            viewModel.PageNumber = 1;
+        
+        MapDataToFindActorsViewModel(viewModel, dto);
+        return View(viewModel);
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    [Route(&quot;Home/Error&quot;)]
+    [Route(&quot;/Home/Error/{statusCode:int}&quot;)]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error(int statusCode)
+    {
+        return statusCode switch
+        {
+            StatusCodes.Status400BadRequest =&gt; View(nameof(BadRequest)),
+            StatusCodes.Status404NotFound =&gt; View(nameof(NotFound)),
+            StatusCodes.Status500InternalServerError =&gt; View(&quot;InternalServerError&quot;),
+            StatusCodes.Status405MethodNotAllowed =&gt; RedirectToAction(nameof(Index)),
+            _ =&gt; View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier })
+        }; 
+    }
+    
+    private DashboardViewModel MapToDashboardViewModelFromDto(DashboardDataDto dto, IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; statusMap)
+    {
+        DashboardViewModel viewModel = new DashboardViewModel
+        {
+            CrewMembersCount = dto.CrewMembersCount,
+            CastMembersCount = dto.CastMembersCount,
+            UpcomingScenesTotal = dto.UpcomingScenesTotal,
+            Productions = dto.Productions
+                .Select(p =&gt; new ProductionInfoViewModel
+                {
+                    Title = p.Title,
+                    Description = p.Description,
+                    StatusType = p.StatusType.ToString(),
+                    AbstractStatus = ResolveAbstractionStatus(statusMap, p.StatusType)
+                })
+                .ToArray(),
+            IsUserCrew = dto.IsUserCrew,
+            HasOwnProductions = dto.HasOwnProductions
+        };
+        
+        return viewModel;
+    }
+    
+    private string ResolveAbstractionStatus(IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; statusMap, ProductionStatusType statusType)
+    {
+        string? key = statusMap
+            .FirstOrDefault(kvp =&gt; kvp.Value.Contains(statusType))
+            .Key;
+        
+        return string.IsNullOrWhiteSpace(key) ? UnknownStatus : key;
+    }
+    
+    private static void MapDataToFindFilmmakersViewModel(FindFilmmakersViewModel viewModel, FindFilmmakersDto dto)
+    {
+        viewModel.FilmmakerList = dto
+            .FilmmakerListDtos
+            .Select(f =&gt; new FilmmakerListViewModel
+            {
+                CrewId = f.CrewId.ToString(),
+                ProfileImagePath = f.ProfileImagePath,
+                FullName = f.FullName,
+                Nickname = f.Nickname,
+                TopRole = f.Role,
+                IsAlreadyInProduction = f.IsAlreadyInProduction
+            })
+            .ToArray();
+    }
+    
+    private static void MapDataToFindActorsViewModel(FindActorsViewModel viewModel, FindActorsDto dto)
+    {
+        viewModel.ActorList = dto
+            .ActorListDtos
+            .Select(a =&gt; new ActorListViewModel
+            {
+                CastId = a.CastId.ToString(),
+                ProfileImagePath = a.ProfileImagePath,
+                FullName = a.FullName,
+                Nickname = a.Nickname,
+                Age = a.Age.ToString(),
+                Gender = a.Gender,
+                IsAlreadyInProduction = a.IsAlreadyInProduction
+            })
+            .ToArray();
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,14,23,60,0],[27,37,27,43,0],[32,5,32,6,0],[33,9,33,38,0],[34,9,34,47,0],[35,9,35,10,0],[36,13,36,61,0],[37,13,37,69,0],[41,9,41,10,0],[42,13,42,84,0],[44,13,45,81,0],[47,13,47,91,0],[49,13,49,36,0],[51,9,51,42,0],[52,9,52,10,0],[53,13,53,73,0],[54,13,54,85,0],[55,13,55,69,0],[57,5,57,6,0],[61,5,61,6,0],[62,9,62,105,0],[63,9,63,39,0],[64,9,64,10,0],[65,13,65,42,0],[66,13,66,52,0],[67,17,67,114,0],[68,9,68,10,0],[70,9,70,39,0],[71,9,71,73,0],[72,9,72,10,0],[73,13,73,48,0],[74,13,74,59,0],[75,17,75,46,0],[76,9,76,10,0],[78,9,84,11,0],[86,9,86,47,0],[87,9,87,97,0],[89,9,89,86,0],[90,13,90,57,0],[91,14,91,43,0],[92,13,92,38,0],[94,9,94,58,0],[95,9,95,32,0],[96,5,96,6,0],[100,5,100,6,0],[101,9,101,101,0],[102,9,102,35,0],[103,9,103,10,0],[104,13,104,42,0],[105,13,105,52,0],[106,17,106,114,0],[107,9,107,10,0],[109,9,116,11,0],[118,9,118,47,0],[119,9,119,97,0],[121,9,121,86,0],[122,13,122,57,0],[123,14,123,43,0],[124,13,124,38,0],[126,9,126,54,0],[127,9,127,32,0],[128,5,128,6,0],[136,5,136,6,0],[137,9,139,48,0],[139,48,139,72,0],[139,72,140,46,0],[140,46,140,68,0],[140,68,141,57,0],[141,57,141,84,0],[141,84,142,54,0],[142,54,142,85,0],[142,85,143,18,0],[143,18,143,110,0],[143,110,144,11,0],[145,5,145,6,0],[148,5,148,6,0],[149,9,155,30,0],[155,30,161,18,0],[161,18,165,11,0],[167,9,167,26,0],[168,5,168,6,0],[171,5,171,6,0],[172,9,173,36,0],[173,36,173,66,0],[173,66,174,18,0],[176,9,176,69,0],[177,5,177,6,0],[180,5,180,6,0],[181,9,183,26,0],[183,26,191,14,0],[191,14,192,24,0],[193,5,193,6,0],[196,5,196,6,0],[197,9,199,26,0],[199,26,208,14,0],[208,14,209,24,0],[210,5,210,6,0]]);
+    </script>
+  </body>
+</html>

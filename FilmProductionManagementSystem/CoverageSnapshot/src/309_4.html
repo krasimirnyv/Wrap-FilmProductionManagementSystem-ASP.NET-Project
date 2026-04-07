@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/Scene.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+
+using GCommon.Enums;
+using MappingEntities;
+
+using static GCommon.EntityConstants.Scene;
+
+/// &lt;summary&gt;
+/// Това entity ще се изпозлва за по-нататък, когато се започне изграждането на план-график възможност в апликацията
+/// &lt;/summary&gt;
+public class Scene
+{
+    [Key]
+    public Guid Id { get; set; }
+    
+    public int SceneNumber { get; set; }
+
+    [Required]
+    public SceneType SceneType { get; set; }
+
+    [Required]
+    [Unicode]
+    [MaxLength(SceneNameMaxLength)]
+    public string SceneName { get; set; } = null!;
+
+    [Required]
+    [Unicode]
+    [MaxLength(LocationMaxLength)]
+    public string Location { get; set; } = null!;
+
+    [Unicode]
+    [MaxLength(DescriptionMaxLength)]
+    public string? Description { get; set; }
+    
+    [Required]
+    [ForeignKey(nameof(Production))]
+    public Guid ProductionId { get; set; }
+
+    public virtual Production Production { get; set; } = null!;
+    
+    public virtual ICollection&lt;ShootingDayScene&gt; ShootingDayScenes { get; set; }
+        = new HashSet&lt;ShootingDayScene&gt;();
+    
+    public virtual ICollection&lt;SceneCrew&gt; SceneCrewMembers { get; set; }
+        = new List&lt;SceneCrew&gt;();
+
+    public virtual ICollection&lt;SceneCast&gt; SceneCastMembers { get; set; }
+        = new List&lt;SceneCast&gt;();
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[29,45,29,50,1],[34,44,34,49,1],[44,58,44,63,1],[47,11,47,42,1],[50,11,50,32,1],[53,11,53,32,1]]);
+    </script>
+  </body>
+</html>

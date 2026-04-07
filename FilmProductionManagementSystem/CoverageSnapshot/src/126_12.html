@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Infrastructure.Tests/WebInfrastructureServiceCollectionExtensionsTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Infrastructure.Tests;
+
+using System.Reflection;
+
+using Microsoft.Extensions.DependencyInjection;
+
+using NUnit.Framework;
+
+using Web.Infrastructure.Extensions;
+using Web.Infrastructure.Utilities;
+
+[TestFixture]
+public class WebInfrastructureServiceCollectionExtensionsTests
+{
+    private static Assembly WebInfraAssembly =&gt; typeof(SlugGenerator).Assembly;
+
+    private static Type[] GetGeneratorInterfaces()
+        =&gt; WebInfraAssembly.GetTypes()
+            .Where(type =&gt; type is { IsInterface: true } &amp;&amp;
+                        type.Name.StartsWith(&quot;I&quot;, StringComparison.Ordinal) &amp;&amp;
+                        type.Name.EndsWith(&quot;Generator&quot;, StringComparison.Ordinal))
+            .ToArray();
+
+    public static IEnumerable&lt;TestCaseData&gt; GeneratorInterfacesCases()
+        =&gt; GetGeneratorInterfaces()
+            .Select(generatorInterface =&gt; new TestCaseData(generatorInterface)
+                .SetName($&quot;AddWebInfrastructure registers {generatorInterface.Name} as Singleton&quot;));
+
+    [Test]
+    public void AddWebInfrastructure_WhenCalled_RegistersAllGeneratorInterfaces()
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act
+        services.AddWebInfrastructure();
+
+        // Assert
+        Type[] generatorInterfaces = GetGeneratorInterfaces();
+        Assert.That(generatorInterfaces.Length, Is.GreaterThan(0), &quot;No I*Generator interfaces found in web infrastructure assembly.&quot;);
+
+        foreach (Type generatorInterface in generatorInterfaces)
+        {
+            ServiceDescriptor[] matches = services.Where(sd =&gt; sd.ServiceType == generatorInterface).ToArray();
+
+            Assert.That(matches.Length, Is.EqualTo(1), $&quot;Expected exactly 1 registration for {generatorInterface.FullName}&quot;);
+            Assert.That(matches[0].Lifetime, Is.EqualTo(ServiceLifetime.Singleton), $&quot;Expected Singleton for {generatorInterface.FullName}&quot;);
+            Assert.That(matches[0].ImplementationType, Is.Not.Null, $&quot;Expected concrete implementation type for {generatorInterface.FullName}&quot;);
+        }
+    }
+
+    [TestCaseSource(nameof(GeneratorInterfacesCases))]
+    public void AddWebInfrastructure_ForEachGeneratorInterface_RegistersExactlyOnceAsSingleton(Type generatorInterface)
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act
+        services.AddWebInfrastructure();
+
+        // Assert
+        ServiceDescriptor[] matches = services.Where(sd =&gt; sd.ServiceType == generatorInterface).ToArray();
+
+        Assert.That(matches.Length, Is.EqualTo(1), $&quot;Expected exactly 1 registration for {generatorInterface.FullName}&quot;);
+        Assert.That(matches[0].Lifetime, Is.EqualTo(ServiceLifetime.Singleton), $&quot;Expected Singleton for {generatorInterface.FullName}&quot;);
+        Assert.That(matches[0].ImplementationType, Is.Not.Null, $&quot;Expected concrete implementation type for {generatorInterface.FullName}&quot;);
+
+        // sanity: implementation should be in the same assembly
+        Assert.That(matches[0].ImplementationType!.Assembly, Is.EqualTo(WebInfraAssembly),
+            $&quot;Implementation for {generatorInterface.FullName} should be in {WebInfraAssembly.GetName().Name}&quot;);
+    }
+
+    [Test]
+    public void AddWebInfrastructure_WhenCalledTwice_DoesNotThrow()
+    {
+        // Arrange
+        IServiceCollection services = new ServiceCollection();
+
+        // Act + Assert
+        Assert.DoesNotThrow(() =&gt;
+        {
+            services.AddWebInfrastructure();
+            services.AddWebInfrastructure();
+        });
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,49,15,79,1],[18,12,19,28,1],[19,28,21,82,1],[21,82,22,23,1],[25,12,26,43,1],[26,43,27,99,1],[27,99,27,100,1],[31,5,31,6,1],[33,9,33,63,1],[36,9,36,41,1],[39,9,39,63,1],[40,9,40,135,1],[42,9,42,16,1],[42,18,42,41,1],[42,42,42,44,1],[42,45,42,64,1],[43,9,43,10,1],[44,13,44,64,1],[44,64,44,100,1],[44,100,44,112,1],[46,13,46,126,1],[47,13,47,142,1],[48,13,48,145,1],[49,9,49,10,1],[50,5,50,6,1],[54,5,54,6,1],[56,9,56,63,1],[59,9,59,41,1],[62,9,62,60,1],[62,60,62,96,1],[62,96,62,108,1],[64,9,64,122,1],[65,9,65,138,1],[66,9,66,141,1],[69,9,70,113,1],[71,5,71,6,1],[75,5,75,6,1],[77,9,77,63,1],[80,9,81,9,1],[81,9,81,10,1],[81,10,82,13,1],[82,13,82,45,1],[82,45,83,13,1],[83,13,83,45,1],[83,45,84,9,1],[84,9,84,10,1],[84,10,84,12,1],[85,5,85,6,1]]);
+    </script>
+  </body>
+</html>

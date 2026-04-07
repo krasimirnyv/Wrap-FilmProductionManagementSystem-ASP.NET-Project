@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/Handlers/CastRegistrationHandler.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core.Handlers;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+
+using Utilities.ImageLogic.Interfaces;
+using Models.LoginAndRegistration;
+using Data.Models;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+
+using static GCommon.OutputMessages.Register;
+using static GCommon.DataFormat;
+using static GCommon.ApplicationConstants.IdentityRoles;
+
+public class CastRegistrationHandler(UserManager&lt;ApplicationUser&gt; userManager,
+                                     SignInManager&lt;ApplicationUser&gt; signInManager,
+                                     IImageService imageService,
+                                     IVariantImageStrategyResolver imageStrategyResolver,
+                                     ILoginRegisterRepository loginRegisterRepository,
+                                     ILogger&lt;CastRegistrationHandler&gt; logger) : RegistrationHandlerBase&lt;CastRegistrationDto&gt;(userManager,
+                                                                                                                             signInManager,
+                                                                                                                             loginRegisterRepository,
+                                                                                                                             logger)
+{
+    private readonly UserManager&lt;ApplicationUser&gt; _userManager = userManager;
+    private readonly ILoginRegisterRepository _loginRegisterRepository = loginRegisterRepository;
+
+    protected override IdentityResult ValidateDto(CastRegistrationDto? registrationDto)
+    {
+        if (registrationDto is null)
+        {
+            logger.LogError(ErrorCreatingCrew);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = ErrorCreatingCrew
+            });
+        }
+        
+        return IdentityResult.Success;
+    }
+
+    protected override ApplicationUser BuildUser(CastRegistrationDto registrationDto)
+    {
+        ApplicationUser user = new ApplicationUser
+        {
+            UserName = registrationDto.UserName,
+            Email = registrationDto.Email,
+            PhoneNumber = registrationDto.PhoneNumber
+        };
+
+        return user;
+    }
+
+    protected override async Task&lt;IdentityResult&gt; AssignRolesAsync(ApplicationUser user, CastRegistrationDto registrationDto)
+        =&gt; await _userManager.AddToRoleAsync(user, Actor);
+    
+    protected override string GetPassword(CastRegistrationDto registrationDto)
+    {
+        string password = registrationDto.Password;
+        return password;
+    }
+
+    protected override async Task&lt;int&gt; PersistDomainDataAsync(CastRegistrationDto registrationDto, ApplicationUser user)
+    {
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ProfileFolderName);
+        string profilePath = await imageService.SaveImageAsync(registrationDto.ProfilePicture, strategy);
+
+        Cast newCast = new Cast
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            ProfileImagePath = profilePath,
+            FirstName = registrationDto.FirstName,
+            LastName = registrationDto.LastName,
+            Nickname = registrationDto.Nickname,
+            Biography = registrationDto.Biography,
+            BirthDate = registrationDto.BirthDate,
+            Gender = registrationDto.Gender,
+            IsActive = false,
+            IsDeleted = false
+        };
+        
+        await _loginRegisterRepository.CreateCastAsync(newCast);
+
+        int expectedRows = 1;
+        return expectedRows;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[21,81,24,133,1],[26,5,26,78,1],[27,5,27,98,1],[30,5,30,6,1],[31,9,31,37,1],[32,9,32,10,1],[33,13,33,48,1],[34,13,37,16,1],[40,9,40,39,1],[41,5,41,6,1],[44,5,44,6,1],[45,9,50,11,1],[52,9,52,21,1],[53,5,53,6,1],[56,12,56,58,1],[59,5,59,6,1],[60,9,60,52,1],[61,9,61,25,1],[62,5,62,6,1],[65,5,65,6,1],[66,9,66,91,1],[67,9,67,106,1],[69,9,82,11,1],[84,9,84,65,1],[86,9,86,30,1],[87,9,87,29,1],[88,5,88,6,1]]);
+    </script>
+  </body>
+</html>

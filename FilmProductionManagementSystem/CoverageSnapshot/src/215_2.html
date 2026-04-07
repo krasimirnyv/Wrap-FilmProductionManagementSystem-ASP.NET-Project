@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@inject SignInManager&lt;ApplicationUser&gt; SignInManager
+@{
+    bool hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+
+    string? currentController = ViewContext.RouteData.Values[&quot;controller&quot;]?.ToString();
+    string? currentAction = ViewContext.RouteData.Values[&quot;action&quot;]?.ToString();
+
+    bool isDeleteProfileActive =
+        string.Equals(currentController, &quot;Profile&quot;, StringComparison.OrdinalIgnoreCase) &amp;&amp;
+        (string.Equals(currentAction, &quot;DeleteFilmmakerOverview&quot;, StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(currentAction, &quot;DeleteActorOverview&quot;, StringComparison.OrdinalIgnoreCase));
+
+    bool isDownloadDataActive =
+        string.Equals(currentController, &quot;Profile&quot;, StringComparison.OrdinalIgnoreCase) &amp;&amp;
+        (string.Equals(currentAction, &quot;DownloadFilmmakerPersonalData&quot;, StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(currentAction, &quot;DownloadActorPersonalData&quot;, StringComparison.OrdinalIgnoreCase));
+}
+
+&lt;ul class=&quot;nav nav-pills flex-column manage-nav&quot;&gt;
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;a class=&quot;nav-link manage-link @ManageNavPages.EmailNavClass(ViewContext)&quot;
+           id=&quot;email&quot; asp-page=&quot;./Email&quot;&gt;
+            &lt;i class=&quot;bi bi-envelope me-2&quot;&gt;&lt;/i&gt;Email
+        &lt;/a&gt;
+    &lt;/li&gt;
+
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;a class=&quot;nav-link manage-link @ManageNavPages.ChangePasswordNavClass(ViewContext)&quot;
+           id=&quot;change-password&quot; asp-page=&quot;./ChangePassword&quot;&gt;
+            &lt;i class=&quot;bi bi-key me-2&quot;&gt;&lt;/i&gt;Password
+        &lt;/a&gt;
+    &lt;/li&gt;
+
+    @if (hasExternalLogins)
+    {
+        &lt;li class=&quot;nav-item&quot;&gt;
+            &lt;a class=&quot;nav-link manage-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)&quot;
+               id=&quot;external-login&quot; asp-page=&quot;./ExternalLogins&quot;&gt;
+                &lt;i class=&quot;bi bi-box-arrow-in-right me-2&quot;&gt;&lt;/i&gt;External logins
+            &lt;/a&gt;
+        &lt;/li&gt;
+    }
+
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;a class=&quot;nav-link manage-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)&quot;
+           id=&quot;two-factor&quot; asp-page=&quot;./TwoFactorAuthentication&quot;&gt;
+            &lt;i class=&quot;bi bi-shield-lock me-2&quot;&gt;&lt;/i&gt;Two-factor authentication
+        &lt;/a&gt;
+    &lt;/li&gt;
+
+    &lt;li class=&quot;nav-item mt-3&quot;&gt;
+        &lt;hr class=&quot;my-2&quot; /&gt;
+    &lt;/li&gt;
+
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;a class=&quot;nav-link manage-link @(isDownloadDataActive ? &quot;active&quot; : null)&quot;
+           asp-area=&quot;&quot;
+           asp-controller=&quot;Profile&quot;
+           asp-action=&quot;DownloadPersonalData&quot;&gt;
+            &lt;i class=&quot;bi bi-download me-2&quot;&gt;&lt;/i&gt;Download personal data
+        &lt;/a&gt;
+    &lt;/li&gt;
+
+    &lt;li class=&quot;nav-item&quot;&gt;
+        &lt;a class=&quot;nav-link manage-link manage-link-danger @(isDeleteProfileActive ? &quot;active&quot; : null)&quot;
+           asp-area=&quot;&quot;
+           asp-controller=&quot;Profile&quot;
+           asp-action=&quot;DeleteProfileOverview&quot;&gt;
+            &lt;i class=&quot;bi bi-trash3-fill me-2&quot;&gt;&lt;/i&gt;Delete profile
+        &lt;/a&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[3,5,3,98,0],[5,5,5,88,0],[6,5,6,80,0],[8,5,11,99,0],[13,5,16,105,0],[34,6,34,28,0],[35,5,35,6,0],[42,5,42,6,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/LoginAndRegistration/CrewRegistrationStepOneInputModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.LoginAndRegistration;
+
+using System.ComponentModel.DataAnnotations;
+
+using Microsoft.AspNetCore.Http;
+
+using static GCommon.EntityConstants.Crew;
+/// &lt;summary&gt;
+/// Step 1: Basic Information for Crew Registration
+/// &lt;/summary&gt;
+public class CrewRegistrationStepOneInputModel
+{
+    [Required]
+    public string UserName { get; set; } = null!;
+
+    [Required]
+    public string Email { get; set; } = null!;
+
+    [Required]
+    public string PhoneNumber { get; set; } = null!;
+
+    [Required]
+    public string Password { get; set; } = null!;
+
+    [Required]
+    [StringLength(FirstNameMaxLength, MinimumLength = FirstNameMinLength)]
+    public string FirstName { get; set; } = null!;
+
+    [Required]
+    [StringLength(LastNameMaxLength, MinimumLength = LastNameMinLength)]
+    public string LastName { get; set; } = null!;
+
+    [StringLength(NicknameMaxLength)]
+    public string? Nickname { get; set; }
+
+    public IFormFile? ProfilePicture { get; set; }
+    
+    [StringLength(BiographyMaxLength)]
+    [DataType(DataType.MultilineText)]
+    public string? Biography { get; set; }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,44,14,49,0],[17,41,17,46,0],[20,47,20,52,0],[23,44,23,49,0],[27,45,27,50,0],[31,44,31,49,0]]);
+    </script>
+  </body>
+</html>

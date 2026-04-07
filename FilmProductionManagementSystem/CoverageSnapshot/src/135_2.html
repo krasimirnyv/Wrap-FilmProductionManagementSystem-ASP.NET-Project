@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/ShowRecoveryCodes.cshtml.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+#nullable disable
+
+namespace FilmProductionManagementSystem.Web.Areas.Identity.Pages.Account.Manage;
+
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+/// &lt;summary&gt;
+///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+///     directly from your code. This API may change or be removed in future releases.
+/// &lt;/summary&gt;
+public class ShowRecoveryCodesModel : PageModel
+{
+    /// &lt;summary&gt;
+    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// &lt;/summary&gt;
+    [TempData]
+    public string[] RecoveryCodes { get; set; }
+
+    /// &lt;summary&gt;
+    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// &lt;/summary&gt;
+    [TempData]
+    public string StatusMessage { get; set; }
+
+    /// &lt;summary&gt;
+    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+    ///     directly from your code. This API may change or be removed in future releases.
+    /// &lt;/summary&gt;
+    public IActionResult OnGet()
+    {
+        if (RecoveryCodes == null || RecoveryCodes.Length == 0)
+            return RedirectToPage(&quot;./TwoFactorAuthentication&quot;);
+
+        return Page();
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[35,5,35,6,0],[36,9,36,64,0],[37,13,37,64,0],[39,9,39,23,0],[40,5,40,6,0]]);
+    </script>
+  </body>
+</html>

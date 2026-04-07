@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Models/Profile/CastProfileDto.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Models.Profile;
+
+using NestedDtos;
+using CommonProperties;
+
+public class CastProfileDto : CommonUserInfo
+{
+    public string ProfileImagePath { get; set; } = null!;
+
+    public string Nickname { get; set; } = null!;
+
+    public string UserName { get; set; } = null!;
+
+    public string Email { get; set; } = null!;
+    
+    public string Age { get; set; } = null!;
+
+    public string Gender { get; set; } = null!;
+    
+    public bool IsActive { get; set; }
+    
+    public IReadOnlyCollection&lt;CastMemberProductionDto&gt; Productions { get; set; } = [];
+
+    public IReadOnlyCollection&lt;CastMemberSceneDto&gt; Scenes { get; set; } = [];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,52,8,57,1],[10,44,10,49,1],[12,44,12,49,1],[14,41,14,46,1],[16,39,16,44,1],[18,42,18,47,1],[22,85,22,87,1],[24,75,24,77,1]]);
+    </script>
+  </body>
+</html>

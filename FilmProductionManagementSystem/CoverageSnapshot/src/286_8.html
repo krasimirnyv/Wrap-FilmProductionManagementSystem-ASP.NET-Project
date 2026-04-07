@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/Profile/EditCrewProfileInputModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.Profile;
+
+using System.ComponentModel.DataAnnotations;
+
+using Microsoft.AspNetCore.Http;
+
+using static GCommon.EntityConstants.Crew;
+
+public class EditCrewProfileInputModel
+{
+    [Required]
+    [StringLength(FirstNameMaxLength, MinimumLength = FirstNameMinLength)]
+    public string FirstName { get; set; } = null!;
+
+    [Required]
+    [StringLength(LastNameMaxLength, MinimumLength = LastNameMinLength)]
+    public string LastName { get; set; } = null!;
+
+    [StringLength(NicknameMaxLength)]
+    public string? Nickname { get; set; }
+
+    [Required]
+    [Phone]
+    public string PhoneNumber { get; set; } = null!;
+
+    [StringLength(BiographyMaxLength)]
+    public string? Biography { get; set; }
+
+    public IFormFile? ProfileImage { get; set; }
+
+    // Read-only properties for displaying data to UI (cannot be edited)
+    public string? Email { get; set; }
+    
+    public string? CurrentProfileImagePath { get; set; }
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,45,13,50,0],[17,44,17,49,0],[24,47,24,52,0]]);
+    </script>
+  </body>
+</html>

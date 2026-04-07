@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ProductionAssetConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+using GCommon.Enums;
+
+using static GCommon.DataFormat;
+using static Common.EntityIdentificationConstants;
+
+public class ProductionAssetConfiguration : IEntityTypeConfiguration&lt;ProductionAsset&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;ProductionAsset&gt; entity)
+    {
+        entity
+            .HasOne(a =&gt; a.Production)
+            .WithMany(p =&gt; p.ProductionAssets)
+            .HasForeignKey(a =&gt; a.ProductionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasIndex(a =&gt; new { a.ProductionId, a.AssetType });
+
+        entity.HasData(ProductionAssetsSeed);
+    }
+    
+    private static readonly DateTime UploadedAt_01 = new(2026, 03, 01, 10, 00, 00, DateTimeKind.Utc);
+    private static readonly DateTime UploadedAt_02 = new(2026, 03, 02, 11, 15, 00, DateTimeKind.Utc);
+    private static readonly DateTime UploadedAt_03 = new(2026, 03, 03, 09, 40, 00, DateTimeKind.Utc);
+    private static readonly DateTime UploadedAt_04 = new(2026, 03, 04, 14, 05, 00, DateTimeKind.Utc);
+    
+    private static readonly ProductionAsset[] ProductionAssetsSeed =
+    [
+        // Production 01 - &quot;Test Film&quot;
+        new()
+        {
+            Id = AssetId_01,
+            ProductionId = ProductionIdTestFilm,
+            AssetType = ProductionAssetType.Storyboard,
+            Title = &quot;Storyboard v1&quot;,
+            Description = &quot;Basic scene coverage and camera beats.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_01
+        },
+        new()
+        {
+            Id = AssetId_02,
+            ProductionId = ProductionIdTestFilm,
+            AssetType = ProductionAssetType.Moodboard,
+            Title = &quot;Moodboard - Visual Tone&quot;,
+            Description = &quot;Lighting references and overall vibe.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_01
+        },
+        new()
+        {
+            Id = AssetId_03,
+            ProductionId = ProductionIdTestFilm,
+            AssetType = ProductionAssetType.ColorWheel,
+            Title = &quot;Color Palette - Day Scenes&quot;,
+            Description = &quot;Primary palette for day interiors.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_02
+        },
+
+        // Production 02 - &quot;Midnight Dreams&quot;
+        new()
+        {
+            Id = AssetId_04,
+            ProductionId = ProductionIdMidnightDreams,
+            AssetType = ProductionAssetType.References,
+            Title = &quot;Reference Frames Pack&quot;,
+            Description = &quot;Reference stills for framing and composition.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_02
+        },
+        new()
+        {
+            Id = AssetId_05,
+            ProductionId = ProductionIdMidnightDreams,
+            AssetType = ProductionAssetType.Storyboard,
+            Title = &quot;Storyboard - Chase Sequence&quot;,
+            Description = &quot;Action sequence beats and movement.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_03
+        },
+        new()
+        {
+            Id = AssetId_06,
+            ProductionId = ProductionIdMidnightDreams,
+            AssetType = ProductionAssetType.Other,
+            Title = &quot;Shot List Draft&quot;,
+            Description = &quot;Draft PDF with lens &amp; shot notes.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_03
+        },
+
+        // Production 03 - &quot;Paper Planes&quot;
+        new()
+        {
+            Id = AssetId_07,
+            ProductionId = ProductionIdPaperPlanes,
+            AssetType = ProductionAssetType.Moodboard,
+            Title = &quot;Moodboard - Night Atmosphere&quot;,
+            Description = &quot;Neon, fog, wet streets.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_03
+        },
+        new()
+        {
+            Id = AssetId_08,
+            ProductionId = ProductionIdPaperPlanes,
+            AssetType = ProductionAssetType.ColorWheel,
+            Title = &quot;Color Palette - Night Scenes&quot;,
+            Description = &quot;Cold shadows with warm practicals.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_04
+        },
+        new()
+        {
+            Id = AssetId_09,
+            ProductionId = ProductionIdPaperPlanes,
+            AssetType = ProductionAssetType.References,
+            Title = &quot;Set Dressing References&quot;,
+            Description = &quot;Props and set dressing ideas.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_04
+        },
+
+        // Production 04 - &quot;The Last Take&quot;
+        new()
+        {
+            Id = AssetId_10,
+            ProductionId = ProductionIdTheLastTake,
+            AssetType = ProductionAssetType.Storyboard,
+            Title = &quot;Storyboard - Finale&quot;,
+            Description = &quot;Final sequence beats and transitions.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_04
+        },
+        new()
+        {
+            Id = AssetId_11,
+            ProductionId = ProductionIdTheLastTake,
+            AssetType = ProductionAssetType.Other,
+            Title = &quot;Location Photos&quot;,
+            Description = &quot;Scouting photos for final location.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_04
+        },
+        new()
+        {
+            Id = AssetId_12,
+            ProductionId = ProductionIdTheLastTake,
+            AssetType = ProductionAssetType.References,
+            Title = &quot;Costume References&quot;,
+            Description = &quot;Wardrobe references for key characters.&quot;,
+            FilePath = DefaultAssetPath,
+            UploadedAt = UploadedAt_04
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[15,5,15,6,0],[16,9,20,47,0],[22,9,22,67,0],[24,9,24,46,0],[25,5,25,6,0],[27,5,27,102,0],[28,5,28,102,0],[29,5,29,102,0],[30,5,30,102,0],[32,5,161,7,0]]);
+    </script>
+  </body>
+</html>

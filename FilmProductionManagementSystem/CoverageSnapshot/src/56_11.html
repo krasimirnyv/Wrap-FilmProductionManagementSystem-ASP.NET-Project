@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Seeding/ApplicationRoleSeeder.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Seeding;
+
+using Microsoft.AspNetCore.Identity;
+
+using Interfaces;
+using Models.Infrastructure;
+
+using static GCommon.ApplicationConstants;
+using static GCommon.OutputMessages.ApplicationRoles;
+
+public class ApplicationRoleSeeder(RoleManager&lt;ApplicationRole&gt; roleManager) : IApplicationRoleSeeder
+{
+    private static readonly string[] Roles =
+    [
+        IdentityRoles.Filmmaker,
+        IdentityRoles.Actor
+    ];
+    
+    public async Task SeedRolesAsync()
+    {
+        foreach (string role in Roles)
+        {
+            bool isRoleExists = await roleManager.RoleExistsAsync(role);
+            if (!isRoleExists)
+            {
+                ApplicationRole newRole = new ApplicationRole(role);
+
+                IdentityResult identityRoleResult = await roleManager.CreateAsync(newRole);
+                if (!identityRoleResult.Succeeded)
+                    throw new Exception(string.Format(RoleSeedingExceptionMessage, role, string.Join(&quot;, &quot;, identityRoleResult.Errors.Select(e =&gt; e.Description))));
+            }
+        }
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[11,14,11,77,1],[13,5,17,7,1],[20,5,20,6,1],[21,9,21,16,1],[21,18,21,29,1],[21,30,21,32,1],[21,33,21,38,1],[22,9,22,10,1],[23,13,23,73,1],[24,13,24,31,1],[25,13,25,14,1],[26,17,26,69,1],[28,17,28,92,1],[29,17,29,51,1],[30,21,30,146,1],[30,146,30,159,1],[30,159,30,164,1],[31,13,31,14,1],[32,9,32,10,1],[33,5,33,6,1]]);
+    </script>
+  </body>
+</html>

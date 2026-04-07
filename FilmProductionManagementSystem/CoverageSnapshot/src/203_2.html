@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Profile/EditSkills.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model EditSkillsInputModel
+
+@{
+    ViewData[TitleDataKey] = &quot;Edit Filmmaker&#39;s Skills&quot;;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/profile.css&quot; asp-append-version=&quot;true&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/registration.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;section class=&quot;home-hero&quot;&gt;
+    &lt;div class=&quot;registration-container&quot;&gt;
+        &lt;div class=&quot;registration-card skills-selection&quot;&gt;
+            &lt;!-- Header --&gt;
+            &lt;div class=&quot;registration-header&quot;&gt;
+                &lt;h2 class=&quot;text-center&quot;&gt;⚡ Edit Your &lt;span class=&quot;text-wrap-red&quot;&gt;Skills&lt;/span&gt;&lt;/h2&gt;
+                &lt;p class=&quot;text-center text-muted&quot;&gt;Add or remove the roles you&#39;re capable of&lt;/p&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Selected Skills Count --&gt;
+            &lt;div class=&quot;selected-count mb-3&quot;&gt;
+                &lt;span id=&quot;selectedCount&quot;&gt;@Model.CurrentSkills.Count&lt;/span&gt; skills selected
+            &lt;/div&gt;
+
+            &lt;!-- Form --&gt;
+            &lt;form asp-controller=&quot;Profile&quot; asp-action=&quot;EditSkills&quot; method=&quot;post&quot; id=&quot;skillsForm&quot;&gt;
+                &lt;input type=&quot;hidden&quot; 
+                       asp-for=&quot;SelectedSkills&quot; 
+                       id=&quot;hiddenSelectedSkills&quot; 
+                       value=&quot;@string.Join(&quot;,&quot;, Model.CurrentSkills.Select(s =&gt; (int)s))&quot; /&gt;
+                
+                &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;text-danger mb-3&quot;&gt;&lt;/div&gt;
+
+                &lt;!-- Accordion --&gt;
+                &lt;div class=&quot;accordion&quot; id=&quot;departmentsAccordion&quot;&gt;
+                    @{
+                        int index = 0;
+                        foreach (KeyValuePair&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; department in Model.AllDepartments)
+                        {
+                            string departmentId = $&quot;department{index}&quot;;
+                            bool isFirstDepartment = index == 0;
+                            
+                            // Count how many skills user currently has in this department
+                            int currentSkillsInDept = department.Value.Count(role =&gt; Model.CurrentSkills.Contains(role));
+
+                            &lt;div class=&quot;accordion-item&quot;&gt;
+                                &lt;h2 class=&quot;accordion-header&quot;&gt;
+                                    &lt;button class=&quot;accordion-button @(isFirstDepartment ? string.Empty : &quot;collapsed&quot;)&quot;
+                                            type=&quot;button&quot;
+                                            data-bs-toggle=&quot;collapse&quot;
+                                            data-bs-target=&quot;#@departmentId&quot;
+                                            aria-expanded=&quot;@(isFirstDepartment ? &quot;true&quot; : &quot;false&quot;)&quot;&gt;
+                                        &lt;span class=&quot;department-name&quot;&gt;@department.Key&lt;/span&gt;
+                                        &lt;span class=&quot;department-count&quot; id=&quot;count-@departmentId&quot;&gt;@currentSkillsInDept&lt;/span&gt;
+                                    &lt;/button&gt;
+                                &lt;/h2&gt;
+                                &lt;div id=&quot;@departmentId&quot;
+                                     class=&quot;accordion-collapse collapse @(isFirstDepartment ? &quot;show&quot; : string.Empty)&quot;
+                                     data-bs-parent=&quot;#departmentsAccordion&quot;&gt;
+                                    &lt;div class=&quot;accordion-body&quot;&gt;
+                                        &lt;div class=&quot;skills-grid&quot;&gt;
+                                            @foreach (CrewRoleType skill in department.Value)
+                                            {
+                                                string skillName = GetDisplayName(skill);
+                                                string skillValue = ((int)skill).ToString();
+                                                
+                                                bool isSelected = Model.CurrentSkills.Contains(skill);
+                                                &lt;button type=&quot;button&quot;
+                                                        class=&quot;skill-bubble @(isSelected ? &quot;selected&quot; : string.Empty)&quot;
+                                                        data-skill=&quot;@skillValue&quot;
+                                                        data-department=&quot;@departmentId&quot;&gt;
+                                                    @skillName
+                                                &lt;/button&gt;
+                                            }
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+
+                            index++;
+                        }
+                    }
+                &lt;/div&gt;
+
+                &lt;div asp-validation-summary=&quot;ModelOnly&quot; class=&quot;text-danger mt-3&quot;&gt;&lt;/div&gt;
+
+                &lt;!-- Actions --&gt;
+                &lt;div class=&quot;d-flex justify-content-between mt-4&quot;&gt;
+                    &lt;a asp-area=&quot;&quot; asp-controller=&quot;Profile&quot; asp-action=&quot;FilmmakerProfile&quot; class=&quot;btn btn-outline-secondary&quot;&gt;
+                        &lt;i class=&quot;bi bi-arrow-left me-2&quot;&gt;&lt;/i&gt;Cancel
+                    &lt;/a&gt;
+                    &lt;button type=&quot;submit&quot; class=&quot;btn btn-wrap-primary&quot; id=&quot;submitBtn&quot;&gt;
+                        &lt;i class=&quot;bi bi-check-circle me-2&quot;&gt;&lt;/i&gt;Save Changes
+                    &lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/section&gt;
+
+@section Scripts {
+    &lt;partial name=&quot;_ValidationScriptsPartial&quot;/&gt;
+    
+    &lt;script src=&quot;~/js/profile/profile-edit-crew-skills.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[4,5,4,56,0],[31,81,31,87,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Web.ViewModels/Production/CreateProductionInputModel.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Web.ViewModels.Production;
+
+using System.ComponentModel.DataAnnotations;
+
+using Microsoft.AspNetCore.Http;
+
+using GCommon.Enums;
+using GCommon.ValidationAttributes;
+using static GCommon.EntityConstants.Production;
+
+public class CreateProductionInputModel
+{
+    public IFormFile? ThumbnailImage { get; set; }
+    
+    [Required]
+    [StringLength(TitleMaxLength, MinimumLength = TitleMinLength)]
+    public string Title { get; set; } = null!;
+    
+    [MaxLength(DescriptionMaxLength)]
+    public string? Description { get; set; }
+    
+    [Range(BudgetMinValue, double.MaxValue)]
+    public decimal Budget { get; set; }
+
+    [Required]
+    public ProductionStatusType StatusType { get; set; }
+    
+    [Required]
+    public DateTime StatusStartDate { get; set; }
+
+    [IsAfter(nameof(StatusStartDate))]
+    public DateTime? StatusEndDate { get; set; }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,41,17,46,0]]);
+    </script>
+  </body>
+</html>

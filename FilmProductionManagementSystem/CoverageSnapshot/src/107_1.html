@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/LoginRegisterServiceTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using System.Security.Claims;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+using Moq;
+using NUnit.Framework;
+
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+using Core;
+using Core.Handlers.Interfaces;
+using Core.Utilities.ImageLogic.Interfaces;
+using Models.LoginAndRegistration;
+
+using static GCommon.OutputMessages;
+using static GCommon.OutputMessages.Register;
+using static GCommon.DataFormat;
+
+[TestFixture]
+public class LoginRegisterServiceTests
+{
+    private Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; userManagerMock = null!;
+    private Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; signInManagerMock = null!;
+
+    private Mock&lt;ILoginRegisterRepository&gt; loginRegisterRepositoryMock = null!;
+    private Mock&lt;IImageService&gt; imageServiceMock = null!;
+    private Mock&lt;IVariantImageStrategyResolver&gt; imageStrategyResolverMock = null!;
+    private Mock&lt;IRegistrationHandlerResolver&gt; registrationHandlerResolverMock = null!;
+    private Mock&lt;ILogger&lt;LoginRegisterService&gt;&gt; loggerMock = null!;
+
+    private LoginRegisterService loginRegisterService = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        userManagerMock = CreateUserManagerMock();
+        signInManagerMock = CreateSignInManagerMock(userManagerMock.Object);
+
+        loginRegisterRepositoryMock = new Mock&lt;ILoginRegisterRepository&gt;(MockBehavior.Strict);
+        imageServiceMock = new Mock&lt;IImageService&gt;(MockBehavior.Strict);
+        imageStrategyResolverMock = new Mock&lt;IVariantImageStrategyResolver&gt;(MockBehavior.Strict);
+        registrationHandlerResolverMock = new Mock&lt;IRegistrationHandlerResolver&gt;(MockBehavior.Strict);
+        loggerMock = new Mock&lt;ILogger&lt;LoginRegisterService&gt;&gt;(MockBehavior.Loose);
+
+        loginRegisterService = new LoginRegisterService(
+            userManagerMock.Object,
+            signInManagerMock.Object,
+            loginRegisterRepositoryMock.Object,
+            imageServiceMock.Object,
+            imageStrategyResolverMock.Object,
+            registrationHandlerResolverMock.Object,
+            loggerMock.Object
+        );
+    }
+
+    [Test]
+    public async Task BuildCrewDraftAsync_WhenValidInput_ReturnsDraftWithSavedProfilePath()
+    {
+        // Arrange
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ProfileFolderName))
+            .Returns(strategy);
+
+        CrewRegistrationStepOneDto dto = new CrewRegistrationStepOneDto
+        {
+            UserName = &quot;crew.user&quot;,
+            Email = &quot;crew@wrap.local&quot;,
+            PhoneNumber = &quot;+359888000000&quot;,
+            Password = &quot;Pass123!&quot;,
+            FirstName = &quot;Crew&quot;,
+            LastName = &quot;User&quot;,
+            Nickname = &quot;C&quot;,
+            Biography = &quot;bio&quot;,
+            ProfilePicture = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3])
+        };
+
+        const string savedPath = &quot;/img/profile/saved.webp&quot;;
+
+        imageServiceMock
+            .Setup(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ReturnsAsync(savedPath);
+
+        // Act
+        CrewRegistrationDraftDto? result = await loginRegisterService.BuildCrewDraftAsync(dto);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.UserName, Is.EqualTo(dto.UserName));
+        Assert.That(result.Email, Is.EqualTo(dto.Email));
+        Assert.That(result.PhoneNumber, Is.EqualTo(dto.PhoneNumber));
+        Assert.That(result.Password, Is.EqualTo(dto.Password));
+        Assert.That(result.FirstName, Is.EqualTo(dto.FirstName));
+        Assert.That(result.LastName, Is.EqualTo(dto.LastName));
+        Assert.That(result.Nickname, Is.EqualTo(dto.Nickname));
+        Assert.That(result.Biography, Is.EqualTo(dto.Biography));
+        Assert.That(result.ProfilePicturePath, Is.EqualTo(savedPath));
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+
+        registrationHandlerResolverMock.VerifyNoOtherCalls();
+        loginRegisterRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void BuildCrewDraftAsync_WhenImageServiceThrowsNotSupportedException_RethrowsNotSupportedException()
+    {
+        // Arrange
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ProfileFolderName))
+            .Returns(strategy);
+
+        CrewRegistrationStepOneDto dto = new CrewRegistrationStepOneDto
+        {
+            UserName = &quot;crew.user&quot;,
+            Email = &quot;crew@wrap.local&quot;,
+            PhoneNumber = &quot;+359888000000&quot;,
+            Password = &quot;Pass123!&quot;,
+            FirstName = &quot;Crew&quot;,
+            LastName = &quot;User&quot;,
+            ProfilePicture = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3])
+        };
+
+        imageServiceMock
+            .Setup(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ThrowsAsync(new NotSupportedException(&quot;bad image&quot;));
+
+        // Act + Assert
+        NotSupportedException ex =
+            Assert.ThrowsAsync&lt;NotSupportedException&gt;(() =&gt; loginRegisterService.BuildCrewDraftAsync(dto))!;
+
+        Assert.That(ex.Message, Is.EqualTo(&quot;bad image&quot;));
+        Assert.That(ex.InnerException, Is.Not.Null);
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+    }
+
+    [Test]
+    public void BuildCrewDraftAsync_WhenUnexpectedExceptionOccurs_ThrowsWrappedExceptionWithConfiguredMessage()
+    {
+        // Arrange
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ProfileFolderName))
+            .Returns(strategy);
+
+        CrewRegistrationStepOneDto dto = new CrewRegistrationStepOneDto
+        {
+            UserName = &quot;crew.user&quot;,
+            Email = &quot;crew@wrap.local&quot;,
+            PhoneNumber = &quot;+359888000000&quot;,
+            Password = &quot;Pass123!&quot;,
+            FirstName = &quot;Crew&quot;,
+            LastName = &quot;User&quot;,
+            ProfilePicture = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3])
+        };
+
+        imageServiceMock
+            .Setup(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ThrowsAsync(new InvalidOperationException(&quot;boom&quot;));
+
+        // Act
+        Exception ex = Assert.ThrowsAsync&lt;Exception&gt;(() =&gt; loginRegisterService.BuildCrewDraftAsync(dto))!;
+
+        // Assert
+        Assert.That(ex.Message, Is.EqualTo(ExceptionBuildingCrewDraft));
+        Assert.That(ex.InnerException, Is.Not.Null);
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.SaveImageAsync(dto.ProfilePicture, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+    }
+
+    [Test]
+    public void GetNewModelWithSkills_WhenCalled_ReturnsDtoWithSkillsByDepartment()
+    {
+        // Act
+        CrewRegistrationStepTwoDto dto = loginRegisterService.GetNewModelWithSkills();
+
+        // Assert
+        Assert.That(dto, Is.Not.Null);
+        Assert.That(dto.SkillsByDepartment, Is.Not.Null);
+        Assert.That(dto.SkillsByDepartment.Count, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void GetSkills_WhenStepTwoDtoProvided_PopulatesSkillsByDepartment()
+    {
+        // Arrange
+        CrewRegistrationStepTwoDto dto = new CrewRegistrationStepTwoDto();
+
+        // Act
+        loginRegisterService.GetSkills(dto);
+
+        // Assert
+        Assert.That(dto.SkillsByDepartment, Is.Not.Null);
+        Assert.That(dto.SkillsByDepartment.Count, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void GetSkills_WhenCompleteDtoProvided_PopulatesSkillsByDepartment()
+    {
+        // Arrange
+        CrewRegistrationCompleteDto dto = new CrewRegistrationCompleteDto();
+
+        // Act
+        loginRegisterService.GetSkills(dto);
+
+        // Assert
+        Assert.That(dto.SkillsByDepartment, Is.Not.Null);
+        Assert.That(dto.SkillsByDepartment.Count, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenHandlerReturnsSuccess_ReturnsSuccess()
+    {
+        // Arrange
+        CastRegistrationDto registrationDto = new CastRegistrationDto
+        {
+            UserName = &quot;cast.user&quot;,
+            Email = &quot;cast@wrap.local&quot;,
+            PhoneNumber = &quot;+359888000111&quot;,
+            Password = &quot;Pass123!&quot;,
+            FirstName = &quot;A&quot;,
+            LastName = &quot;B&quot;,
+            BirthDate = new DateTime(2000, 1, 1),
+            Gender = GCommon.Enums.GenderType.Male,
+            ProfilePicture = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3]),
+            Biography = &quot;bio&quot;
+        };
+
+        Mock&lt;IRegistrationHandler&lt;CastRegistrationDto&gt;&gt; handlerMock =
+            new Mock&lt;IRegistrationHandler&lt;CastRegistrationDto&gt;&gt;(MockBehavior.Strict);
+
+        registrationHandlerResolverMock
+            .Setup(rhr =&gt; rhr.Resolve&lt;CastRegistrationDto&gt;())
+            .Returns(handlerMock.Object);
+
+        handlerMock
+            .Setup(h =&gt; h.CompleteRegistrationAsync(registrationDto))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        IdentityResult result = await loginRegisterService.CompleteRegistrationAsync(registrationDto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.True);
+
+        registrationHandlerResolverMock.Verify(rhr =&gt; rhr.Resolve&lt;CastRegistrationDto&gt;(), Times.Once);
+        handlerMock.Verify(h =&gt; h.CompleteRegistrationAsync(registrationDto), Times.Once);
+
+        loginRegisterRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenHandlerReturnsFailed_ReturnsFailed()
+    {
+        // Arrange
+        CrewRegistrationCompleteDto registrationDto = new CrewRegistrationCompleteDto
+        {
+            Draft = new CrewRegistrationDraftDto
+            {
+                UserName = &quot;crew.user&quot;,
+                Email = &quot;crew@wrap.local&quot;,
+                PhoneNumber = &quot;+359888000000&quot;,
+                Password = &quot;Pass123!&quot;,
+                FirstName = &quot;Crew&quot;,
+                LastName = &quot;User&quot;,
+                ProfilePicturePath = &quot;/img/profile/default.webp&quot;
+            },
+            SkillNumbers = [1, 2]
+        };
+
+        Mock&lt;IRegistrationHandler&lt;CrewRegistrationCompleteDto&gt;&gt; handlerMock =
+            new Mock&lt;IRegistrationHandler&lt;CrewRegistrationCompleteDto&gt;&gt;(MockBehavior.Strict);
+
+        IdentityResult failed = IdentityResult.Failed(new IdentityError { Description = &quot;failed&quot; });
+
+        registrationHandlerResolverMock
+            .Setup(rhr =&gt; rhr.Resolve&lt;CrewRegistrationCompleteDto&gt;())
+            .Returns(handlerMock.Object);
+
+        handlerMock
+            .Setup(h =&gt; h.CompleteRegistrationAsync(registrationDto))
+            .ReturnsAsync(failed);
+
+        // Act
+        IdentityResult result = await loginRegisterService.CompleteRegistrationAsync(registrationDto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.False);
+        Assert.That(result.Errors.Select(e =&gt; e.Description), Does.Contain(&quot;failed&quot;));
+    }
+
+    [Test]
+    public void CompleteRegistrationAsync_WhenResolverThrows_PropagatesException()
+    {
+        // Arrange
+        CastRegistrationDto registrationDto = new CastRegistrationDto
+        {
+            UserName = &quot;cast.user&quot;,
+            Email = &quot;cast@wrap.local&quot;,
+            PhoneNumber = &quot;+359888000111&quot;,
+            Password = &quot;Pass123!&quot;,
+            FirstName = &quot;A&quot;,
+            LastName = &quot;B&quot;,
+            BirthDate = new DateTime(2000, 1, 1),
+            Gender = GCommon.Enums.GenderType.Male,
+            ProfilePicture = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3]),
+            Biography = &quot;bio&quot;
+        };
+
+        registrationHandlerResolverMock
+            .Setup(rhr =&gt; rhr.Resolve&lt;CastRegistrationDto&gt;())
+            .Throws(new InvalidOperationException(&quot;resolver boom&quot;));
+
+        // Act + Assert
+        InvalidOperationException ex =
+            Assert.ThrowsAsync&lt;InvalidOperationException&gt;(() =&gt; loginRegisterService.CompleteRegistrationAsync(registrationDto))!;
+
+        Assert.That(ex.Message, Is.EqualTo(&quot;resolver boom&quot;));
+    }
+
+    [Test]
+    public void CompleteRegistrationAsync_WhenHandlerThrows_PropagatesException()
+    {
+        // Arrange
+        CastRegistrationDto registrationDto = new CastRegistrationDto
+        {
+            UserName = &quot;cast.user&quot;,
+            Email = &quot;cast@wrap.local&quot;,
+            PhoneNumber = &quot;+359888000111&quot;,
+            Password = &quot;Pass123!&quot;,
+            FirstName = &quot;A&quot;,
+            LastName = &quot;B&quot;,
+            BirthDate = new DateTime(2000, 1, 1),
+            Gender = GCommon.Enums.GenderType.Male,
+            ProfilePicture = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3]),
+            Biography = &quot;bio&quot;
+        };
+
+        Mock&lt;IRegistrationHandler&lt;CastRegistrationDto&gt;&gt; handlerMock =
+            new Mock&lt;IRegistrationHandler&lt;CastRegistrationDto&gt;&gt;(MockBehavior.Strict);
+
+        registrationHandlerResolverMock
+            .Setup(rhr =&gt; rhr.Resolve&lt;CastRegistrationDto&gt;())
+            .Returns(handlerMock.Object);
+
+        handlerMock
+            .Setup(h =&gt; h.CompleteRegistrationAsync(registrationDto))
+            .ThrowsAsync(new Exception(&quot;handler boom&quot;));
+
+        // Act + Assert
+        Exception ex = Assert.ThrowsAsync&lt;Exception&gt;(() =&gt; loginRegisterService.CompleteRegistrationAsync(registrationDto))!;
+        Assert.That(ex.Message, Is.EqualTo(&quot;handler boom&quot;));
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenDtoIsNull_ReturnsFailedWithEmptyRole()
+    {
+        // Arrange
+        LoginRequestDto? dto = null;
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.False);
+        Assert.That(result.Role, Is.EqualTo(string.Empty));
+
+        loginRegisterRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenRoleIsInvalid_ReturnsFailedWithEmptyRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;user&quot;,
+            Password = &quot;pass&quot;,
+            RememberMe = false,
+            Role = &quot;InvalidRole&quot;
+        };
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.False);
+        Assert.That(result.Role, Is.EqualTo(string.Empty));
+
+        loginRegisterRepositoryMock.VerifyNoOtherCalls();
+        userManagerMock.Verify(um =&gt; um.FindByNameAsync(It.IsAny&lt;string&gt;()), Times.Never);
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenUserDoesNotExist_ReturnsFailedWithEmptyRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;missingUser&quot;,
+            Password = &quot;pass&quot;,
+            RememberMe = false,
+            Role = CrewString
+        };
+
+        userManagerMock
+            .Setup(um =&gt; um.FindByNameAsync(dto.UserName))
+            .ReturnsAsync((ApplicationUser?)null);
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.False);
+        Assert.That(result.Role, Is.EqualTo(string.Empty));
+
+        userManagerMock.Verify(um =&gt; um.FindByNameAsync(dto.UserName), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CheckPasswordAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;string&gt;()), Times.Never);
+        signInManagerMock.Verify(sim =&gt; sim.PasswordSignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;string&gt;(), It.IsAny&lt;bool&gt;(), false), Times.Never);
+        loginRegisterRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenPasswordCheckFails_ReturnsFailedWithEmptyRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;user&quot;,
+            Password = &quot;wrong&quot;,
+            RememberMe = false,
+            Role = CastString
+        };
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = dto.UserName
+        };
+
+        userManagerMock
+            .Setup(um =&gt; um.FindByNameAsync(dto.UserName))
+            .ReturnsAsync(user);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(user, dto.Password))
+            .ReturnsAsync(false);
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.False);
+        Assert.That(result.Role, Is.EqualTo(string.Empty));
+
+        userManagerMock.Verify(um =&gt; um.FindByNameAsync(dto.UserName), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CheckPasswordAsync(user, dto.Password), Times.Once);
+        signInManagerMock.Verify(sim =&gt; sim.PasswordSignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;string&gt;(), It.IsAny&lt;bool&gt;(), false), Times.Never);
+        loginRegisterRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenCrewRoleButCrewDoesNotExist_ReturnsFailedCrewRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;crewUser&quot;,
+            Password = &quot;p&quot;,
+            RememberMe = false,
+            Role = CrewString
+        };
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = dto.UserName
+        };
+
+        userManagerMock
+            .Setup(um =&gt; um.FindByNameAsync(dto.UserName))
+            .ReturnsAsync(user);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(user, dto.Password))
+            .ReturnsAsync(true);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CrewExistsByUserIdAsync(user.Id))
+            .ReturnsAsync(false);
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.False);
+        Assert.That(result.Role, Is.EqualTo(CrewString));
+
+        userManagerMock.Verify(um =&gt; um.FindByNameAsync(dto.UserName), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CheckPasswordAsync(user, dto.Password), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CrewExistsByUserIdAsync(user.Id), Times.Once);
+        signInManagerMock.Verify(sim =&gt; sim.PasswordSignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;string&gt;(), It.IsAny&lt;bool&gt;(), false), Times.Never);
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenCastRoleButCastDoesNotExist_ReturnsFailedCastRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;castUser&quot;,
+            Password = &quot;p&quot;,
+            RememberMe = false,
+            Role = CastString
+        };
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = dto.UserName
+        };
+
+        userManagerMock
+            .Setup(um =&gt; um.FindByNameAsync(dto.UserName))
+            .ReturnsAsync(user);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(user, dto.Password))
+            .ReturnsAsync(true);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CastExistsByUserIdAsync(user.Id))
+            .ReturnsAsync(false);
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.False);
+        Assert.That(result.Role, Is.EqualTo(CastString));
+
+        userManagerMock.Verify(um =&gt; um.FindByNameAsync(dto.UserName), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CheckPasswordAsync(user, dto.Password), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CastExistsByUserIdAsync(user.Id), Times.Once);
+        signInManagerMock.Verify(sim =&gt; sim.PasswordSignInAsync(It.IsAny&lt;ApplicationUser&gt;(), It.IsAny&lt;string&gt;(), It.IsAny&lt;bool&gt;(), false), Times.Never);
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenCrewExistsButPasswordSignInFails_ReturnsFailedWithEmptyRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;crewUser&quot;,
+            Password = &quot;pass&quot;,
+            RememberMe = false,
+            Role = CrewString
+        };
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = dto.UserName
+        };
+
+        userManagerMock
+            .Setup(um =&gt; um.FindByNameAsync(dto.UserName))
+            .ReturnsAsync(user);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(user, dto.Password))
+            .ReturnsAsync(true);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CrewExistsByUserIdAsync(user.Id))
+            .ReturnsAsync(true);
+
+        signInManagerMock
+            .Setup(sim =&gt; sim.PasswordSignInAsync(user, dto.Password, dto.RememberMe, false))
+            .ReturnsAsync(SignInResult.Failed);
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.False);
+        Assert.That(result.Role, Is.EqualTo(string.Empty));
+
+        signInManagerMock.Verify(sim =&gt; sim.PasswordSignInAsync(user, dto.Password, dto.RememberMe, false), Times.Once);
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenCastExistsButPasswordSignInFails_ReturnsFailedWithEmptyRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;castUser&quot;,
+            Password = &quot;pass&quot;,
+            RememberMe = false,
+            Role = CastString
+        };
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = dto.UserName
+        };
+
+        userManagerMock
+            .Setup(um =&gt; um.FindByNameAsync(dto.UserName))
+            .ReturnsAsync(user);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(user, dto.Password))
+            .ReturnsAsync(true);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CastExistsByUserIdAsync(user.Id))
+            .ReturnsAsync(true);
+
+        signInManagerMock
+            .Setup(sim =&gt; sim.PasswordSignInAsync(user, dto.Password, dto.RememberMe, false))
+            .ReturnsAsync(SignInResult.Failed);
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.False);
+        Assert.That(result.Role, Is.EqualTo(string.Empty));
+
+        signInManagerMock.Verify(sim =&gt; sim.PasswordSignInAsync(user, dto.Password, dto.RememberMe, false), Times.Once);
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenCrewRoleAndCrewExists_ReturnsSucceededCrewRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;crewUser&quot;,
+            Password = &quot;pass&quot;,
+            RememberMe = true,
+            Role = CrewString
+        };
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = dto.UserName
+        };
+
+        userManagerMock
+            .Setup(um =&gt; um.FindByNameAsync(dto.UserName))
+            .ReturnsAsync(user);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(user, dto.Password))
+            .ReturnsAsync(true);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CrewExistsByUserIdAsync(user.Id))
+            .ReturnsAsync(true);
+
+        signInManagerMock
+            .Setup(sim =&gt; sim.PasswordSignInAsync(user, dto.Password, dto.RememberMe, false))
+            .ReturnsAsync(SignInResult.Success);
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.True);
+        Assert.That(result.Role, Is.EqualTo(CrewString));
+
+        userManagerMock.Verify(um =&gt; um.FindByNameAsync(dto.UserName), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CheckPasswordAsync(user, dto.Password), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CrewExistsByUserIdAsync(user.Id), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CastExistsByUserIdAsync(It.IsAny&lt;Guid&gt;()), Times.Never);
+        signInManagerMock.Verify(sim =&gt; sim.PasswordSignInAsync(user, dto.Password, dto.RememberMe, false), Times.Once);
+    }
+
+    [Test]
+    public async Task LoginStatusAsync_WhenCastRoleAndCastExists_ReturnsSucceededCastRole()
+    {
+        // Arrange
+        LoginRequestDto dto = new LoginRequestDto
+        {
+            UserName = &quot;castUser&quot;,
+            Password = &quot;p&quot;,
+            RememberMe = false,
+            Role = CastString
+        };
+
+        ApplicationUser user = new ApplicationUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = dto.UserName
+        };
+
+        userManagerMock
+            .Setup(um =&gt; um.FindByNameAsync(dto.UserName))
+            .ReturnsAsync(user);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(user, dto.Password))
+            .ReturnsAsync(true);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr =&gt; lrr.CastExistsByUserIdAsync(user.Id))
+            .ReturnsAsync(true);
+
+        signInManagerMock
+            .Setup(sim =&gt; sim.PasswordSignInAsync(user, dto.Password, dto.RememberMe, false))
+            .ReturnsAsync(SignInResult.Success);
+
+        // Act
+        LoginStatusDto result = await loginRegisterService.LoginStatusAsync(dto);
+
+        // Assert
+        Assert.That(result.IsSucceeded, Is.True);
+        Assert.That(result.Role, Is.EqualTo(CastString));
+
+        userManagerMock.Verify(um =&gt; um.FindByNameAsync(dto.UserName), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CheckPasswordAsync(user, dto.Password), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CastExistsByUserIdAsync(user.Id), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr =&gt; lrr.CrewExistsByUserIdAsync(It.IsAny&lt;Guid&gt;()), Times.Never);
+        signInManagerMock.Verify(sim =&gt; sim.PasswordSignInAsync(user, dto.Password, dto.RememberMe, false), Times.Once);
+    }
+
+    [Test]
+    public async Task LogoutAsync_WhenCalled_SignsOut()
+    {
+        // Arrange
+        signInManagerMock
+            .Setup(sim =&gt; sim.SignOutAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await loginRegisterService.LogoutAsync();
+
+        // Assert
+        signInManagerMock.Verify(sim =&gt; sim.SignOutAsync(), Times.Once);
+    }
+
+    private static Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; CreateUserManagerMock()
+    {
+        Mock&lt;IUserStore&lt;ApplicationUser&gt;&gt; storeMock = new Mock&lt;IUserStore&lt;ApplicationUser&gt;&gt;(MockBehavior.Loose);
+
+        Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; userManager = new Mock&lt;UserManager&lt;ApplicationUser&gt;&gt;
+        (
+            storeMock.Object,
+            Mock.Of&lt;IOptions&lt;IdentityOptions&gt;&gt;(),
+            Mock.Of&lt;IPasswordHasher&lt;ApplicationUser&gt;&gt;(),
+            Array.Empty&lt;IUserValidator&lt;ApplicationUser&gt;&gt;(),
+            Array.Empty&lt;IPasswordValidator&lt;ApplicationUser&gt;&gt;(),
+            Mock.Of&lt;ILookupNormalizer&gt;(),
+            Mock.Of&lt;IdentityErrorDescriber&gt;(),
+            Mock.Of&lt;IServiceProvider&gt;(),
+            Mock.Of&lt;ILogger&lt;UserManager&lt;ApplicationUser&gt;&gt;&gt;()
+        );
+
+        userManager.SetReturnsDefault(Task.FromResult&lt;ApplicationUser?&gt;(null));
+
+        return userManager;
+    }
+
+    private static Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; CreateSignInManagerMock(UserManager&lt;ApplicationUser&gt; userManager)
+    {
+        DefaultHttpContext httpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity())
+        };
+
+        Mock&lt;IHttpContextAccessor&gt; httpContextAccessorMock = new Mock&lt;IHttpContextAccessor&gt;(MockBehavior.Loose);
+        httpContextAccessorMock
+            .Setup(hca =&gt; hca.HttpContext)
+            .Returns(httpContext);
+
+        Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; signInManager = new Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt;
+        (
+            userManager,
+            httpContextAccessorMock.Object,
+            Mock.Of&lt;IUserClaimsPrincipalFactory&lt;ApplicationUser&gt;&gt;(),
+            Mock.Of&lt;IOptions&lt;IdentityOptions&gt;&gt;(),
+            Mock.Of&lt;ILogger&lt;SignInManager&lt;ApplicationUser&gt;&gt;&gt;(),
+            Mock.Of&lt;IAuthenticationSchemeProvider&gt;(),
+            Mock.Of&lt;IUserConfirmation&lt;ApplicationUser&gt;&gt;()
+        )
+        {
+            CallBase = false
+        };
+
+        return signInManager;
+    }
+
+    private static IFormFile CreateFormFile(string fileName, byte[] content)
+    {
+        MemoryStream stream = new MemoryStream(content);
+
+        IFormFile file = new FormFile(stream, 0, content.Length, &quot;file&quot;, fileName);
+
+        return file;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[28,5,28,72,1],[29,5,29,76,1],[31,5,31,80,1],[32,5,32,58,1],[33,5,33,83,1],[34,5,34,88,1],[35,5,35,68,1],[37,5,37,63,1],[41,5,41,6,1],[42,9,42,51,1],[43,9,43,77,1],[45,9,45,95,1],[46,9,46,73,1],[47,9,47,98,1],[48,9,48,103,1],[49,9,49,82,1],[51,9,59,11,1],[60,5,60,6,1],[64,5,64,6,1],[66,9,66,75,1],[67,9,69,32,1],[71,9,82,11,1],[86,9,88,38,1],[91,9,91,96,1],[94,9,94,42,1],[95,9,95,65,1],[96,9,96,58,1],[97,9,97,70,1],[98,9,98,64,1],[99,9,99,66,1],[100,9,100,64,1],[101,9,101,64,1],[102,9,102,66,1],[103,9,103,71,1],[105,9,105,93,1],[106,9,106,133,1],[108,9,108,62,1],[109,9,109,58,1],[110,5,110,6,1],[114,5,114,6,1],[116,9,116,75,1],[117,9,119,32,1],[121,9,130,11,1],[132,9,134,66,1],[137,9,138,61,1],[138,61,138,106,1],[138,106,138,109,1],[140,9,140,58,1],[141,9,141,53,1],[143,9,143,93,1],[144,9,144,133,1],[145,5,145,6,1],[149,5,149,6,1],[151,9,151,75,1],[152,9,154,32,1],[156,9,165,11,1],[167,9,169,65,1],[172,9,172,60,1],[172,60,172,105,1],[172,105,172,108,1],[175,9,175,73,1],[176,9,176,53,1],[178,9,178,93,1],[179,9,179,133,1],[180,5,180,6,1],[184,5,184,6,1],[186,9,186,87,1],[189,9,189,39,1],[190,9,190,58,1],[191,9,191,70,1],[192,5,192,6,1],[196,5,196,6,1],[198,9,198,75,1],[201,9,201,45,1],[204,9,204,58,1],[205,9,205,70,1],[206,5,206,6,1],[210,5,210,6,1],[212,9,212,77,1],[215,9,215,45,1],[218,9,218,58,1],[219,9,219,70,1],[220,5,220,6,1],[224,5,224,6,1],[226,9,238,11,1],[240,9,241,86,1],[243,9,245,42,1],[247,9,249,51,1],[252,9,252,103,1],[255,9,255,48,1],[257,9,257,103,1],[258,9,258,91,1],[260,9,260,58,1],[261,9,261,47,1],[262,9,262,56,1],[263,5,263,6,1],[267,5,267,6,1],[269,9,282,11,1],[284,9,285,94,1],[287,9,287,101,1],[289,9,291,42,1],[293,9,295,35,1],[298,9,298,103,1],[301,9,301,49,1],[302,9,302,47,1],[302,47,302,60,1],[302,60,302,87,1],[303,5,303,6,1],[307,5,307,6,1],[309,9,321,11,1],[323,9,325,69,1],[328,9,329,65,1],[329,65,329,128,1],[329,128,329,131,1],[331,9,331,62,1],[332,5,332,6,1],[336,5,336,6,1],[338,9,350,11,1],[352,9,353,86,1],[355,9,357,42,1],[359,9,361,57,1],[364,9,364,60,1],[364,60,364,123,1],[364,123,364,126,1],[365,9,365,61,1],[366,5,366,6,1],[370,5,370,6,1],[372,9,372,37,1],[375,9,375,82,1],[378,9,378,51,1],[379,9,379,60,1],[381,9,381,58,1],[382,5,382,6,1],[386,5,386,6,1],[388,9,394,11,1],[397,9,397,82,1],[400,9,400,51,1],[401,9,401,60,1],[403,9,403,58,1],[404,9,404,91,1],[405,5,405,6,1],[409,5,409,6,1],[411,9,417,11,1],[419,9,421,51,1],[424,9,424,82,1],[427,9,427,51,1],[428,9,428,60,1],[430,9,430,84,1],[431,9,431,123,1],[432,9,432,153,1],[433,9,433,58,1],[434,5,434,6,1],[438,5,438,6,1],[440,9,446,11,1],[448,9,452,11,1],[454,9,456,33,1],[458,9,460,34,1],[463,9,463,82,1],[466,9,466,51,1],[467,9,467,60,1],[469,9,469,84,1],[470,9,470,93,1],[471,9,471,153,1],[472,9,472,58,1],[473,5,473,6,1],[477,5,477,6,1],[479,9,485,11,1],[487,9,491,11,1],[493,9,495,33,1],[497,9,499,33,1],[501,9,503,34,1],[506,9,506,82,1],[509,9,509,51,1],[510,9,510,58,1],[512,9,512,84,1],[513,9,513,93,1],[514,9,514,101,1],[515,9,515,153,1],[516,5,516,6,1],[520,5,520,6,1],[522,9,528,11,1],[530,9,534,11,1],[536,9,538,33,1],[540,9,542,33,1],[544,9,546,34,1],[549,9,549,82,1],[552,9,552,51,1],[553,9,553,58,1],[555,9,555,84,1],[556,9,556,93,1],[557,9,557,101,1],[558,9,558,153,1],[559,5,559,6,1],[563,5,563,6,1],[565,9,571,11,1],[573,9,577,11,1],[579,9,581,33,1],[583,9,585,33,1],[587,9,589,33,1],[591,9,593,48,1],[596,9,596,82,1],[599,9,599,51,1],[600,9,600,60,1],[602,9,602,121,1],[603,5,603,6,1],[607,5,607,6,1],[609,9,615,11,1],[617,9,621,11,1],[623,9,625,33,1],[627,9,629,33,1],[631,9,633,33,1],[635,9,637,48,1],[640,9,640,82,1],[643,9,643,51,1],[644,9,644,60,1],[646,9,646,121,1],[647,5,647,6,1],[651,5,651,6,1],[653,9,659,11,1],[661,9,665,11,1],[667,9,669,33,1],[671,9,673,33,1],[675,9,677,33,1],[679,9,681,49,1],[684,9,684,82,1],[687,9,687,50,1],[688,9,688,58,1],[690,9,690,84,1],[691,9,691,93,1],[692,9,692,101,1],[693,9,693,111,1],[694,9,694,121,1],[695,5,695,6,1],[699,5,699,6,1],[701,9,707,11,1],[709,9,713,11,1],[715,9,717,33,1],[719,9,721,33,1],[723,9,725,33,1],[727,9,729,49,1],[732,9,732,82,1],[735,9,735,50,1],[736,9,736,58,1],[738,9,738,84,1],[739,9,739,93,1],[740,9,740,101,1],[741,9,741,111,1],[742,9,742,121,1],[743,5,743,6,1],[747,5,747,6,1],[749,9,751,42,1],[754,9,754,50,1],[757,9,757,73,1],[758,5,758,6,1],[761,5,761,6,1],[762,9,762,113,1],[764,9,775,11,1],[777,9,777,80,1],[779,9,779,28,1],[780,5,780,6,1],[783,5,783,6,1],[784,9,787,11,1],[789,9,789,113,1],[790,9,792,35,1],[794,9,806,11,1],[808,9,808,30,1],[809,5,809,6,1],[812,5,812,6,1],[813,9,813,57,1],[815,9,815,84,1],[817,9,817,21,1],[818,5,818,6,1]]);
+    </script>
+  </body>
+</html>

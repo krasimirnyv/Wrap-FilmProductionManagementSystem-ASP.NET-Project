@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/Handlers/RegistrationHandlerBase.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core.Handlers;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+
+using Interfaces;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+
+using static GCommon.OutputMessages.Register;
+
+public abstract class RegistrationHandlerBase&lt;TRegistrationDto&gt;(UserManager&lt;ApplicationUser&gt; userManager, 
+                                                                SignInManager&lt;ApplicationUser&gt; signInManager,
+                                                                ILoginRegisterRepository loginRegisterRepository,
+                                                                ILogger&lt;RegistrationHandlerBase&lt;TRegistrationDto&gt;&gt; logger) : IRegistrationHandler&lt;TRegistrationDto&gt;
+{
+    public async Task&lt;IdentityResult&gt; CompleteRegistrationAsync(TRegistrationDto registrationDto)
+    {
+        IdentityResult? identityResult = ValidateDto(registrationDto);
+        if (identityResult is { Succeeded: false })
+            return identityResult;
+        
+        ApplicationUser user = BuildUser(registrationDto);
+
+        await using IDbContextTransaction transaction = await loginRegisterRepository.BeginTransactionAsync();
+        try
+        {
+            IdentityResult createResult = await CreateIdentityUserAsync(user, registrationDto);
+            if (!createResult.Succeeded)
+            {
+                await loginRegisterRepository.RollbackTransactionAsync(transaction);
+                LogIdentityErrors(createResult);
+                return createResult;
+            }
+
+            IdentityResult roleResult = await AssignRolesAsync(user, registrationDto);
+            if (!roleResult.Succeeded)
+            {
+                await loginRegisterRepository.RollbackTransactionAsync(transaction);
+                try { await userManager.DeleteAsync(user); } catch { /* ignored */ }
+
+                LogIdentityErrors(roleResult);
+                return roleResult;
+            }
+
+            int expectedRows = await PersistDomainDataAsync(registrationDto, user);
+            int affectedRows = await loginRegisterRepository.SaveAllChangesAsync();
+            if (affectedRows &lt; expectedRows)
+            {
+                await loginRegisterRepository.RollbackTransactionAsync(transaction);
+                await userManager.DeleteAsync(user);
+
+                logger.LogError(RegistrationTransactionFailure + string.Format(EffectedDbRowsFailure, expectedRows, affectedRows));
+                
+                return IdentityResult.Failed(new IdentityError
+                {
+                    Description = RegistrationTransactionFailure
+                });
+            }
+
+            await loginRegisterRepository.CommitTransactionAsync(transaction);
+            await signInManager.SignInAsync(user, false);
+
+            return IdentityResult.Success;
+        }
+        catch (Exception e)
+        {
+            await loginRegisterRepository.RollbackTransactionAsync(transaction);
+            try { await userManager.DeleteAsync(user); }catch { /* ignored */ }
+
+            LogUnhandledException(e);
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = RegistrationTransactionFailure
+            });
+        }
+    }
+
+    protected virtual async Task&lt;IdentityResult&gt; CreateIdentityUserAsync(ApplicationUser user, TRegistrationDto registrationDto)
+    {
+        string password = GetPassword(registrationDto);
+        IdentityResult result = await userManager.CreateAsync(user, password);
+        
+        return result;
+    }
+    
+    protected virtual async Task&lt;IdentityResult&gt; AssignRolesAsync(ApplicationUser user, TRegistrationDto registrationDto)
+        =&gt; await Task.FromResult(IdentityResult.Success);
+    
+    protected virtual void LogIdentityErrors(IdentityResult result)
+    {
+        foreach (IdentityError error in result.Errors)
+            logger.LogError(string.Format(IdentityCreateFailed, error.Description));
+    }
+    
+    protected virtual void LogUnhandledException(Exception exception)
+    {
+        logger.LogError(exception, RegistrationTransactionFailure + exception.Message);
+    }
+    
+    protected abstract IdentityResult? ValidateDto(TRegistrationDto registrationDto);
+    
+    protected abstract ApplicationUser BuildUser(TRegistrationDto registrationDto);
+    
+    protected abstract string GetPassword(TRegistrationDto registrationDto);
+    
+    protected abstract Task&lt;int&gt; PersistDomainDataAsync(TRegistrationDto registrationDto, ApplicationUser user);
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[13,23,16,123,1],[19,5,19,6,1],[20,9,20,71,1],[21,9,21,52,1],[22,13,22,35,1],[24,9,24,59,1],[26,9,26,111,1],[28,9,28,10,1],[29,13,29,96,1],[30,13,30,41,1],[31,13,31,14,1],[32,17,32,85,1],[33,17,33,49,1],[34,17,34,37,1],[37,13,37,87,1],[38,13,38,39,1],[39,13,39,14,1],[40,17,40,85,1],[41,21,41,22,1],[41,23,41,59,1],[41,60,41,61,1],[41,62,41,67,0],[41,68,41,69,0],[41,84,41,85,0],[43,17,43,47,1],[44,17,44,35,1],[47,13,47,84,1],[48,13,48,84,1],[49,13,49,45,1],[50,13,50,14,1],[51,17,51,85,1],[52,17,52,53,1],[54,17,54,132,1],[56,17,59,20,1],[62,13,62,79,1],[63,13,63,58,1],[65,13,65,43,1],[67,9,67,28,1],[68,9,68,10,1],[69,13,69,81,1],[70,17,70,18,1],[70,19,70,55,1],[70,56,70,57,1],[70,57,70,62,0],[70,63,70,64,0],[70,79,70,80,0],[72,13,72,38,1],[73,13,76,16,1],[78,5,78,6,1],[81,5,81,6,1],[82,9,82,56,1],[83,9,83,79,1],[85,9,85,23,1],[86,5,86,6,1],[89,12,89,57,0],[92,5,92,6,1],[93,9,93,16,1],[93,18,93,37,1],[93,38,93,40,1],[93,41,93,54,1],[94,13,94,85,1],[95,5,95,6,1],[98,5,98,6,1],[99,9,99,88,1],[100,5,100,6,1]]);
+    </script>
+  </body>
+</html>

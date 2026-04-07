@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/ProfileImageStrategyTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using NUnit.Framework;
+
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
+
+using Core.Utilities.ImageLogic;
+
+using static GCommon.DataFormat;
+
+[TestFixture]
+public class ProfileImageStrategyTests
+{
+    [Test]
+    public void Properties_WhenAccessed_ReturnExpectedConfigurationValues()
+    {
+        // Arrange
+        ProfileImageStrategy strategy = new ProfileImageStrategy();
+
+        // Assert
+        Assert.That(strategy.FolderName, Is.EqualTo(ProfileFolderName));
+        Assert.That(strategy.DefaultPath, Is.EqualTo(DefaultProfilePath));
+
+        Assert.That(strategy.Width, Is.EqualTo(OutputSizeProfileImage));
+        Assert.That(strategy.Height, Is.EqualTo(OutputSizeProfileImage));
+
+        Assert.That(strategy.Quality, Is.EqualTo(WebpQuality));
+
+        Assert.That(strategy.ResizeMode, Is.EqualTo(ResizeMode.Crop));
+        Assert.That(strategy.AnchorPosition, Is.EqualTo(AnchorPositionMode.Center));
+        Assert.That(strategy.FileFormat, Is.EqualTo(WebpFileFormatType.Lossy));
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,5,17,6,1],[19,9,19,68,1],[22,9,22,73,1],[23,9,23,75,1],[25,9,25,73,1],[26,9,26,74,1],[28,9,28,64,1],[30,9,30,71,1],[31,9,31,85,1],[32,9,32,80,1],[33,5,33,6,1]]);
+    </script>
+  </body>
+</html>

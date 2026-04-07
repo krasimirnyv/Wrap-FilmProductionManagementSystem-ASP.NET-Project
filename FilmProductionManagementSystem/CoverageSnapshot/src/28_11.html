@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Dtos/Cast/CastPersonalDataDto.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Dtos.Cast;
+
+public sealed record CastPersonalDataDto
+{
+    public Guid Id { get; init; }
+
+    public string FirstName { get; init; } = null!;
+    
+    public string LastName { get; init; } = null!;
+    
+    public string? Nickname { get; init; }
+    
+    public string? Biography { get; init; }
+
+    public DateTime Birthday { get; init; }
+    
+    public byte Age { get; init; }
+    
+    public string Gender { get; init; } = null!;
+
+    public CastUserDataDto User { get; init; } = null!;
+
+    public int ProductionsCount { get; init; }
+
+    public IReadOnlyCollection&lt;CastProductionDataDto&gt; Productions { get; init; } = [];
+
+    public int ScenesCount { get; init; }
+
+    public IReadOnlyCollection&lt;CastSceneDataDto&gt; Scenes { get; init; } = [];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[7,46,7,51,1],[9,45,9,50,1],[19,43,19,48,1],[21,50,21,55,1],[25,84,25,86,1],[29,74,29,76,1]]);
+    </script>
+  </body>
+</html>

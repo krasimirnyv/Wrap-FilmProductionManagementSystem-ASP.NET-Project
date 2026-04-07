@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Infrastructure.Tests/DisplayNameFormatterTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Infrastructure.Tests;
+
+using NUnit.Framework;
+
+using GCommon.Text;
+using GCommon.Enums;
+
+[TestFixture]
+public class DisplayNameFormatterTests
+{
+    [TestCase(&quot;&quot;, &quot;&quot;)]
+    [TestCase(&quot;   &quot;, &quot;&quot;)]
+    [TestCase(&quot;DirectorOfPhotography&quot;, &quot;Director Of Photography&quot;)]
+    [TestCase(&quot;FirstAssistantDirector&quot;, &quot;First Assistant Director&quot;)]
+    [TestCase(&quot;ADRSupervisor&quot;, &quot;ADR Supervisor&quot;)]
+    [TestCase(&quot;Version2Alpha&quot;, &quot;Version 2 Alpha&quot;)]
+    [TestCase(&quot;Already Split&quot;, &quot;Already Split&quot;)]
+    public void ToDisplayName_String_FormatsAsExpected(string input, string expected)
+    {
+        string result = DisplayNameFormatter.ToDisplayName(input);
+
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    [TestCaseSource(nameof(EnumCases))]
+    public void ToDisplayName_Enum_FormatsAsExpected(Enum input, string expected)
+    {
+        string result = DisplayNameFormatter.ToDisplayName(input);
+
+        Assert.That(result, Is.EqualTo(expected));
+    }
+
+    private static object[] EnumCases =&gt;
+    [
+        new object[]
+        {
+            CrewRoleType.DirectorOfPhotography,
+            &quot;Director Of Photography&quot;
+        },
+        new object[]
+        {
+            CrewRoleType.FirstAssistantDirector,
+            &quot;First Assistant Director&quot;
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,5,19,6,1],[20,9,20,67,1],[22,9,22,51,1],[23,5,23,6,1],[27,5,27,6,1],[28,9,28,67,1],[30,9,30,51,1],[31,5,31,6,1],[34,5,45,6,1]]);
+    </script>
+  </body>
+</html>

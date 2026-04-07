@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Models/LoginAndRegistration/CrewRegistrationStepTwoDto.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Models.LoginAndRegistration;
+
+using GCommon.Enums;
+
+public class CrewRegistrationStepTwoDto
+{
+    public IReadOnlyCollection&lt;int&gt; SelectedSkills { get; set; } =
+        new List&lt;int&gt;();
+    
+    public IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; SkillsByDepartment { get; set; }
+        = new Dictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt;();
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[8,9,8,24,1],[11,11,11,70,1]]);
+    </script>
+  </body>
+</html>

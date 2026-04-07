@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Areas/Identity/Pages/Account/Manage/_Layout.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@{
+    Layout = &quot;/Views/Shared/_Layout.cshtml&quot;;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/site.css&quot; asp-append-version=&quot;true&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/profile.css&quot; asp-append-version=&quot;true&quot; /&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+    @await RenderSectionAsync(&quot;Styles&quot;, required: false)
+}
+
+&lt;div class=&quot;production-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+
+        &lt;div class=&quot;section-card mt-4&quot;&gt;
+            &lt;div class=&quot;section-header&quot;&gt;
+                &lt;i class=&quot;bi bi-gear-fill me-2&quot;&gt;&lt;/i&gt;
+                &lt;h3&gt;Account Settings&lt;/h3&gt;
+            &lt;/div&gt;
+
+            &lt;div class=&quot;row g-4 mt-1&quot;&gt;
+
+                @* Left: Manage navigation *@
+                &lt;div class=&quot;col-lg-3&quot;&gt;
+                    &lt;div class=&quot;section-card h-100&quot;&gt;
+                        &lt;div class=&quot;section-header&quot;&gt;
+                            &lt;i class=&quot;bi bi-list me-2&quot;&gt;&lt;/i&gt;
+                            &lt;h3&gt;Manage&lt;/h3&gt;
+                        &lt;/div&gt;
+
+                        &lt;partial name=&quot;_ManageNav&quot; /&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                @* Right: Page body *@
+                &lt;div class=&quot;col-lg-9&quot;&gt;
+                    &lt;div class=&quot;section-card h-100&quot;&gt;
+                        @RenderBody()
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    @await RenderSectionAsync(&quot;Scripts&quot;, required: false)
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[2,5,2,45,0]]);
+    </script>
+  </body>
+</html>

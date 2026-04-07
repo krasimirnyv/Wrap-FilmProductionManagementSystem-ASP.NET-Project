@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.GCommon/UI/ProductionStatusAbstractionCatalog.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.GCommon.UI;
+
+using Enums;
+using static ApplicationConstants;
+
+using static Text.DisplayNameFormatter;
+
+/// &lt;summary&gt;
+/// Groups ProductionStatusTypes enum values by abstract status
+/// Used for rendering UI
+/// &lt;/summary&gt;
+public static class ProductionStatusAbstractionCatalog
+{
+    /// &lt;summary&gt;
+    /// Categorizing the status types by their abstract version for easily visualize.
+    /// &lt;/summary&gt;
+    /// &lt;returns&gt;Dictionary with key - abstraction name and value - enum values&lt;/returns&gt;
+    public static IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; GetStatusTypeByAbstraction()
+    {
+        return new Dictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt;
+        {
+            [PreProductionKey] =
+            [
+                ProductionStatusType.Concept,
+                ProductionStatusType.Development,
+                ProductionStatusType.Preproduction,
+                ProductionStatusType.Financing,
+                ProductionStatusType.Casting,
+                ProductionStatusType.LocationScouting,
+                ProductionStatusType.Rehearsals
+            ],
+
+            [ProductionKey] =
+            [
+                ProductionStatusType.Production,
+                ProductionStatusType.OnHold,
+                ProductionStatusType.Reshoots
+            ],
+
+            [PostProductionKey] =
+            [
+                ProductionStatusType.PostProduction,
+                ProductionStatusType.PictureLock,
+                ProductionStatusType.SoundDesign,
+                ProductionStatusType.ColorGrading,
+                ProductionStatusType.VisualEffects,
+                ProductionStatusType.MusicComposition
+            ],
+
+            [DistributionKey] =
+            [
+                ProductionStatusType.Marketing,
+                ProductionStatusType.Distribution,
+                ProductionStatusType.FestivalCircuit,
+                ProductionStatusType.Released,
+                ProductionStatusType.Completed,
+                ProductionStatusType.Cancelled
+            ]
+        };
+    }
+
+    public static string GetDisplayName(string status)
+        =&gt; ToDisplayName(status);
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[19,5,19,6,1],[20,9,59,11,1],[60,5,60,6,1],[63,12,63,33,1]]);
+    </script>
+  </body>
+</html>

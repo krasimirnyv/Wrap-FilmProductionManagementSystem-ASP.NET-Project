@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/FindPeopleService.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core;
+
+using Interfaces;
+using Models.FindPeople;
+using Data.Repository.Interfaces;
+using GCommon.Enums;
+
+using static GCommon.ApplicationConstants;
+
+public class FindPeopleService(IFindPeopleRepository findPeopleRepository, IProductionRepository productionRepository) : IFindPeopleService
+{
+    public async Task&lt;FindFilmmakersDto&gt; GetFilmmakersAsync
+        (int pageNumber = 1, string? search = null, CrewRoleType? roleType = null, Guid? productionId = null, int peoplePerPage = DefaultPeoplePerPage)
+    {
+        int safePage = Math.Max(pageNumber, 1);
+        int skip = (safePage - 1) * peoplePerPage;
+
+        (IReadOnlyCollection&lt;FilmmakerListDto&gt; filmmakers, int totalCount) = await findPeopleRepository
+            .GetFilmmakersPagedAsync(skip, peoplePerPage, search, roleType, productionId);
+
+        FindFilmmakersDto filmmakersDto = new FindFilmmakersDto
+        {
+            FilmmakerListDtos = filmmakers,
+            TotalCount = totalCount
+        };
+        
+        return filmmakersDto;
+    }
+
+    public async Task&lt;FindActorsDto&gt; GetActorsAsync
+        (int pageNumber = 1, string? search = null, byte? age = null, string? gender = null, Guid? productionId = null, int peoplePerPage = DefaultPeoplePerPage)
+    {
+        int safePage = Math.Max(pageNumber, 1);
+        int skip = (safePage - 1) * peoplePerPage;
+
+        (IReadOnlyCollection&lt;ActorListDto&gt; actors, int totalCount) = await findPeopleRepository
+            .GetActorsPagedAsync(skip, peoplePerPage, search, age, gender, productionId);
+
+        FindActorsDto actorsDto = new FindActorsDto
+        {
+            ActorListDtos = actors,
+            TotalCount = totalCount
+        };
+        
+        return actorsDto;
+    }
+
+    public async Task&lt;bool&gt; CanManageProductionAsync(Guid productionId, string userId)
+    {
+        Guid? userGuidId = ValidateGuid(userId);
+        if (userGuidId is null)
+            return false;
+        
+        bool isAllowed = await productionRepository.IsUserProductionLeaderAsync(productionId, userGuidId.Value);
+        return isAllowed;
+    }
+
+    public async Task AddCrewAsync(AddFilmmakerDto dto)
+    {
+        await findPeopleRepository.AddCrewToProductionAsync
+        (
+            productionId: dto.ProductionId,
+            crewId: dto.CrewId,
+            roleType: dto.RoleType
+        );
+
+        await findPeopleRepository.SaveAllChangesAsync();
+    }
+
+    public async Task RemoveCrewAsync(Guid productionId, Guid crewId)
+    {
+        await findPeopleRepository.RemoveCrewFromProductionAsync(productionId, crewId);
+        await findPeopleRepository.SaveAllChangesAsync();
+    }
+
+    public async Task AddCastAsync(AddActorDto dto)
+    {
+        await findPeopleRepository.AddCastToProductionAsync
+        (
+            productionId: dto.ProductionId,
+            castId: dto.CastId,
+            roleName: dto.RoleName
+        );
+
+        await findPeopleRepository.SaveAllChangesAsync();
+    }
+
+    public async Task RemoveCastAsync(Guid productionId, Guid castId)
+    {
+        await findPeopleRepository.RemoveCastFromProductionAsync(productionId, castId);
+        await findPeopleRepository.SaveAllChangesAsync();
+    }
+
+    private static Guid? ValidateGuid(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            return null;
+
+        bool isValidId = Guid.TryParse(id, out Guid productionId);
+        if (!isValidId)
+            return null;
+        
+        return productionId;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[10,14,10,119,1],[14,5,14,6,1],[15,9,15,48,1],[16,9,16,51,1],[18,9,19,91,1],[21,9,25,11,1],[27,9,27,30,1],[28,5,28,6,1],[32,5,32,6,1],[33,9,33,48,1],[34,9,34,51,1],[36,9,37,90,1],[39,9,43,11,1],[45,9,45,26,1],[46,5,46,6,1],[49,5,49,6,1],[50,9,50,49,1],[51,9,51,32,1],[52,13,52,26,1],[54,9,54,113,1],[55,9,55,26,1],[56,5,56,6,1],[59,5,59,6,1],[60,9,65,11,1],[67,9,67,58,1],[68,5,68,6,1],[71,5,71,6,1],[72,9,72,88,1],[73,9,73,58,1],[74,5,74,6,1],[77,5,77,6,1],[78,9,83,11,1],[85,9,85,58,1],[86,5,86,6,1],[89,5,89,6,1],[90,9,90,88,1],[91,9,91,58,1],[92,5,92,6,1],[95,5,95,6,1],[96,9,96,43,1],[97,13,97,25,1],[99,9,99,67,1],[100,9,100,24,1],[101,13,101,25,1],[103,9,103,29,1],[104,5,104,6,1]]);
+    </script>
+  </body>
+</html>

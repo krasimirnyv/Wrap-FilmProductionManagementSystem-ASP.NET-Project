@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data.Models/MappingEntities/SceneCast.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Models.MappingEntities;
+
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using Microsoft.EntityFrameworkCore;
+
+using static GCommon.EntityConstants.Cast;
+
+/// &lt;summary&gt;
+/// За момента игнораме това mapping entity, то е за план-графикa
+/// &lt;/summary&gt;
+public class SceneCast
+{
+    [ForeignKey(nameof(Scene))]
+    public Guid SceneId { get; set; }
+
+    public virtual Scene Scene { get; set; } = null!;
+
+    [ForeignKey(nameof(CastMember))]
+    public Guid CastMemberId { get; set; }
+
+    public virtual Cast CastMember { get; set; } = null!;
+
+    /// &lt;summary&gt;
+    /// Ролята на актьора няма общо с ролите на снимачния екип
+    /// &lt;/summary&gt;
+    [Unicode]
+    [MaxLength(RoleMaxLength)]
+    public string Role { get; set; } = null!;
+    // Example: &quot;Detective Ivanov&quot;
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,48,18,53,1],[23,52,23,57,1],[30,40,30,45,1]]);
+    </script>
+  </body>
+</html>

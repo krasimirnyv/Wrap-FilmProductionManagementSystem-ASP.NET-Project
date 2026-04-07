@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Infrastructure.Tests/ApplicationRoleSeederTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Infrastructure.Tests;
+
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Moq;
+using NUnit.Framework;
+
+using Data.Seeding;
+using Data.Seeding.Interfaces;
+using Data.Models.Infrastructure;
+
+using static GCommon.ApplicationConstants;
+using static GCommon.OutputMessages.ApplicationRoles;
+
+[TestFixture]
+public class ApplicationRoleSeederTests
+{
+    private Mock&lt;RoleManager&lt;ApplicationRole&gt;&gt; roleManagerMock = null!;
+    private IApplicationRoleSeeder applicationRoleSeeder = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        roleManagerMock = CreateRoleManagerMock();
+
+        applicationRoleSeeder = new ApplicationRoleSeeder(roleManagerMock.Object);
+    }
+
+    [Test]
+    public async Task SeedRolesAsync_WhenRolesAlreadyExist_DoesNotCreateRoles()
+    {
+        // Arrange
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker))
+            .ReturnsAsync(true);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor))
+            .ReturnsAsync(true);
+
+        // Act
+        await applicationRoleSeeder.SeedRolesAsync();
+
+        // Assert
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker), Times.Once);
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor), Times.Once);
+
+        roleManagerMock.Verify(rm =&gt; rm.CreateAsync(It.IsAny&lt;ApplicationRole&gt;()), Times.Never);
+    }
+
+    [Test]
+    public async Task SeedRolesAsync_WhenFilmmakerRoleDoesNotExist_CreatesFilmmakerRole()
+    {
+        // Arrange
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker))
+            .ReturnsAsync(false);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor))
+            .ReturnsAsync(true);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Filmmaker)))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        await applicationRoleSeeder.SeedRolesAsync();
+
+        // Assert
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker), Times.Once);
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor), Times.Once);
+
+        roleManagerMock.Verify(
+            rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Filmmaker)),
+            Times.Once);
+
+        roleManagerMock.Verify(
+            rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Actor)),
+            Times.Never);
+    }
+
+    [Test]
+    public async Task SeedRolesAsync_WhenActorRoleDoesNotExist_CreatesActorRole()
+    {
+        // Arrange
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker))
+            .ReturnsAsync(true);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor))
+            .ReturnsAsync(false);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Actor)))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        await applicationRoleSeeder.SeedRolesAsync();
+
+        // Assert
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker), Times.Once);
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor), Times.Once);
+
+        roleManagerMock.Verify(
+            rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Actor)),
+            Times.Once);
+
+        roleManagerMock.Verify(
+            rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Filmmaker)),
+            Times.Never);
+    }
+
+    [Test]
+    public async Task SeedRolesAsync_WhenBothRolesDoNotExist_CreatesBothRoles()
+    {
+        // Arrange
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker))
+            .ReturnsAsync(false);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor))
+            .ReturnsAsync(false);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Filmmaker)))
+            .ReturnsAsync(IdentityResult.Success);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Actor)))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        await applicationRoleSeeder.SeedRolesAsync();
+
+        // Assert
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker), Times.Once);
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor), Times.Once);
+
+        roleManagerMock.Verify(
+            rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Filmmaker)),
+            Times.Once);
+
+        roleManagerMock.Verify(
+            rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Actor)),
+            Times.Once);
+    }
+
+    [Test]
+    public void SeedRolesAsync_WhenFilmmakerCreationFails_ThrowsExceptionWithCorrectMessage()
+    {
+        // Arrange
+        IdentityResult failedResult = IdentityResult.Failed(
+            new IdentityError { Description = &quot;Role creation failed&quot; });
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker))
+            .ReturnsAsync(false);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Filmmaker)))
+            .ReturnsAsync(failedResult);
+
+        // Act
+        Exception? ex = Assert.ThrowsAsync&lt;Exception&gt;(() =&gt; applicationRoleSeeder.SeedRolesAsync());
+
+        // Assert
+        Assert.That(ex, Is.Not.Null);
+        Assert.That(ex!.Message, Does.Contain(string.Format(
+            RoleSeedingExceptionMessage,
+            IdentityRoles.Filmmaker,
+            &quot;Role creation failed&quot;)));
+
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker), Times.Once);
+        roleManagerMock.Verify(
+            rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Filmmaker)),
+            Times.Once);
+
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor), Times.Never);
+    }
+
+    [Test]
+    public void SeedRolesAsync_WhenActorCreationFails_ThrowsExceptionWithCorrectMessage()
+    {
+        // Arrange
+        IdentityResult failedResult = IdentityResult.Failed(
+            new IdentityError { Description = &quot;Actor creation failed&quot; });
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker))
+            .ReturnsAsync(true);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor))
+            .ReturnsAsync(false);
+
+        roleManagerMock
+            .Setup(rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Actor)))
+            .ReturnsAsync(failedResult);
+
+        // Act
+        Exception? ex = Assert.ThrowsAsync&lt;Exception&gt;(() =&gt; applicationRoleSeeder.SeedRolesAsync());
+
+        // Assert
+        Assert.That(ex, Is.Not.Null);
+        Assert.That(ex!.Message, Does.Contain(string.Format(
+            RoleSeedingExceptionMessage,
+            IdentityRoles.Actor,
+            &quot;Actor creation failed&quot;)));
+
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Filmmaker), Times.Once);
+        roleManagerMock.Verify(rm =&gt; rm.RoleExistsAsync(IdentityRoles.Actor), Times.Once);
+        roleManagerMock.Verify(
+            rm =&gt; rm.CreateAsync(It.Is&lt;ApplicationRole&gt;(r =&gt; r.Name == IdentityRoles.Actor)),
+            Times.Once);
+    }
+
+    private static Mock&lt;RoleManager&lt;ApplicationRole&gt;&gt; CreateRoleManagerMock()
+    {
+        Mock&lt;IRoleStore&lt;ApplicationRole&gt;&gt; roleStoreMock = new Mock&lt;IRoleStore&lt;ApplicationRole&gt;&gt;();
+
+        Mock&lt;RoleManager&lt;ApplicationRole&gt;&gt; roleManagerMock = new Mock&lt;RoleManager&lt;ApplicationRole&gt;&gt;
+        (
+            roleStoreMock.Object,
+            Array.Empty&lt;IRoleValidator&lt;ApplicationRole&gt;&gt;(),
+            Mock.Of&lt;ILookupNormalizer&gt;(),
+            Mock.Of&lt;IdentityErrorDescriber&gt;(),
+            Mock.Of&lt;ILogger&lt;RoleManager&lt;ApplicationRole&gt;&gt;&gt;()
+        );
+
+        return roleManagerMock;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[18,5,18,72,1],[19,5,19,66,1],[23,5,23,6,1],[24,9,24,51,1],[26,9,26,83,1],[27,5,27,6,1],[31,5,31,6,1],[33,9,35,33,1],[37,9,39,33,1],[42,9,42,54,1],[45,9,45,95,1],[46,9,46,91,1],[48,9,48,96,1],[49,5,49,6,1],[53,5,53,6,1],[55,9,57,34,1],[59,9,61,33,1],[63,9,65,51,1],[68,9,68,54,1],[71,9,71,95,1],[72,9,72,91,1],[74,9,76,25,1],[78,9,80,26,1],[81,5,81,6,1],[85,5,85,6,1],[87,9,89,33,1],[91,9,93,34,1],[95,9,97,51,1],[100,9,100,54,1],[103,9,103,95,1],[104,9,104,91,1],[106,9,108,25,1],[110,9,112,26,1],[113,5,113,6,1],[117,5,117,6,1],[119,9,121,34,1],[123,9,125,34,1],[127,9,129,51,1],[131,9,133,51,1],[136,9,136,54,1],[139,9,139,95,1],[140,9,140,91,1],[142,9,144,25,1],[146,9,148,25,1],[149,5,149,6,1],[153,5,153,6,1],[155,9,156,73,1],[158,9,160,34,1],[162,9,164,41,1],[167,9,167,101,1],[170,9,170,38,1],[171,9,174,39,1],[176,9,176,95,1],[177,9,179,25,1],[181,9,181,92,1],[182,5,182,6,1],[186,5,186,6,1],[188,9,189,74,1],[191,9,193,33,1],[195,9,197,34,1],[199,9,201,41,1],[204,9,204,101,1],[207,9,207,38,1],[208,9,211,40,1],[213,9,213,95,1],[214,9,214,91,1],[215,9,217,25,1],[218,5,218,6,1],[221,5,221,6,1],[222,9,222,99,1],[224,9,231,11,1],[233,9,233,32,1],[234,5,234,6,1]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/NavBarServiceTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using Microsoft.Extensions.Logging;
+
+using Moq;
+using NUnit.Framework;
+
+using Core;
+using Core.Interfaces;
+using Models.NavBar;
+using Data.Models;
+using Data.Models.Infrastructure;
+using Data.Repository.Interfaces;
+using GCommon.Enums;
+
+using static GCommon.OutputMessages;
+using static GCommon.OutputMessages.NavBar;
+
+[TestFixture]
+public class NavBarServiceTests
+{
+    private Mock&lt;INavBarRepository&gt; navBarRepositoryMock = null!;
+    private Mock&lt;ILogger&lt;NavBarService&gt;&gt; loggerMock = null!;
+
+    private INavBarService navBarService = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        navBarRepositoryMock = new Mock&lt;INavBarRepository&gt;(MockBehavior.Strict);
+        loggerMock = new Mock&lt;ILogger&lt;NavBarService&gt;&gt;(MockBehavior.Loose);
+
+        navBarService = new NavBarService(navBarRepositoryMock.Object, loggerMock.Object);
+    }
+
+    [Test]
+    public async Task GetNavBarUserAsync_WhenCrewUserExists_ReturnsCrewDtoAndDoesNotQueryCast()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid();
+
+        Crew crew = CreateCrew(
+            userId: userId,
+            userName: &quot;crew.user&quot;,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;);
+
+        navBarRepositoryMock
+            .Setup(nbr =&gt; nbr.GetCrewUserAsync(userId))
+            .ReturnsAsync(crew);
+
+        // Act
+        NavBarUserDto? result = await navBarService.GetNavBarUserAsync(userId);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.UserName, Is.EqualTo(&quot;crew.user&quot;));
+        Assert.That(result.ProfileImagePath, Is.EqualTo(&quot;/img/profile/crew.webp&quot;));
+        Assert.That(result.Role, Is.EqualTo(CrewString));
+
+        navBarRepositoryMock.Verify(nbr =&gt; nbr.GetCrewUserAsync(userId), Times.Once);
+        navBarRepositoryMock.Verify(nbr =&gt; nbr.GetCastUserAsync(It.IsAny&lt;Guid&gt;()), Times.Never);
+        navBarRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetNavBarUserAsync_WhenCrewIsNullAndCastUserExists_ReturnsCastDto()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid();
+
+        Cast cast = CreateCast(
+            userId: userId,
+            userName: &quot;cast.user&quot;,
+            profileImagePath: &quot;/img/profile/cast.webp&quot;);
+
+        navBarRepositoryMock
+            .Setup(nbr =&gt; nbr.GetCrewUserAsync(userId))
+            .ReturnsAsync((Crew?)null);
+
+        navBarRepositoryMock
+            .Setup(nbr =&gt; nbr.GetCastUserAsync(userId))
+            .ReturnsAsync(cast);
+
+        // Act
+        NavBarUserDto? result = await navBarService.GetNavBarUserAsync(userId);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.UserName, Is.EqualTo(&quot;cast.user&quot;));
+        Assert.That(result.ProfileImagePath, Is.EqualTo(&quot;/img/profile/cast.webp&quot;));
+        Assert.That(result.Role, Is.EqualTo(CastString));
+
+        navBarRepositoryMock.Verify(nbr =&gt; nbr.GetCrewUserAsync(userId), Times.Once);
+        navBarRepositoryMock.Verify(nbr =&gt; nbr.GetCastUserAsync(userId), Times.Once);
+        navBarRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void GetNavBarUserAsync_WhenCrewAndCastAreNull_ThrowsArgumentNullExceptionWithUserNotFoundMessage()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid();
+
+        navBarRepositoryMock
+            .Setup(nbr =&gt; nbr.GetCrewUserAsync(userId))
+            .ReturnsAsync((Crew?)null);
+
+        navBarRepositoryMock
+            .Setup(nbr =&gt; nbr.GetCastUserAsync(userId))
+            .ReturnsAsync((Cast?)null);
+
+        // Act
+        ArgumentNullException ex = Assert.ThrowsAsync&lt;ArgumentNullException&gt;(
+            () =&gt; navBarService.GetNavBarUserAsync(userId))!;
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(UserNotFoundMessage, userId)));
+
+        navBarRepositoryMock.Verify(nbr =&gt; nbr.GetCrewUserAsync(userId), Times.Once);
+        navBarRepositoryMock.Verify(nbr =&gt; nbr.GetCastUserAsync(userId), Times.Once);
+        navBarRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    private static Crew CreateCrew(Guid userId, string? userName, string? profileImagePath)
+    {
+        Crew newCrew = new Crew
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            FirstName = &quot;Crew&quot;,
+            LastName = &quot;User&quot;,
+            IsActive = true,
+            IsDeleted = false,
+            ProfileImagePath = profileImagePath,
+            User = new ApplicationUser
+            {
+                Id = userId,
+                UserName = userName
+            }
+        };
+        
+        return newCrew;
+    }
+
+    private static Cast CreateCast(Guid userId, string? userName, string? profileImagePath)
+    {
+        Cast newCast = new Cast
+        {
+            Id = Guid.NewGuid(),
+            UserId = userId,
+            FirstName = &quot;Cast&quot;,
+            LastName = &quot;User&quot;,
+            BirthDate = new DateTime(2000, 1, 1),
+            Gender = GenderType.Male,
+            IsActive = true,
+            IsDeleted = false,
+            ProfileImagePath = profileImagePath,
+            User = new ApplicationUser
+            {
+                Id = userId,
+                UserName = userName
+            }
+        };
+        
+        return newCast;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[22,5,22,66,1],[23,5,23,61,1],[25,5,25,50,1],[29,5,29,6,1],[30,9,30,81,1],[31,9,31,75,1],[33,9,33,91,1],[34,5,34,6,1],[38,5,38,6,1],[40,9,40,38,1],[42,9,45,57,1],[47,9,49,33,1],[52,9,52,80,1],[55,9,55,42,1],[56,9,56,64,1],[57,9,57,84,1],[58,9,58,58,1],[60,9,60,86,1],[61,9,61,97,1],[62,9,62,51,1],[63,5,63,6,1],[67,5,67,6,1],[69,9,69,38,1],[71,9,74,57,1],[76,9,78,40,1],[80,9,82,33,1],[85,9,85,80,1],[88,9,88,42,1],[89,9,89,64,1],[90,9,90,84,1],[91,9,91,58,1],[93,9,93,86,1],[94,9,94,86,1],[95,9,95,51,1],[96,5,96,6,1],[100,5,100,6,1],[102,9,102,38,1],[104,9,106,40,1],[108,9,110,40,1],[113,9,114,19,1],[114,19,114,59,1],[114,59,114,62,1],[117,9,117,91,1],[119,9,119,86,1],[120,9,120,86,1],[121,9,121,51,1],[122,5,122,6,1],[125,5,125,6,1],[126,9,140,11,1],[142,9,142,24,1],[143,5,143,6,1],[146,5,146,6,1],[147,9,163,11,1],[165,9,165,24,1],[166,5,166,6,1]]);
+    </script>
+  </body>
+</html>

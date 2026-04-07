@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Tests/CrewProfileServiceTests.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Tests;
+
+using System.Security.Claims;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+using Moq;
+using NUnit.Framework;
+
+using Data.Models;
+using Data.Models.Infrastructure;
+using Data.Models.MappingEntities;
+using Data.Repository.Interfaces;
+using Data.Dtos.Crew;
+using Core;
+using Core.Utilities.ImageLogic.Interfaces;
+using Models.Profile;
+using Models.Profile.NestedDtos;
+
+using GCommon.Enums;
+using GCommon.UI;
+
+using static GCommon.OutputMessages.Profile;
+using static GCommon.DataFormat;
+
+[TestFixture]
+public class CrewProfileServiceTests
+{
+    private Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; userManagerMock = null!;
+    private Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; signInManagerMock = null!;
+    private Mock&lt;IProfileRepository&gt; profileRepositoryMock = null!;
+    private Mock&lt;IImageService&gt; imageServiceMock = null!;
+    private Mock&lt;IVariantImageStrategyResolver&gt; imageStrategyResolverMock = null!;
+    private Mock&lt;ILogger&lt;CrewProfileService&gt;&gt; loggerMock = null!;
+
+    private CrewProfileService crewProfileService = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        userManagerMock = CreateUserManagerMock();
+        signInManagerMock = CreateSignInManagerMock(userManagerMock.Object);
+        
+        profileRepositoryMock = new Mock&lt;IProfileRepository&gt;(MockBehavior.Strict);
+        imageServiceMock = new Mock&lt;IImageService&gt;(MockBehavior.Strict);
+        imageStrategyResolverMock = new Mock&lt;IVariantImageStrategyResolver&gt;(MockBehavior.Strict);
+        loggerMock = new Mock&lt;ILogger&lt;CrewProfileService&gt;&gt;(MockBehavior.Loose);
+
+        crewProfileService = new CrewProfileService
+        (
+            userManagerMock.Object,
+            signInManagerMock.Object,
+            profileRepositoryMock.Object,
+            imageServiceMock.Object,
+            imageStrategyResolverMock.Object,
+            loggerMock.Object
+        );
+    }
+
+    [Test]
+    public void GetCrewProfileDataAsync_WhenCrewNotFound_ThrowsArgumentNullExceptionWithMessage()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        ArgumentNullException? ex = Assert.ThrowsAsync&lt;ArgumentNullException&gt;(
+            () =&gt; crewProfileService.GetCrewProfileDataAsync(username));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(CrewNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetCrewProfileDataAsync_WhenCrewExists_MapsProfileAndGroupsSkillsAndMapsCollections()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: null, // should become EmptyNickname
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        // Pick roles from the real catalog so the grouping logic is deterministic
+        IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; catalog = CrewRolesDepartmentCatalog.GetRolesByDepartment();
+        KeyValuePair&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; firstDept = catalog.First();
+        string dept1 = firstDept.Key;
+        CrewRoleType roleFromDept1 = firstDept.Value.First();
+
+        KeyValuePair&lt;string, IReadOnlyCollection&lt;CrewRoleType&gt;&gt; secondDept = catalog.Skip(1).First();
+        string dept2 = secondDept.Key;
+        CrewRoleType roleFromDept2 = secondDept.Value.First();
+
+        IReadOnlyCollection&lt;CrewSkill&gt; skills = new List&lt;CrewSkill&gt;
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CrewMemberId = crew.Id,
+                RoleType = roleFromDept1,
+                CrewMember = crew
+            },
+            new()
+            {
+                Id = Guid.NewGuid(), 
+                CrewMemberId = crew.Id,
+                RoleType = roleFromDept2, 
+                CrewMember = crew
+            }
+        };
+
+        Production production = new Production
+        {
+            Id = Guid.NewGuid(),
+            Title = &quot;Production One&quot;,
+            StatusType = ProductionStatusType.Production
+        };
+
+        Scene scene = new Scene
+        {
+            Id = Guid.NewGuid(),
+            SceneName = &quot;Scene 1&quot;,
+            Production = production,
+            ProductionId = production.Id,
+            Location = &quot;loc&quot;,
+            SceneType = SceneType.Interior
+        };
+
+        ProductionCrew productionCrew = new ProductionCrew
+        {
+            ProductionId = production.Id,
+            Production = production,
+            CrewMemberId = crew.Id,
+            CrewMember = crew,
+            RoleType = roleFromDept1
+        };
+
+        SceneCrew sceneCrew = new SceneCrew
+        {
+            SceneId = scene.Id,
+            Scene = scene,
+            CrewMemberId = crew.Id,
+            CrewMember = crew,
+            RoleType = roleFromDept2
+        };
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync(crew);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewSkillsAsync(crew.Id))
+            .ReturnsAsync(skills);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewProductionsAsync(crew.Id))
+            .ReturnsAsync(new List&lt;ProductionCrew&gt; { productionCrew });
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewScenesAsync(crew.Id))
+            .ReturnsAsync(new List&lt;SceneCrew&gt; { sceneCrew });
+
+        // Act
+        CrewProfileDto result = await crewProfileService.GetCrewProfileDataAsync(username);
+
+        // Assert base mapping
+        Assert.That(result.FirstName, Is.EqualTo(crew.FirstName));
+        Assert.That(result.LastName, Is.EqualTo(crew.LastName));
+        Assert.That(result.ProfileImagePath, Is.EqualTo(crew.ProfileImagePath));
+        Assert.That(result.Nickname, Is.EqualTo(EmptyNickname));
+        Assert.That(result.UserName, Is.EqualTo(crew.User.UserName));
+        Assert.That(result.Email, Is.EqualTo(crew.User.Email));
+        Assert.That(result.PhoneNumber, Is.EqualTo(crew.User.PhoneNumber));
+        Assert.That(result.IsActive, Is.EqualTo(crew.IsActive));
+        Assert.That(result.Biography, Is.EqualTo(crew.Biography));
+
+        // Assert department grouping
+        Assert.That(result.DepartmentSkills.ContainsKey(dept1), Is.True);
+        Assert.That(result.DepartmentSkills[dept1], Does.Contain(roleFromDept1));
+
+        Assert.That(result.DepartmentSkills.ContainsKey(dept2), Is.True);
+        Assert.That(result.DepartmentSkills[dept2], Does.Contain(roleFromDept2));
+
+        // productions mapping
+        Assert.That(result.Productions.Count, Is.EqualTo(1));
+        CrewMemberProductionDto prodDto = result.Productions.Single();
+        Assert.That(prodDto.ProductionId, Is.EqualTo(production.Id.ToString()));
+        Assert.That(prodDto.ProductionTitle, Is.EqualTo(production.Title));
+        Assert.That(prodDto.ProjectStatus, Is.EqualTo(production.StatusType.ToString()));
+        Assert.That(prodDto.RoleType, Is.EqualTo(roleFromDept1));
+
+        // scenes mapping
+        Assert.That(result.Scenes.Count, Is.EqualTo(1));
+        CrewMemberSceneDto sceneDto = result.Scenes.Single();
+        Assert.That(sceneDto.SceneId, Is.EqualTo(scene.Id.ToString()));
+        Assert.That(sceneDto.SceneName, Is.EqualTo(scene.SceneName));
+        Assert.That(sceneDto.ProductionTitle, Is.EqualTo(production.Title));
+        Assert.That(sceneDto.RoleType, Is.EqualTo(roleFromDept2));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewSkillsAsync(crew.Id), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewProductionsAsync(crew.Id), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewScenesAsync(crew.Id), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void GetEditCrewProfileAsync_WhenCrewNotFound_ThrowsArgumentNullExceptionWithMessage()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        ArgumentNullException? ex = Assert.ThrowsAsync&lt;ArgumentNullException&gt;(
+            () =&gt; crewProfileService.GetEditCrewProfileAsync(username));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(CrewNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetEditCrewProfileAsync_WhenCrewExists_MapsEditDtoCorrectly()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: &quot;Nick&quot;,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync(crew);
+
+        // Act
+        EditCrewProfileDto result = await crewProfileService.GetEditCrewProfileAsync(username);
+
+        // Assert
+        Assert.That(result.FirstName, Is.EqualTo(crew.FirstName));
+        Assert.That(result.LastName, Is.EqualTo(crew.LastName));
+        Assert.That(result.Nickname, Is.EqualTo(crew.Nickname));
+        Assert.That(result.PhoneNumber, Is.EqualTo(crew.User.PhoneNumber));
+        Assert.That(result.Biography, Is.EqualTo(crew.Biography));
+        Assert.That(result.ProfileImage, Is.Null);
+
+        Assert.That(result.Email, Is.EqualTo(crew.User.Email));
+        Assert.That(result.CurrentProfileImagePath, Is.EqualTo(crew.ProfileImagePath));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+    
+    [Test]
+    public void UpdateCrewProfileAsync_WhenCrewNotFound_RollsBackAndThrowsException()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        EditCrewProfileDto crewDto = new EditCrewProfileDto
+        {
+            FirstName = &quot;New&quot;,
+            LastName = &quot;Name&quot;,
+            Nickname = &quot;Nick&quot;,
+            Biography = &quot;bio&quot;,
+            PhoneNumber = &quot;+359&quot;,
+            ProfileImage = null,
+            CurrentProfileImagePath = &quot;/img/profile/old.webp&quot;
+        };
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.BeginTransactionAsync())
+            .ReturnsAsync(transactionMock.Object);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.RollbackTransactionAsync(transactionMock.Object))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        Exception? ex = Assert.ThrowsAsync&lt;Exception&gt;(
+            () =&gt; crewProfileService.UpdateCrewProfileAsync(username, crewDto));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(CrewNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.BeginTransactionAsync(), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+        profileRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Never);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task UpdateCrewProfileAsync_WhenNoNewImage_UpdatesFields_SavesAndCommits()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Old&quot;,
+            lastName: &quot;Old&quot;,
+            nickname: &quot;OldNick&quot;,
+            profileImagePath: &quot;/img/profile/old.webp&quot;,
+            isActive: true,
+            biography: &quot;old bio&quot;);
+
+        EditCrewProfileDto crewDto = new EditCrewProfileDto
+        {
+            FirstName = &quot;NewFirst&quot;,
+            LastName = &quot;NewLast&quot;,
+            Nickname = &quot;NewNick&quot;,
+            Biography = &quot;new bio&quot;,
+            PhoneNumber = &quot;+359999&quot;,
+            ProfileImage = null,
+            CurrentProfileImagePath = crew.ProfileImagePath
+        };
+
+        profileRepositoryMock.Setup(pr =&gt; pr.BeginTransactionAsync()).ReturnsAsync(transactionMock.Object);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsync(username)).ReturnsAsync(crew);
+        profileRepositoryMock.Setup(pr =&gt; pr.SaveAllChangesAsync()).ReturnsAsync(1);
+        profileRepositoryMock.Setup(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object)).Returns(Task.CompletedTask);
+
+        // Act
+        await crewProfileService.UpdateCrewProfileAsync(username, crewDto);
+
+        // Assert
+        Assert.That(crew.FirstName, Is.EqualTo(&quot;NewFirst&quot;));
+        Assert.That(crew.LastName, Is.EqualTo(&quot;NewLast&quot;));
+        Assert.That(crew.Nickname, Is.EqualTo(&quot;NewNick&quot;));
+        Assert.That(crew.Biography, Is.EqualTo(&quot;new bio&quot;));
+        Assert.That(crew.User.PhoneNumber, Is.EqualTo(&quot;+359999&quot;));
+        Assert.That(crew.ProfileImagePath, Is.EqualTo(&quot;/img/profile/old.webp&quot;));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.BeginTransactionAsync(), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task UpdateCrewProfileAsync_WhenNewImageProvided_ReplacesImage_SavesAndCommits()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Old&quot;,
+            lastName: &quot;Old&quot;,
+            nickname: &quot;OldNick&quot;,
+            profileImagePath: &quot;/img/profile/old.webp&quot;,
+            isActive: true,
+            biography: &quot;old bio&quot;);
+
+        IFormFile newImage = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3]);
+
+        EditCrewProfileDto crewDto = new EditCrewProfileDto
+        {
+            FirstName = &quot;NewFirst&quot;,
+            LastName = &quot;NewLast&quot;,
+            Nickname = &quot;NewNick&quot;,
+            Biography = &quot;new bio&quot;,
+            PhoneNumber = &quot;+359999&quot;,
+            ProfileImage = newImage,
+            CurrentProfileImagePath = crew.ProfileImagePath
+        };
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        const string newWebPath = &quot;/img/profile/new.webp&quot;;
+
+        profileRepositoryMock.Setup(pr =&gt; pr.BeginTransactionAsync()).ReturnsAsync(transactionMock.Object);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsync(username)).ReturnsAsync(crew);
+
+        imageStrategyResolverMock.Setup(isr =&gt; isr.Resolve(ProfileFolderName)).Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.ReplaceAsync(crewDto.CurrentProfileImagePath, crewDto.ProfileImage, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ReturnsAsync(newWebPath);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.SaveAllChangesAsync()).ReturnsAsync(1);
+        profileRepositoryMock.Setup(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object)).Returns(Task.CompletedTask);
+
+        // Act
+        await crewProfileService.UpdateCrewProfileAsync(username, crewDto);
+
+        // Assert
+        Assert.That(crew.ProfileImagePath, Is.EqualTo(newWebPath));
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.ReplaceAsync(crewDto.CurrentProfileImagePath, crewDto.ProfileImage, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.BeginTransactionAsync(), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void UpdateCrewProfileAsync_WhenImageReplaceThrowsNotSupported_RollsBackAndRethrowsNotSupported()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Old&quot;,
+            lastName: &quot;Old&quot;,
+            nickname: &quot;OldNick&quot;,
+            profileImagePath: &quot;/img/profile/old.webp&quot;,
+            isActive: true,
+            biography: &quot;old bio&quot;);
+
+        IFormFile newImage = CreateFormFile(&quot;pic.png&quot;, [1, 2, 3]);
+
+        EditCrewProfileDto crewDto = new EditCrewProfileDto
+        {
+            FirstName = &quot;NewFirst&quot;,
+            LastName = &quot;NewLast&quot;,
+            Nickname = &quot;NewNick&quot;,
+            Biography = &quot;new bio&quot;,
+            PhoneNumber = &quot;+359999&quot;,
+            ProfileImage = newImage,
+            CurrentProfileImagePath = crew.ProfileImagePath
+        };
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+        NotSupportedException nse = new NotSupportedException(&quot;bad image&quot;);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.BeginTransactionAsync()).ReturnsAsync(transactionMock.Object);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsync(username)).ReturnsAsync(crew);
+
+        imageStrategyResolverMock.Setup(isr =&gt; isr.Resolve(ProfileFolderName)).Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.ReplaceAsync(crewDto.CurrentProfileImagePath, crewDto.ProfileImage, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .ThrowsAsync(nse);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.RollbackTransactionAsync(transactionMock.Object)).Returns(Task.CompletedTask);
+
+        // Act
+        NotSupportedException? ex = Assert.ThrowsAsync&lt;NotSupportedException&gt;(
+            () =&gt; crewProfileService.UpdateCrewProfileAsync(username, crewDto));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(&quot;bad image&quot;));
+        Assert.That(ex.InnerException, Is.Not.Null);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.ReplaceAsync(crewDto.CurrentProfileImagePath, crewDto.ProfileImage, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+    }
+
+    [Test]
+    public void UpdateCrewProfileAsync_WhenSaveAllChangesThrowsException_RollsBackAndThrowsException()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Old&quot;,
+            lastName: &quot;Old&quot;,
+            nickname: &quot;OldNick&quot;,
+            profileImagePath: &quot;/img/profile/old.webp&quot;,
+            isActive: true,
+            biography: &quot;old bio&quot;);
+
+        EditCrewProfileDto crewDto = new EditCrewProfileDto
+        {
+            FirstName = &quot;NewFirst&quot;,
+            LastName = &quot;NewLast&quot;,
+            Nickname = &quot;NewNick&quot;,
+            Biography = &quot;new bio&quot;,
+            PhoneNumber = &quot;+359999&quot;,
+            ProfileImage = null,
+            CurrentProfileImagePath = crew.ProfileImagePath
+        };
+
+        profileRepositoryMock.Setup(pr =&gt; pr.BeginTransactionAsync()).ReturnsAsync(transactionMock.Object);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsync(username)).ReturnsAsync(crew);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.SaveAllChangesAsync()).ThrowsAsync(new InvalidOperationException(&quot;db fail&quot;));
+        profileRepositoryMock.Setup(pr =&gt; pr.RollbackTransactionAsync(transactionMock.Object)).Returns(Task.CompletedTask);
+
+        // Act
+        Exception? ex = Assert.ThrowsAsync&lt;Exception&gt;(
+            () =&gt; crewProfileService.UpdateCrewProfileAsync(username, crewDto));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(&quot;db fail&quot;));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+    
+    [Test]
+    public void GetEditSkillsAsync_WhenCrewNotFound_ThrowsArgumentNullException()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        Assert.ThrowsAsync&lt;ArgumentNullException&gt;(
+            () =&gt; crewProfileService.GetEditSkillsAsync(username));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetEditSkillsAsync_WhenCrewExists_ReturnsCurrentSkillsAndCatalog()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: &quot;Nick&quot;,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        IReadOnlyCollection&lt;CrewSkill&gt; crewSkills = new List&lt;CrewSkill&gt;
+        {
+            new()
+            {
+                Id = Guid.NewGuid(), 
+                CrewMemberId = crew.Id,
+                RoleType = CrewRoleType.Director, 
+                CrewMember = crew
+            },
+            new()
+            {
+                Id = Guid.NewGuid(), 
+                CrewMemberId = crew.Id,
+                RoleType = CrewRoleType.Gaffer,
+                CrewMember = crew
+            }
+        };
+
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username)).ReturnsAsync(crew);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewSkillsAsync(crew.Id)).ReturnsAsync(crewSkills);
+
+        // Act
+        EditSkillsDto result = await crewProfileService.GetEditSkillsAsync(username);
+
+        // Assert
+        Assert.That(result.CurrentSkills, Has.Count.EqualTo(2));
+        Assert.That(result.CurrentSkills, Does.Contain(CrewRoleType.Director));
+        Assert.That(result.CurrentSkills, Does.Contain(CrewRoleType.Gaffer));
+        Assert.That(result.AllDepartments, Is.Not.Empty);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewSkillsAsync(crew.Id), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void UpdateSkillsAsync_WhenCrewNotFound_ThrowsArgumentNullException()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        UpdateSkillsDto skillsDto = new UpdateSkillsDto { SelectedSkills = &quot;1,2&quot; };
+
+        // Act
+        Assert.ThrowsAsync&lt;ArgumentNullException&gt;(
+            () =&gt; crewProfileService.UpdateSkillsAsync(username, skillsDto));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void UpdateSkillsAsync_WhenNoSkillsSelected_ThrowsArgumentException()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: &quot;Nick&quot;,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username)).ReturnsAsync(crew);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewSkillsForUpdateAsync(crew.Id)).ReturnsAsync([]);
+
+        UpdateSkillsDto skillsDto = new UpdateSkillsDto { SelectedSkills = &quot;   &quot; };
+
+        // Act
+        ArgumentException? ex = Assert.ThrowsAsync&lt;ArgumentException&gt;(
+            () =&gt; crewProfileService.UpdateSkillsAsync(username, skillsDto));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(NoSkillsSelected));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewSkillsForUpdateAsync(crew.Id), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task UpdateSkillsAsync_WhenOnlyRemoveNeeded_RemovesSkills_SavesAndCommits()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: &quot;Nick&quot;,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        List&lt;CrewSkill&gt; currentSkills =
+        [
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CrewMemberId = crew.Id, 
+                RoleType = CrewRoleType.Director,
+                CrewMember = crew
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CrewMemberId = crew.Id,
+                RoleType = CrewRoleType.Gaffer,
+                CrewMember = crew
+            }
+        ];
+
+        // new: Director only =&gt; remove Gaffer
+        UpdateSkillsDto skillsDto = new UpdateSkillsDto
+        {
+            SelectedSkills = ((int)CrewRoleType.Director).ToString()
+        };
+
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username)).ReturnsAsync(crew);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewSkillsForUpdateAsync(crew.Id)).ReturnsAsync(currentSkills);
+        profileRepositoryMock.Setup(pr =&gt; pr.BeginTransactionAsync()).ReturnsAsync(transactionMock.Object);
+
+        IEnumerable&lt;CrewSkill&gt;? removed = null;
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.RemoveCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()))
+            .Callback&lt;IEnumerable&lt;CrewSkill&gt;&gt;(items =&gt; removed = items)
+            .Returns(Task.CompletedTask);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.SaveAllChangesAsync()).ReturnsAsync(1);
+        profileRepositoryMock.Setup(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object)).Returns(Task.CompletedTask);
+
+        // Act
+        await crewProfileService.UpdateSkillsAsync(username, skillsDto);
+
+        // Assert
+        IEnumerable&lt;CrewSkill&gt; crewSkills = removed!.ToArray();
+        Assert.That(crewSkills, Is.Not.Null);
+        Assert.That(crewSkills.Select(r =&gt; r.RoleType), Does.Contain(CrewRoleType.Gaffer));
+        Assert.That(crewSkills.Select(r =&gt; r.RoleType), Does.Not.Contain(CrewRoleType.Director));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.RemoveCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.AddCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()), Times.Never);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+    }
+
+    [Test]
+    public async Task UpdateSkillsAsync_WhenOnlyAddNeeded_AddsSkills_SavesAndCommits()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: &quot;Nick&quot;,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        // current: Director only
+        List&lt;CrewSkill&gt; currentSkills =
+        [
+            new()
+            {
+                Id = Guid.NewGuid(), 
+                CrewMemberId = crew.Id, 
+                RoleType = CrewRoleType.Director,
+                CrewMember = crew
+            }
+        ];
+
+        // new: Director + Gaffer =&gt; add Gaffer
+        UpdateSkillsDto skillsDto = new UpdateSkillsDto
+        {
+            SelectedSkills = $&quot;{(int)CrewRoleType.Director},{(int)CrewRoleType.Gaffer}&quot;
+        };
+
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username)).ReturnsAsync(crew);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewSkillsForUpdateAsync(crew.Id)).ReturnsAsync(currentSkills);
+        profileRepositoryMock.Setup(pr =&gt; pr.BeginTransactionAsync()).ReturnsAsync(transactionMock.Object);
+
+        IEnumerable&lt;CrewSkill&gt;? added = null;
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.AddCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()))
+            .Callback&lt;IEnumerable&lt;CrewSkill&gt;&gt;(items =&gt; added = items)
+            .Returns(Task.CompletedTask);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.SaveAllChangesAsync()).ReturnsAsync(1);
+        profileRepositoryMock.Setup(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object)).Returns(Task.CompletedTask);
+
+        // Act
+        await crewProfileService.UpdateSkillsAsync(username, skillsDto);
+
+        // Assert
+        IEnumerable&lt;CrewSkill&gt;? crewSkills = added!.ToArray();
+        Assert.That(crewSkills, Is.Not.Null);
+        Assert.That(crewSkills.Select(a =&gt; a.RoleType), Does.Contain(CrewRoleType.Gaffer));
+        Assert.That(crewSkills.All(a =&gt; a.Id != Guid.Empty), Is.True);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.AddCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.RemoveCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()), Times.Never);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+    }
+
+    [Test]
+    public async Task UpdateSkillsAsync_WhenAddAndRemoveNeeded_PerformsBoth_SavesAndCommits()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: &quot;Nick&quot;,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        // current: Director, Gaffer
+        List&lt;CrewSkill&gt; currentSkills =
+        [
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CrewMemberId = crew.Id,
+                RoleType = CrewRoleType.Director,
+                CrewMember = crew
+            },
+
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CrewMemberId = crew.Id,
+                RoleType = CrewRoleType.Gaffer,
+                CrewMember = crew
+            }
+        ];
+
+        // new: Director + Editor =&gt; remove Gaffer, add Editor
+        UpdateSkillsDto skillsDto = new UpdateSkillsDto
+        {
+            SelectedSkills = $&quot;{(int)CrewRoleType.Director},{(int)CrewRoleType.Editor}&quot;
+        };
+
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username)).ReturnsAsync(crew);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewSkillsForUpdateAsync(crew.Id)).ReturnsAsync(currentSkills);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.BeginTransactionAsync()).ReturnsAsync(transactionMock.Object);
+        profileRepositoryMock.Setup(pr =&gt; pr.RemoveCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;())).Returns(Task.CompletedTask);
+        profileRepositoryMock.Setup(pr =&gt; pr.AddCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;())).Returns(Task.CompletedTask);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.SaveAllChangesAsync()).ReturnsAsync(1);
+        profileRepositoryMock.Setup(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object)).Returns(Task.CompletedTask);
+
+        // Act
+        await crewProfileService.UpdateSkillsAsync(username, skillsDto);
+
+        // Assert
+        profileRepositoryMock.Verify(pr =&gt; pr.RemoveCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.AddCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()), Times.Once);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+    }
+
+    [Test]
+    public void UpdateSkillsAsync_WhenExceptionOccurs_RollsBackAndThrowsException()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        Mock&lt;IDbContextTransaction&gt; transactionMock = CreateTransactionMock();
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: &quot;Nick&quot;,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        List&lt;CrewSkill&gt; currentSkills =
+        [
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CrewMemberId = crew.Id,
+                RoleType = CrewRoleType.Director,
+                CrewMember = crew
+            }
+        ];
+
+        UpdateSkillsDto skillsDto = new UpdateSkillsDto
+        {
+            SelectedSkills = ((int)CrewRoleType.Director).ToString()
+        };
+
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewByUsernameAsNoTrackingAsync(username)).ReturnsAsync(crew);
+        profileRepositoryMock.Setup(pr =&gt; pr.GetCrewSkillsForUpdateAsync(crew.Id)).ReturnsAsync(currentSkills);
+
+        profileRepositoryMock.Setup(pr =&gt; pr.BeginTransactionAsync()).ReturnsAsync(transactionMock.Object);
+
+        // no remove/add calls (both empty), but fail on save
+        profileRepositoryMock.Setup(pr =&gt; pr.SaveAllChangesAsync()).ThrowsAsync(new InvalidOperationException(&quot;db fail&quot;));
+        profileRepositoryMock.Setup(pr =&gt; pr.RollbackTransactionAsync(transactionMock.Object)).Returns(Task.CompletedTask);
+
+        // Act
+        Exception? ex = Assert.ThrowsAsync&lt;Exception&gt;(
+            () =&gt; crewProfileService.UpdateSkillsAsync(username, skillsDto));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(&quot;db fail&quot;));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.CommitTransactionAsync(It.IsAny&lt;IDbContextTransaction&gt;()), Times.Never);
+
+        // also ensure add/remove not called when sets are same
+        profileRepositoryMock.Verify(pr =&gt; pr.AddCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()), Times.Never);
+        profileRepositoryMock.Verify(pr =&gt; pr.RemoveCrewSkillsAsync(It.IsAny&lt;IEnumerable&lt;CrewSkill&gt;&gt;()), Times.Never);
+    }
+
+    [Test]
+    public void GetDeleteCrewProfileAsync_WhenCrewNotFound_ThrowsArgumentNullException()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewWithAllDataIncludedByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        ArgumentNullException? ex = Assert.ThrowsAsync&lt;ArgumentNullException&gt;(
+            () =&gt; crewProfileService.GetDeleteCrewProfileAsync(username));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(CrewNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewWithAllDataIncludedByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDeleteCrewProfileAsync_WhenCrewExists_ReturnsMappedDto()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: null,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        crew.CrewMemberProductions = new List&lt;ProductionCrew&gt; { new(), new() };
+        crew.CrewMemberScenes = new List&lt;SceneCrew&gt; { new() };
+        crew.Skills = new List&lt;CrewSkill&gt; { new(), new(), new() };
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewWithAllDataIncludedByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync(crew);
+
+        // Act
+        DeleteProfileDto result = await crewProfileService.GetDeleteCrewProfileAsync(username);
+
+        // Assert
+        Assert.That(result.FirstName, Is.EqualTo(crew.FirstName));
+        Assert.That(result.LastName, Is.EqualTo(crew.LastName));
+        Assert.That(result.ProfileImagePath, Is.EqualTo(crew.ProfileImagePath));
+        Assert.That(result.UserName, Is.EqualTo(crew.User.UserName));
+        Assert.That(result.Email, Is.EqualTo(crew.User.Email));
+        Assert.That(result.PhoneNumber, Is.EqualTo(crew.User.PhoneNumber));
+        
+        Assert.That(result.ProductionsCount, Is.EqualTo(2));
+        Assert.That(result.ScenesCount, Is.EqualTo(1));
+        Assert.That(result.SkillsCount, Is.EqualTo(3));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewWithAllDataIncludedByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void DeleteCrewProfileAsync_WhenCrewNotFound_ThrowsArgumentNullException()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+        DeleteProfileDto dto = new DeleteProfileDto { Password = &quot;password&quot; };
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsync(username))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        ArgumentNullException? ex = Assert.ThrowsAsync&lt;ArgumentNullException&gt;(
+            () =&gt; crewProfileService.DeleteCrewProfileAsync(username, dto));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(CrewNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task DeleteCrewProfileAsync_WhenPasswordInvalid_ReturnsFalseAndLogsError()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        DeleteProfileDto dto = new DeleteProfileDto { Password = &quot;wrong_password&quot; };
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: null,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsync(username))
+            .ReturnsAsync(crew);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(crew.User, dto.Password))
+            .ReturnsAsync(false);
+
+        // Act
+        bool result = await crewProfileService.DeleteCrewProfileAsync(username, dto);
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsync(username), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CheckPasswordAsync(crew.User, dto.Password), Times.Once);
+        
+        // Уверяваме се, че няма извиквания за изтриване
+        profileRepositoryMock.Verify(pr =&gt; pr.DeleteCrewProfileAsync(It.IsAny&lt;Guid&gt;()), Times.Never);
+        profileRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Never);
+    }
+
+    [Test]
+    public async Task DeleteCrewProfileAsync_WhenValid_DeletesProfileAndReturnsTrue()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        DeleteProfileDto dto = new DeleteProfileDto { Password = &quot;correct_password&quot; };
+
+        Crew crew = CreateCrew(
+            username: username,
+            email: &quot;crew@wrap.local&quot;,
+            phone: &quot;+359888000000&quot;,
+            firstName: &quot;Crew&quot;,
+            lastName: &quot;User&quot;,
+            nickname: null,
+            profileImagePath: &quot;/img/profile/crew.webp&quot;,
+            isActive: true,
+            biography: &quot;bio&quot;);
+
+        IVariantImageStrategy strategy = Mock.Of&lt;IVariantImageStrategy&gt;();
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.GetCrewByUsernameAsync(username))
+            .ReturnsAsync(crew);
+
+        userManagerMock
+            .Setup(um =&gt; um.CheckPasswordAsync(crew.User, dto.Password))
+            .ReturnsAsync(true);
+
+        imageStrategyResolverMock
+            .Setup(isr =&gt; isr.Resolve(ProfileFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img =&gt; img.DeleteAsync(crew.ProfileImagePath, strategy, It.IsAny&lt;CancellationToken&gt;()))
+            .Returns(Task.CompletedTask);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.DeleteCrewProfileAsync(crew.Id))
+            .ReturnsAsync(true);
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        signInManagerMock
+            .Setup(sm =&gt; sm.SignOutAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        bool result = await crewProfileService.DeleteCrewProfileAsync(username, dto);
+
+        // Assert
+        Assert.That(result, Is.True);
+
+        profileRepositoryMock.Verify(pr =&gt; pr.GetCrewByUsernameAsync(username), Times.Once);
+        userManagerMock.Verify(um =&gt; um.CheckPasswordAsync(crew.User, dto.Password), Times.Once);
+        imageStrategyResolverMock.Verify(isr =&gt; isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img =&gt; img.DeleteAsync(crew.ProfileImagePath, strategy, It.IsAny&lt;CancellationToken&gt;()), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.DeleteCrewProfileAsync(crew.Id), Times.Once);
+        profileRepositoryMock.Verify(pr =&gt; pr.SaveAllChangesAsync(), Times.Once);
+        signInManagerMock.Verify(sm =&gt; sm.SignOutAsync(), Times.Once);
+    }
+    
+    [Test]
+    public void DownloadCrewProfileDataAsync_WhenDataIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        const string username = &quot;missing.user&quot;;
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.DownloadCrewDataAsync(username))
+            .ReturnsAsync((CrewPersonalDataDto[]?)null);
+
+        // Act
+        ArgumentNullException? ex = Assert.ThrowsAsync&lt;ArgumentNullException&gt;(
+            () =&gt; crewProfileService.DownloadCrewProfileDataAsync(username));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(CrewNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.DownloadCrewDataAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task DownloadCrewProfileDataAsync_WhenDataExists_ReturnsJsonString()
+    {
+        // Arrange
+        const string username = &quot;crew.user&quot;;
+        
+        CrewPersonalDataDto[] data =
+        [
+            new()
+        ];
+
+        profileRepositoryMock
+            .Setup(pr =&gt; pr.DownloadCrewDataAsync(username))
+            .ReturnsAsync(data);
+
+        // Act
+        string result = await crewProfileService.DownloadCrewProfileDataAsync(username);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.Not.Empty);
+        
+        Assert.That(result.TrimStart(), Does.StartWith(&quot;[&quot;));
+        Assert.That(result.TrimEnd(), Does.EndWith(&quot;]&quot;));
+
+        profileRepositoryMock.Verify(pr =&gt; pr.DownloadCrewDataAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+    
+     private static Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; CreateUserManagerMock()
+    {
+        Mock&lt;IUserStore&lt;ApplicationUser&gt;&gt; storeMock = new Mock&lt;IUserStore&lt;ApplicationUser&gt;&gt;(MockBehavior.Loose);
+
+        Mock&lt;UserManager&lt;ApplicationUser&gt;&gt; userManager = new Mock&lt;UserManager&lt;ApplicationUser&gt;&gt;
+        (
+            storeMock.Object,
+            Mock.Of&lt;IOptions&lt;IdentityOptions&gt;&gt;(),
+            Mock.Of&lt;IPasswordHasher&lt;ApplicationUser&gt;&gt;(),
+            Array.Empty&lt;IUserValidator&lt;ApplicationUser&gt;&gt;(),
+            Array.Empty&lt;IPasswordValidator&lt;ApplicationUser&gt;&gt;(),
+            Mock.Of&lt;ILookupNormalizer&gt;(),
+            Mock.Of&lt;IdentityErrorDescriber&gt;(),
+            Mock.Of&lt;IServiceProvider&gt;(),
+            Mock.Of&lt;ILogger&lt;UserManager&lt;ApplicationUser&gt;&gt;&gt;()
+        );
+
+        userManager.SetReturnsDefault(Task.FromResult&lt;ApplicationUser?&gt;(null));
+        
+        return userManager;
+    }
+
+    private static Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; CreateSignInManagerMock(UserManager&lt;ApplicationUser&gt; userManager)
+    {
+        DefaultHttpContext httpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity())
+        };
+
+        Mock&lt;IHttpContextAccessor&gt; httpContextAccessorMock = new Mock&lt;IHttpContextAccessor&gt;(MockBehavior.Loose);
+        httpContextAccessorMock.Setup(hca =&gt; hca.HttpContext).Returns(httpContext);
+
+        Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt; signInManager = new Mock&lt;SignInManager&lt;ApplicationUser&gt;&gt;
+        (
+            userManager,
+            httpContextAccessorMock.Object,
+            Mock.Of&lt;IUserClaimsPrincipalFactory&lt;ApplicationUser&gt;&gt;(),
+            Mock.Of&lt;IOptions&lt;IdentityOptions&gt;&gt;(),
+            Mock.Of&lt;ILogger&lt;SignInManager&lt;ApplicationUser&gt;&gt;&gt;(),
+            Mock.Of&lt;IAuthenticationSchemeProvider&gt;(),
+            Mock.Of&lt;IUserConfirmation&lt;ApplicationUser&gt;&gt;()
+        )
+        {
+            CallBase = false
+        };
+
+        return signInManager;
+    }
+    
+    private static Crew CreateCrew(string username, string email, string phone, string firstName, string lastName,
+        string? nickname, string profileImagePath, bool isActive, string? biography)
+    {
+        Crew newCrew = new Crew
+        {
+            Id = Guid.NewGuid(),
+            FirstName = firstName,
+            LastName = lastName,
+            Nickname = nickname,
+            ProfileImagePath = profileImagePath,
+            IsActive = isActive,
+            IsDeleted = false,
+            Biography = biography,
+            User = new ApplicationUser
+            {
+                UserName = username,
+                Email = email,
+                PhoneNumber = phone
+            }
+        };
+        
+        return newCrew;
+    }
+
+    private static Mock&lt;IDbContextTransaction&gt; CreateTransactionMock()
+    {
+        Mock&lt;IDbContextTransaction&gt; transactionMock = new Mock&lt;IDbContextTransaction&gt;(MockBehavior.Strict);
+        transactionMock.Setup(tx =&gt; tx.DisposeAsync()).Returns(ValueTask.CompletedTask);
+        
+        return transactionMock;
+    }
+
+    private static IFormFile CreateFormFile(string fileName, byte[] content)
+    {
+        MemoryStream stream = new MemoryStream(content);
+        IFormFile file =  new FormFile(stream, 0, content.Length, &quot;file&quot;, fileName);
+        
+        return file;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[34,5,34,72,1],[35,5,35,76,1],[36,5,36,68,1],[37,5,37,58,1],[38,5,38,83,1],[39,5,39,66,1],[41,5,41,59,1],[45,5,45,6,1],[46,9,46,51,1],[47,9,47,77,1],[49,9,49,83,1],[50,9,50,73,1],[51,9,51,98,1],[52,9,52,80,1],[54,9,62,11,1],[63,5,63,6,1],[67,5,67,6,1],[71,9,73,40,1],[76,9,77,73,1],[80,9,80,93,1],[82,9,82,105,1],[83,9,83,52,1],[85,9,85,47,1],[86,9,86,56,1],[87,5,87,6,1],[91,5,91,6,1],[95,9,104,31,1],[107,9,107,132,1],[108,9,108,93,1],[109,9,109,38,1],[110,9,110,62,1],[112,9,112,102,1],[113,9,113,39,1],[114,9,114,63,1],[116,9,132,11,1],[134,9,139,11,1],[141,9,149,11,1],[151,9,158,11,1],[160,9,167,11,1],[169,9,171,33,1],[173,9,175,35,1],[177,9,179,72,1],[181,9,183,62,1],[186,9,186,92,1],[189,9,189,67,1],[190,9,190,65,1],[191,9,191,81,1],[192,9,192,65,1],[193,9,193,70,1],[194,9,194,64,1],[195,9,195,76,1],[196,9,196,65,1],[197,9,197,67,1],[200,9,200,74,1],[201,9,201,82,1],[203,9,203,74,1],[204,9,204,82,1],[207,9,207,62,1],[208,9,208,71,1],[209,9,209,81,1],[210,9,210,76,1],[211,9,211,90,1],[212,9,212,66,1],[215,9,215,57,1],[216,9,216,62,1],[217,9,217,72,1],[218,9,218,70,1],[219,9,219,77,1],[220,9,220,67,1],[222,9,222,105,1],[223,9,223,88,1],[224,9,224,93,1],[225,9,225,88,1],[226,9,226,52,1],[228,9,228,47,1],[229,9,229,56,1],[230,5,230,6,1],[234,5,234,6,1],[238,9,240,40,1],[243,9,244,73,1],[247,9,247,93,1],[249,9,249,105,1],[250,9,250,52,1],[252,9,252,47,1],[253,9,253,56,1],[254,5,254,6,1],[258,5,258,6,1],[262,9,271,31,1],[273,9,275,33,1],[278,9,278,96,1],[281,9,281,67,1],[282,9,282,65,1],[283,9,283,65,1],[284,9,284,76,1],[285,9,285,67,1],[286,9,286,51,1],[288,9,288,64,1],[289,9,289,88,1],[291,9,291,105,1],[292,9,292,52,1],[294,9,294,47,1],[295,9,295,56,1],[296,5,296,6,1],[300,5,300,6,1],[303,9,303,79,1],[305,9,314,11,1],[316,9,318,51,1],[320,9,322,40,1],[324,9,326,42,1],[329,9,330,19,1],[330,19,330,79,1],[330,79,330,81,1],[333,9,333,93,1],[335,9,335,84,1],[336,9,336,93,1],[337,9,337,109,1],[338,9,338,119,1],[339,9,339,83,1],[340,9,340,52,1],[342,9,342,47,1],[343,9,343,56,1],[344,5,344,6,1],[348,5,348,6,1],[351,9,351,79,1],[353,9,362,35,1],[364,9,373,11,1],[375,9,375,108,1],[376,9,376,99,1],[377,9,377,85,1],[378,9,378,122,1],[381,9,381,76,1],[384,9,384,61,1],[385,9,385,59,1],[386,9,386,59,1],[387,9,387,60,1],[388,9,388,67,1],[389,9,389,81,1],[391,9,391,84,1],[392,9,392,93,1],[393,9,393,82,1],[394,9,394,107,1],[395,9,395,121,1],[396,9,396,52,1],[398,9,398,47,1],[399,9,399,56,1],[400,5,400,6,1],[404,5,404,6,1],[407,9,407,79,1],[409,9,418,35,1],[420,9,420,67,1],[422,9,431,11,1],[433,9,433,75,1],[436,9,436,108,1],[437,9,437,99,1],[439,9,439,98,1],[441,9,443,39,1],[445,9,445,85,1],[446,9,446,122,1],[449,9,449,76,1],[452,9,452,68,1],[454,9,454,93,1],[455,9,455,166,1],[457,9,457,84,1],[458,9,458,93,1],[459,9,459,82,1],[460,9,460,107,1],[461,9,461,121,1],[462,9,462,52,1],[464,9,464,47,1],[465,9,465,56,1],[466,5,466,6,1],[470,5,470,6,1],[473,9,473,79,1],[475,9,484,35,1],[486,9,486,67,1],[488,9,497,11,1],[499,9,499,75,1],[500,9,500,76,1],[502,9,502,108,1],[503,9,503,99,1],[505,9,505,98,1],[507,9,509,31,1],[511,9,511,124,1],[514,9,515,19,1],[515,19,515,79,1],[515,79,515,81,1],[518,9,518,60,1],[519,9,519,53,1],[521,9,521,109,1],[522,9,522,119,1],[524,9,524,93,1],[525,9,525,166,1],[526,5,526,6,1],[530,5,530,6,1],[533,9,533,79,1],[535,9,544,35,1],[546,9,555,11,1],[557,9,557,108,1],[558,9,558,99,1],[560,9,560,123,1],[561,9,561,124,1],[564,9,565,19,1],[565,19,565,79,1],[565,79,565,81,1],[568,9,568,58,1],[570,9,570,109,1],[571,9,571,119,1],[573,9,573,47,1],[574,9,574,56,1],[575,5,575,6,1],[579,5,579,6,1],[583,9,585,40,1],[588,9,589,68,1],[591,9,591,105,1],[592,9,592,52,1],[593,5,593,6,1],[597,5,597,6,1],[601,9,610,31,1],[612,9,628,11,1],[630,9,630,111,1],[631,9,631,100,1],[634,9,634,86,1],[637,9,637,65,1],[638,9,638,80,1],[639,9,639,78,1],[640,9,640,58,1],[642,9,642,105,1],[643,9,643,88,1],[644,9,644,52,1],[645,5,645,6,1],[649,5,649,6,1],[653,9,655,40,1],[657,9,657,84,1],[660,9,661,19,1],[661,19,661,76,1],[661,76,661,78,1],[663,9,663,105,1],[664,9,664,52,1],[665,5,665,6,1],[669,5,669,6,1],[673,9,682,31,1],[684,9,684,111,1],[685,9,685,101,1],[687,9,687,84,1],[690,9,691,19,1],[691,19,691,76,1],[691,76,691,78,1],[694,9,694,65,1],[696,9,696,105,1],[697,9,697,97,1],[698,9,698,52,1],[699,5,699,6,1],[703,5,703,6,1],[706,9,706,79,1],[708,9,717,31,1],[719,9,735,11,1],[738,9,741,11,1],[743,9,743,111,1],[744,9,744,112,1],[745,9,745,108,1],[747,9,747,48,1],[748,9,750,56,1],[750,56,750,71,1],[750,71,751,42,1],[753,9,753,85,1],[754,9,754,122,1],[757,9,757,73,1],[760,9,760,64,1],[761,9,761,46,1],[762,9,762,44,1],[762,44,762,54,1],[762,54,762,92,1],[763,9,763,44,1],[763,44,763,54,1],[763,54,763,98,1],[765,9,765,118,1],[766,9,766,116,1],[768,9,768,82,1],[769,9,769,107,1],[770,9,770,121,1],[771,5,771,6,1],[775,5,775,6,1],[778,9,778,79,1],[780,9,789,31,1],[792,9,801,11,1],[804,9,807,11,1],[809,9,809,111,1],[810,9,810,112,1],[811,9,811,108,1],[813,9,813,46,1],[814,9,816,56,1],[816,56,816,69,1],[816,69,817,42,1],[819,9,819,85,1],[820,9,820,122,1],[823,9,823,73,1],[826,9,826,63,1],[827,9,827,46,1],[828,9,828,44,1],[828,44,828,54,1],[828,54,828,92,1],[829,9,829,41,1],[829,41,829,59,1],[829,59,829,71,1],[831,9,831,115,1],[832,9,832,119,1],[834,9,834,82,1],[835,9,835,107,1],[836,9,836,121,1],[837,5,837,6,1],[841,5,841,6,1],[844,9,844,79,1],[846,9,855,31,1],[858,9,875,11,1],[878,9,881,11,1],[883,9,883,111,1],[884,9,884,112,1],[886,9,886,108,1],[887,9,887,133,1],[888,9,888,130,1],[890,9,890,85,1],[891,9,891,122,1],[894,9,894,73,1],[897,9,897,118,1],[898,9,898,115,1],[900,9,900,82,1],[901,9,901,107,1],[902,9,902,121,1],[903,5,903,6,1],[907,5,907,6,1],[910,9,910,79,1],[912,9,921,31,1],[923,9,932,11,1],[934,9,937,11,1],[939,9,939,111,1],[940,9,940,112,1],[942,9,942,108,1],[945,9,945,123,1],[946,9,946,124,1],[949,9,950,19,1],[950,19,950,76,1],[950,76,950,78,1],[953,9,953,58,1],[955,9,955,109,1],[956,9,956,119,1],[959,9,959,116,1],[960,9,960,119,1],[961,5,961,6,1],[965,5,965,6,1],[969,9,971,40,1],[974,9,975,75,1],[978,9,978,93,1],[980,9,980,124,1],[981,9,981,52,1],[982,5,982,6,1],[986,5,986,6,1],[990,9,999,31,1],[1001,9,1001,80,1],[1002,9,1002,63,1],[1003,9,1003,67,1],[1005,9,1007,33,1],[1010,9,1010,96,1],[1013,9,1013,67,1],[1014,9,1014,65,1],[1015,9,1015,81,1],[1016,9,1016,70,1],[1017,9,1017,64,1],[1018,9,1018,76,1],[1020,9,1020,61,1],[1021,9,1021,56,1],[1022,9,1022,56,1],[1024,9,1024,124,1],[1025,9,1025,52,1],[1026,5,1026,6,1],[1030,5,1030,6,1],[1033,9,1033,79,1],[1035,9,1037,40,1],[1040,9,1041,19,1],[1041,19,1041,75,1],[1041,75,1041,77,1],[1044,9,1044,93,1],[1046,9,1046,93,1],[1047,9,1047,52,1],[1048,5,1048,6,1],[1052,5,1052,6,1],[1055,9,1055,85,1],[1057,9,1066,31,1],[1068,9,1070,33,1],[1072,9,1074,34,1],[1077,9,1077,86,1],[1080,9,1080,39,1],[1082,9,1082,93,1],[1083,9,1083,98,1],[1086,9,1086,102,1],[1087,9,1087,83,1],[1088,5,1088,6,1],[1092,5,1092,6,1],[1095,9,1095,87,1],[1097,9,1106,31,1],[1108,9,1108,75,1],[1110,9,1112,33,1],[1114,9,1116,33,1],[1118,9,1120,32,1],[1122,9,1124,42,1],[1126,9,1128,33,1],[1130,9,1132,30,1],[1134,9,1136,42,1],[1139,9,1139,86,1],[1142,9,1142,38,1],[1144,9,1144,93,1],[1145,9,1145,98,1],[1146,9,1146,93,1],[1147,9,1147,133,1],[1148,9,1148,92,1],[1149,9,1149,82,1],[1150,9,1150,71,1],[1151,5,1151,6,1],[1155,5,1155,6,1],[1159,9,1161,57,1],[1164,9,1165,78,1],[1168,9,1168,93,1],[1170,9,1170,92,1],[1171,9,1171,52,1],[1172,5,1172,6,1],[1176,5,1176,6,1],[1180,9,1183,11,1],[1185,9,1187,33,1],[1190,9,1190,89,1],[1193,9,1193,56,1],[1195,9,1195,62,1],[1196,9,1196,58,1],[1198,9,1198,92,1],[1199,9,1199,52,1],[1200,5,1200,6,1],[1203,5,1203,6,1],[1204,9,1204,113,1],[1206,9,1217,11,1],[1219,9,1219,80,1],[1221,9,1221,28,1],[1222,5,1222,6,1],[1225,5,1225,6,1],[1226,9,1229,11,1],[1231,9,1231,113,1],[1232,9,1232,84,1],[1234,9,1246,11,1],[1248,9,1248,30,1],[1249,5,1249,6,1],[1253,5,1253,6,1],[1254,9,1270,11,1],[1272,9,1272,24,1],[1273,5,1273,6,1],[1276,5,1276,6,1],[1277,9,1277,108,1],[1278,9,1278,89,1],[1280,9,1280,32,1],[1281,5,1281,6,1],[1284,5,1284,6,1],[1285,9,1285,57,1],[1286,9,1286,85,1],[1288,9,1288,21,1],[1289,5,1289,6,1]]);
+    </script>
+  </body>
+</html>

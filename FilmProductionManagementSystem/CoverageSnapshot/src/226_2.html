@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Production/Details.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model DetailsProductionViewModel
+
+@inject ISlugGenerator SlugGenerator;
+
+@{
+    ViewData[TitleDataKey] = Model.Title;
+}
+
+@section Styles {
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;div class=&quot;production-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+        
+        &lt;partial name=&quot;_TempDataPartial&quot;&gt;&lt;/partial&gt;
+
+        @* ── Hero Header Card ── *@
+        &lt;div class=&quot;production-header-card&quot;&gt;
+            &lt;div class=&quot;row align-items-center g-4&quot;&gt;
+
+                &lt;div class=&quot;col-md-4 text-center&quot;&gt;
+                    &lt;img src=&quot;@Model.Thumbnail&quot;
+                         alt=&quot;@Model.Title&quot;
+                         class=&quot;production-thumbnail&quot;&gt;
+                &lt;/div&gt;
+
+                &lt;div class=&quot;col-md-8&quot;&gt;
+                    &lt;div class=&quot;d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3&quot;&gt;
+                        &lt;div&gt;
+                            &lt;h1 class=&quot;fw-bold mb-2&quot; style=&quot;color: var(--wrap-dark-blue);&quot;&gt;
+                                @Model.Title
+                            &lt;/h1&gt;
+                            &lt;span class=&quot;status-badge @Model.StatusAbstractClass&quot;&gt;@GetDisplayName(Model.StatusType)&lt;/span&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;d-flex gap-2 flex-wrap&quot;&gt;
+                            @if (Model.CanManage)
+                            {
+                                &lt;a asp-area=&quot;Filmmaker&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Edit&quot; asp-route-productionId=&quot;@Model.Id&quot;
+                                   asp-route-slug=&quot;@SlugGenerator.GenerateSlug(Model.Title)&quot;
+                                   class=&quot;btn btn-production&quot;&gt;
+                                    &lt;i class=&quot;bi bi-pencil-fill me-1&quot;&gt;&lt;/i&gt;Edit
+                                &lt;/a&gt;
+                                &lt;a asp-area=&quot;Filmmaker&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Delete&quot; asp-route-productionId=&quot;@Model.Id&quot;
+                                   asp-route-slug=&quot;@SlugGenerator.GenerateSlug(Model.Title)&quot;
+                                   class=&quot;btn btn-production-danger&quot;&gt;
+                                    &lt;i class=&quot;bi bi-trash-fill me-1&quot;&gt;&lt;/i&gt;Delete
+                                &lt;/a&gt;
+                            }
+                            &lt;a asp-area=&quot;&quot; asp-controller=&quot;Production&quot; asp-action=&quot;Index&quot;
+                               class=&quot;btn btn-production-secondary&quot;&gt;
+                                &lt;i class=&quot;bi bi-arrow-left me-1&quot;&gt;&lt;/i&gt;Back
+                            &lt;/a&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;row&quot;&gt;
+                        &lt;div class=&quot;col-sm-6&quot;&gt;
+                            &lt;div class=&quot;info-item&quot;&gt;
+                                &lt;div class=&quot;info-label&quot;&gt;&lt;i class=&quot;bi bi-cash me-1&quot;&gt;&lt;/i&gt;Budget&lt;/div&gt;
+                                &lt;div class=&quot;info-value&quot;&gt;@Model.Budget&lt;/div&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&quot;info-item&quot;&gt;
+                                &lt;div class=&quot;info-label&quot;&gt;
+                                    &lt;i class=&quot;bi bi-calendar-check me-1&quot;&gt;&lt;/i&gt;Start Date
+                                &lt;/div&gt;
+                                &lt;div class=&quot;info-value&quot;&gt;@Model.StatusStartDate&lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&quot;col-sm-6&quot;&gt;
+                            &lt;div class=&quot;info-item&quot;&gt;
+                                &lt;div class=&quot;info-label&quot;&gt;
+                                    &lt;i class=&quot;bi bi-calendar-x me-1&quot;&gt;&lt;/i&gt;End Date
+                                &lt;/div&gt;
+                                &lt;div class=&quot;info-value&quot;&gt;@Model.StatusEndDate&lt;/div&gt;
+                            &lt;/div&gt;
+                            @if (!string.IsNullOrWhiteSpace(Model.ScriptId))
+                            {
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;
+                                        &lt;i class=&quot;bi bi-file-text me-1&quot;&gt;&lt;/i&gt;Script
+                                    &lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;
+                                        &lt;a asp-area=&quot;Filmmaker&quot; asp-controller=&quot;Scripts&quot; asp-action=&quot;Details&quot;
+                                           asp-route-id=&quot;@Model.ScriptId&quot;
+                                           class=&quot;btn btn-production-outline btn-sm&quot;&gt;
+                                            &lt;i class=&quot;bi bi-file-earmark-text me-1&quot;&gt;&lt;/i&gt;View Script
+                                        &lt;/a&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            }
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        @* ── Description ── *@
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            &lt;div class=&quot;section-card&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-text-paragraph me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Description&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;biography-content&quot;&gt;@Model.Description&lt;/div&gt;
+            &lt;/div&gt;
+        }
+
+        @* ── Tabs ── *@
+        &lt;div class=&quot;section-card&quot;&gt;
+            &lt;ul class=&quot;nav prod-tabs flex-wrap gap-2 mb-4&quot; id=&quot;prodTabs&quot; role=&quot;tablist&quot;&gt;
+                &lt;li class=&quot;nav-item&quot; role=&quot;presentation&quot;&gt;
+                    &lt;button class=&quot;nav-link active&quot; data-bs-toggle=&quot;tab&quot;
+                            data-bs-target=&quot;#tabCrew&quot; type=&quot;button&quot;&gt;
+                        &lt;i class=&quot;bi bi-people me-1&quot;&gt;&lt;/i&gt;Crew
+                        &lt;span class=&quot;badge bg-secondary ms-1&quot;&gt;@Model.ProductionCrewMembers.Count&lt;/span&gt;
+                    &lt;/button&gt;
+                &lt;/li&gt;
+                &lt;li class=&quot;nav-item&quot; role=&quot;presentation&quot;&gt;
+                    &lt;button class=&quot;nav-link&quot; data-bs-toggle=&quot;tab&quot;
+                            data-bs-target=&quot;#tabCast&quot; type=&quot;button&quot;&gt;
+                        &lt;i class=&quot;bi bi-person-video3 me-1&quot;&gt;&lt;/i&gt;Cast
+                        &lt;span class=&quot;badge bg-secondary ms-1&quot;&gt;@Model.ProductionCastMembers.Count&lt;/span&gt;
+                    &lt;/button&gt;
+                &lt;/li&gt;
+                &lt;li class=&quot;nav-item&quot; role=&quot;presentation&quot;&gt;
+                    &lt;button class=&quot;nav-link&quot; data-bs-toggle=&quot;tab&quot;
+                            data-bs-target=&quot;#tabScenes&quot; type=&quot;button&quot;&gt;
+                        &lt;i class=&quot;bi bi-camera-video me-1&quot;&gt;&lt;/i&gt;Scenes
+                        &lt;span class=&quot;badge bg-secondary ms-1&quot;&gt;@Model.ProductionScenes.Count&lt;/span&gt;
+                    &lt;/button&gt;
+                &lt;/li&gt;
+                &lt;li class=&quot;nav-item&quot; role=&quot;presentation&quot;&gt;
+                    &lt;button class=&quot;nav-link&quot; data-bs-toggle=&quot;tab&quot;
+                            data-bs-target=&quot;#tabAssets&quot; type=&quot;button&quot;&gt;
+                        &lt;i class=&quot;bi bi-folder me-1&quot;&gt;&lt;/i&gt;Assets
+                        &lt;span class=&quot;badge bg-secondary ms-1&quot;&gt;@Model.ProductionAssets.Count&lt;/span&gt;
+                    &lt;/button&gt;
+                &lt;/li&gt;
+                &lt;li class=&quot;nav-item&quot; role=&quot;presentation&quot;&gt;
+                    &lt;button class=&quot;nav-link&quot; data-bs-toggle=&quot;tab&quot;
+                            data-bs-target=&quot;#tabSchedule&quot; type=&quot;button&quot;&gt;
+                        &lt;i class=&quot;bi bi-calendar-event me-1&quot;&gt;&lt;/i&gt;Schedule
+                        &lt;span class=&quot;badge bg-secondary ms-1&quot;&gt;@Model.ProductionShootingDays.Count&lt;/span&gt;
+                    &lt;/button&gt;
+                &lt;/li&gt;
+            &lt;/ul&gt;
+
+            &lt;div class=&quot;tab-content prod-tab-content&quot;&gt;
+
+                @* ── Crew ── *@
+                &lt;div class=&quot;tab-pane fade show active&quot; id=&quot;tabCrew&quot;&gt;
+
+                    &lt;div class=&quot;d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3&quot;&gt;
+                        &lt;div class=&quot;text-muted small&quot;&gt;
+                            @Model.ProductionCrewMembers.Count @(Model.ProductionCrewMembers.Count == 1 ? &quot;member&quot; : &quot;members&quot;)
+                        &lt;/div&gt;
+
+                        @if (Model.CanManage)
+                        {
+                            &lt;a asp-area=&quot;&quot;
+                               asp-controller=&quot;Home&quot;
+                               asp-action=&quot;FindFilmmakers&quot;
+                               asp-route-ProductionId=&quot;@Model.Id&quot;
+                               class=&quot;btn btn-production btn-sm&quot;&gt;
+                                &lt;i class=&quot;bi bi-person-plus-fill me-1&quot;&gt;&lt;/i&gt;Add filmmaker
+                            &lt;/a&gt;
+                        }
+                    &lt;/div&gt;
+
+                    @if (!Model.ProductionCrewMembers.Any())
+                    {
+                        &lt;div class=&quot;empty-state&quot;&gt;
+                            &lt;i class=&quot;bi bi-people&quot;&gt;&lt;/i&gt;
+                            &lt;p&gt;No filmmakers assigned yet.&lt;/p&gt;
+                        &lt;/div&gt;
+                    }
+                    else
+                    {
+                        &lt;div class=&quot;row g-3&quot;&gt;
+                            @foreach (ProductionCrewMemberViewModel crew in Model.ProductionCrewMembers)
+                            {
+                                &lt;div class=&quot;col-6 col-md-4 col-lg-3&quot;&gt;
+                                    &lt;div class=&quot;member-card position-relative&quot;&gt;
+                                        &lt;img src=&quot;@crew.ProfileImagePath&quot;
+                                             alt=&quot;@crew.FirstName @crew.LastName&quot;
+                                             class=&quot;member-avatar&quot;&gt;
+                                        &lt;div&gt;
+                                            &lt;div class=&quot;member-name&quot;&gt;@crew.FirstName @crew.LastName&lt;/div&gt;
+                                            &lt;div class=&quot;member-role&quot;&gt;@crew.Role&lt;/div&gt;
+                                        &lt;/div&gt;
+
+                                        @if (Model.CanManage)
+                                        {
+                                            &lt;form asp-area=&quot;Filmmaker&quot;
+                                                  asp-controller=&quot;Production&quot;
+                                                  asp-action=&quot;RemoveFilmmakerFromProduction&quot;
+                                                  method=&quot;post&quot;
+                                                  class=&quot;position-absolute top-0 end-0 m-2&quot;&gt;
+                                                @Html.AntiForgeryToken()
+
+                                                &lt;input type=&quot;hidden&quot; name=&quot;productionId&quot; value=&quot;@Model.Id&quot; /&gt;
+                                                &lt;input type=&quot;hidden&quot; name=&quot;crewId&quot; value=&quot;@crew.Id&quot; /&gt;
+
+                                                &lt;button type=&quot;submit&quot;
+                                                        class=&quot;btn btn-sm btn-production-danger&quot;
+                                                        title=&quot;Remove from production&quot;&gt;
+                                                    &lt;i class=&quot;bi bi-x-lg&quot;&gt;&lt;/i&gt;
+                                                &lt;/button&gt;
+                                            &lt;/form&gt;
+                                        }
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            }
+                        &lt;/div&gt;
+                    }
+                &lt;/div&gt;
+
+                @* ── Cast ── *@
+                &lt;div class=&quot;tab-pane fade&quot; id=&quot;tabCast&quot;&gt;
+
+                    &lt;div class=&quot;d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3&quot;&gt;
+                        &lt;div class=&quot;text-muted small&quot;&gt;
+                            @Model.ProductionCastMembers.Count @(Model.ProductionCastMembers.Count == 1 ? &quot;actor&quot; : &quot;actors&quot;)
+                        &lt;/div&gt;
+
+                        @if (Model.CanManage)
+                        {
+                            &lt;a asp-area=&quot;&quot;
+                               asp-controller=&quot;Home&quot;
+                               asp-action=&quot;FindActors&quot;
+                               asp-route-ProductionId=&quot;@Model.Id&quot;
+                               class=&quot;btn btn-production btn-sm&quot;&gt;
+                                &lt;i class=&quot;bi bi-person-plus-fill me-1&quot;&gt;&lt;/i&gt;Add actor
+                            &lt;/a&gt;
+                        }
+                    &lt;/div&gt;
+
+                    @if (!Model.ProductionCastMembers.Any())
+                    {
+                        &lt;div class=&quot;empty-state&quot;&gt;
+                            &lt;i class=&quot;bi bi-person-video3&quot;&gt;&lt;/i&gt;
+                            &lt;p&gt;No actors assigned yet.&lt;/p&gt;
+                        &lt;/div&gt;
+                    }
+                    else
+                    {
+                        &lt;div class=&quot;row g-3&quot;&gt;
+                            @foreach (ProductionCastMemberViewModel cast in Model.ProductionCastMembers)
+                            {
+                                &lt;div class=&quot;col-md-6&quot;&gt;
+                                    &lt;div class=&quot;d-flex align-items-center gap-3 member-card text-start position-relative&quot;&gt;
+                                        &lt;img src=&quot;@cast.ProfileImagePath&quot;
+                                             alt=&quot;@cast.FirstName @cast.LastName&quot;
+                                             class=&quot;member-avatar&quot; style=&quot;min-width: 70px;&quot;&gt;
+                                        &lt;div class=&quot;flex-grow-1&quot;&gt;
+                                            &lt;div class=&quot;member-name&quot;&gt;@cast.FirstName @cast.LastName&lt;/div&gt;
+                                            &lt;div class=&quot;member-role&quot;&gt;
+                                                @cast.Role &#183; Age @cast.Age &#183; @cast.Gender
+                                            &lt;/div&gt;
+                                        &lt;/div&gt;
+
+                                        @if (Model.CanManage)
+                                        {
+                                            &lt;form asp-area=&quot;Filmmaker&quot;
+                                                  asp-controller=&quot;Production&quot;
+                                                  asp-action=&quot;RemoveActorFromProduction&quot;
+                                                  method=&quot;post&quot;
+                                                  class=&quot;position-absolute top-0 end-0 m-2&quot;&gt;
+                                                @Html.AntiForgeryToken()
+
+                                                &lt;input type=&quot;hidden&quot; name=&quot;productionId&quot; value=&quot;@Model.Id&quot; /&gt;
+                                                &lt;input type=&quot;hidden&quot; name=&quot;castId&quot; value=&quot;@cast.Id&quot; /&gt;
+
+                                                &lt;button type=&quot;submit&quot;
+                                                        class=&quot;btn btn-sm btn-production-danger&quot;
+                                                        title=&quot;Remove from production&quot;&gt;
+                                                    &lt;i class=&quot;bi bi-x-lg&quot;&gt;&lt;/i&gt;
+                                                &lt;/button&gt;
+                                            &lt;/form&gt;
+                                        }
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            }
+                        &lt;/div&gt;
+                    }
+                &lt;/div&gt;
+
+                @* ── Scenes ── *@
+                &lt;div class=&quot;tab-pane fade&quot; id=&quot;tabScenes&quot;&gt;
+                    @if (!Model.ProductionScenes.Any())
+                    {
+                        &lt;div class=&quot;empty-state&quot;&gt;
+                            &lt;i class=&quot;bi bi-camera-video&quot;&gt;&lt;/i&gt;
+                            &lt;p&gt;No scenes created yet.&lt;/p&gt;
+                        &lt;/div&gt;
+                    }
+                    else
+                    {
+                        @foreach (ProductionSceneViewModel scene in Model.ProductionScenes)
+                        {
+                            &lt;div class=&quot;scene-row&quot;&gt;
+                                &lt;div class=&quot;scene-number&quot;&gt;@scene.SceneNumber&lt;/div&gt;
+                                &lt;div class=&quot;flex-grow-1&quot;&gt;
+                                    &lt;div class=&quot;fw-semibold&quot; style=&quot;color: var(--wrap-dark-blue);&quot;&gt;
+                                        @scene.SceneName
+                                    &lt;/div&gt;
+                                    &lt;small class=&quot;text-muted&quot;&gt;@scene.Location&lt;/small&gt;
+                                &lt;/div&gt;
+                                &lt;span class=&quot;badge bg-secondary&quot;&gt;@scene.SceneType&lt;/span&gt;
+                            &lt;/div&gt;
+                        }
+                    }
+                &lt;/div&gt;
+
+                @* ── Assets ── *@
+                &lt;div class=&quot;tab-pane fade&quot; id=&quot;tabAssets&quot;&gt;
+                    @if (!Model.ProductionAssets.Any())
+                    {
+                        &lt;div class=&quot;empty-state&quot;&gt;
+                            &lt;i class=&quot;bi bi-folder&quot;&gt;&lt;/i&gt;
+                            &lt;p&gt;No assets uploaded yet.&lt;/p&gt;
+                        &lt;/div&gt;
+                    }
+                    else
+                    {
+                        @foreach (ProductionAssetViewModel asset in Model.ProductionAssets)
+                        {
+                            &lt;div class=&quot;asset-item&quot;&gt;
+                                &lt;div class=&quot;asset-icon&quot;&gt;&lt;i class=&quot;bi bi-file-earmark&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+                                &lt;div&gt;
+                                    &lt;div class=&quot;fw-semibold&quot; style=&quot;color: var(--wrap-dark-blue);&quot;&gt;
+                                        @asset.Title
+                                    &lt;/div&gt;
+                                    &lt;small class=&quot;text-muted&quot;&gt;@asset.AssetType&lt;/small&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        }
+                    }
+                &lt;/div&gt;
+
+                @* ── Schedule ── *@
+                &lt;div class=&quot;tab-pane fade&quot; id=&quot;tabSchedule&quot;&gt;
+                    @if (!Model.ProductionShootingDays.Any())
+                    {
+                        &lt;div class=&quot;empty-state&quot;&gt;
+                            &lt;i class=&quot;bi bi-calendar-event&quot;&gt;&lt;/i&gt;
+                            &lt;p&gt;No shooting days scheduled yet.&lt;/p&gt;
+                        &lt;/div&gt;
+                    }
+                    else
+                    {
+                        @foreach (ProductionShootingDayViewModel day in Model.ProductionShootingDays)
+                        {
+                            &lt;div class=&quot;schedule-item&quot;&gt;
+                                &lt;i class=&quot;bi bi-calendar-check&quot; style=&quot;color: #11998e; font-size: 1.3rem;&quot;&gt;&lt;/i&gt;
+                                &lt;span class=&quot;fw-semibold&quot; style=&quot;color: var(--wrap-dark-blue);&quot;&gt;
+                                    @day.Date
+                                &lt;/span&gt;
+                            &lt;/div&gt;
+                        }
+                    }
+                &lt;/div&gt;
+
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;script src=&quot;~/js/production/production-details.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[6,5,6,42,0],[37,30,37,50,0],[38,29,38,30,0],[49,29,49,30,0],[77,30,77,77,0],[78,29,78,30,0],[91,29,91,30,0],[99,10,99,60,0],[100,9,100,10,0],[108,9,108,10,0],[160,26,160,46,0],[161,25,161,26,0],[169,25,169,26,0],[172,22,172,61,0],[173,21,173,22,0],[178,21,178,22,0],[180,21,180,22,0],[182,30,182,37,0],[182,39,182,73,0],[182,74,182,76,0],[182,77,182,104,0],[183,29,183,30,0],[194,42,194,62,0],[195,41,195,42,0],[212,41,212,42,0],[215,29,215,30,0],[217,21,217,22,0],[228,26,228,46,0],[229,25,229,26,0],[237,25,237,26,0],[240,22,240,61,0],[241,21,241,22,0],[246,21,246,22,0],[248,21,248,22,0],[250,30,250,37,0],[250,39,250,73,0],[250,74,250,76,0],[250,77,250,104,0],[251,29,251,30,0],[264,42,264,62,0],[265,41,265,42,0],[282,41,282,42,0],[285,29,285,30,0],[287,21,287,22,0],[292,22,292,56,0],[293,21,293,22,0],[298,21,298,22,0],[300,21,300,22,0],[301,26,301,33,0],[301,35,301,65,0],[301,66,301,68,0],[301,69,301,91,0],[302,25,302,26,0],[313,25,313,26,0],[314,21,314,22,0],[319,22,319,56,0],[320,21,320,22,0],[325,21,325,22,0],[327,21,327,22,0],[328,26,328,33,0],[328,35,328,65,0],[328,66,328,68,0],[328,69,328,91,0],[329,25,329,26,0],[339,25,339,26,0],[340,21,340,22,0],[345,22,345,62,0],[346,21,346,22,0],[351,21,351,22,0],[353,21,353,22,0],[354,26,354,33,0],[354,35,354,69,0],[354,70,354,72,0],[354,73,354,101,0],[355,25,355,26,0],[362,25,362,26,0],[363,21,363,22,0]]);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Views/Profile/ActorProfile.cshtml</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+@model CastProfileViewModel
+
+@inject ISlugGenerator SlugGenerator;
+
+@{
+    string fullName = $&quot;{Model.FirstName} {Model.LastName}&quot;;
+    ViewData[TitleDataKey] = $&quot;{fullName} - Actor Profile&quot;;
+}
+
+@section Styles{
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/profile.css&quot; asp-append-version=&quot;true&quot;/&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;~/css/production.css&quot; asp-append-version=&quot;true&quot; /&gt;
+}
+
+&lt;div class=&quot;profile-wrapper&quot;&gt;
+    &lt;div class=&quot;container&quot;&gt;
+        
+        &lt;partial name=&quot;_TempDataPartial&quot;&gt;&lt;/partial&gt;
+        
+        &lt;!-- Profile Header Card --&gt;
+        &lt;div class=&quot;profile-header-card&quot;&gt;
+            &lt;div class=&quot;row align-items-center&quot;&gt;
+                &lt;!-- Left: Profile Image --&gt;
+                &lt;div class=&quot;col-md-4 text-center&quot;&gt;
+                    &lt;div class=&quot;profile-image-container&quot;&gt;
+                        &lt;img src=&quot;@Model.ProfileImagePath&quot; 
+                             alt=&quot;@Model.FirstName @Model.LastName&quot; 
+                             class=&quot;profile-image&quot;&gt;
+                        &lt;div class=&quot;edit-icon-overlay&quot; title=&quot;Edit Profile&quot;&gt;
+                            &lt;a asp-area=&quot;&quot; asp-controller=&quot;Profile&quot; asp-action=&quot;EditActor&quot; asp-route-slug=&quot;@SlugGenerator.GenerateSlug(fullName)&quot;
+                               class=&quot;text-white&quot; style=&quot;text-decoration: none;&quot;&gt;
+                                &lt;i class=&quot;bi bi-pencil-fill&quot;&gt;&lt;/i&gt;
+                            &lt;/a&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    
+                    &lt;!-- Role Badge --&gt;
+                    &lt;div class=&quot;role-badge actor-badge mt-3&quot;&gt;
+                        &#127917; Actor
+                    &lt;/div&gt;
+                &lt;/div&gt;
+
+                &lt;!-- Right: Personal Information --&gt;
+                &lt;div class=&quot;col-md-8&quot;&gt;
+                    &lt;div class=&quot;profile-info&quot;&gt;
+                        &lt;!-- Name &amp; Username --&gt;
+                        &lt;div class=&quot;profile-name-section mb-4&quot;&gt;
+                            &lt;h1 class=&quot;profile-name&quot;&gt;@Model.FirstName @Model.LastName&lt;/h1&gt;
+                        &lt;/div&gt;
+
+                        &lt;!-- Info Grid --&gt;
+                        &lt;div class=&quot;row&quot;&gt;
+                            &lt;!-- Left Column --&gt;
+                            &lt;div class=&quot;col-md-6&quot;&gt;
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Name&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.FirstName @Model.LastName&lt;/div&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Email address&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.Email&lt;/div&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Phone number&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.PhoneNumber&lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Username&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.UserName&lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+
+                            &lt;!-- Right Column --&gt;
+                            &lt;div class=&quot;col-md-6&quot;&gt;
+                                
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Nickname&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.Nickname&lt;/div&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Age&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;@Model.Age&lt;/div&gt;
+                                &lt;/div&gt;
+
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Gender&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;
+                                        @Model.Gender
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class=&quot;info-item&quot;&gt;
+                                    &lt;div class=&quot;info-label&quot;&gt;Status&lt;/div&gt;
+                                    &lt;div class=&quot;info-value&quot;&gt;
+                                        &lt;span class=&quot;badge @(Model.IsActive ? ActiveStyle : InactiveStyle) badge-custom&quot;&gt;
+                                            @(Model.IsActive ? Active : Inactive)
+                                        &lt;/span&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;!-- Biography Section --&gt;
+        @if (!string.IsNullOrWhiteSpace(Model.Biography))
+        {
+            &lt;div class=&quot;section-card mt-4&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-person-lines-fill me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Biography&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class=&quot;biography-content&quot;&gt;
+                    @Model.Biography
+                &lt;/div&gt;
+            &lt;/div&gt;
+        }
+        
+        &lt;!-- Productions Section --&gt;
+        &lt;div class=&quot;section-card mt-4&quot;&gt;
+            &lt;div class=&quot;section-header&quot;&gt;
+                &lt;i class=&quot;bi bi-film me-2&quot;&gt;&lt;/i&gt;
+                &lt;h3&gt;Productions (@Model.CastMemberProductionsCount)&lt;/h3&gt;
+            &lt;/div&gt;
+        
+            @if (Model.CastMemberProductions is not null &amp;&amp; Model.CastMemberProductions.Any())
+            {
+                &lt;div class=&quot;row&quot;&gt;
+                    @foreach (CastMemberProduction productionCast in Model.CastMemberProductions)
+                    {
+                        &lt;div class=&quot;col-md-6 mb-3&quot;&gt;
+                            &lt;div class=&quot;production-card&quot;&gt;
+                                &lt;div class=&quot;d-flex justify-content-between align-items-start&quot;&gt;
+                                    &lt;div&gt;
+                                        &lt;h5 class=&quot;production-title&quot;&gt;@productionCast.ProductionTitle&lt;/h5&gt;
+                                        @if (!string.IsNullOrWhiteSpace(productionCast.CharacterName))
+                                        {
+                                            &lt;p class=&quot;character-role&quot;&gt;as &lt;strong&gt;@productionCast.CharacterName&lt;/strong&gt;&lt;/p&gt;
+                                        }
+                                        &lt;small class=&quot;text-muted&quot;&gt;Project status: @productionCast.ProjectStatus&lt;/small&gt;
+                                    &lt;/div&gt;
+                                    &lt;a asp-area=&quot;&quot; 
+                                       asp-controller=&quot;Production&quot;
+                                       asp-action=&quot;Details&quot;
+                                       asp-route-productionId=&quot;@productionCast.ProductionId&quot;
+                                       asp-route-slug=&quot;@SlugGenerator.GenerateSlug(productionCast.ProductionTitle!)&quot;
+                                       class=&quot;btn btn-sm btn-outline-primary&quot;&gt;
+                                        View
+                                    &lt;/a&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    }
+                &lt;/div&gt;
+            }
+            else
+            {
+                &lt;div class=&quot;text-center py-4 text-muted&quot;&gt;
+                    &lt;i class=&quot;bi bi-film&quot; style=&quot;font-size: 3rem;&quot;&gt;&lt;/i&gt;
+                    &lt;p class=&quot;mt-2&quot;&gt;No productions yet&lt;/p&gt;
+                &lt;/div&gt;
+            }
+        &lt;/div&gt;
+        
+        &lt;!-- Scenes Section --&gt;
+        @if (Model.CastMemberScenes is not null &amp;&amp; Model.CastMemberScenes.Any())
+        {
+            &lt;div class=&quot;section-card mt-4&quot;&gt;
+                &lt;div class=&quot;section-header&quot;&gt;
+                    &lt;i class=&quot;bi bi-camera-reels me-2&quot;&gt;&lt;/i&gt;
+                    &lt;h3&gt;Scenes (@Model.CastMemberScenesCount)&lt;/h3&gt;
+                &lt;/div&gt;
+        
+                &lt;div class=&quot;table-responsive&quot;&gt;
+                    &lt;table class=&quot;table table-hover&quot;&gt;
+                        &lt;thead&gt;
+                            &lt;tr&gt;
+                                &lt;th&gt;Scene&lt;/th&gt;
+                                &lt;th&gt;Production&lt;/th&gt;
+                                &lt;th&gt;Action&lt;/th&gt;
+                            &lt;/tr&gt;
+                        &lt;/thead&gt;
+                        &lt;tbody&gt;
+                            @foreach (CastMemberScene sceneCast in Model.CastMemberScenes)
+                            {
+                                &lt;tr&gt;
+                                    &lt;td&gt;@sceneCast.SceneName&lt;/td&gt;
+                                    &lt;td&gt;@sceneCast.ProductionTitle&lt;/td&gt;
+                                    &lt;td&gt;@sceneCast.CharacterName&lt;/td&gt;
+                                    &lt;td&gt;
+                                        &lt;a asp-area=&quot;&quot; 
+                                           asp-controller=&quot;Scene&quot;
+                                           asp-action=&quot;Details&quot;
+                                           asp-route-id=&quot;@sceneCast.SceneId&quot;
+                                           asp-route-slug=&quot;@SlugGenerator.GenerateSlug(sceneCast.SceneName!)&quot;
+                                           class=&quot;btn btn-sm btn-link&quot;&gt;
+                                            View Details
+                                        &lt;/a&gt;
+                                    &lt;/td&gt;
+                                &lt;/tr&gt;
+                            }
+                        &lt;/tbody&gt;
+                    &lt;/table&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        }
+
+        &lt;div class=&quot;py-4 d-flex justify-content-center flex-wrap gap-5&quot;&gt;
+            &lt;a asp-area=&quot;&quot; 
+               asp-controller=&quot;Profile&quot; 
+               asp-action=&quot;DeleteActorOverview&quot; 
+               asp-route-slug=&quot;@SlugGenerator.GenerateSlug(fullName)&quot;
+               class=&quot;btn btn-custom-1 btn-lg&quot;&gt;
+                &lt;i class=&quot;bi bi-trash3-fill me-2 &quot;&gt;&lt;/i&gt;Delete Profile
+            &lt;/a&gt;
+            
+            &lt;a asp-area=&quot;&quot; 
+               asp-controller=&quot;Profile&quot; 
+               asp-action=&quot;DownloadActorPersonalData&quot;
+               class=&quot;btn btn-production-success btn-lg&quot;&gt;
+                &lt;i class=&quot;bi bi-download me-2&quot;&gt;&lt;/i&gt;Download Personal Data (JSON)
+            &lt;/a&gt;
+            
+            &lt;a asp-area=&quot;Identity&quot;
+               asp-page=&quot;/Account/Manage/Email&quot;
+               class=&quot;btn btn-custom btn-lg&quot;&gt;
+                &lt;i class=&quot;bi bi-gear&quot;&gt;&lt;/i&gt; Manage your account
+            &lt;/a&gt;
+        &lt;/div&gt;
+        
+    &lt;/div&gt;
+&lt;/div&gt;
+
+@section Scripts {
+    &lt;script src=&quot;~/js/profile/profile.js&quot; asp-append-version=&quot;true&quot;&gt;&lt;/script&gt;
+}
+
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[6,5,6,61,0],[7,5,7,60,0],[112,10,112,58,0],[113,9,113,10,0],[123,9,123,10,0],[132,14,132,95,0],[133,13,133,14,0],[135,22,135,29,0],[135,31,135,66,0],[135,67,135,69,0],[135,70,135,97,0],[136,21,136,22,0],[142,42,142,103,0],[143,41,143,42,0],[145,41,145,42,0],[159,21,159,22,0],[161,13,161,14,0],[163,13,163,14,0],[168,13,168,14,0],[172,10,172,81,0],[173,9,173,10,0],[190,30,190,37,0],[190,39,190,64,0],[190,65,190,67,0],[190,68,190,90,0],[191,29,191,30,0],[207,29,207,30,0],[212,9,212,10,0]]);
+    </script>
+  </body>
+</html>

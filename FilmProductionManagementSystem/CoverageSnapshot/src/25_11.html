@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Data/Configuration/ScriptConfiguration.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Data.Configuration;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Models;
+using GCommon.Enums;
+
+using static Common.EntityIdentificationConstants;
+
+public class ScriptConfiguration : IEntityTypeConfiguration&lt;Script&gt;
+{
+    public void Configure(EntityTypeBuilder&lt;Script&gt; entity)
+    {
+        entity
+            .HasMany(s =&gt; s.ScriptBlocks)
+            .WithOne(sb =&gt; sb.Script)
+            .HasForeignKey(sb =&gt; sb.ScriptId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasData(Scripts);
+    }
+    
+    private static readonly DateTime SeedLastEditedAtUtc = new(2026, 03, 26, 13, 22, 05, DateTimeKind.Utc);
+    
+    private static readonly Script[] Scripts =
+    [
+        new()
+        {
+            Id = ScriptId_01,
+            Title = &quot;Test Screenplay&quot;,
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.Draft,
+            RevisionType = null,
+            ProductionId = ProductionIdTestFilm
+        },
+        new()
+        {
+            Id = ScriptId_02,
+            Title = &quot;Midnight Dreams — Draft&quot;,
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.Draft,
+            RevisionType = null,
+            ProductionId = ProductionIdMidnightDreams
+        },
+        new()
+        {
+            Id = ScriptId_03,
+            Title = &quot;Paper Planes — Shooting Script&quot;,
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.ShootingScript,
+            RevisionType = ScriptRevisionType.PinkRevision,
+            ProductionId = ProductionIdPaperPlanes
+        },
+        new()
+        {
+            Id = ScriptId_04,
+            Title = &quot;The Last Take — Blue Revision&quot;,
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.ProductionDraft,
+            RevisionType = ScriptRevisionType.BlueRevision,
+            ProductionId = ProductionIdTheLastTake
+        },
+        new()
+        {
+            Id = ScriptId_05,
+            Title = &quot;Neon Skyline — Outline&quot;,
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.Outline,
+            RevisionType = null,
+            ProductionId = ProductionIdNeonSkyline
+        },
+        new()
+        {
+            Id = ScriptId_06,
+            Title = &quot;Wild Tracks — Polish&quot;,
+            LastEditedAt = SeedLastEditedAtUtc,
+            StageType = ScriptStageType.Polish,
+            RevisionType = ScriptRevisionType.YellowRevision,
+            ProductionId = ProductionIdWildTracks
+        }
+    ];
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[14,5,14,6,0],[15,9,19,47,0],[21,9,21,33,0],[22,5,22,6,0],[24,5,24,108,0],[26,5,82,7,0]]);
+    </script>
+  </body>
+</html>

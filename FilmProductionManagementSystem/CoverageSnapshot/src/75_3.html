@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>/Users/krasi/Desktop/Wrap-FilmProductionManagementSystem-ASP.NET-Project/FilmProductionManagementSystem/Wrap.Services.Core/ProductionService.cs</title>
+    <script type="text/javascript" src="../js/dotcover.sourceview.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/dotcover.report.css" />
+  </head>
+  <body>
+    <pre id="content" class="source-code">
+namespace Wrap.Services.Core;
+
+using Interfaces;
+using Utilities.ImageLogic.Interfaces;
+using Models.Production;
+using Models.Production.NestedDtos;
+using Data.Models;
+using Data.Models.MappingEntities;
+using Data.Repository.Interfaces;
+using GCommon.Enums;
+using GCommon.UI;
+
+using static GCommon.ApplicationConstants;
+using static GCommon.OutputMessages.Production;
+using static GCommon.DataFormat;
+
+public class ProductionService(IProductionRepository productionRepository,
+                               IImageService imageService,
+                               IVariantImageStrategyResolver imageStrategyResolver) : IProductionService
+{
+    private static readonly IReadOnlyDictionary&lt;ProductionStatusType, string&gt; StatusAbstractMap =
+        BuildStatusCssMap();
+
+    private static string GetStatusAbstractClass(ProductionStatusType statusType)
+        =&gt; StatusAbstractMap.GetValueOrDefault(statusType, DefaultStatus);
+    
+    public async Task&lt;IReadOnlyCollection&lt;ProductionDto&gt;&gt; GetAllProductionsAsync
+        (int pageNumber = 1, string? status = null, bool? isActive = null, int productionsPerPage = DefaultProductionsPerPage)
+    {
+        int skipCount = (pageNumber - 1) * productionsPerPage;
+        
+        IReadOnlyCollection&lt;ProductionStatusType&gt;? possibleStatuses = ProductionStatusTypes(status);
+        IReadOnlyCollection&lt;Production&gt; production = await productionRepository.GetAllAsync(
+            skipCount: skipCount, 
+            takeCount: productionsPerPage,
+            statuses: possibleStatuses,
+            isActive: isActive);
+
+        IReadOnlyCollection&lt;ProductionDto&gt; dto = production
+            .Select(p =&gt; new ProductionDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                ThumbnailPath = p.Thumbnail!,
+                StatusType = p.StatusType
+            })
+            .ToArray()
+            .AsReadOnly();
+            
+        foreach (ProductionDto productionDto in dto)
+            productionDto.StatusAbstractClass = GetStatusAbstractClass(productionDto.StatusType);
+
+        return dto;
+    }
+
+    public async Task&lt;int&gt; GetProductionsCountAsync(string? status = null, bool? isActive = null)
+    {
+        IReadOnlyCollection&lt;ProductionStatusType&gt;? possibleStatuses = ProductionStatusTypes(status);
+        
+        int productionsCount = await productionRepository.CountAsync(possibleStatuses, isActive);
+        
+        return productionsCount;
+    }
+
+    public async Task&lt;DetailsProductionDto?&gt; GetProductionDetailsAsync(string? id)
+    {
+        Guid? productionId = ValidateGuid(id);
+        if (productionId is null)
+            return null;
+
+        (Production?                              production, 
+            IReadOnlyCollection&lt;ProductionCrew&gt;?  productionCrews, 
+            IReadOnlyCollection&lt;ProductionCast&gt;?  productionCasts, 
+            IReadOnlyCollection&lt;Scene&gt;?           productionScenes, 
+            IReadOnlyCollection&lt;ProductionAsset&gt;? productionAssets, 
+            IReadOnlyCollection&lt;ShootingDay&gt;?     productionShootingDays) data = await productionRepository.GetDetailsAsync(productionId.Value);
+        
+        if (data is (production:             null,
+                     productionCrews:        null,
+                     productionCasts:        null, 
+                     productionScenes:       null,
+                     productionAssets:       null, 
+                     productionShootingDays: null))
+            return null;
+
+        DetailsProductionDto baseDto = new DetailsProductionDto
+        {
+            Id = data.production!.Id,
+            Thumbnail = data.production.Thumbnail!,
+            Title = data.production.Title,
+            Description = data.production.Description,
+            Budget = data.production.Budget,
+            StatusType = data.production.StatusType,
+            StatusStartDate = data.production.StatusStartDate,
+            StatusEndDate = data.production.StatusEndDate,
+            ScriptId = data.production.Script?.Id
+        };
+
+        IReadOnlyCollection&lt;ProductionCrewMemberDto&gt; crewDtos = data
+            .productionCrews!
+            .Select(pc =&gt; new ProductionCrewMemberDto
+            {
+                Id = pc.CrewMember.Id.ToString(),
+                ProfileImagePath = pc.CrewMember.ProfileImagePath!,
+                FirstName = pc.CrewMember.FirstName,
+                LastName = pc.CrewMember.LastName,
+                Role = pc.RoleType
+            })
+            .ToArray()
+            .AsReadOnly();
+
+        IReadOnlyCollection&lt;ProductionCastMemberDto&gt; castDtos = data
+            .productionCasts!
+            .Select(pc =&gt; new ProductionCastMemberDto
+            {
+                Id = pc.CastMember.Id.ToString(),
+                ProfileImagePath = pc.CastMember.ProfileImagePath!,
+                FirstName = pc.CastMember.FirstName,
+                LastName = pc.CastMember.LastName,
+                Role = pc.Role,
+                Age = pc.CastMember.Age,
+                Gender = pc.CastMember.Gender
+            })
+            .ToArray()
+            .AsReadOnly();
+
+        IReadOnlyCollection&lt;ProductionSceneDto&gt; sceneDtos = data
+            .productionScenes!
+            .Select(s =&gt; new ProductionSceneDto
+            {
+                SceneNumber = s.SceneNumber,
+                SceneType = s.SceneType,
+                SceneName = s.SceneName,
+                Location = s.Location
+            })
+            .ToArray()
+            .AsReadOnly();
+        
+        IReadOnlyCollection&lt;ProductionAssetDto&gt; assetDtos = data
+            .productionAssets!
+            .Select(pa =&gt; new ProductionAssetDto
+            {
+                Title = pa.Title,
+                AssetType = pa.AssetType
+            })
+            .ToArray()
+            .AsReadOnly();
+
+        IReadOnlyCollection&lt;ProductionShootingDayDto&gt; shootingDayDtos = data
+            .productionShootingDays!
+            .Select(sd =&gt; new ProductionShootingDayDto
+            {
+                Date = sd.Date
+            })
+            .ToArray()
+            .AsReadOnly();
+
+        baseDto.ProductionCrewMembers = crewDtos;
+        baseDto.ProductionCastMembers = castDtos;
+        baseDto.ProductionScenes = sceneDtos;
+        baseDto.ProductionAssets = assetDtos;
+        baseDto.ProductionShootingDays = shootingDayDtos;
+        
+        baseDto.StatusAbstractClass = GetStatusAbstractClass(baseDto.StatusType);
+
+        return baseDto;
+    }
+    
+    public async Task&lt;string?&gt; CreateProductionAsync(CreateProductionDto dto)
+    {
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ThumbnailFolderName);
+        string thumbnail = await imageService.SaveImageAsync(dto.ThumbnailImage, strategy);
+
+        Crew? creator = await GetCrewIdByUserIdAsync(dto.CreatorId);
+        if (creator is null)
+            return null;
+        
+        Production production = new Production
+        {
+            Id = Guid.NewGuid(),
+            Title = dto.Title,
+            Description = dto.Description,
+            Budget = dto.Budget,
+            StatusType = dto.StatusType,
+            StatusStartDate = dto.StatusStartDate,
+            StatusEndDate = dto.StatusEndDate,
+            Thumbnail = thumbnail,
+            CreatedByUserId = dto.CreatorId
+        };
+
+        await productionRepository.AddAsync(production);
+        await productionRepository.AddDirectorToProductionAsync(production.Id, creator, CrewRoleType.Director);
+        await productionRepository.SaveAllChangesAsync();
+
+        return production.Id.ToString();
+    }
+
+    public async Task&lt;EditProductionDto?&gt; GetEditProductionAsync(string? id)
+    {
+        Guid? productionId = ValidateGuid(id);
+        if (productionId is null)
+            return null;
+
+        Production? production = await productionRepository.GetByIdAsNoTrackingAsync(productionId.Value);
+        if (production is null)
+            return null;
+
+        EditProductionDto dto = new EditProductionDto
+        {
+            ProductionId = production.Id,
+            Title = production.Title,
+            Description = production.Description,
+            Budget = production.Budget,
+            StatusType = production.StatusType,
+            StatusStartDate = production.StatusStartDate,
+            StatusEndDate = production.StatusEndDate,
+            CurrentThumbnailPath = production.Thumbnail,
+            ThumbnailImage = null
+        };
+
+        return dto;
+    }
+
+    public async Task&lt;bool&gt; UpdateProductionAsync(EditProductionDto dto)
+    {
+        Production? production = await productionRepository.GetByIdAsync(dto.ProductionId);
+        if (production is null)
+            return false;
+
+        production.Title = dto.Title;
+        production.Description = dto.Description;
+        production.Budget = dto.Budget;
+        production.StatusType = dto.StatusType;
+        production.StatusStartDate = dto.StatusStartDate;
+        production.StatusEndDate = dto.StatusEndDate;
+
+        if (dto.ThumbnailImage is not null &amp;&amp; dto.ThumbnailImage.Length &gt; 0)
+        {
+            IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ThumbnailFolderName);
+            production.Thumbnail = await imageService.ReplaceAsync(dto.CurrentThumbnailPath, dto.ThumbnailImage, strategy);
+        }
+
+        await productionRepository.SaveAllChangesAsync();
+        
+        return true;
+    }
+
+    public async Task&lt;DeleteProductionDto?&gt; GetDeleteProductionAsync(string? id)
+    {
+        Guid? productionId = ValidateGuid(id);
+        if (productionId is null)
+            return null;
+
+        Production? production = await productionRepository.GetByIdAsync(productionId.Value);
+        if (production is null)
+            return null;
+
+        DeleteProductionDto dto = new DeleteProductionDto
+        {
+            Id = production.Id,
+            Title = production.Title!,
+            Thumbnail = production.Thumbnail!,
+            Description = production.Description,
+            StatusType = production.StatusType,
+            Budget = production.Budget,
+            CrewMembersCount = production.ProductionCrewMembers.Count,
+            CastMembersCount = production.ProductionCastMembers.Count,
+            ScenesCount = production.Scenes.Count
+        };
+        
+        return dto;
+    }
+
+    public async Task&lt;bool&gt; DeleteProductionAsync(string? id)
+    {
+        Guid? productionId = ValidateGuid(id);
+        if (productionId is null)
+            throw new ArgumentException(string.Format(IdIsNullOrEmptyMessage, id));
+
+        Production? production = await productionRepository.GetByIdAsync(productionId.Value);
+        if (production is null)
+            return false;
+        
+        IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ThumbnailFolderName);
+        
+        await imageService.DeleteAsync(production.Thumbnail, strategy);
+        await productionRepository.DeleteAsync(production);
+        await productionRepository.SaveAllChangesAsync();
+        
+        return true;
+    }
+    
+    public async Task&lt;Guid?&gt; GetUserIdIfIsCrewAsync(string? userId)
+    {
+        Guid? applicationUserId = ValidateGuid(userId);
+        if (applicationUserId is null)
+            return null;
+        
+        Crew? crew = await productionRepository.GetCrewByUserIdAsync(applicationUserId.Value);
+        return crew is null ? null : applicationUserId;
+    }
+
+    public async Task&lt;bool&gt; IsUserAllowedToManageProductionAsync(string? productionId, string userId)
+    {
+        Guid? productionGuidId = ValidateGuid(productionId);
+        if (productionGuidId is null)
+            return false;
+        
+        Guid? userGuidId = ValidateGuid(userId);
+        if (userGuidId is null)
+            return false;
+
+        bool isLeader = await productionRepository.IsUserProductionLeaderAsync(productionGuidId.Value, userGuidId.Value);
+        return isLeader;
+    }
+
+    private async Task&lt;Crew?&gt; GetCrewIdByUserIdAsync(Guid userId)
+    { 
+        Crew? crew = await productionRepository.GetCrewByUserIdAsync(userId);
+        return crew;
+    }
+    
+    
+    private static Guid? ValidateGuid(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            return null;
+
+        bool isValidId = Guid.TryParse(id, out Guid productionId);
+        if (!isValidId)
+            return null;
+        
+        return productionId;
+    }
+    
+    private static IReadOnlyCollection&lt;ProductionStatusType&gt;? ProductionStatusTypes(string? status)
+    {
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            IReadOnlyDictionary&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; statusMap 
+                = ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
+
+            if (statusMap.TryGetValue(status, out IReadOnlyCollection&lt;ProductionStatusType&gt;? statuses))
+                return statuses;
+        }
+
+        return null;
+    }
+    
+    private static IReadOnlyDictionary&lt;ProductionStatusType, string&gt; BuildStatusCssMap()
+    {
+        Dictionary&lt;string, string&gt; abstractNames = new Dictionary&lt;string, string&gt;(StringComparer.Ordinal)
+        {
+            [PreProductionKey] = PreProductionStatus,
+            [ProductionKey] = ProductionStatus,
+            [PostProductionKey] = PostProductionStatus,
+            [DistributionKey] = DistributionStatus
+        };
+
+        Dictionary&lt;ProductionStatusType, string&gt; map = new Dictionary&lt;ProductionStatusType, string&gt;();
+
+        foreach (KeyValuePair&lt;string, IReadOnlyCollection&lt;ProductionStatusType&gt;&gt; kvp in
+                 ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction())
+        {
+            string abstractName = kvp.Key;
+            IReadOnlyCollection&lt;ProductionStatusType&gt; statuses = kvp.Value;
+            
+            string cssClass = abstractNames.GetValueOrDefault(abstractName, DefaultStatus);
+            
+            foreach (ProductionStatusType status in statuses)
+                map[status] = cssClass;
+        }
+
+        return map;
+    }
+}
+    </pre>
+    <script type="text/javascript">
+      highlightRanges([[17,14,19,84,1],[21,5,22,29,1],[25,12,25,74,1],[29,5,29,6,1],[30,9,30,63,1],[32,9,32,101,1],[33,9,37,33,1],[39,9,40,26,1],[40,26,46,14,1],[46,14,48,27,1],[50,9,50,16,1],[50,18,50,45,1],[50,46,50,48,1],[50,49,50,52,1],[51,13,51,98,1],[53,9,53,20,1],[54,5,54,6,1],[57,5,57,6,1],[58,9,58,101,1],[60,9,60,98,1],[62,9,62,33,1],[63,5,63,6,1],[66,5,66,6,1],[67,9,67,47,1],[68,9,68,34,1],[69,13,69,25,1],[71,9,76,145,1],[78,9,83,52,1],[84,13,84,25,1],[86,9,97,11,1],[99,9,101,27,1],[101,27,108,14,1],[108,14,110,27,1],[112,9,114,27,1],[114,27,123,14,1],[123,14,125,27,1],[127,9,129,26,1],[129,26,135,14,1],[135,14,137,27,1],[139,9,141,27,1],[141,27,145,14,1],[145,14,147,27,1],[149,9,151,27,1],[151,27,154,14,1],[154,14,156,27,1],[158,9,158,50,1],[159,9,159,50,1],[160,9,160,46,1],[161,9,161,46,1],[162,9,162,58,1],[164,9,164,82,1],[166,9,166,24,1],[167,5,167,6,1],[170,5,170,6,1],[171,9,171,93,1],[172,9,172,92,1],[174,9,174,69,1],[175,9,175,29,1],[176,13,176,25,1],[178,9,189,11,1],[191,9,191,57,1],[192,9,192,112,1],[193,9,193,58,1],[195,9,195,41,1],[196,5,196,6,1],[199,5,199,6,1],[200,9,200,47,1],[201,9,201,34,1],[202,13,202,25,1],[204,9,204,106,1],[205,9,205,32,1],[206,13,206,25,1],[208,9,219,11,1],[221,9,221,20,1],[222,5,222,6,1],[225,5,225,6,1],[226,9,226,92,1],[227,9,227,32,1],[228,13,228,26,1],[230,9,230,38,1],[231,9,231,50,1],[232,9,232,40,1],[233,9,233,48,1],[234,9,234,58,1],[235,9,235,54,1],[237,9,237,77,1],[238,9,238,10,1],[239,13,239,97,1],[240,13,240,124,1],[241,9,241,10,1],[243,9,243,58,1],[245,9,245,21,1],[246,5,246,6,1],[249,5,249,6,1],[250,9,250,47,1],[251,9,251,34,1],[252,13,252,25,1],[254,9,254,94,1],[255,9,255,32,1],[256,13,256,25,1],[258,9,269,11,1],[271,9,271,20,1],[272,5,272,6,1],[275,5,275,6,1],[276,9,276,47,1],[277,9,277,34,1],[278,13,278,84,1],[280,9,280,94,1],[281,9,281,32,1],[282,13,282,26,1],[284,9,284,93,1],[286,9,286,72,1],[287,9,287,60,1],[288,9,288,58,1],[290,9,290,21,1],[291,5,291,6,1],[294,5,294,6,1],[295,9,295,56,1],[296,9,296,39,1],[297,13,297,25,1],[299,9,299,95,1],[300,9,300,56,1],[301,5,301,6,1],[304,5,304,6,1],[305,9,305,61,1],[306,9,306,38,1],[307,13,307,26,1],[309,9,309,49,1],[310,9,310,32,1],[311,13,311,26,1],[313,9,313,122,1],[314,9,314,25,1],[315,5,315,6,1],[318,5,318,6,1],[319,9,319,78,1],[320,9,320,21,1],[321,5,321,6,1],[325,5,325,6,1],[326,9,326,43,1],[327,13,327,25,1],[329,9,329,67,1],[330,9,330,24,1],[331,13,331,25,1],[333,9,333,29,1],[334,5,334,6,1],[337,5,337,6,1],[338,9,338,48,1],[339,9,339,10,1],[340,13,341,83,1],[343,13,343,104,1],[344,17,344,33,1],[345,9,345,10,0],[347,9,347,21,1],[348,5,348,6,1],[351,5,351,6,1],[352,9,358,11,1],[360,9,360,103,1],[362,9,362,16,1],[362,18,362,85,1],[362,86,362,88,1],[363,18,363,81,1],[364,9,364,10,1],[365,13,365,43,1],[366,13,366,76,1],[368,13,368,92,1],[370,13,370,20,1],[370,22,370,49,1],[370,50,370,52,1],[370,53,370,61,1],[371,17,371,40,1],[372,9,372,10,1],[374,9,374,20,1],[375,5,375,6,1]]);
+    </script>
+  </body>
+</html>
