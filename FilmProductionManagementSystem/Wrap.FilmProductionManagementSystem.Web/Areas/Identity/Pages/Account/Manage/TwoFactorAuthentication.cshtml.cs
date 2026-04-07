@@ -11,8 +11,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Wrap.Data.Models.Infrastructure;
 
 public class TwoFactorAuthenticationModel(UserManager<ApplicationUser> userManager, 
-                                          SignInManager<ApplicationUser> signInManager, 
-                                          ILogger<TwoFactorAuthenticationModel> logger) : PageModel
+                                          SignInManager<ApplicationUser> signInManager) : PageModel
 {
     /// <summary>
     ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used

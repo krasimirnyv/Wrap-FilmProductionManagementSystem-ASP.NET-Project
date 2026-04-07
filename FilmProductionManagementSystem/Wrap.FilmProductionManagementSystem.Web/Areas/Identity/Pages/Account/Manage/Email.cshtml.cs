@@ -16,8 +16,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 using Wrap.Data.Models.Infrastructure;
 
-public class EmailModel(UserManager<ApplicationUser> userManager,
-                        SignInManager<ApplicationUser> signInManager, 
+public class EmailModel(UserManager<ApplicationUser> userManager, 
                         IEmailSender emailSender) : PageModel
 {
     /// <summary>
