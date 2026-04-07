@@ -1,15 +1,13 @@
 namespace Wrap.Services.Tests;
 
-using System.Collections.ObjectModel;
-
 using Microsoft.AspNetCore.Http;
 
 using Moq;
 using NUnit.Framework;
 
 using Data.Models;
-using Data.Models.MappingEntities;
 using Data.Models.Infrastructure;
+using Data.Models.MappingEntities;
 using Data.Repository.Interfaces;
 using GCommon.Enums;
 using GCommon.UI;
@@ -18,9 +16,9 @@ using Core.Utilities.ImageLogic.Interfaces;
 using Models.Production;
 using Models.Production.NestedDtos;
 
+using static GCommon.DataFormat;
 using static GCommon.ApplicationConstants;
 using static GCommon.OutputMessages.Production;
-using static GCommon.DataFormat;
 
 [TestFixture]
 public class ProductionServiceTests
@@ -38,46 +36,35 @@ public class ProductionServiceTests
         imageServiceMock = new Mock<IImageService>(MockBehavior.Strict);
         imageStrategyResolverMock = new Mock<IVariantImageStrategyResolver>(MockBehavior.Strict);
 
-        productionService = new ProductionService
-        (
+        productionService = new ProductionService(
             productionRepositoryMock.Object,
             imageServiceMock.Object,
-            imageStrategyResolverMock.Object
-        );
+            imageStrategyResolverMock.Object);
     }
 
     [Test]
-    public async Task GetAllProductionsAsync_WhenCalled_UsesPagingAndMapsDtosAndSetsStatusClass()
+    public async Task GetAllProductionsAsync_WhenCalledWithoutFilters_UsesPagingAndMapsDtosAndSetsStatusClass()
     {
         // Arrange
         int pageNumber = 2;
         int productionsPerPage = 5;
-
         int expectedSkip = (pageNumber - 1) * productionsPerPage;
 
         ProductionStatusType statusType = GetStatusFromCatalogOrFallback();
 
-        ReadOnlyCollection<Production> productions = new List<Production>
+        IReadOnlyCollection<Production> productions = new List<Production>
         {
-            CreateProduction(
-                id: Guid.NewGuid(),
-                title: "p1",
-                thumbnail: "/img/productions/p1.webp",
-                statusType: statusType),
-            CreateProduction(
-                id: Guid.NewGuid(),
-                title: "p2",
-                thumbnail: "/img/productions/p2.webp",
-                statusType: statusType)
+            CreateProduction(Guid.NewGuid(), "p1", "/img/productions/p1.webp", statusType),
+            CreateProduction(Guid.NewGuid(), "p2", "/img/productions/p2.webp", statusType)
         }.AsReadOnly();
 
         productionRepositoryMock
-            .Setup(pr => pr.GetAllAsync(expectedSkip, productionsPerPage))
+            .Setup(pr => pr.GetAllProductionsAsync(expectedSkip, productionsPerPage, null, null))
             .ReturnsAsync(productions);
 
         // Act
         IReadOnlyCollection<ProductionDto> result =
-            await productionService.GetAllProductionsAsync(pageNumber, productionsPerPage);
+            await productionService.GetAllProductionsAsync(pageNumber, null, null, productionsPerPage);
 
         // Assert
         Assert.That(result, Has.Count.EqualTo(2));
@@ -87,19 +74,62 @@ public class ProductionServiceTests
         Assert.That(dto1.StatusType, Is.EqualTo(statusType));
         Assert.That(dto1.StatusAbstractClass, Is.Not.Empty);
 
-        productionRepositoryMock.Verify(pr => pr.GetAllAsync(expectedSkip, productionsPerPage), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetAllProductionsAsync(expectedSkip, productionsPerPage, null, null), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
 
     [Test]
-    public async Task GetProductionsCountAsync_WhenRepositoryReturnsCount_ReturnsSameCount()
+    public async Task GetAllProductionsAsync_WhenStatusAndIsActiveProvided_PassesFiltersToRepository()
+    {
+        // Arrange
+        int pageNumber = 1;
+        int productionsPerPage = 6;
+        const string status = "Production";
+        const bool isActive = true;
+
+        IReadOnlyCollection<ProductionStatusType> expectedStatuses =
+            ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction()[status];
+
+        IReadOnlyCollection<Production> productions =
+        [
+            CreateProduction(Guid.NewGuid(), "p1", "/img/productions/p1.webp", expectedStatuses.First())
+        ];
+
+        productionRepositoryMock
+            .Setup(pr => pr.GetAllProductionsAsync(
+                0,
+                productionsPerPage,
+                It.Is<IReadOnlyCollection<ProductionStatusType>>(s => s.SequenceEqual(expectedStatuses)),
+                isActive))
+            .ReturnsAsync(productions);
+
+        // Act
+        IReadOnlyCollection<ProductionDto> result =
+            await productionService.GetAllProductionsAsync(pageNumber, status, isActive, productionsPerPage);
+
+        // Assert
+        Assert.That(result, Has.Count.EqualTo(1));
+        Assert.That(result.First().Title, Is.EqualTo("p1"));
+
+        productionRepositoryMock.Verify(pr => pr.GetAllProductionsAsync(
+            0,
+            productionsPerPage,
+            It.Is<IReadOnlyCollection<ProductionStatusType>>(s => s.SequenceEqual(expectedStatuses)),
+            isActive), Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetProductionsCountAsync_WhenRepositoryReturnsCountWithoutFilters_ReturnsSameCount()
     {
         // Arrange
         productionRepositoryMock
-            .Setup(pr => pr.CountAsync())
+            .Setup(pr => pr.ProductionCountAsync(null, null))
             .ReturnsAsync(42);
 
         // Act
@@ -108,9 +138,39 @@ public class ProductionServiceTests
         // Assert
         Assert.That(result, Is.EqualTo(42));
 
-        productionRepositoryMock.Verify(pr => pr.CountAsync(), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.ProductionCountAsync(null, null), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
 
+    [Test]
+    public async Task GetProductionsCountAsync_WhenStatusAndIsActiveProvided_PassesFiltersToRepository()
+    {
+        // Arrange
+        const string status = "Production";
+        const bool isActive = true;
+
+        IReadOnlyCollection<ProductionStatusType> expectedStatuses =
+            ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction()[status];
+
+        productionRepositoryMock
+            .Setup(pr => pr.ProductionCountAsync(
+                It.Is<IReadOnlyCollection<ProductionStatusType>>(s => s.SequenceEqual(expectedStatuses)),
+                isActive))
+            .ReturnsAsync(7);
+
+        // Act
+        int result = await productionService.GetProductionsCountAsync(status, isActive);
+
+        // Assert
+        Assert.That(result, Is.EqualTo(7));
+
+        productionRepositoryMock.Verify(pr => pr.ProductionCountAsync(
+            It.Is<IReadOnlyCollection<ProductionStatusType>>(s => s.SequenceEqual(expectedStatuses)),
+            isActive), Times.Once);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -168,7 +228,6 @@ public class ProductionServiceTests
 
         productionRepositoryMock.Verify(pr => pr.GetDetailsAsync(productionId), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -178,7 +237,6 @@ public class ProductionServiceTests
     {
         // Arrange
         Guid productionId = Guid.NewGuid();
-
         ProductionStatusType statusType = GetStatusFromCatalogOrFallback();
 
         Production production = new Production
@@ -202,7 +260,7 @@ public class ProductionServiceTests
             ProfileImagePath = "/img/profile/crew.webp",
             User = new ApplicationUser
             {
-                UserName = "crew.user", 
+                UserName = "crew.user",
                 Email = "crew@wrap.local",
                 PhoneNumber = "+359"
             }
@@ -218,7 +276,7 @@ public class ProductionServiceTests
             Gender = GenderType.Male,
             User = new ApplicationUser
             {
-                UserName = "cast.user", 
+                UserName = "cast.user",
                 Email = "cast@wrap.local",
                 PhoneNumber = "+359"
             }
@@ -286,17 +344,16 @@ public class ProductionServiceTests
 
         // Assert
         Assert.That(result, Is.Not.Null);
-        Assert.That(result.Id, Is.EqualTo(productionId));
+        Assert.That(result!.Id, Is.EqualTo(productionId));
         Assert.That(result.Title, Is.EqualTo("My Production"));
         Assert.That(result.Thumbnail, Is.EqualTo("/img/productions/thumb.webp"));
         Assert.That(result.Description, Is.EqualTo("desc"));
         Assert.That(result.Budget, Is.EqualTo(1000m));
         Assert.That(result.StatusType, Is.EqualTo(statusType));
         Assert.That(result.StatusAbstractClass, Is.Not.Empty);
-        Assert.That(result.ScriptId, Is.EqualTo(production.Script.Id));
+        Assert.That(result.ScriptId, Is.EqualTo(production.Script!.Id));
 
         Assert.That(result.ProductionCrewMembers.Count, Is.EqualTo(1));
-        
         ProductionCrewMemberDto crewDto = result.ProductionCrewMembers.Single();
         Assert.That(crewDto.FirstName, Is.EqualTo("CrewFirst"));
         Assert.That(crewDto.LastName, Is.EqualTo("CrewLast"));
@@ -304,7 +361,6 @@ public class ProductionServiceTests
         Assert.That(crewDto.Role, Is.EqualTo(CrewRoleType.Director));
 
         Assert.That(result.ProductionCastMembers.Count, Is.EqualTo(1));
-        
         ProductionCastMemberDto castDto = result.ProductionCastMembers.Single();
         Assert.That(castDto.FirstName, Is.EqualTo("CastFirst"));
         Assert.That(castDto.LastName, Is.EqualTo("CastLast"));
@@ -313,7 +369,6 @@ public class ProductionServiceTests
         Assert.That(castDto.Gender, Is.EqualTo(GenderType.Male));
 
         Assert.That(result.ProductionScenes.Count, Is.EqualTo(1));
-        
         ProductionSceneDto sceneDto = result.ProductionScenes.Single();
         Assert.That(sceneDto.SceneNumber, Is.EqualTo(1));
         Assert.That(sceneDto.SceneType, Is.EqualTo(SceneType.Interior));
@@ -321,32 +376,30 @@ public class ProductionServiceTests
         Assert.That(sceneDto.Location, Is.EqualTo("Location"));
 
         Assert.That(result.ProductionAssets.Count, Is.EqualTo(1));
-        
         ProductionAssetDto assetDto = result.ProductionAssets.Single();
         Assert.That(assetDto.Title, Is.EqualTo("Storyboard"));
         Assert.That(assetDto.AssetType, Is.EqualTo(ProductionAssetType.Storyboard));
 
         Assert.That(result.ProductionShootingDays.Count, Is.EqualTo(1));
-        
         ProductionShootingDayDto sdDto = result.ProductionShootingDays.Single();
         Assert.That(sdDto.Date, Is.EqualTo(new DateTime(2026, 3, 31)));
 
         productionRepositoryMock.Verify(pr => pr.GetDetailsAsync(productionId), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
-    
+
     [Test]
-    public async Task CreateProductionAsync_WhenValidDto_SavesImage_AddsProduction_SavesChanges_ReturnsId()
+    public async Task CreateProductionAsync_WhenCreatorIsNotCrew_ReturnsNull()
     {
         // Arrange
-        IFormFile thumbnailFile = CreateFormFile("thumb.png", [1, 2, 3]);
+        Guid creatorId = Guid.NewGuid();
 
         CreateProductionDto dto = new CreateProductionDto
         {
-            ThumbnailImage = thumbnailFile,
+            CreatorId = creatorId,
+            ThumbnailImage = CreateFormFile("thumb.png", [1, 2, 3]),
             Title = "New Production",
             Description = "desc",
             Budget = 500m,
@@ -366,6 +419,71 @@ public class ProductionServiceTests
             .Setup(img => img.SaveImageAsync(dto.ThumbnailImage, strategy, It.IsAny<CancellationToken>()))
             .ReturnsAsync(savedThumbnailPath);
 
+        productionRepositoryMock
+            .Setup(pr => pr.GetCrewByUserIdAsync(creatorId))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        string? result = await productionService.CreateProductionAsync(dto);
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        imageStrategyResolverMock.Verify(isr => isr.Resolve(ThumbnailFolderName), Times.Once);
+        imageServiceMock.Verify(img => img.SaveImageAsync(dto.ThumbnailImage, strategy, It.IsAny<CancellationToken>()), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetCrewByUserIdAsync(creatorId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.AddAsync(It.IsAny<Production>()), Times.Never);
+        productionRepositoryMock.Verify(pr => pr.AddDirectorToProductionAsync(It.IsAny<Guid>(), It.IsAny<Crew>(), It.IsAny<CrewRoleType>()), Times.Never);
+        productionRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Never);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task CreateProductionAsync_WhenValidDto_SavesImage_AddsProduction_AddsDirector_SavesChanges_ReturnsId()
+    {
+        // Arrange
+        Guid creatorId = Guid.NewGuid();
+        IFormFile thumbnailFile = CreateFormFile("thumb.png", [1, 2, 3]);
+
+        CreateProductionDto dto = new CreateProductionDto
+        {
+            CreatorId = creatorId,
+            ThumbnailImage = thumbnailFile,
+            Title = "New Production",
+            Description = "desc",
+            Budget = 500m,
+            StatusType = ProductionStatusType.Production,
+            StatusStartDate = new DateTime(2026, 3, 1),
+            StatusEndDate = null
+        };
+
+        Crew creator = new Crew
+        {
+            Id = Guid.NewGuid(),
+            UserId = creatorId,
+            FirstName = "Crew",
+            LastName = "User",
+            ProfileImagePath = "/img/profile/crew.webp"
+        };
+
+        IVariantImageStrategy strategy = Mock.Of<IVariantImageStrategy>();
+        const string savedThumbnailPath = "/img/productions/saved.webp";
+
+        imageStrategyResolverMock
+            .Setup(isr => isr.Resolve(ThumbnailFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img => img.SaveImageAsync(dto.ThumbnailImage, strategy, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(savedThumbnailPath);
+
+        productionRepositoryMock
+            .Setup(pr => pr.GetCrewByUserIdAsync(creatorId))
+            .ReturnsAsync(creator);
+
         Production? captured = null;
         productionRepositoryMock
             .Setup(pr => pr.AddAsync(It.IsAny<Production>()))
@@ -373,17 +491,22 @@ public class ProductionServiceTests
             .Returns(Task.CompletedTask);
 
         productionRepositoryMock
+            .Setup(pr => pr.AddDirectorToProductionAsync(It.IsAny<Guid>(), creator, CrewRoleType.Director))
+            .Returns(Task.CompletedTask);
+
+        productionRepositoryMock
             .Setup(pr => pr.SaveAllChangesAsync())
             .ReturnsAsync(1);
 
         // Act
-        string resultId = await productionService.CreateProductionAsync(dto);
+        string? resultId = await productionService.CreateProductionAsync(dto);
 
         // Assert
+        Assert.That(resultId, Is.Not.Null);
         Assert.That(Guid.TryParse(resultId, out _), Is.True);
 
         Assert.That(captured, Is.Not.Null);
-        Assert.That(captured.Id, Is.Not.EqualTo(Guid.Empty));
+        Assert.That(captured!.Id, Is.Not.EqualTo(Guid.Empty));
         Assert.That(captured.Title, Is.EqualTo(dto.Title));
         Assert.That(captured.Description, Is.EqualTo(dto.Description));
         Assert.That(captured.Budget, Is.EqualTo(dto.Budget));
@@ -391,10 +514,13 @@ public class ProductionServiceTests
         Assert.That(captured.StatusStartDate, Is.EqualTo(dto.StatusStartDate));
         Assert.That(captured.StatusEndDate, Is.EqualTo(dto.StatusEndDate));
         Assert.That(captured.Thumbnail, Is.EqualTo(savedThumbnailPath));
+        Assert.That(captured.CreatedByUserId, Is.EqualTo(dto.CreatorId));
 
         imageStrategyResolverMock.Verify(isr => isr.Resolve(ThumbnailFolderName), Times.Once);
         imageServiceMock.Verify(img => img.SaveImageAsync(dto.ThumbnailImage, strategy, It.IsAny<CancellationToken>()), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetCrewByUserIdAsync(creatorId), Times.Once);
         productionRepositoryMock.Verify(pr => pr.AddAsync(It.IsAny<Production>()), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.AddDirectorToProductionAsync(captured.Id, creator, CrewRoleType.Director), Times.Once);
         productionRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Once);
 
         productionRepositoryMock.VerifyNoOtherCalls();
@@ -425,7 +551,7 @@ public class ProductionServiceTests
         Guid productionId = Guid.NewGuid();
 
         productionRepositoryMock
-            .Setup(pr => pr.GetByIdAsNoTrackingAsync(productionId))
+            .Setup(pr => pr.GetProductionByIdAsNoTrackingAsync(productionId))
             .ReturnsAsync((Production?)null);
 
         // Act
@@ -434,9 +560,8 @@ public class ProductionServiceTests
         // Assert
         Assert.That(result, Is.Null);
 
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsNoTrackingAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionByIdAsNoTrackingAsync(productionId), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -448,17 +573,17 @@ public class ProductionServiceTests
         Guid productionId = Guid.NewGuid();
 
         Production production = CreateProduction(
-            id: productionId,
-            title: "Title",
-            thumbnail: "/img/productions/old.webp",
-            statusType: ProductionStatusType.Preproduction,
-            description: "desc",
-            budget: 123m,
-            statusStart: new DateTime(2026, 1, 1),
-            statusEnd: new DateTime(2026, 2, 1));
+            productionId,
+            "Title",
+            "/img/productions/old.webp",
+            ProductionStatusType.Preproduction,
+            "desc",
+            123m,
+            new DateTime(2026, 1, 1),
+            new DateTime(2026, 2, 1));
 
         productionRepositoryMock
-            .Setup(pr => pr.GetByIdAsNoTrackingAsync(productionId))
+            .Setup(pr => pr.GetProductionByIdAsNoTrackingAsync(productionId))
             .ReturnsAsync(production);
 
         // Act
@@ -466,7 +591,7 @@ public class ProductionServiceTests
 
         // Assert
         Assert.That(result, Is.Not.Null);
-        Assert.That(result.ProductionId, Is.EqualTo(productionId));
+        Assert.That(result!.ProductionId, Is.EqualTo(productionId));
         Assert.That(result.Title, Is.EqualTo("Title"));
         Assert.That(result.Description, Is.EqualTo("desc"));
         Assert.That(result.Budget, Is.EqualTo(123m));
@@ -476,9 +601,8 @@ public class ProductionServiceTests
         Assert.That(result.CurrentThumbnailPath, Is.EqualTo("/img/productions/old.webp"));
         Assert.That(result.ThumbnailImage, Is.Null);
 
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsNoTrackingAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionByIdAsNoTrackingAsync(productionId), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -501,7 +625,7 @@ public class ProductionServiceTests
         };
 
         productionRepositoryMock
-            .Setup(pr => pr.GetByIdAsync(productionId))
+            .Setup(pr => pr.GetProductionByIdAsync(productionId))
             .ReturnsAsync((Production?)null);
 
         // Act
@@ -510,9 +634,8 @@ public class ProductionServiceTests
         // Assert
         Assert.That(result, Is.False);
 
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionByIdAsync(productionId), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -524,14 +647,14 @@ public class ProductionServiceTests
         Guid productionId = Guid.NewGuid();
 
         Production production = CreateProduction(
-            id: productionId,
-            title: "Old",
-            thumbnail: "/img/productions/old.webp",
-            statusType: ProductionStatusType.Concept,
-            description: "old desc",
-            budget: 10m,
-            statusStart: new DateTime(2026, 1, 1),
-            statusEnd: null);
+            productionId,
+            "Old",
+            "/img/productions/old.webp",
+            ProductionStatusType.Concept,
+            "old desc",
+            10m,
+            new DateTime(2026, 1, 1),
+            null);
 
         EditProductionDto dto = new EditProductionDto
         {
@@ -546,8 +669,13 @@ public class ProductionServiceTests
             ThumbnailImage = null
         };
 
-        productionRepositoryMock.Setup(pr => pr.GetByIdAsync(productionId)).ReturnsAsync(production);
-        productionRepositoryMock.Setup(pr => pr.SaveAllChangesAsync()).ReturnsAsync(1);
+        productionRepositoryMock
+            .Setup(pr => pr.GetProductionByIdAsync(productionId))
+            .ReturnsAsync(production);
+
+        productionRepositoryMock
+            .Setup(pr => pr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
 
         // Act
         bool result = await productionService.UpdateProductionAsync(dto);
@@ -562,10 +690,9 @@ public class ProductionServiceTests
         Assert.That(production.StatusEndDate, Is.EqualTo(new DateTime(2026, 4, 1)));
         Assert.That(production.Thumbnail, Is.EqualTo("/img/productions/old.webp"));
 
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionByIdAsync(productionId), Times.Once);
         productionRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -577,10 +704,10 @@ public class ProductionServiceTests
         Guid productionId = Guid.NewGuid();
 
         Production production = CreateProduction(
-            id: productionId,
-            title: "Old",
-            thumbnail: "/img/productions/old.webp",
-            statusType: ProductionStatusType.Concept);
+            productionId,
+            "Old",
+            "/img/productions/old.webp",
+            ProductionStatusType.Concept);
 
         IFormFile newThumb = CreateFormFile("new.png", [1, 2, 3]);
 
@@ -600,7 +727,9 @@ public class ProductionServiceTests
         IVariantImageStrategy strategy = Mock.Of<IVariantImageStrategy>();
         const string replacedPath = "/img/productions/replaced.webp";
 
-        productionRepositoryMock.Setup(pr => pr.GetByIdAsync(productionId)).ReturnsAsync(production);
+        productionRepositoryMock
+            .Setup(pr => pr.GetProductionByIdAsync(productionId))
+            .ReturnsAsync(production);
 
         imageStrategyResolverMock
             .Setup(isr => isr.Resolve(ThumbnailFolderName))
@@ -610,7 +739,9 @@ public class ProductionServiceTests
             .Setup(img => img.ReplaceAsync(dto.CurrentThumbnailPath, dto.ThumbnailImage, strategy, It.IsAny<CancellationToken>()))
             .ReturnsAsync(replacedPath);
 
-        productionRepositoryMock.Setup(pr => pr.SaveAllChangesAsync()).ReturnsAsync(1);
+        productionRepositoryMock
+            .Setup(pr => pr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
 
         // Act
         bool result = await productionService.UpdateProductionAsync(dto);
@@ -621,11 +752,10 @@ public class ProductionServiceTests
 
         imageStrategyResolverMock.Verify(isr => isr.Resolve(ThumbnailFolderName), Times.Once);
         imageServiceMock.Verify(img => img.ReplaceAsync(dto.CurrentThumbnailPath, dto.ThumbnailImage, strategy, It.IsAny<CancellationToken>()), Times.Once);
-
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionByIdAsync(productionId), Times.Once);
         productionRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Once);
-        productionRepositoryMock.VerifyNoOtherCalls();
 
+        productionRepositoryMock.VerifyNoOtherCalls();
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -653,7 +783,7 @@ public class ProductionServiceTests
         Guid productionId = Guid.NewGuid();
 
         productionRepositoryMock
-            .Setup(pr => pr.GetByIdAsync(productionId))
+            .Setup(pr => pr.GetProductionWithDataByIdAsync(productionId))
             .ReturnsAsync((Production?)null);
 
         // Act
@@ -662,9 +792,8 @@ public class ProductionServiceTests
         // Assert
         Assert.That(result, Is.Null);
 
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionWithDataByIdAsync(productionId), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -676,32 +805,33 @@ public class ProductionServiceTests
         Guid productionId = Guid.NewGuid();
 
         Production production = CreateProduction(
-            id: productionId,
-            title: "Title",
-            thumbnail: "/img/productions/t.webp",
-            statusType: ProductionStatusType.Production,
-            description: "desc",
-            budget: 100m);
+            productionId,
+            "Title",
+            "/img/productions/t.webp",
+            ProductionStatusType.Production,
+            "desc",
+            100m);
 
         production.ProductionCrewMembers = new List<ProductionCrew>
         {
-            new() 
-                { ProductionId = productionId,
-                    CrewMemberId = Guid.NewGuid(),
-                    RoleType = CrewRoleType.Director,
-                    Production = production, 
-                    CrewMember = new Crew()
-                }
+            new()
+            {
+                ProductionId = productionId,
+                CrewMemberId = Guid.NewGuid(),
+                RoleType = CrewRoleType.Director,
+                Production = production,
+                CrewMember = new Crew()
+            }
         };
 
         production.ProductionCastMembers = new List<ProductionCast>
         {
             new()
             {
-                ProductionId = productionId, 
-                CastMemberId = Guid.NewGuid(), 
-                Role = "Role", 
-                Production = production, 
+                ProductionId = productionId,
+                CastMemberId = Guid.NewGuid(),
+                Role = "Role",
+                Production = production,
                 CastMember = new Cast()
             }
         };
@@ -711,16 +841,31 @@ public class ProductionServiceTests
             new()
             {
                 Id = Guid.NewGuid(),
-                SceneName = "S1", 
-                Location = "L", 
+                SceneName = "S1",
+                Location = "L",
                 SceneType = SceneType.Interior,
-                Production = production, 
+                Production = production,
                 ProductionId = productionId
             }
         };
 
+        production.ProductionAssets = new List<ProductionAsset>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AssetType = ProductionAssetType.Storyboard,
+                Title = "Title",
+                Description = "desc",
+                FilePath = "/img/productions/t.webp",
+                UploadedAt = DateTime.UtcNow,
+                ProductionId = productionId,
+                Production = production
+            }
+        };
+
         productionRepositoryMock
-            .Setup(pr => pr.GetByIdAsync(productionId))
+            .Setup(pr => pr.GetProductionWithDataByIdAsync(productionId))
             .ReturnsAsync(production);
 
         // Act
@@ -728,7 +873,7 @@ public class ProductionServiceTests
 
         // Assert
         Assert.That(result, Is.Not.Null);
-        Assert.That(result.Id, Is.EqualTo(productionId));
+        Assert.That(result!.Id, Is.EqualTo(productionId));
         Assert.That(result.Title, Is.EqualTo("Title"));
         Assert.That(result.Thumbnail, Is.EqualTo("/img/productions/t.webp"));
         Assert.That(result.Description, Is.EqualTo("desc"));
@@ -737,14 +882,14 @@ public class ProductionServiceTests
         Assert.That(result.CrewMembersCount, Is.EqualTo(1));
         Assert.That(result.CastMembersCount, Is.EqualTo(1));
         Assert.That(result.ScenesCount, Is.EqualTo(1));
+        Assert.That(result.AssetsCount, Is.EqualTo(1));
 
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionWithDataByIdAsync(productionId), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
-    
+
     [Test]
     public void DeleteProductionAsync_WhenIdInvalid_ThrowsArgumentExceptionWithMessage()
     {
@@ -756,7 +901,8 @@ public class ProductionServiceTests
             () => productionService.DeleteProductionAsync(invalidId));
 
         // Assert
-        Assert.That(ex.Message, Does.Contain(string.Format(IdIsNullOrEmptyMessage, invalidId)));
+        Assert.That(ex, Is.Not.Null);
+        Assert.That(ex!.Message, Does.Contain(string.Format(IdIsNullOrEmptyMessage, invalidId)));
 
         productionRepositoryMock.VerifyNoOtherCalls();
         imageServiceMock.VerifyNoOtherCalls();
@@ -770,7 +916,7 @@ public class ProductionServiceTests
         Guid productionId = Guid.NewGuid();
 
         productionRepositoryMock
-            .Setup(pr => pr.GetByIdAsync(productionId))
+            .Setup(pr => pr.GetProductionByIdAsync(productionId))
             .ReturnsAsync((Production?)null);
 
         // Act
@@ -779,9 +925,8 @@ public class ProductionServiceTests
         // Assert
         Assert.That(result, Is.False);
 
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionByIdAsync(productionId), Times.Once);
         productionRepositoryMock.VerifyNoOtherCalls();
-
         imageServiceMock.VerifyNoOtherCalls();
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
@@ -793,13 +938,13 @@ public class ProductionServiceTests
         Guid productionId = Guid.NewGuid();
 
         Production production = CreateProduction(
-            id: productionId,
-            title: "Title",
-            thumbnail: "/img/productions/t.webp",
-            statusType: ProductionStatusType.Production);
+            productionId,
+            "Title",
+            "/img/productions/t.webp",
+            ProductionStatusType.Production);
 
         productionRepositoryMock
-            .Setup(pr => pr.GetByIdAsync(productionId))
+            .Setup(pr => pr.GetProductionByIdAsync(productionId))
             .ReturnsAsync(production);
 
         IVariantImageStrategy strategy = Mock.Of<IVariantImageStrategy>();
@@ -828,8 +973,7 @@ public class ProductionServiceTests
 
         imageStrategyResolverMock.Verify(isr => isr.Resolve(ThumbnailFolderName), Times.Once);
         imageServiceMock.Verify(img => img.DeleteAsync(production.Thumbnail, strategy, It.IsAny<CancellationToken>()), Times.Once);
-
-        productionRepositoryMock.Verify(pr => pr.GetByIdAsync(productionId), Times.Once);
+        productionRepositoryMock.Verify(pr => pr.GetProductionByIdAsync(productionId), Times.Once);
         productionRepositoryMock.Verify(pr => pr.DeleteAsync(production), Times.Once);
         productionRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Once);
 
@@ -838,10 +982,151 @@ public class ProductionServiceTests
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
 
+    [Test]
+    public async Task GetUserIdIfIsCrewAsync_WhenUserIdIsInvalid_ReturnsNull()
+    {
+        // Act
+        Guid? result1 = await productionService.GetUserIdIfIsCrewAsync(null);
+        Guid? result2 = await productionService.GetUserIdIfIsCrewAsync("not-a-guid");
+
+        // Assert
+        Assert.That(result1, Is.Null);
+        Assert.That(result2, Is.Null);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetUserIdIfIsCrewAsync_WhenUserIsNotCrew_ReturnsNull()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr => pr.GetCrewByUserIdAsync(userId))
+            .ReturnsAsync((Crew?)null);
+
+        // Act
+        Guid? result = await productionService.GetUserIdIfIsCrewAsync(userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.Null);
+
+        productionRepositoryMock.Verify(pr => pr.GetCrewByUserIdAsync(userId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetUserIdIfIsCrewAsync_WhenUserIsCrew_ReturnsUserId()
+    {
+        // Arrange
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr => pr.GetCrewByUserIdAsync(userId))
+            .ReturnsAsync(new Crew
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                FirstName = "Crew",
+                LastName = "User",
+                ProfileImagePath = "/img/profile/crew.webp"
+            });
+
+        // Act
+        Guid? result = await productionService.GetUserIdIfIsCrewAsync(userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.EqualTo(userId));
+
+        productionRepositoryMock.Verify(pr => pr.GetCrewByUserIdAsync(userId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserAllowedToManageProductionAsync_WhenProductionIdIsInvalid_ReturnsFalse()
+    {
+        // Act
+        bool result = await productionService.IsUserAllowedToManageProductionAsync("bad-id", Guid.NewGuid().ToString());
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserAllowedToManageProductionAsync_WhenUserIdIsInvalid_ReturnsFalse()
+    {
+        // Act
+        bool result = await productionService.IsUserAllowedToManageProductionAsync(Guid.NewGuid().ToString(), "bad-id");
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserAllowedToManageProductionAsync_WhenRepositoryReturnsFalse_ReturnsFalse()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr => pr.IsUserProductionLeaderAsync(productionId, userId))
+            .ReturnsAsync(false);
+
+        // Act
+        bool result = await productionService.IsUserAllowedToManageProductionAsync(productionId.ToString(), userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        productionRepositoryMock.Verify(pr => pr.IsUserProductionLeaderAsync(productionId, userId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task IsUserAllowedToManageProductionAsync_WhenRepositoryReturnsTrue_ReturnsTrue()
+    {
+        // Arrange
+        Guid productionId = Guid.NewGuid();
+        Guid userId = Guid.NewGuid();
+
+        productionRepositoryMock
+            .Setup(pr => pr.IsUserProductionLeaderAsync(productionId, userId))
+            .ReturnsAsync(true);
+
+        // Act
+        bool result = await productionService.IsUserAllowedToManageProductionAsync(productionId.ToString(), userId.ToString());
+
+        // Assert
+        Assert.That(result, Is.True);
+
+        productionRepositoryMock.Verify(pr => pr.IsUserProductionLeaderAsync(productionId, userId), Times.Once);
+        productionRepositoryMock.VerifyNoOtherCalls();
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
     private static Production CreateProduction(Guid id, string title, string? thumbnail, ProductionStatusType statusType,
         string? description = null, decimal budget = 0m, DateTime? statusStart = null, DateTime? statusEnd = null)
     {
-        Production newProduction =  new Production
+        Production newProduction = new Production
         {
             Id = id,
             Title = title,
@@ -852,7 +1137,7 @@ public class ProductionServiceTests
             StatusStartDate = statusStart ?? new DateTime(2026, 1, 1),
             StatusEndDate = statusEnd
         };
-        
+
         return newProduction;
     }
 
@@ -866,23 +1151,25 @@ public class ProductionServiceTests
 
     private static ProductionStatusType GetStatusFromCatalogOrFallback()
     {
-        // Идеята e да вземем status от каталога, за да сме сигурни, че StatusAbstractClass няма да е празен
-        IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> catalog = ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
+        IReadOnlyDictionary<string, IReadOnlyCollection<ProductionStatusType>> catalog =
+            ProductionStatusAbstractionCatalog.GetStatusTypeByAbstraction();
 
-        // Опитваме да вземем някой от очакваните keys (ако ги има)
-        if (catalog.TryGetValue(PreProductionKey, out IReadOnlyCollection<ProductionStatusType>? preProdStatuses) && preProdStatuses.Count > 0)
+        if (catalog.TryGetValue(PreProductionKey, out IReadOnlyCollection<ProductionStatusType>? preProdStatuses) &&
+            preProdStatuses.Count > 0)
             return preProdStatuses.First();
 
-        if (catalog.TryGetValue(ProductionKey, out IReadOnlyCollection<ProductionStatusType>? prodStatuses) && prodStatuses.Count > 0)
+        if (catalog.TryGetValue(ProductionKey, out IReadOnlyCollection<ProductionStatusType>? prodStatuses) &&
+            prodStatuses.Count > 0)
             return prodStatuses.First();
 
-        if (catalog.TryGetValue(PostProductionKey, out IReadOnlyCollection<ProductionStatusType>? postStatuses) && postStatuses.Count > 0)
+        if (catalog.TryGetValue(PostProductionKey, out IReadOnlyCollection<ProductionStatusType>? postStatuses) &&
+            postStatuses.Count > 0)
             return postStatuses.First();
 
-        if (catalog.TryGetValue(DistributionKey, out IReadOnlyCollection<ProductionStatusType>? distStatuses) && distStatuses.Count > 0)
+        if (catalog.TryGetValue(DistributionKey, out IReadOnlyCollection<ProductionStatusType>? distStatuses) &&
+            distStatuses.Count > 0)
             return distStatuses.First();
 
-        // Fallback (ако някой промени каталога) – тестът пак е стабилен.
         return ProductionStatusType.Production;
     }
 }
