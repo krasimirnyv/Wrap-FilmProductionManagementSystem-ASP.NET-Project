@@ -13,13 +13,11 @@ env:
   WEBAPP_NAME: Wrap-Studio
   WEB_PROJECT: FilmProductionManagementSystem/Wrap.FilmProductionManagementSystem.Web/Wrap.FilmProductionManagementSystem.Web.csproj
   PUBLISH_DIR: ${{ github.workspace }}/publish
+  PACKAGE_ZIP: ${{ github.workspace }}/app.zip
 
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: read
-
     steps:
       - uses: actions/checkout@v4
 
@@ -31,17 +29,20 @@ jobs:
       - name: Restore
         run: dotnet restore "${{ env.WEB_PROJECT }}"
 
-      - name: Build
-        run: dotnet build "${{ env.WEB_PROJECT }}" -c Release --no-restore
-
       - name: Publish
-        run: dotnet publish "${{ env.WEB_PROJECT }}" -c Release -o "${{ env.PUBLISH_DIR }}" --no-build
+        run: dotnet publish "${{ env.WEB_PROJECT }}" -c Release -o "${{ env.PUBLISH_DIR }}"
+
+      - name: Zip publish output
+        shell: pwsh
+        run: |
+          if (Test-Path "${{ env.PACKAGE_ZIP }}") { Remove-Item "${{ env.PACKAGE_ZIP }}" -Force }
+          Compress-Archive -Path "${{ env.PUBLISH_DIR }}\*" -DestinationPath "${{ env.PACKAGE_ZIP }}"
 
       - name: Upload artifact for deploy job
         uses: actions/upload-artifact@v4
         with:
           name: webapp
-          path: ${{ env.PUBLISH_DIR }}
+          path: ${{ env.PACKAGE_ZIP }}
 
   deploy:
     runs-on: windows-latest
@@ -49,13 +50,12 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: webapp
-          path: webapp
+          path: .
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -68,5 +68,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.WEBAPP_NAME }}
-          package: webapp
+          package: app.zip
           
