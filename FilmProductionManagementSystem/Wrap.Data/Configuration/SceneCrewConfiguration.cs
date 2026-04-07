@@ -26,6 +26,8 @@ public class SceneCrewConfiguration : IEntityTypeConfiguration<SceneCrew>
             .HasForeignKey(sc => sc.CrewMemberId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        entity.HasQueryFilter(sc => !sc.CrewMember.IsDeleted);
+        
         entity.HasData(SceneCrewSeed);
     }
     

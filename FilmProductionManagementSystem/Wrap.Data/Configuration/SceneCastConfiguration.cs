@@ -25,6 +25,8 @@ public class SceneCastConfiguration : IEntityTypeConfiguration<SceneCast>
             .HasForeignKey(sc => sc.CastMemberId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        entity.HasQueryFilter(sc => !sc.CastMember.IsDeleted);
+        
         entity.HasData(SceneCastSeed);
     }
     

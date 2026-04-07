@@ -17,6 +17,8 @@ public class CrewSkillConfiguration : IEntityTypeConfiguration<CrewSkill>
             .WithMany(c => c.Skills)
             .HasForeignKey(cs => cs.CrewMemberId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasQueryFilter(cs => !cs.CrewMember.IsDeleted);
 
         entity.HasData(CrewSkillsSeed);
     }
