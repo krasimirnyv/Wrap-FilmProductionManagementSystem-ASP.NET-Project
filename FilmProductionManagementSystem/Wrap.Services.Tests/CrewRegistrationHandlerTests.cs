@@ -1,8 +1,11 @@
 namespace Wrap.Services.Tests;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Moq;
 using NUnit.Framework;
@@ -14,6 +17,7 @@ using Core.Handlers;
 using Models.LoginAndRegistration;
 
 using static GCommon.OutputMessages.Register;
+using static GCommon.ApplicationConstants.IdentityRoles;
 
 [TestFixture]
 public class CrewRegistrationHandlerTests
@@ -58,6 +62,7 @@ public class CrewRegistrationHandlerTests
 
         loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Never);
         userManagerMock.Verify(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
         signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Never);
     }
 
@@ -80,6 +85,7 @@ public class CrewRegistrationHandlerTests
 
         loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Never);
         userManagerMock.Verify(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
         signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Never);
     }
 
@@ -102,6 +108,7 @@ public class CrewRegistrationHandlerTests
 
         loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Never);
         userManagerMock.Verify(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
         signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Never);
     }
 
@@ -124,6 +131,7 @@ public class CrewRegistrationHandlerTests
 
         loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Never);
         userManagerMock.Verify(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
         signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Never);
     }
 
@@ -163,12 +171,68 @@ public class CrewRegistrationHandlerTests
         loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Once);
         loginRegisterRepositoryMock.Verify(lrr => lrr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
 
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker), Times.Never);
+
         loginRegisterRepositoryMock.Verify(lrr => lrr.CreateCrewAsync(It.IsAny<Crew>()), Times.Never);
         loginRegisterRepositoryMock.Verify(lrr => lrr.AddCrewSkillsAsync(It.IsAny<Guid>(), It.IsAny<IReadOnlyCollection<int>>()), Times.Never);
         loginRegisterRepositoryMock.Verify(lrr => lrr.SaveAllChangesAsync(), Times.Never);
         loginRegisterRepositoryMock.Verify(lrr => lrr.CommitTransactionAsync(It.IsAny<IDbContextTransaction>()), Times.Never);
 
         userManagerMock.Verify(um => um.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Never);
+        signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Never);
+    }
+
+    [Test]
+    public async Task CompleteRegistrationAsync_WhenAddToRoleFails_RollsBack_DeletesUser_AndReturnsRoleResult()
+    {
+        // Arrange
+        Mock<IDbContextTransaction> transactionMock = CreateTransactionMock();
+
+        CrewRegistrationCompleteDto dto = new CrewRegistrationCompleteDto
+        {
+            Draft = ValidCrewDraft(),
+            SkillNumbers = new List<int> { 1, 2 }
+        };
+
+        IdentityResult roleFail = IdentityResult.Failed(new IdentityError { Description = "role failed" });
+
+        loginRegisterRepositoryMock
+            .Setup(lrr => lrr.BeginTransactionAsync())
+            .ReturnsAsync(transactionMock.Object);
+
+        userManagerMock
+            .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Draft.Password))
+            .Callback<ApplicationUser, string>((user, _) => user.Id = Guid.NewGuid())
+            .ReturnsAsync(IdentityResult.Success);
+
+        userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker))
+            .ReturnsAsync(roleFail);
+
+        loginRegisterRepositoryMock
+            .Setup(lrr => lrr.RollbackTransactionAsync(transactionMock.Object))
+            .Returns(Task.CompletedTask);
+
+        userManagerMock
+            .Setup(um => um.DeleteAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        // Act
+        IdentityResult result = await crewHandler.CompleteRegistrationAsync(dto);
+
+        // Assert
+        Assert.That(result.Succeeded, Is.False);
+        Assert.That(result.Errors.Select(e => e.Description), Does.Contain("role failed"));
+
+        loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Once);
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker), Times.Once);
+        loginRegisterRepositoryMock.Verify(lrr => lrr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
+        userManagerMock.Verify(um => um.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Once);
+
+        loginRegisterRepositoryMock.Verify(lrr => lrr.CreateCrewAsync(It.IsAny<Crew>()), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr => lrr.AddCrewSkillsAsync(It.IsAny<Guid>(), It.IsAny<IReadOnlyCollection<int>>()), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr => lrr.SaveAllChangesAsync(), Times.Never);
+        loginRegisterRepositoryMock.Verify(lrr => lrr.CommitTransactionAsync(It.IsAny<IDbContextTransaction>()), Times.Never);
         signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Never);
     }
 
@@ -192,10 +256,13 @@ public class CrewRegistrationHandlerTests
 
         userManagerMock
             .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Draft.Password))
+            .Callback<ApplicationUser, string>((user, _) => user.Id = Guid.NewGuid())
             .ReturnsAsync(IdentityResult.Success);
 
-        // PersistDomainDataAsync:
-        // CreateCrew + AddCrewSkills
+        userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker))
+            .ReturnsAsync(IdentityResult.Success);
+
         loginRegisterRepositoryMock
             .Setup(lrr => lrr.CreateCrewAsync(It.IsAny<Crew>()))
             .Returns(Task.CompletedTask);
@@ -204,7 +271,6 @@ public class CrewRegistrationHandlerTests
             .Setup(lrr => lrr.AddCrewSkillsAsync(It.IsAny<Guid>(), skills))
             .Returns(Task.CompletedTask);
 
-        // expectedRows = 1 + skills.Count = 4; return 3 => failure
         loginRegisterRepositoryMock
             .Setup(lrr => lrr.SaveAllChangesAsync())
             .ReturnsAsync(3);
@@ -224,6 +290,7 @@ public class CrewRegistrationHandlerTests
         Assert.That(result.Succeeded, Is.False);
         Assert.That(result.Errors.Select(e => e.Description), Does.Contain(RegistrationTransactionFailure));
 
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker), Times.Once);
         loginRegisterRepositoryMock.Verify(lrr => lrr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
         userManagerMock.Verify(um => um.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Once);
 
@@ -252,7 +319,15 @@ public class CrewRegistrationHandlerTests
         ApplicationUser? createdUser = null;
         userManagerMock
             .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Draft.Password))
-            .Callback<ApplicationUser, string>((user, _) => createdUser = user)
+            .Callback<ApplicationUser, string>((user, _) =>
+            {
+                user.Id = Guid.NewGuid();
+                createdUser = user;
+            })
+            .ReturnsAsync(IdentityResult.Success);
+
+        userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker))
             .ReturnsAsync(IdentityResult.Success);
 
         Crew? capturedCrew = null;
@@ -265,7 +340,6 @@ public class CrewRegistrationHandlerTests
             .Setup(lrr => lrr.AddCrewSkillsAsync(It.IsAny<Guid>(), skills))
             .Returns(Task.CompletedTask);
 
-        // expectedRows = 1 + skills.Count
         loginRegisterRepositoryMock
             .Setup(lrr => lrr.SaveAllChangesAsync())
             .ReturnsAsync(1 + skills.Count);
@@ -284,28 +358,27 @@ public class CrewRegistrationHandlerTests
         // Assert
         Assert.That(result.Succeeded, Is.True);
 
-        // domain mapping checks
+        Assert.That(createdUser, Is.Not.Null);
         Assert.That(capturedCrew, Is.Not.Null);
-        Assert.That(capturedCrew.Id, Is.Not.EqualTo(Guid.Empty));
+        Assert.That(capturedCrew!.Id, Is.Not.EqualTo(Guid.Empty));
         Assert.That(capturedCrew.UserId, Is.EqualTo(createdUser!.Id));
         Assert.That(capturedCrew.ProfileImagePath, Is.EqualTo(dto.Draft.ProfilePicturePath));
         Assert.That(capturedCrew.FirstName, Is.EqualTo(dto.Draft.FirstName));
         Assert.That(capturedCrew.LastName, Is.EqualTo(dto.Draft.LastName));
         Assert.That(capturedCrew.Nickname, Is.EqualTo(dto.Draft.Nickname));
         Assert.That(capturedCrew.Biography, Is.EqualTo(dto.Draft.Biography));
-        Assert.That(capturedCrew.IsActive, Is.True);
+        Assert.That(capturedCrew.IsActive, Is.False);
         Assert.That(capturedCrew.IsDeleted, Is.False);
 
-        // transactional calls
         loginRegisterRepositoryMock.Verify(lrr => lrr.BeginTransactionAsync(), Times.Once);
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker), Times.Once);
         loginRegisterRepositoryMock.Verify(lrr => lrr.CreateCrewAsync(It.IsAny<Crew>()), Times.Once);
         loginRegisterRepositoryMock.Verify(lrr => lrr.AddCrewSkillsAsync(capturedCrew.Id, skills), Times.Once);
         loginRegisterRepositoryMock.Verify(lrr => lrr.SaveAllChangesAsync(), Times.Once);
         loginRegisterRepositoryMock.Verify(lrr => lrr.CommitTransactionAsync(transactionMock.Object), Times.Once);
 
-        signInManagerMock.Verify(sm => sm.SignInAsync(createdUser, false, It.IsAny<string?>()), Times.Once);
+        signInManagerMock.Verify(sm => sm.SignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<bool>(), It.IsAny<string?>()), Times.Once);
 
-        // ensure no rollback/delete on success
         loginRegisterRepositoryMock.Verify(lrr => lrr.RollbackTransactionAsync(It.IsAny<IDbContextTransaction>()), Times.Never);
         userManagerMock.Verify(um => um.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Never);
     }
@@ -330,9 +403,13 @@ public class CrewRegistrationHandlerTests
 
         userManagerMock
             .Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), dto.Draft!.Password))
+            .Callback<ApplicationUser, string>((user, _) => user.Id = Guid.NewGuid())
             .ReturnsAsync(IdentityResult.Success);
 
-        // Force exception inside PersistDomainDataAsync
+        userManagerMock
+            .Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker))
+            .ReturnsAsync(IdentityResult.Success);
+
         loginRegisterRepositoryMock
             .Setup(lrr => lrr.CreateCrewAsync(It.IsAny<Crew>()))
             .ThrowsAsync(new InvalidOperationException("boom"));
@@ -352,6 +429,7 @@ public class CrewRegistrationHandlerTests
         Assert.That(result.Succeeded, Is.False);
         Assert.That(result.Errors.Select(e => e.Description), Does.Contain(RegistrationTransactionFailure));
 
+        userManagerMock.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), Filmmaker), Times.Once);
         loginRegisterRepositoryMock.Verify(lrr => lrr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
         userManagerMock.Verify(um => um.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Once);
 
@@ -373,10 +451,10 @@ public class CrewRegistrationHandlerTests
             Biography = "bio",
             ProfilePicturePath = "/img/profile/crew.webp"
         };
-        
+
         return dto;
-    } 
-    
+    }
+
     private static Mock<IDbContextTransaction> CreateTransactionMock()
     {
         Mock<IDbContextTransaction> transactionMock = new Mock<IDbContextTransaction>(MockBehavior.Strict);
@@ -395,7 +473,7 @@ public class CrewRegistrationHandlerTests
         Mock<UserManager<ApplicationUser>> userManagerMock = new Mock<UserManager<ApplicationUser>>
         (
             store.Object,
-            Mock.Of<Microsoft.Extensions.Options.IOptions<IdentityOptions>>(),
+            Mock.Of<IOptions<IdentityOptions>>(),
             Mock.Of<IPasswordHasher<ApplicationUser>>(),
             Array.Empty<IUserValidator<ApplicationUser>>(),
             Array.Empty<IPasswordValidator<ApplicationUser>>(),
@@ -404,7 +482,7 @@ public class CrewRegistrationHandlerTests
             Mock.Of<IServiceProvider>(),
             Mock.Of<ILogger<UserManager<ApplicationUser>>>()
         );
-        
+
         return userManagerMock;
     }
 
@@ -413,14 +491,14 @@ public class CrewRegistrationHandlerTests
         Mock<SignInManager<ApplicationUser>> signInManagerMock = new Mock<SignInManager<ApplicationUser>>
         (
             userManager,
-            Mock.Of<Microsoft.AspNetCore.Http.IHttpContextAccessor>(),
+            Mock.Of<IHttpContextAccessor>(),
             Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
-            Mock.Of<Microsoft.Extensions.Options.IOptions<IdentityOptions>>(),
+            Mock.Of<IOptions<IdentityOptions>>(),
             Mock.Of<ILogger<SignInManager<ApplicationUser>>>(),
-            Mock.Of<Microsoft.AspNetCore.Authentication.IAuthenticationSchemeProvider>(),
+            Mock.Of<IAuthenticationSchemeProvider>(),
             Mock.Of<IUserConfirmation<ApplicationUser>>()
         );
-        
+
         return signInManagerMock;
     }
 }
