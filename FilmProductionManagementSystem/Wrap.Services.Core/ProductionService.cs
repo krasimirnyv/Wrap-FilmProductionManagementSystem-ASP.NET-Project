@@ -5,8 +5,8 @@ using Utilities.ImageLogic.Interfaces;
 using Models.Production;
 using Models.Production.NestedDtos;
 using Data.Models;
-using Wrap.Data.Models.MappingEntities;
-using Wrap.Data.Repository.Interfaces;
+using Data.Models.MappingEntities;
+using Data.Repository.Interfaces;
 using GCommon.Enums;
 using GCommon.UI;
 
@@ -14,7 +14,7 @@ using static GCommon.ApplicationConstants;
 using static GCommon.OutputMessages.Production;
 using static GCommon.DataFormat;
 
-public class ProductionService(IProductionRepository productionRepository, 
+public class ProductionService(IProductionRepository productionRepository,
                                IImageService imageService,
                                IVariantImageStrategyResolver imageStrategyResolver) : IProductionService
 {
@@ -24,12 +24,13 @@ public class ProductionService(IProductionRepository productionRepository,
     private static string GetStatusAbstractClass(ProductionStatusType statusType)
         => StatusAbstractMap.GetValueOrDefault(statusType, DefaultStatus);
     
-    public async Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, string? status = null, bool? isActive = null, int productionsPerPage = DefaultProductionsPerPage)
+    public async Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync
+        (int pageNumber = 1, string? status = null, bool? isActive = null, int productionsPerPage = DefaultProductionsPerPage)
     {
         int skipCount = (pageNumber - 1) * productionsPerPage;
         
         IReadOnlyCollection<ProductionStatusType>? possibleStatuses = ProductionStatusTypes(status);
-        IReadOnlyCollection<Production> production = await productionRepository.GetAllAsync(
+        IReadOnlyCollection<Production> production = await productionRepository.GetAllProductionsAsync(
             skipCount: skipCount, 
             takeCount: productionsPerPage,
             statuses: possibleStatuses,
@@ -56,7 +57,7 @@ public class ProductionService(IProductionRepository productionRepository,
     {
         IReadOnlyCollection<ProductionStatusType>? possibleStatuses = ProductionStatusTypes(status);
         
-        int productionsCount = await productionRepository.CountAsync(possibleStatuses, isActive);
+        int productionsCount = await productionRepository.ProductionCountAsync(possibleStatuses, isActive);
         
         return productionsCount;
     }
@@ -99,6 +100,7 @@ public class ProductionService(IProductionRepository productionRepository,
             .productionCrews!
             .Select(pc => new ProductionCrewMemberDto
             {
+                Id = pc.CrewMember.Id.ToString(),
                 ProfileImagePath = pc.CrewMember.ProfileImagePath!,
                 FirstName = pc.CrewMember.FirstName,
                 LastName = pc.CrewMember.LastName,
@@ -111,6 +113,7 @@ public class ProductionService(IProductionRepository productionRepository,
             .productionCasts!
             .Select(pc => new ProductionCastMemberDto
             {
+                Id = pc.CastMember.Id.ToString(),
                 ProfileImagePath = pc.CastMember.ProfileImagePath!,
                 FirstName = pc.CastMember.FirstName,
                 LastName = pc.CastMember.LastName,
@@ -163,10 +166,14 @@ public class ProductionService(IProductionRepository productionRepository,
         return baseDto;
     }
     
-    public async Task<string> CreateProductionAsync(CreateProductionDto dto)
+    public async Task<string?> CreateProductionAsync(CreateProductionDto dto)
     {
         IVariantImageStrategy strategy = imageStrategyResolver.Resolve(ThumbnailFolderName);
         string thumbnail = await imageService.SaveImageAsync(dto.ThumbnailImage, strategy);
+
+        Crew? creator = await GetCrewIdByUserIdAsync(dto.CreatorId);
+        if (creator is null)
+            return null;
         
         Production production = new Production
         {
@@ -177,10 +184,12 @@ public class ProductionService(IProductionRepository productionRepository,
             StatusType = dto.StatusType,
             StatusStartDate = dto.StatusStartDate,
             StatusEndDate = dto.StatusEndDate,
-            Thumbnail = thumbnail
+            Thumbnail = thumbnail,
+            CreatedByUserId = dto.CreatorId
         };
 
         await productionRepository.AddAsync(production);
+        await productionRepository.AddDirectorToProductionAsync(production.Id, creator, CrewRoleType.Director);
         await productionRepository.SaveAllChangesAsync();
 
         return production.Id.ToString();
@@ -192,7 +201,7 @@ public class ProductionService(IProductionRepository productionRepository,
         if (productionId is null)
             return null;
 
-        Production? production = await productionRepository.GetByIdAsNoTrackingAsync(productionId.Value);
+        Production? production = await productionRepository.GetProductionByIdAsNoTrackingAsync(productionId.Value);
         if (production is null)
             return null;
 
@@ -214,7 +223,7 @@ public class ProductionService(IProductionRepository productionRepository,
 
     public async Task<bool> UpdateProductionAsync(EditProductionDto dto)
     {
-        Production? production = await productionRepository.GetByIdAsync(dto.ProductionId);
+        Production? production = await productionRepository.GetProductionByIdAsync(dto.ProductionId);
         if (production is null)
             return false;
 
@@ -242,7 +251,7 @@ public class ProductionService(IProductionRepository productionRepository,
         if (productionId is null)
             return null;
 
-        Production? production = await productionRepository.GetByIdAsync(productionId.Value);
+        Production? production = await productionRepository.GetProductionWithDataByIdAsync(productionId.Value);
         if (production is null)
             return null;
 
@@ -256,7 +265,8 @@ public class ProductionService(IProductionRepository productionRepository,
             Budget = production.Budget,
             CrewMembersCount = production.ProductionCrewMembers.Count,
             CastMembersCount = production.ProductionCastMembers.Count,
-            ScenesCount = production.Scenes.Count
+            ScenesCount = production.Scenes.Count,
+            AssetsCount = production.ProductionAssets.Count
         };
         
         return dto;
@@ -268,7 +278,7 @@ public class ProductionService(IProductionRepository productionRepository,
         if (productionId is null)
             throw new ArgumentException(string.Format(IdIsNullOrEmptyMessage, id));
 
-        Production? production = await productionRepository.GetByIdAsync(productionId.Value);
+        Production? production = await productionRepository.GetProductionByIdAsync(productionId.Value);
         if (production is null)
             return false;
         
@@ -280,6 +290,37 @@ public class ProductionService(IProductionRepository productionRepository,
         
         return true;
     }
+    
+    public async Task<Guid?> GetUserIdIfIsCrewAsync(string? userId)
+    {
+        Guid? applicationUserId = ValidateGuid(userId);
+        if (applicationUserId is null)
+            return null;
+        
+        Crew? crew = await productionRepository.GetCrewByUserIdAsync(applicationUserId.Value);
+        return crew is null ? null : applicationUserId;
+    }
+
+    public async Task<bool> IsUserAllowedToManageProductionAsync(string? productionId, string userId)
+    {
+        Guid? productionGuidId = ValidateGuid(productionId);
+        if (productionGuidId is null)
+            return false;
+        
+        Guid? userGuidId = ValidateGuid(userId);
+        if (userGuidId is null)
+            return false;
+
+        bool isLeader = await productionRepository.IsUserProductionLeaderAsync(productionGuidId.Value, userGuidId.Value);
+        return isLeader;
+    }
+
+    private async Task<Crew?> GetCrewIdByUserIdAsync(Guid userId)
+    { 
+        Crew? crew = await productionRepository.GetCrewByUserIdAsync(userId);
+        return crew;
+    }
+    
     
     private static Guid? ValidateGuid(string? id)
     {

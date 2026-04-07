@@ -40,4 +40,6 @@ public class DetailsProductionViewModel
     
     public IReadOnlyCollection<ProductionShootingDayViewModel> ProductionShootingDays { get; set; }
         = new List<ProductionShootingDayViewModel>();
+    
+    public bool CanManage { get; set; } = false;
 }

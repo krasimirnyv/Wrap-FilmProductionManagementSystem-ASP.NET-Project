@@ -10,7 +10,8 @@ using GCommon.Enums;
 public class ProductionRepository(FilmProductionDbContext dbContext) 
     : BaseRepository(dbContext), IProductionRepository
 {
-    public async Task<IReadOnlyCollection<Production>> GetAllAsync(int? skipCount = null, int? takeCount = null, IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null)
+    public async Task<IReadOnlyCollection<Production>> GetAllProductionsAsync
+        (int? skipCount = null, int? takeCount = null, IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null)
     {
         IQueryable<Production> productionsQuery = Context!
             .Productions
@@ -32,7 +33,7 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
         return productions;
     }
 
-    public async Task<int> CountAsync(IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null)
+    public async Task<int> ProductionCountAsync(IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null)
     {
         IQueryable<Production> productionsQuery = Context!
             .Productions
@@ -45,7 +46,7 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
         return productionsCount;
     }
 
-    public async Task<Production?> GetByIdAsNoTrackingAsync(Guid productionId)
+    public async Task<Production?> GetProductionByIdAsNoTrackingAsync(Guid productionId)
     {
         Production? production = await Context!
             .Productions
@@ -55,10 +56,26 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
         return production;
     }
     
-    public async Task<Production?> GetByIdAsync(Guid productionId)
+    public async Task<Production?> GetProductionByIdAsync(Guid productionId)
     {
         Production? production = await Context!
             .Productions
+            .SingleOrDefaultAsync(p => p.Id == productionId);
+        
+        return production;
+    }
+    
+    public async Task<Production?> GetProductionWithDataByIdAsync(Guid productionId)
+    {
+        Production? production = await Context!
+            .Productions
+            .Include(p => p.ProductionCrewMembers)
+            .ThenInclude(pc => pc.CrewMember)
+            .Include(p => p.ProductionCastMembers)
+            .ThenInclude(pc => pc.CastMember)
+            .Include(p => p.ProductionAssets)
+            .Include(p => p.Scenes)
+            .AsNoTracking()
             .SingleOrDefaultAsync(p => p.Id == productionId);
         
         return production;
@@ -74,6 +91,7 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
     {
         Production? production = await Context!
             .Productions
+            .Include(p => p.Script)
             .AsNoTracking()
             .SingleOrDefaultAsync(p => p.Id == productionId);
         
@@ -87,12 +105,14 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
 
         IReadOnlyCollection<ProductionCrew> productionCrews = await Context!
             .ProductionsCrewMembers
+            .Include(pc => pc.CrewMember)
             .AsNoTracking()
             .Where(pc => pc.ProductionId == productionId)
             .ToArrayAsync();
         
         IReadOnlyCollection<ProductionCast> productionCasts = await Context!
             .ProductionsCastMembers
+            .Include(pc => pc.CastMember)
             .AsNoTracking()
             .Where(pc => pc.ProductionId == productionId)
             .ToArrayAsync();
@@ -127,6 +147,60 @@ public class ProductionRepository(FilmProductionDbContext dbContext)
     {
         Context!.Productions.Remove(production);
         return Task.CompletedTask;
+    }
+
+    public async Task<Crew?> GetCrewByUserIdAsync(Guid applicationUserId)
+    {
+        Crew? crew = await Context!
+            .CrewMembers
+            .AsNoTracking()
+            .SingleOrDefaultAsync(c => c.UserId == applicationUserId);
+        
+        return crew;
+    }
+
+    public async Task AddDirectorToProductionAsync(Guid productionId, Crew creator, CrewRoleType roleType)
+    {
+        ProductionCrew newProductionCrew = new ProductionCrew
+        {
+            ProductionId = productionId,
+            CrewMemberId = creator.Id,
+            RoleType = roleType
+        };
+        
+        await Context!.ProductionsCrewMembers.AddAsync(newProductionCrew);
+    }
+
+    public async Task<bool> IsUserProductionLeaderAsync(Guid productionId, Guid applicationUserId)
+    {
+        Guid? crewId = await Context!
+            .CrewMembers
+            .AsNoTracking()
+            .Where(c => c.UserId == applicationUserId && !c.IsDeleted)
+            .Select(c => c.Id)
+            .SingleOrDefaultAsync();
+
+        if (crewId == Guid.Empty)
+            return false;
+
+        CrewRoleType[] allowedLeaderRoles =
+        [
+            CrewRoleType.Director,
+            CrewRoleType.Producer,
+        ];
+
+        bool isLeader = await Context
+                            .Productions
+                            .AsNoTracking()
+                            .Where(p => p.Id == productionId)
+                            .AnyAsync(p => p.CreatedByUserId == applicationUserId) ||
+                        await Context
+                            .ProductionsCrewMembers
+                            .AsNoTracking()
+                            .AnyAsync(pc => pc.ProductionId == productionId
+                                            && pc.CrewMemberId == crewId
+                                            && allowedLeaderRoles.Contains(pc.RoleType));
+        return isLeader;
     }
 
     public async Task<int> SaveAllChangesAsync()

@@ -1,8 +1,6 @@
 namespace Wrap.Services.Core.Interfaces;
 
 using Models.Production;
-using GCommon.Enums;
-
 using static GCommon.ApplicationConstants;
 
 public interface IProductionService
@@ -13,7 +11,8 @@ public interface IProductionService
     /// <param name="productionsPerPage">int</param>
     /// </summary>
     /// <returns>IReadOnlyCollection<ProductionDto> collection of productions</returns>
-    Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync(int pageNumber = 1, string? status = null, bool? isActive = null, int productionsPerPage = DefaultProductionsPerPage);
+    Task<IReadOnlyCollection<ProductionDto>> GetAllProductionsAsync
+        (int pageNumber = 1, string? status = null, bool? isActive = null, int productionsPerPage = DefaultProductionsPerPage);
     
     /// <summary>
     /// Returns the count of the productions
@@ -34,7 +33,7 @@ public interface IProductionService
     /// </summary>
     /// <param name="dto">CreateProductionDto</param>
     /// <returns>string: production's ID</returns>
-    Task<string> CreateProductionAsync(CreateProductionDto dto);
+    Task<string?> CreateProductionAsync(CreateProductionDto dto);
     
     /// <summary>
     /// Gets the current details of a production for editing purposes, based on its ID
@@ -62,4 +61,19 @@ public interface IProductionService
     /// <param name="id">string</param>
     /// <returns>bool -> true or false</returns>
     Task<bool> DeleteProductionAsync(string? id);
+
+    /// <summary>
+    /// Gives permission to create a production only to users who are crew members, not actors
+    /// </summary>
+    /// <param name="userId">nullable string</param>
+    /// <returns>bool</returns>
+    Task<Guid?> GetUserIdIfIsCrewAsync(string? userId);
+
+    /// <summary>
+    /// Gives the permission to manage production
+    /// </summary>
+    /// <param name="productionId">nullable string</param>
+    /// <param name="userId">string</param>
+    /// <returns>bool</returns>
+    Task<bool> IsUserAllowedToManageProductionAsync(string? productionId, string userId);
 }

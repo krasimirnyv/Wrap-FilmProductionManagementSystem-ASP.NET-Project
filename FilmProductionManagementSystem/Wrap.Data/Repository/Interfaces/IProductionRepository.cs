@@ -6,13 +6,15 @@ using GCommon.Enums;
 
 public interface IProductionRepository
 {
-    Task<IReadOnlyCollection<Production>> GetAllAsync(int? skipCount = null, int? takeCount = null, IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null);
+    Task<IReadOnlyCollection<Production>> GetAllProductionsAsync(int? skipCount = null, int? takeCount = null, IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null);
     
-    Task<int> CountAsync(IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null);
+    Task<int> ProductionCountAsync(IReadOnlyCollection<ProductionStatusType>? statuses = null, bool? isActive = null);
     
-    Task<Production?> GetByIdAsNoTrackingAsync(Guid productionId);
+    Task<Production?> GetProductionByIdAsNoTrackingAsync(Guid productionId);
+
+    Task<Production?> GetProductionWithDataByIdAsync(Guid productionId);
     
-    Task<Production?> GetByIdAsync(Guid productionId);
+    Task<Production?> GetProductionByIdAsync(Guid productionId);
 
               Task<(Production?       production,
 IReadOnlyCollection<ProductionCrew>?  productionCrews, 
@@ -25,6 +27,12 @@ IReadOnlyCollection<ShootingDay>?     productionShootingDays)>
     Task AddAsync(Production production);
 
     Task DeleteAsync(Production production);
+    
+    Task<Crew?> GetCrewByUserIdAsync(Guid applicationUserId);
 
+    Task AddDirectorToProductionAsync(Guid productionId, Crew creator, CrewRoleType roleType);
+    
+    Task<bool> IsUserProductionLeaderAsync(Guid productionId, Guid applicationUserId);
+    
     Task<int> SaveAllChangesAsync();
 }

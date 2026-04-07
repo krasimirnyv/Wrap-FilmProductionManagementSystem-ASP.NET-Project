@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using Microsoft.EntityFrameworkCore;
 
+using Infrastructure;
 using MappingEntities;
 using GCommon.Enums;
 
@@ -47,6 +48,12 @@ public class Production
     [Column(TypeName = DateTimeTypeFormat)]
     public DateTime? StatusEndDate { get; set; }
 
+    [Required]
+    [ForeignKey(nameof(CreatedByUser))]
+    public Guid CreatedByUserId { get; set; }
+
+    public virtual ApplicationUser CreatedByUser { get; set; } = null!;
+    
     public virtual Script? Script { get; set; }
 
     public virtual ICollection<ProductionCrew> ProductionCrewMembers { get; set; }

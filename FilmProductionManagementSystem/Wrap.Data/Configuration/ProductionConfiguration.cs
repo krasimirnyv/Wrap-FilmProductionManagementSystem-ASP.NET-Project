@@ -19,6 +19,12 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             .HasForeignKey<Script>(s => s.ProductionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        entity
+            .HasOne(p => p.CreatedByUser)
+            .WithMany()
+            .HasForeignKey(p => p.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
         entity.HasData(ProductionsSeed);
     }
 
@@ -33,7 +39,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Concept,
             StatusStartDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 06, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 06, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -44,7 +51,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Development,
             StatusStartDate = new DateTime(2026, 01, 10, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 02, 15, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 02, 15, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -55,7 +63,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Casting,
             StatusStartDate = new DateTime(2026, 02, 20, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 20, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 20, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -66,7 +75,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Preproduction,
             StatusStartDate = new DateTime(2026, 03, 05, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 04, 05, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 04, 05, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -77,7 +87,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Financing,
             StatusStartDate = new DateTime(2025, 12, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 01, 25, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 01, 25, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -88,7 +99,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.LocationScouting,
             StatusStartDate = new DateTime(2026, 02, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 02, 18, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 02, 18, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -99,7 +111,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.OnHold,
             StatusStartDate = new DateTime(2026, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -110,7 +123,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Reshoots,
             StatusStartDate = new DateTime(2026, 04, 10, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 04, 25, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 04, 25, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -121,7 +135,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.ColorGrading,
             StatusStartDate = new DateTime(2026, 05, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 05, 20, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 05, 20, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -132,7 +147,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.FestivalCircuit,
             StatusStartDate = new DateTime(2026, 06, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 09, 01, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 09, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
 
         new()
@@ -144,7 +160,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Financing,
             StatusStartDate = new DateTime(2026, 01, 12, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 02, 05, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 02, 05, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -155,7 +172,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Casting,
             StatusStartDate = new DateTime(2026, 01, 08, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 01, 28, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 01, 28, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -166,7 +184,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Cancelled,
             StatusStartDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 28, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 28, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -177,7 +196,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.LocationScouting,
             StatusStartDate = new DateTime(2026, 02, 10, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 02, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 02, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -188,7 +208,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Preproduction,
             StatusStartDate = new DateTime(2026, 03, 15, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 04, 10, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 04, 10, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -199,7 +220,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Reshoots,
             StatusStartDate = new DateTime(2026, 04, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 05, 12, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 05, 12, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -210,7 +232,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.LocationScouting,
             StatusStartDate = new DateTime(2026, 02, 14, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -221,7 +244,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.PostProduction,
             StatusStartDate = new DateTime(2026, 05, 18, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 06, 15, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 06, 15, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -232,7 +256,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.SoundDesign,
             StatusStartDate = new DateTime(2026, 06, 05, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 06, 28, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 06, 28, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -243,7 +268,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Distribution,
             StatusStartDate = new DateTime(2026, 07, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 08, 10, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 08, 10, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -254,7 +280,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Development,
             StatusStartDate = new DateTime(2026, 01, 18, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 02, 22, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 02, 22, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -265,7 +292,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Financing,
             StatusStartDate = new DateTime(2026, 01, 05, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 02, 10, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 02, 10, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -276,7 +304,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Casting,
             StatusStartDate = new DateTime(2026, 02, 08, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -287,7 +316,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Preproduction,
             StatusStartDate = new DateTime(2026, 02, 25, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 25, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 25, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -298,7 +328,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.LocationScouting,
             StatusStartDate = new DateTime(2026, 01, 22, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 02, 06, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 02, 06, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -309,7 +340,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Rehearsals,
             StatusStartDate = new DateTime(2026, 03, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 18, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 18, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -320,7 +352,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Production,
             StatusStartDate = new DateTime(2026, 04, 05, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 05, 02, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 05, 02, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -331,7 +364,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.OnHold,
             StatusStartDate = new DateTime(2026, 02, 14, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 04, 01, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 04, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -342,7 +376,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Reshoots,
             StatusStartDate = new DateTime(2026, 05, 10, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 05, 24, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 05, 24, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -353,7 +388,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.PostProduction,
             StatusStartDate = new DateTime(2026, 05, 15, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 06, 12, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 06, 12, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -364,7 +400,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.PictureLock,
             StatusStartDate = new DateTime(2026, 06, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 06, 14, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 06, 14, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -375,7 +412,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.SoundDesign,
             StatusStartDate = new DateTime(2026, 06, 10, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 06, 28, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 06, 28, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -386,7 +424,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.VisualEffects,
             StatusStartDate = new DateTime(2026, 06, 20, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 07, 18, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 07, 18, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -397,7 +436,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Marketing,
             StatusStartDate = new DateTime(2026, 07, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 07, 30, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 07, 30, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -408,7 +448,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Distribution,
             StatusStartDate = new DateTime(2026, 07, 15, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 08, 20, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 08, 20, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         },
         new()
         {
@@ -419,7 +460,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Released,
             StatusStartDate = new DateTime(2026, 08, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 08, 01, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 08, 01, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId3
         },
         new()
         {
@@ -430,7 +472,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Completed,
             StatusStartDate = new DateTime(2026, 09, 10, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 09, 10, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 09, 10, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId1
         },
         new()
         {
@@ -441,7 +484,8 @@ public class ProductionConfiguration : IEntityTypeConfiguration<Production>
             Thumbnail = DefaultThumbnailPath,
             StatusType = ProductionStatusType.Cancelled,
             StatusStartDate = new DateTime(2026, 02, 01, 0, 0, 0, DateTimeKind.Utc),
-            StatusEndDate = new DateTime(2026, 03, 12, 0, 0, 0, DateTimeKind.Utc)
+            StatusEndDate = new DateTime(2026, 03, 12, 0, 0, 0, DateTimeKind.Utc),
+            CreatedByUserId = CrewUserId2
         }
     ];
 }

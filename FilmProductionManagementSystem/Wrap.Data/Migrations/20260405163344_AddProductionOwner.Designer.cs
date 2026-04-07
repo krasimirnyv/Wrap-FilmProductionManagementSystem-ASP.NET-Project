@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wrap.Data;
 
@@ -11,9 +12,11 @@ using Wrap.Data;
 namespace Wrap.Data.Migrations
 {
     [DbContext(typeof(FilmProductionDbContext))]
-    partial class FilmProductionDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260405163344_AddProductionOwner")]
+    partial class AddProductionOwner
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -181,7 +184,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CastMembers", (string)null);
+                    b.ToTable("CastMembers");
 
                     b.HasData(
                         new
@@ -273,7 +276,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CrewMembers", (string)null);
+                    b.ToTable("CrewMembers");
 
                     b.HasData(
                         new
@@ -329,7 +332,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("CrewMemberId");
 
-                    b.ToTable("CrewSkills", (string)null);
+                    b.ToTable("CrewSkills");
 
                     b.HasData(
                         new
@@ -616,7 +619,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("CastMemberId");
 
-                    b.ToTable("ProductionsCastMembers", (string)null);
+                    b.ToTable("ProductionsCastMembers");
 
                     b.HasData(
                         new
@@ -672,7 +675,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("CrewMemberId");
 
-                    b.ToTable("ProductionsCrewMembers", (string)null);
+                    b.ToTable("ProductionsCrewMembers");
 
                     b.HasData(
                         new
@@ -737,7 +740,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("CastMemberId");
 
-                    b.ToTable("ScenesCastMembers", (string)null);
+                    b.ToTable("ScenesCastMembers");
 
                     b.HasData(
                         new
@@ -799,7 +802,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("CrewMemberId");
 
-                    b.ToTable("ScenesCrewMembers", (string)null);
+                    b.ToTable("ScenesCrewMembers");
 
                     b.HasData(
                         new
@@ -971,7 +974,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.ToTable("Productions", (string)null);
+                    b.ToTable("Productions");
 
                     b.HasData(
                         new
@@ -1468,7 +1471,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("ProductionId", "AssetType");
 
-                    b.ToTable("ProductionsAssets", (string)null);
+                    b.ToTable("ProductionsAssets");
 
                     b.HasData(
                         new
@@ -1629,7 +1632,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("ProductionId", "SceneNumber");
 
-                    b.ToTable("Scenes", (string)null);
+                    b.ToTable("Scenes");
 
                     b.HasData(
                         new
@@ -1763,7 +1766,7 @@ namespace Wrap.Data.Migrations
                     b.HasIndex("ProductionId")
                         .IsUnique();
 
-                    b.ToTable("Scripts", (string)null);
+                    b.ToTable("Scripts");
 
                     b.HasData(
                         new
@@ -1853,7 +1856,7 @@ namespace Wrap.Data.Migrations
                     b.HasIndex("ScriptId", "OrderIndex")
                         .IsUnique();
 
-                    b.ToTable("ScriptBlocks", (string)null);
+                    b.ToTable("ScriptBlocks");
 
                     b.HasData(
                         new
@@ -1919,7 +1922,7 @@ namespace Wrap.Data.Migrations
 
                     b.HasIndex("ProductionId");
 
-                    b.ToTable("ShootingDays", (string)null);
+                    b.ToTable("ShootingDays");
 
                     b.HasData(
                         new
@@ -2037,7 +2040,7 @@ namespace Wrap.Data.Migrations
                     b.HasIndex("ShootingDayId", "SceneId")
                         .IsUnique();
 
-                    b.ToTable("ShootingDaysScenes", (string)null);
+                    b.ToTable("ShootingDaysScenes");
 
                     b.HasData(
                         new

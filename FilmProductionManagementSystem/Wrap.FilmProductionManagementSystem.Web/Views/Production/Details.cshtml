@@ -34,16 +34,19 @@
                             <span class="status-badge @Model.StatusAbstractClass">@GetDisplayName(Model.StatusType)</span>
                         </div>
                         <div class="d-flex gap-2 flex-wrap">
-                            <a asp-area="" asp-controller="Production" asp-action="Edit" asp-route-productionId="@Model.Id" 
-                               asp-route-slug="@SlugGenerator.GenerateSlug(Model.Title)"
-                               class="btn btn-production">
-                                <i class="bi bi-pencil-fill me-1"></i>Edit
-                            </a>
-                            <a asp-area="" asp-controller="Production" asp-action="Delete" asp-route-productionId="@Model.Id"
-                               asp-route-slug="@SlugGenerator.GenerateSlug(Model.Title)"
-                               class="btn btn-production-danger">
-                                <i class="bi bi-trash-fill me-1"></i>Delete
-                            </a>
+                            @if (Model.CanManage)
+                            {
+                                <a asp-area="Filmmaker" asp-controller="Production" asp-action="Edit" asp-route-productionId="@Model.Id"
+                                   asp-route-slug="@SlugGenerator.GenerateSlug(Model.Title)"
+                                   class="btn btn-production">
+                                    <i class="bi bi-pencil-fill me-1"></i>Edit
+                                </a>
+                                <a asp-area="Filmmaker" asp-controller="Production" asp-action="Delete" asp-route-productionId="@Model.Id"
+                                   asp-route-slug="@SlugGenerator.GenerateSlug(Model.Title)"
+                                   class="btn btn-production-danger">
+                                    <i class="bi bi-trash-fill me-1"></i>Delete
+                                </a>
+                            }
                             <a asp-area="" asp-controller="Production" asp-action="Index"
                                class="btn btn-production-secondary">
                                 <i class="bi bi-arrow-left me-1"></i>Back
@@ -78,7 +81,7 @@
                                         <i class="bi bi-file-text me-1"></i>Script
                                     </div>
                                     <div class="info-value">
-                                        <a asp-area="" asp-controller="Scripts" asp-action="Details"
+                                        <a asp-area="Filmmaker" asp-controller="Scripts" asp-action="Details"
                                            asp-route-id="@Model.ScriptId"
                                            class="btn btn-production-outline btn-sm">
                                             <i class="bi bi-file-earmark-text me-1"></i>View Script
@@ -148,6 +151,24 @@
 
                 @* ── Crew ── *@
                 <div class="tab-pane fade show active" id="tabCrew">
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <div class="text-muted small">
+                            @Model.ProductionCrewMembers.Count @(Model.ProductionCrewMembers.Count == 1 ? "member" : "members")
+                        </div>
+
+                        @if (Model.CanManage)
+                        {
+                            <a asp-area=""
+                               asp-controller="Home"
+                               asp-action="FindFilmmakers"
+                               asp-route-ProductionId="@Model.Id"
+                               class="btn btn-production btn-sm">
+                                <i class="bi bi-person-plus-fill me-1"></i>Add filmmaker
+                            </a>
+                        }
+                    </div>
+
                     @if (!Model.ProductionCrewMembers.Any())
                     {
                         <div class="empty-state">
@@ -161,16 +182,34 @@
                             @foreach (ProductionCrewMemberViewModel crew in Model.ProductionCrewMembers)
                             {
                                 <div class="col-6 col-md-4 col-lg-3">
-                                    <div class="member-card">
+                                    <div class="member-card position-relative">
                                         <img src="@crew.ProfileImagePath"
                                              alt="@crew.FirstName @crew.LastName"
                                              class="member-avatar">
                                         <div>
                                             <div class="member-name">@crew.FirstName @crew.LastName</div>
-                                            <div class="member-role">
-                                                @crew.Role
-                                            </div>
+                                            <div class="member-role">@crew.Role</div>
                                         </div>
+
+                                        @if (Model.CanManage)
+                                        {
+                                            <form asp-area="Filmmaker"
+                                                  asp-controller="Production"
+                                                  asp-action="RemoveFilmmakerFromProduction"
+                                                  method="post"
+                                                  class="position-absolute top-0 end-0 m-2">
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden" name="productionId" value="@Model.Id" />
+                                                <input type="hidden" name="crewId" value="@crew.Id" />
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-production-danger"
+                                                        title="Remove from production">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </form>
+                                        }
                                     </div>
                                 </div>
                             }
@@ -180,6 +219,24 @@
 
                 @* ── Cast ── *@
                 <div class="tab-pane fade" id="tabCast">
+
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <div class="text-muted small">
+                            @Model.ProductionCastMembers.Count @(Model.ProductionCastMembers.Count == 1 ? "actor" : "actors")
+                        </div>
+
+                        @if (Model.CanManage)
+                        {
+                            <a asp-area=""
+                               asp-controller="Home"
+                               asp-action="FindActors"
+                               asp-route-ProductionId="@Model.Id"
+                               class="btn btn-production btn-sm">
+                                <i class="bi bi-person-plus-fill me-1"></i>Add actor
+                            </a>
+                        }
+                    </div>
+
                     @if (!Model.ProductionCastMembers.Any())
                     {
                         <div class="empty-state">
@@ -193,16 +250,36 @@
                             @foreach (ProductionCastMemberViewModel cast in Model.ProductionCastMembers)
                             {
                                 <div class="col-md-6">
-                                    <div class="d-flex align-items-center gap-3 member-card text-start">
+                                    <div class="d-flex align-items-center gap-3 member-card text-start position-relative">
                                         <img src="@cast.ProfileImagePath"
                                              alt="@cast.FirstName @cast.LastName"
                                              class="member-avatar" style="min-width: 70px;">
-                                        <div>
+                                        <div class="flex-grow-1">
                                             <div class="member-name">@cast.FirstName @cast.LastName</div>
                                             <div class="member-role">
                                                 @cast.Role · Age @cast.Age · @cast.Gender
                                             </div>
                                         </div>
+
+                                        @if (Model.CanManage)
+                                        {
+                                            <form asp-area="Filmmaker"
+                                                  asp-controller="Production"
+                                                  asp-action="RemoveActorFromProduction"
+                                                  method="post"
+                                                  class="position-absolute top-0 end-0 m-2">
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden" name="productionId" value="@Model.Id" />
+                                                <input type="hidden" name="castId" value="@cast.Id" />
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-production-danger"
+                                                        title="Remove from production">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </form>
+                                        }
                                     </div>
                                 </div>
                             }
@@ -288,7 +365,6 @@
 
             </div>
         </div>
-
     </div>
 </div>
 

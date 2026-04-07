@@ -25,6 +25,8 @@ public class ProductionCrewConfiguration : IEntityTypeConfiguration<ProductionCr
             .WithMany(c => c.CrewMemberProductions)
             .HasForeignKey(pc => pc.CrewMemberId)
             .OnDelete(DeleteBehavior.Cascade);
+        
+        entity.HasQueryFilter(pc => !pc.CrewMember.IsDeleted);
 
         entity.HasData(ProductionCrewSeed);
     }

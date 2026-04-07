@@ -25,6 +25,8 @@ public class ProductionCastConfiguration : IEntityTypeConfiguration<ProductionCa
             .HasForeignKey(pc => pc.CastMemberId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        entity.HasQueryFilter(pc => !pc.CastMember.IsDeleted);
+        
         entity.HasData(ProductionCastSeed);
     }
     
