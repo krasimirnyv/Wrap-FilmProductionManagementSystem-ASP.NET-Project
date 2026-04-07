@@ -93,10 +93,7 @@ public class Program
         app.UseStatusCodePagesWithRedirects(StatusCodeErrorPath);
         
         app.MapControllerRoute(
-            name: "DirectionAndProduction",
-            pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-        app.MapControllerRoute(
-            name: "Identity",
+            name: "areas",
             pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
         app.MapControllerRoute(
             name: "slugRouteWithId",
