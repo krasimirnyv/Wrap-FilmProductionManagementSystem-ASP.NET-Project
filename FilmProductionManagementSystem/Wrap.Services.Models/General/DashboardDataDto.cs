@@ -10,4 +10,8 @@ public class DashboardDataDto
 
     public IReadOnlyCollection<ProductionDashboardDto> Productions { get; set; }
         = new HashSet<ProductionDashboardDto>();
+    
+    public bool IsUserCrew { get; set; } = false;
+
+    public bool HasOwnProductions { get; set; } = false;
 }

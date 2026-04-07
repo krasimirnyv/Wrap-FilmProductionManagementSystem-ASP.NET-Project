@@ -4,10 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 using Interfaces;
 using Models;
+using Models.Infrastructure;
 using GCommon.Enums;
 
-public class HomeRepository(FilmProductionDbContext dbContext)
-    : BaseRepository(dbContext), IHomeRepository
+public class HomeRepository(FilmProductionDbContext dbContext) : BaseRepository(dbContext), IHomeRepository
 {
     public async Task<int> GetCrewCountAsync()
     {
@@ -41,5 +41,35 @@ public class HomeRepository(FilmProductionDbContext dbContext)
             .ToArrayAsync();
         
         return productions;
+    }
+
+    public async Task<ApplicationUser?> GetApplicationUserDataAsync(Guid applicationUserId)
+    {
+        ApplicationUser? user = await Context!
+            .Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(au => au.Id == applicationUserId);
+        
+        return user;
+    }
+
+    public async Task<Crew?> GetCrewByUserIdAsync(Guid applicationUserId)
+    {
+        Crew? crew = await Context!
+            .CrewMembers
+            .AsNoTracking()
+            .SingleOrDefaultAsync(c => c.UserId == applicationUserId);
+        
+        return crew;
+    }
+
+    public async Task<bool> IsUserOwnsProductionsAsync(Guid userId)
+    {
+        bool hasProductions = await Context!
+            .Productions
+            .AsNoTracking()
+            .AnyAsync(p => p.CreatedByUserId == userId);
+        
+        return hasProductions;
     }
 }
