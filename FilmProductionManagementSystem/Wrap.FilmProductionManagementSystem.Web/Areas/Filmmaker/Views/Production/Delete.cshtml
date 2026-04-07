@@ -91,10 +91,15 @@
                         <div class="flex-grow-1">Scenes</div>
                         <span class="associated-count">@Model.ScenesCount</span>
                     </div>
+                    <div class="associated-data-item">
+                        <i class="bi bi-camera-video-fill"></i>
+                        <div class="flex-grow-1">Assets</div>
+                        <span class="associated-count">@Model.AssetsCount</span>
+                    </div>
 
-                    @if (Model.CrewMembersCount > 0 || Model.CastMembersCount > 0 || Model.ScenesCount > 0)
+                    @if (Model.CrewMembersCount > 0 || Model.CastMembersCount > 0 || Model.ScenesCount > 0 || Model.AssetsCount > 0)
                     {
-                        <div class="alert alert-warning mt-3 mb-0 d-flex gap-2 align-items-center">
+                        <div class="rounded-3 p-3 mx-3 alert-warning mt-3 mb-0 d-flex gap-2 align-items-center">
                             <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
                             <span>All associations above will be permanently removed.</span>
                         </div>
@@ -119,7 +124,7 @@
                                autocomplete="off" />
                     </div>
 
-                    <form asp-area="" asp-controller="Production" asp-action="Delete" asp-route-productionId="@Model.Id" method="post"
+                    <form asp-area="Filmmaker" asp-controller="Production" asp-action="DeleteConfirmed" asp-route-productionId="@Model.Id" method="post"
                           asp-route-slug="@SlugGenerator.GenerateSlug(Model.Title)">
                         @Html.AntiForgeryToken()
 

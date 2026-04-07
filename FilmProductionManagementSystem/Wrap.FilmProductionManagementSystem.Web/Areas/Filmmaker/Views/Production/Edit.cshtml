@@ -1,5 +1,3 @@
-@using static Wrap.GCommon.DataFormat;
-
 @model EditProductionInputModel
 
 @inject ISlugGenerator SlugGenerator;
@@ -32,15 +30,17 @@
             <h2 class="fw-bold mt-3 mb-1" style="color: var(--wrap-dark-blue);">Edit Production</h2>
             <p class="text-muted mb-0">Update the details for your film project</p>
         </div>
-
-        <input type="hidden" asp-for="ProductionId" />
-        <input type="hidden" asp-for="CurrentThumbnailPath" />
         
-        <form asp-area="" asp-controller="Production" asp-action="Edit" asp-route-productionId="@Model.ProductionId"
-              asp-route-slug="@SlugGenerator.GenerateSlug(Model.Title)"
-              method="post" enctype="multipart/form-data" id="editProductionForm">
+        <form asp-area="Filmmaker" asp-controller="Production" asp-action="Edit"
+              asp-route-slug="@SlugGenerator.GenerateSlug(Model.Title)" method="post"
+              enctype="multipart/form-data" id="editProductionForm">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="ProductionId" />
+            <input type="hidden" asp-for="CurrentThumbnailPath" />
+            
             @* ── Thumbnail ── *@
             <div class="section-card">
                 <div class="section-header">

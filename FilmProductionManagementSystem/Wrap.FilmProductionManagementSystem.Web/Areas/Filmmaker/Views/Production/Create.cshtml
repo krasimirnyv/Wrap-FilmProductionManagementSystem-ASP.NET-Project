@@ -1,5 +1,3 @@
-@using static Wrap.GCommon.DataFormat;
-
 @model CreateProductionInputModel
 
 @{
@@ -25,7 +23,7 @@
             <p class="text-muted mb-0">Fill in the details to start your next film project</p>
         </div>
 
-        <form asp-area="" asp-controller="Production" asp-action="Create" method="post" enctype="multipart/form-data" id="createProductionForm">
+        <form asp-area="Filmmaker" asp-controller="Production" asp-action="Create" method="post" enctype="multipart/form-data" id="createProductionForm">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
             @* ── Thumbnail Upload ── *@
