@@ -4,18 +4,21 @@ using Microsoft.AspNetCore.Identity;
 
 using Interfaces;
 using Models.Infrastructure;
-using GCommon.UI;
 
+using static GCommon.ApplicationConstants;
 using static GCommon.OutputMessages.ApplicationRoles;
 
 public class ApplicationRoleSeeder(RoleManager<ApplicationRole> roleManager) : IApplicationRoleSeeder
 {
-    private static IReadOnlyCollection<string> DepartmentAsAbstractRoles
-        => CrewRolesDepartmentCatalog.GetRolesByDepartment().Keys.ToArray().AsReadOnly();
+    private static readonly string[] Roles =
+    [
+        IdentityRoles.Filmmaker,
+        IdentityRoles.Actor
+    ];
     
     public async Task SeedRolesAsync()
     {
-        foreach (string role in DepartmentAsAbstractRoles)
+        foreach (string role in Roles)
         {
             bool isRoleExists = await roleManager.RoleExistsAsync(role);
             if (!isRoleExists)

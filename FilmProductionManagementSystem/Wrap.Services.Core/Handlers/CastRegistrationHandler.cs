@@ -11,6 +11,7 @@ using Data.Repository.Interfaces;
 
 using static GCommon.OutputMessages.Register;
 using static GCommon.DataFormat;
+using static GCommon.ApplicationConstants.IdentityRoles;
 
 public class CastRegistrationHandler(UserManager<ApplicationUser> userManager,
                                      SignInManager<ApplicationUser> signInManager,
@@ -22,8 +23,9 @@ public class CastRegistrationHandler(UserManager<ApplicationUser> userManager,
                                                                                                                              loginRegisterRepository,
                                                                                                                              logger)
 {
-    private readonly ILoginRegisterRepository repository = loginRegisterRepository;
-    
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly ILoginRegisterRepository _loginRegisterRepository = loginRegisterRepository;
+
     protected override IdentityResult ValidateDto(CastRegistrationDto? registrationDto)
     {
         if (registrationDto is null)
@@ -50,6 +52,9 @@ public class CastRegistrationHandler(UserManager<ApplicationUser> userManager,
         return user;
     }
 
+    protected override async Task<IdentityResult> AssignRolesAsync(ApplicationUser user, CastRegistrationDto registrationDto)
+        => await _userManager.AddToRoleAsync(user, Actor);
+    
     protected override string GetPassword(CastRegistrationDto registrationDto)
     {
         string password = registrationDto.Password;
@@ -76,7 +81,7 @@ public class CastRegistrationHandler(UserManager<ApplicationUser> userManager,
             IsDeleted = false
         };
         
-        await repository.CreateCastAsync(newCast);
+        await _loginRegisterRepository.CreateCastAsync(newCast);
 
         int expectedRows = 1;
         return expectedRows;

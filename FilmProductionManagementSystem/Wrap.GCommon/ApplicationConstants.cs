@@ -128,4 +128,13 @@ public static class ApplicationConstants
 
     /* Pagination */
     public const int DefaultProductionsPerPage = 9;
+    public const int DefaultPeoplePerPage = 20;
+    
+    /* Identity Roles */
+    public static class IdentityRoles
+    {
+        public const string Filmmaker = "Filmmaker";
+        
+        public const string Actor = "Actor";
+    }
 }

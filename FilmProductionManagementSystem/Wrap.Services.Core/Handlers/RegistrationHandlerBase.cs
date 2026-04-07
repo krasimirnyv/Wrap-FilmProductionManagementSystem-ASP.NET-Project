@@ -26,12 +26,22 @@ public abstract class RegistrationHandlerBase<TRegistrationDto>(UserManager<Appl
         await using IDbContextTransaction transaction = await loginRegisterRepository.BeginTransactionAsync();
         try
         {
-            IdentityResult result = await CreateIdentityUserAsync(user, registrationDto);
-            if (!result.Succeeded)
+            IdentityResult createResult = await CreateIdentityUserAsync(user, registrationDto);
+            if (!createResult.Succeeded)
             {
                 await loginRegisterRepository.RollbackTransactionAsync(transaction);
-                LogIdentityErrors(result);
-                return result;
+                LogIdentityErrors(createResult);
+                return createResult;
+            }
+
+            IdentityResult roleResult = await AssignRolesAsync(user, registrationDto);
+            if (!roleResult.Succeeded)
+            {
+                await loginRegisterRepository.RollbackTransactionAsync(transaction);
+                try { await userManager.DeleteAsync(user); } catch { /* ignored */ }
+
+                LogIdentityErrors(roleResult);
+                return roleResult;
             }
 
             int expectedRows = await PersistDomainDataAsync(registrationDto, user);
@@ -75,12 +85,13 @@ public abstract class RegistrationHandlerBase<TRegistrationDto>(UserManager<Appl
         return result;
     }
     
+    protected virtual async Task<IdentityResult> AssignRolesAsync(ApplicationUser user, TRegistrationDto registrationDto)
+        => await Task.FromResult(IdentityResult.Success);
+    
     protected virtual void LogIdentityErrors(IdentityResult result)
     {
         foreach (IdentityError error in result.Errors)
-        {
             logger.LogError(string.Format(IdentityCreateFailed, error.Description));
-        }
     }
     
     protected virtual void LogUnhandledException(Exception exception)

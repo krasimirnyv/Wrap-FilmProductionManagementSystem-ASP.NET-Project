@@ -9,6 +9,7 @@ using Data.Models.Infrastructure;
 using Data.Repository.Interfaces;
 
 using static GCommon.OutputMessages.Register;
+using static GCommon.ApplicationConstants.IdentityRoles;
 
 public class CrewRegistrationHandler(UserManager<ApplicationUser> userManager,
                                      SignInManager<ApplicationUser> signInManager,
@@ -18,7 +19,8 @@ public class CrewRegistrationHandler(UserManager<ApplicationUser> userManager,
                                                                                                                                      loginRegisterRepository,
                                                                                                                                      logger)
 {
-    private readonly ILoginRegisterRepository repository = loginRegisterRepository;
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
+    private readonly ILoginRegisterRepository _loginRegisterRepository = loginRegisterRepository;
 
     protected override IdentityResult ValidateDto(CrewRegistrationCompleteDto? registrationDto)
     {
@@ -51,7 +53,7 @@ public class CrewRegistrationHandler(UserManager<ApplicationUser> userManager,
         
         return IdentityResult.Success;
     }
-
+    
     protected override ApplicationUser BuildUser(CrewRegistrationCompleteDto registrationDto)
     {
         CrewRegistrationDraftDto draft = registrationDto.Draft!;
@@ -66,6 +68,9 @@ public class CrewRegistrationHandler(UserManager<ApplicationUser> userManager,
         return user;
     }
 
+    protected override async Task<IdentityResult> AssignRolesAsync(ApplicationUser user, CrewRegistrationCompleteDto registrationDto)
+        => await _userManager.AddToRoleAsync(user, Filmmaker);
+    
     protected override string GetPassword(CrewRegistrationCompleteDto registrationDto)
     {
         string password = registrationDto.Draft!.Password;
@@ -90,8 +95,8 @@ public class CrewRegistrationHandler(UserManager<ApplicationUser> userManager,
             IsDeleted = false
         };
         
-        await repository.CreateCrewAsync(newCrew);
-        await repository.AddCrewSkillsAsync(newCrew.Id, skills);
+        await _loginRegisterRepository.CreateCrewAsync(newCrew);
+        await _loginRegisterRepository.AddCrewSkillsAsync(newCrew.Id, skills);
         
         int expectedRows = 1 + skills.Count;
         return expectedRows;
