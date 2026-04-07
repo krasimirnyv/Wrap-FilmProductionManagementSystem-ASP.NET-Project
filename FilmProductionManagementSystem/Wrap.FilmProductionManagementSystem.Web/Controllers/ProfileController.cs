@@ -430,6 +430,7 @@ public class ProfileController(IProfileService profileService,
         if (!inputModel.IsConfirmed)
         {
             DeleteProfileInputModel filled = await FillDeleteFilmmakerModelAsync(username, inputModel);
+            TempData[WarningTempDataKey] = CheckBoxForDeleteErrorMessage;
             return View("DeleteCrewProfile", filled);
         }
         
@@ -509,6 +510,7 @@ public class ProfileController(IProfileService profileService,
         if (!inputModel.IsConfirmed)
         {
             DeleteProfileInputModel filled = await FillDeleteActorModelAsync(username, inputModel);
+            TempData[WarningTempDataKey] = CheckBoxForDeleteErrorMessage;
             return View("DeleteCastProfile", filled);
         }
         

@@ -62,6 +62,7 @@ public static class EntityConstants
         
         public const int NicknameMaxLength = 100;
         
+        public const int RoleMinLength = 1;
         public const int RoleMaxLength = 200;
         
         public const int BiographyMaxLength = 4000;

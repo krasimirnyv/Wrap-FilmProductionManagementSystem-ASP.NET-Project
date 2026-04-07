@@ -46,7 +46,7 @@ public class CastProfileService(UserManager<ApplicationUser> userManager,
             PhoneNumber = cast.User.PhoneNumber!,
             Age = cast.Age.ToString(),
             Gender = cast.Gender.ToString(),
-            IsActive = cast.IsActive,
+            IsActive = productions.Any(),
             Biography = cast.Biography,
             
             Productions = productions
@@ -195,6 +195,5 @@ public class CastProfileService(UserManager<ApplicationUser> userManager,
             .SerializeObject(castPersonalData, Formatting.Indented);
         
         return json;
-        
     }
 }

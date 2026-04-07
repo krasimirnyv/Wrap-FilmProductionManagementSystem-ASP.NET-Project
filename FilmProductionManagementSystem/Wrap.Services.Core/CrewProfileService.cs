@@ -51,7 +51,7 @@ public class CrewProfileService(UserManager<ApplicationUser> userManager,
             UserName = crew.User.UserName!,
             Email = crew.User.Email!,
             PhoneNumber = crew.User.PhoneNumber!,
-            IsActive = crew.IsActive,
+            IsActive = productions.Any(),
             Biography = crew.Biography,
             DepartmentSkills = departmentSkills,
 

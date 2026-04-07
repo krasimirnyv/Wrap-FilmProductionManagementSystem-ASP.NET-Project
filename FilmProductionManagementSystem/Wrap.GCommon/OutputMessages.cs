@@ -73,6 +73,15 @@ public static class OutputMessages
         
         public const string CrudSuccessMessage = "Production is {0} successfully!";
         public const string CrudFailureMessage = "Exception occured while {0} the project. {1}";
+
+        public const string CastTryingToCreateProductionMessage = "Actors are not allowed to create movie productions, only filmmakers can create them!";
+        public const string ManageDenied = "You cannot manage this production due to your role in production hierarchy.";
+
+        public const string AddedCrew = "Filmmaker added to production successfully.";
+        public const string AddedCast = "Actor added to production successfully.";
+        public const string RemovedCrew = "Filmmaker removed from production successfully.";
+        public const string RemovedCast = "Actor removed from production successfully.";
+        public const string SomethingWentWrong = "Sorry but something went wrong! Please try again later.";
     }
 
     public static class Profile
