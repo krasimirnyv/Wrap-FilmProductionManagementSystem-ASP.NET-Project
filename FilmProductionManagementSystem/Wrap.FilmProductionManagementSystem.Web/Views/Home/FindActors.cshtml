@@ -1,0 +1,237 @@
+@model FindActorsViewModel
+
+@{
+    ViewData[TitleDataKey] = "Find Actors";
+
+    string? productionId = Model.ProductionId;
+    string? search = Model.Search;
+    byte? age = Model.Age;
+    string? gender = Model.Gender;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+}
+
+<div class="production-wrapper">
+    <div class="container">
+
+        <partial name="_TempDataPartial"></partial>
+
+        @* ── Header ── *@
+        <div class="production-header-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold mb-1" style="color: var(--wrap-dark-blue);">
+                    <i class="bi bi-person-video3 me-2" style="color: var(--wrap-blue);"></i>
+                    Find Actors
+                </h1>
+                <p class="text-muted mb-0">
+                    Browse actors and filter by name, age or gender.
+                </p>
+
+                @if (!string.IsNullOrWhiteSpace(productionId))
+                {
+                    <div class="mt-2">
+                        <span class="badge bg-secondary">Context: Production</span>
+
+                        @if (Model.CanManageProduction)
+                        {
+                            <span class="badge bg-success ms-2">You can manage this production</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark ms-2">Read-only (no permission to add)</span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                @if (!string.IsNullOrWhiteSpace(productionId))
+                {
+                    <a asp-area=""
+                       asp-controller="Production"
+                       asp-action="Details"
+                       asp-route-productionId="@productionId"
+                       class="btn btn-production-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to production
+                    </a>
+                }
+                else
+                {
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Dashboard"
+                       class="btn btn-production-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
+                }
+            </div>
+        </div>
+
+        @* ── Filters row ── *@
+        <div class="section-card py-3 px-4">
+            <form method="get"
+                  asp-area=""
+                  asp-controller="Home"
+                  asp-action="FindActors">
+
+                <input type="hidden" name="ProductionId" value="@productionId" />
+
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text"
+                                  style="border-color: var(--wrap-blue); color: var(--wrap-blue);">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text"
+                                   name="Search"
+                                   value="@search"
+                                   class="form-control"
+                                   placeholder="Search by first name / last name / nickname…" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-1">
+                        <input type="number"
+                               name="Age"
+                               value="@(age?.ToString() ?? string.Empty)"
+                               class="form-control"
+                               min="0" max="120"
+                               placeholder="Age" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <select name="Gender" class="form-select">
+                            <option value="" selected="@(string.IsNullOrWhiteSpace(gender))">All genders</option>
+                            <option value="Male" selected="@(string.Equals(gender, "Male", StringComparison.OrdinalIgnoreCase))">Male</option>
+                            <option value="Female" selected="@(string.Equals(gender, "Female", StringComparison.OrdinalIgnoreCase))">Female</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 d-flex ms-auto justify-content-end gap-2">
+                        <button type="submit" class="btn btn-sm btn-production" >
+                            <i class="bi bi-funnel-fill me-1"></i>Apply
+                        </button>
+
+                        <a class="btn btn-sm btn-production-secondary"
+                           asp-area=""
+                           asp-controller="Home"
+                           asp-action="FindActors"
+                           asp-route-ProductionId="@productionId">
+                            <i class="bi bi-x-circle me-1"></i>Clear
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="text-muted small">
+                        @Model.TotalCount @(Model.TotalCount == 1 ? "actor" : "actors") found
+                    </span>
+
+                    <partial name="_ActorsPaginationPartial" model="Model" />
+                </div>
+            </form>
+        </div>
+
+        @* ── Results ── *@
+        @if (!Model.ActorList.Any())
+        {
+            <div class="section-card mt-4">
+                <div class="empty-state">
+                    <i class="bi bi-person-video3"></i>
+                    <p class="mt-2">No actors match your filters.</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row mt-4">
+                @foreach (ActorListViewModel actor in Model.ActorList)
+                {
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="section-card h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@actor.ProfileImagePath"
+                                     alt="@actor.FullName"
+                                     style="width:70px; height:70px; object-fit:cover; border-radius:16px;" />
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold" style="color:var(--wrap-dark-blue);">
+                                        @actor.FullName
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(actor.Nickname))
+                                    {
+                                        <div class="text-muted small">@actor.Nickname</div>
+                                    }
+                                    <div class="badge bg-secondary mt-2">
+                                        Age @actor.Age · @actor.Gender
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-3" />
+
+                            @* Add-to-production (only when in production context + permission) *@
+                            @if (!string.IsNullOrWhiteSpace(productionId) && Model.CanManageProduction)
+                            {
+                                @if (actor.IsAlreadyInProduction)
+                                {
+                                    <div class="alert alert-info mb-0 d-flex gap-2 align-items-center">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Already in this production.</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <form asp-area="Filmmaker"
+                                          asp-controller="Production"
+                                          asp-action="AddActorToProduction"
+                                          method="post"
+                                          class="d-flex flex-column gap-2">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden" name="ProductionId" value="@productionId" />
+                                        <input type="hidden" name="CastId" value="@actor.CastId" />
+
+                                        <div>
+                                            <label class="form-label small text-muted mb-1">Role in production</label>
+                                            <input type="text"
+                                                   name="RoleName"
+                                                   class="form-control"
+                                                   placeholder="e.g. Detective Ivanov"
+                                                   maxlength="80"
+                                                   required />
+                                            <div class="form-text">This is the character / role name (free text).</div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-production w-100 mt-2">
+                                            <i class="bi bi-person-plus-fill me-1"></i>Add to production
+                                        </button>
+                                    </form>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-muted small">
+                                    @if (!string.IsNullOrWhiteSpace(productionId))
+                                    {
+                                        <span>You don’t have permission to add members.</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Select a production (context) to add members.</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <partial name="_ActorsPaginationPartial" model="Model" />
+        }
+    </div>
+</div>

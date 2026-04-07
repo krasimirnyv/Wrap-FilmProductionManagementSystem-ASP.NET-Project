@@ -1,0 +1,270 @@
+@model FindFilmmakersViewModel
+
+@{
+    ViewData[TitleDataKey] = "Find Filmmakers";
+
+    IReadOnlyDictionary<string, IReadOnlyCollection<CrewRoleType>> rolesByDept = GetRolesByDepartment();
+
+    string? productionId = Model.ProductionId;
+    string? search = Model.Search;
+    int? roleTypeRaw = Model.RoleType;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/production.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+}
+
+<div class="production-wrapper">
+    <div class="container">
+
+        <partial name="_TempDataPartial"></partial>
+
+        @* ── Header ── *@
+        <div class="production-header-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold mb-1" style="color: var(--wrap-dark-blue);">
+                    <i class="bi bi-people me-2" style="color: var(--wrap-blue);"></i>
+                    Find Filmmakers
+                </h1>
+                <p class="text-muted mb-0">
+                    Browse filmmakers and filter by name or crew role.
+                </p>
+
+                @if (!string.IsNullOrWhiteSpace(productionId))
+                {
+                    <div class="mt-2">
+                        @if (Model.CanManageProduction)
+                        {
+                            <span class="badge bg-success ms-2">You can manage this production</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark ms-2">Read-only (no permission to add)</span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                @if (!string.IsNullOrWhiteSpace(productionId))
+                {
+                    <a asp-area=""
+                       asp-controller="Production"
+                       asp-action="Details"
+                       asp-route-productionId="@productionId"
+                       class="btn btn-production-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to production
+                    </a>
+                }
+                else
+                {
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="Dashboard"
+                       class="btn btn-production-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
+                }
+            </div>
+        </div>
+
+        @* ── Filters row ── *@
+        <div class="section-card py-3 px-4">
+            <form method="get"
+                  asp-area=""
+                  asp-controller="Home"
+                  asp-action="FindFilmmakers">
+                <input type="hidden" name="ProductionId" value="@productionId" />
+
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text"
+                                  style="border-color: var(--wrap-blue); color: var(--wrap-blue);">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text"
+                                   name="Search"
+                                   value="@search"
+                                   class="form-control"
+                                   placeholder="Search by first name / last name / nickname…" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <select name="RoleType" class="form-select">
+                            <option value="">All crew roles</option>
+                            @foreach (CrewRoleType role in Enum.GetValues(typeof(CrewRoleType)).Cast<CrewRoleType>())
+                            {
+                                int raw = (int)role;
+                                <option value="@raw" selected="@(roleTypeRaw == raw)">
+                                    @GetDisplayName(role)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex ms-auto justify-content-end gap-2">
+                        <button type="submit" class="btn btn-sm btn-production">
+                            <i class="bi bi-funnel-fill me-1"></i>Apply
+                        </button>
+
+                        <a class="btn btn-sm btn-production-secondary"
+                           asp-area=""
+                           asp-controller="Home"
+                           asp-action="FindFilmmakers"
+                           asp-route-ProductionId="@productionId">
+                            <i class="bi bi-x-circle me-1"></i>Clear
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="text-muted small">
+                        @Model.TotalCount @(Model.TotalCount == 1 ? "filmmaker" : "filmmakers") found
+                    </span>
+
+                    <partial name="_FilmmakerPaginationPartial" model="Model" />
+                </div>
+            </form>
+        </div>
+
+        @* ── Results ── *@
+        @if (!Model.FilmmakerList.Any())
+        {
+            <div class="section-card mt-4">
+                <div class="empty-state">
+                    <i class="bi bi-people"></i>
+                    <p class="mt-2">No filmmakers match your filters.</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row mt-4">
+                @foreach (FilmmakerListViewModel filmmakerList in Model.FilmmakerList)
+                {
+                    string deptSelectId = $"dept_{filmmakerList.CrewId}";
+                    string roleSelectId = $"role_{filmmakerList.CrewId}";
+
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="section-card h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@filmmakerList.ProfileImagePath"
+                                     alt="@filmmakerList.FullName"
+                                     style="width:70px; height:70px; object-fit:cover; border-radius:16px;" />
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold" style="color:var(--wrap-dark-blue);">
+                                        @filmmakerList.FullName
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(filmmakerList.Nickname))
+                                    {
+                                        <div class="text-muted small">@filmmakerList.Nickname</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(filmmakerList.TopRole))
+                                    {
+                                        <div class="badge bg-secondary mt-2">
+                                            @filmmakerList.TopRole
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <hr class="my-3" />
+
+                            @* Add-to-production (only when in production context + permission) *@
+                            @if (!string.IsNullOrWhiteSpace(productionId) && Model.CanManageProduction)
+                            {
+                                @if (filmmakerList.IsAlreadyInProduction)
+                                {
+                                    <div class="alert alert-info mb-0 d-flex gap-2 align-items-center">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Already in this production.</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <form asp-area="Filmmaker"
+                                          asp-controller="Production"
+                                          asp-action="AddFilmmakerToProduction"
+                                          method="post"
+                                          class="d-flex flex-column gap-2">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden" name="ProductionId" value="@productionId" />
+                                        <input type="hidden" name="CrewId" value="@filmmakerList.CrewId" />
+
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <label class="form-label small text-muted mb-1">Department</label>
+                                                <select id="@deptSelectId"
+                                                        class="form-select"
+                                                        data-role-dept="@roleSelectId">
+                                                    <option value="">— Select —</option>
+                                                    @foreach (string dept in rolesByDept.Keys)
+                                                    {
+                                                        <option value="@dept">@dept</option>
+                                                    }
+                                                </select>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <label class="form-label small text-muted mb-1">Role</label>
+                                                <select name="RoleType"
+                                                        id="@roleSelectId"
+                                                        class="form-select"
+                                                        disabled
+                                                        required>
+                                                    <option value="">— Select dept first —</option>
+
+                                                    @foreach (KeyValuePair<string, IReadOnlyCollection<CrewRoleType>> dept in rolesByDept)
+                                                    {
+                                                        <optgroup label="@dept.Key" data-phase="@dept.Key" style="display:none;">
+                                                            @foreach (CrewRoleType role in dept.Value)
+                                                            {
+                                                                <option value="@role.ToString()">
+                                                                    @GetDisplayName(role)
+                                                                </option>
+                                                            }
+                                                        </optgroup>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-production w-100 mt-2">
+                                            <i class="bi bi-person-plus-fill me-1"></i>Add to production
+                                        </button>
+                                    </form>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-muted small">
+                                    @if (!string.IsNullOrWhiteSpace(productionId))
+                                    {
+                                        <span>You don’t have permission to add members.</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Select a production (context) to add members.</span>
+                                    }
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            <partial name="_FilmmakerPaginationPartial" model="Model" />
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/people/role-picker.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,110 @@
+@model Wrap.Web.ViewModels.FindPeople.FindFilmmakersViewModel
+
+@{
+    int page = Model.PageNumber;
+    int total = Model.TotalPages;
+    int chunkSize = Model.ShowingPages;
+
+    int chunkStart = ((page - 1) / chunkSize) * chunkSize + 1;
+    int chunkEnd = Math.Min(chunkStart + chunkSize - 1, total);
+
+    bool showPrevious = page > 1;
+    bool showNext = page < total;
+
+    bool showBackwardEllipsis = chunkStart > 1;
+    int backwardEllipsisTarget = Math.Max(1, chunkStart - chunkSize);
+
+    bool showForwardEllipsis = chunkEnd < total;
+    int forwardEllipsisTarget = Math.Min(total, chunkStart + chunkSize);
+}
+
+@if (total > 1)
+{
+    <nav aria-label="Filmmakers pagination">
+        <ul class="pagination pagination-sm mb-0 production-pagination">
+
+            @if (showPrevious)
+            {
+                <li class="page-item">
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="FindFilmmakers"
+                       asp-route-PageNumber="@(page - 1)"
+                       asp-route-Search="@Model.Search"
+                       asp-route-RoleType="@Model.RoleType"
+                       asp-route-ProductionId="@Model.ProductionId"
+                       class="page-link">
+                        Previous
+                    </a>
+                </li>
+            }
+
+            @if (showBackwardEllipsis)
+            {
+                <li class="page-item">
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="FindFilmmakers"
+                       asp-route-PageNumber="@backwardEllipsisTarget"
+                       asp-route-Search="@Model.Search"
+                       asp-route-RoleType="@Model.RoleType"
+                       asp-route-ProductionId="@Model.ProductionId"
+                       class="page-link"
+                       aria-label="Previous pages">
+                        ...
+                    </a>
+                </li>
+            }
+
+            @for (int i = chunkStart; i <= chunkEnd; i++)
+            {
+                <li class="page-item @(page == i ? "active" : string.Empty)"
+                    aria-current="@(page == i ? "page" : null)">
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="FindFilmmakers"
+                       asp-route-PageNumber="@i"
+                       asp-route-Search="@Model.Search"
+                       asp-route-RoleType="@Model.RoleType"
+                       asp-route-ProductionId="@Model.ProductionId"
+                       class="page-link">
+                        @i
+                    </a>
+                </li>
+            }
+
+            @if (showForwardEllipsis)
+            {
+                <li class="page-item">
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="FindFilmmakers"
+                       asp-route-PageNumber="@forwardEllipsisTarget"
+                       asp-route-Search="@Model.Search"
+                       asp-route-RoleType="@Model.RoleType"
+                       asp-route-ProductionId="@Model.ProductionId"
+                       class="page-link"
+                       aria-label="Next pages">
+                        ...
+                    </a>
+                </li>
+            }
+
+            @if (showNext)
+            {
+                <li class="page-item">
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="FindFilmmakers"
+                       asp-route-PageNumber="@(page + 1)"
+                       asp-route-Search="@Model.Search"
+                       asp-route-RoleType="@Model.RoleType"
+                       asp-route-ProductionId="@Model.ProductionId"
+                       class="page-link">
+                        Next
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+}
