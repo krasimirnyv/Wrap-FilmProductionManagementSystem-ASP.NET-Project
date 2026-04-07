@@ -30,7 +30,7 @@ public class ProfileServiceTests
         Crew crew = new Crew { Id = Guid.NewGuid() };
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCrewByUsernameAsync(username))
+            .Setup(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync(crew);
 
         // Act
@@ -39,7 +39,7 @@ public class ProfileServiceTests
         // Assert
         Assert.That(result, Is.True);
 
-        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
     }
 
@@ -50,7 +50,7 @@ public class ProfileServiceTests
         const string username = "missing.user";
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCrewByUsernameAsync(username))
+            .Setup(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync((Crew?)null);
 
         // Act
@@ -59,7 +59,7 @@ public class ProfileServiceTests
         // Assert
         Assert.That(result, Is.False);
 
-        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
     }
 
@@ -72,7 +72,7 @@ public class ProfileServiceTests
         Cast cast = new Cast { Id = Guid.NewGuid() };
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync(cast);
 
         // Act
@@ -81,7 +81,7 @@ public class ProfileServiceTests
         // Assert
         Assert.That(result, Is.True);
 
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
     }
 
@@ -92,7 +92,7 @@ public class ProfileServiceTests
         const string username = "missing.user";
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync((Cast?)null);
 
         // Act
@@ -101,7 +101,7 @@ public class ProfileServiceTests
         // Assert
         Assert.That(result, Is.False);
 
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
     }
 
@@ -114,7 +114,7 @@ public class ProfileServiceTests
         Crew crew = new Crew { Id = Guid.NewGuid() };
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCrewByUsernameAsync(username))
+            .Setup(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync(crew);
 
         // Act
@@ -124,8 +124,8 @@ public class ProfileServiceTests
         Assert.That(result.IsCrew, Is.True);
         Assert.That(result.IsCast, Is.False);
 
-        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsync(username), Times.Once);
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(It.IsAny<string>()), Times.Never);
+        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(It.IsAny<string>()), Times.Never);
         profileRepositoryMock.VerifyNoOtherCalls();
     }
 
@@ -136,13 +136,13 @@ public class ProfileServiceTests
         const string username = "cast.user";
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCrewByUsernameAsync(username))
+            .Setup(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync((Crew?)null);
 
         Cast cast = new Cast { Id = Guid.NewGuid() };
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync(cast);
 
         // Act
@@ -152,8 +152,8 @@ public class ProfileServiceTests
         Assert.That(result.IsCrew, Is.False);
         Assert.That(result.IsCast, Is.True);
 
-        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsync(username), Times.Once);
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
     }
 
@@ -164,11 +164,11 @@ public class ProfileServiceTests
         const string username = "missing.user";
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCrewByUsernameAsync(username))
+            .Setup(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync((Crew?)null);
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync((Cast?)null);
 
         // Act
@@ -178,8 +178,8 @@ public class ProfileServiceTests
         Assert.That(result.IsCrew, Is.False);
         Assert.That(result.IsCast, Is.False);
 
-        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsync(username), Times.Once);
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCrewByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
     }
 }
