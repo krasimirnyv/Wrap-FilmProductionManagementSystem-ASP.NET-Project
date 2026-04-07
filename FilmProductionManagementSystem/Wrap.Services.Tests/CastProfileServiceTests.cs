@@ -1,8 +1,13 @@
 namespace Wrap.Services.Tests;
 
+using System.Security.Claims;
+
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication;
 
 using Moq;
 using NUnit.Framework;
@@ -11,6 +16,7 @@ using Data.Models;
 using Data.Models.Infrastructure;
 using Data.Models.MappingEntities;
 using Data.Repository.Interfaces;
+using Data.Dtos.Cast;
 using Core;
 using Core.Utilities.ImageLogic.Interfaces;
 using Models.Profile;
@@ -23,6 +29,8 @@ using static GCommon.DataFormat;
 [TestFixture]
 public class CastProfileServiceTests
 {
+    private Mock<UserManager<ApplicationUser>> userManagerMock = null!;
+    private Mock<SignInManager<ApplicationUser>> signInManagerMock = null!;
     private Mock<IProfileRepository> profileRepositoryMock = null!;
     private Mock<IImageService> imageServiceMock = null!;
     private Mock<IVariantImageStrategyResolver> imageStrategyResolverMock = null!;
@@ -33,6 +41,9 @@ public class CastProfileServiceTests
     [SetUp]
     public void SetUp()
     {
+        userManagerMock = CreateUserManagerMock();
+        signInManagerMock = CreateSignInManagerMock(userManagerMock.Object);
+        
         profileRepositoryMock = new Mock<IProfileRepository>(MockBehavior.Strict);
         imageServiceMock = new Mock<IImageService>(MockBehavior.Strict);
         imageStrategyResolverMock = new Mock<IVariantImageStrategyResolver>(MockBehavior.Strict);
@@ -40,6 +51,8 @@ public class CastProfileServiceTests
 
         castProfileService = new CastProfileService
         (
+            userManagerMock.Object,
+            signInManagerMock.Object,
             profileRepositoryMock.Object,
             imageServiceMock.Object,
             imageStrategyResolverMock.Object,
@@ -54,7 +67,7 @@ public class CastProfileServiceTests
         const string username = "missing.user";
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync((Cast?)null);
 
         // Act
@@ -64,7 +77,7 @@ public class CastProfileServiceTests
         // Assert
         Assert.That(ex.Message, Does.Contain(string.Format(CastNotFoundMessage, username)));
 
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
 
         imageServiceMock.VerifyNoOtherCalls();
@@ -162,7 +175,7 @@ public class CastProfileServiceTests
         };
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync(cast);
 
         profileRepositoryMock
@@ -214,7 +227,7 @@ public class CastProfileServiceTests
         Assert.That(sceneDto2.ProductionTitle, Is.EqualTo("Production Two"));
         Assert.That(sceneDto2.CharacterName, Is.EqualTo("Villain"));
 
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.Verify(pr => pr.GetCastProductionsAsync(cast.Id), Times.Once);
         profileRepositoryMock.Verify(pr => pr.GetCastScenesAsync(cast.Id), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
@@ -230,7 +243,7 @@ public class CastProfileServiceTests
         const string username = "missing.user";
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync((Cast?)null);
 
         // Act
@@ -240,7 +253,7 @@ public class CastProfileServiceTests
         // Assert
         Assert.That(ex.Message, Does.Contain(string.Format(CastNotFoundMessage, username)));
 
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
 
         imageServiceMock.VerifyNoOtherCalls();
@@ -266,7 +279,7 @@ public class CastProfileServiceTests
             biography: "bio");
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsNoTrackingAsync(username))
             .ReturnsAsync(cast);
 
         // Act
@@ -286,7 +299,7 @@ public class CastProfileServiceTests
         Assert.That(result.Age, Is.EqualTo(cast.Age.ToString()));
         Assert.That(result.Gender, Is.EqualTo(cast.Gender.ToString()));
 
-        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsNoTrackingAsync(username), Times.Once);
         profileRepositoryMock.VerifyNoOtherCalls();
 
         imageServiceMock.VerifyNoOtherCalls();
@@ -316,7 +329,7 @@ public class CastProfileServiceTests
             .ReturnsAsync(transactionMock.Object);
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastForUpdateAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsync(username))
             .ReturnsAsync((Cast?)null);
 
         profileRepositoryMock
@@ -330,7 +343,7 @@ public class CastProfileServiceTests
         Assert.That(ex.Message, Does.Contain(string.Format(CastNotFoundMessage, username)));
 
         profileRepositoryMock.Verify(pr => pr.BeginTransactionAsync(), Times.Once);
-        profileRepositoryMock.Verify(pr => pr.GetCastForUpdateAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
         profileRepositoryMock.Verify(pr => pr.RollbackTransactionAsync(transactionMock.Object), Times.Once);
         profileRepositoryMock.Verify(pr => pr.CommitTransactionAsync(It.IsAny<IDbContextTransaction>()), Times.Never);
         profileRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Never);
@@ -375,7 +388,7 @@ public class CastProfileServiceTests
             .ReturnsAsync(transactionMock.Object);
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastForUpdateAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsync(username))
             .ReturnsAsync(cast);
 
         profileRepositoryMock
@@ -398,7 +411,7 @@ public class CastProfileServiceTests
         Assert.That(cast.ProfileImagePath, Is.EqualTo("/img/profile/old.webp")); // unchanged
 
         profileRepositoryMock.Verify(pr => pr.BeginTransactionAsync(), Times.Once);
-        profileRepositoryMock.Verify(pr => pr.GetCastForUpdateAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
         profileRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Once);
         profileRepositoryMock.Verify(pr => pr.CommitTransactionAsync(transactionMock.Object), Times.Once);
         profileRepositoryMock.Verify(pr => pr.RollbackTransactionAsync(It.IsAny<IDbContextTransaction>()), Times.Never);
@@ -448,7 +461,7 @@ public class CastProfileServiceTests
             .ReturnsAsync(transactionMock.Object);
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastForUpdateAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsync(username))
             .ReturnsAsync(cast);
 
         imageStrategyResolverMock
@@ -477,7 +490,7 @@ public class CastProfileServiceTests
         imageServiceMock.Verify(img => img.ReplaceAsync(castDto.CurrentProfileImagePath, castDto.ProfileImage, strategy, It.IsAny<CancellationToken>()), Times.Once);
 
         profileRepositoryMock.Verify(pr => pr.BeginTransactionAsync(), Times.Once);
-        profileRepositoryMock.Verify(pr => pr.GetCastForUpdateAsync(username), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
         profileRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Once);
         profileRepositoryMock.Verify(pr => pr.CommitTransactionAsync(transactionMock.Object), Times.Once);
         profileRepositoryMock.Verify(pr => pr.RollbackTransactionAsync(It.IsAny<IDbContextTransaction>()), Times.Never);
@@ -527,7 +540,7 @@ public class CastProfileServiceTests
             .ReturnsAsync(transactionMock.Object);
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastForUpdateAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsync(username))
             .ReturnsAsync(cast);
 
         imageStrategyResolverMock
@@ -591,7 +604,7 @@ public class CastProfileServiceTests
             .ReturnsAsync(transactionMock.Object);
 
         profileRepositoryMock
-            .Setup(pr => pr.GetCastForUpdateAsync(username))
+            .Setup(pr => pr.GetCastByUsernameAsync(username))
             .ReturnsAsync(cast);
 
         profileRepositoryMock
@@ -615,10 +628,305 @@ public class CastProfileServiceTests
         imageStrategyResolverMock.VerifyNoOtherCalls();
     }
 
-    // ---------------------------
-    // Helpers
-    // ---------------------------
+    [Test]
+    public void GetDeleteCastProfileAsync_WhenCastNotFound_ThrowsArgumentNullExceptionWithMessage()
+    {
+        // Arrange
+        const string username = "missing.user";
 
+        profileRepositoryMock
+            .Setup(pr => pr.GetCastWithAllDataIncludedByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync((Cast?)null);
+
+        // Act
+        ArgumentNullException? ex = Assert.ThrowsAsync<ArgumentNullException>(
+            () => castProfileService.GetDeleteCastProfileAsync(username));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(CastNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr => pr.GetCastWithAllDataIncludedByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task GetDeleteCastProfileAsync_WhenCastExists_MapsDeleteDtoCorrectly()
+    {
+        // Arrange
+        const string username = "cast.user";
+
+        Cast cast = CreateCast(
+            username: username,
+            email: "cast@wrap.local",
+            phone: "+359888000111",
+            firstName: "A",
+            lastName: "B",
+            nickname: null, 
+            profileImagePath: "/img/profile/cast.webp",
+            birthDate: new DateTime(2000, 1, 1),
+            isActive: true,
+            biography: "bio");
+
+        // Simulate related data for count
+        cast.CastMemberProductions = new List<ProductionCast> { new(), new() };
+        cast.CastMemberScenes = new List<SceneCast> { new(), new(), new() };
+
+        profileRepositoryMock
+            .Setup(pr => pr.GetCastWithAllDataIncludedByUsernameAsNoTrackingAsync(username))
+            .ReturnsAsync(cast);
+
+        // Act
+        DeleteProfileDto result = await castProfileService.GetDeleteCastProfileAsync(username);
+
+        // Assert
+        Assert.That(result.FirstName, Is.EqualTo(cast.FirstName));
+        Assert.That(result.LastName, Is.EqualTo(cast.LastName));
+        Assert.That(result.ProfileImagePath, Is.EqualTo(cast.ProfileImagePath));
+        Assert.That(result.UserName, Is.EqualTo(cast.User.UserName));
+        Assert.That(result.Email, Is.EqualTo(cast.User.Email));
+        Assert.That(result.PhoneNumber, Is.EqualTo(cast.User.PhoneNumber));
+        Assert.That(result.ProductionsCount, Is.EqualTo(cast.CastMemberProductions.Count));
+        Assert.That(result.ScenesCount, Is.EqualTo(cast.CastMemberScenes.Count));
+
+        profileRepositoryMock.Verify(pr => pr.GetCastWithAllDataIncludedByUsernameAsNoTrackingAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+
+        imageServiceMock.VerifyNoOtherCalls();
+        imageStrategyResolverMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public void DeleteCastProfileAsync_WhenCastNotFound_ThrowsArgumentNullException()
+    {
+        // Arrange
+        const string username = "missing.user";
+        DeleteProfileDto dto = new DeleteProfileDto { Password = "password" };
+
+        profileRepositoryMock
+            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .ReturnsAsync((Cast?)null);
+
+        // Act
+        ArgumentNullException? ex = Assert.ThrowsAsync<ArgumentNullException>(
+            () => castProfileService.DeleteCastProfileAsync(username, dto));
+
+        // Assert
+        Assert.That(ex.Message, Does.Contain(string.Format(CastNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task DeleteCastProfileAsync_WhenPasswordInvalid_ReturnsFalseAndLogsError()
+    {
+        // Arrange
+        const string username = "cast.user";
+        DeleteProfileDto dto = new DeleteProfileDto { Password = "wrong_password" };
+
+        Cast cast = CreateCast(
+            username: username,
+            email: "cast@wrap.local",
+            phone: "+359888000111",
+            firstName: "A",
+            lastName: "B",
+            nickname: null, 
+            profileImagePath: "/img/profile/cast.webp",
+            birthDate: new DateTime(2000, 1, 1),
+            isActive: true,
+            biography: "bio");
+
+        profileRepositoryMock
+            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .ReturnsAsync(cast);
+
+        userManagerMock
+            .Setup(um => um.CheckPasswordAsync(cast.User, dto.Password))
+            .ReturnsAsync(false);
+
+        // Act
+        bool result = await castProfileService.DeleteCastProfileAsync(username, dto);
+
+        // Assert
+        Assert.That(result, Is.False);
+
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        userManagerMock.Verify(um => um.CheckPasswordAsync(cast.User, dto.Password), Times.Once);
+        
+        // Ensure data is not deleted
+        profileRepositoryMock.Verify(pr => pr.DeleteCastProfileAsync(It.IsAny<Guid>()), Times.Never);
+        profileRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Never);
+        imageServiceMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task DeleteCastProfileAsync_WhenValid_DeletesProfileAndReturnsTrue()
+    {
+        // Arrange
+        const string username = "cast.user";
+        DeleteProfileDto dto = new DeleteProfileDto { Password = "correct_password" };
+
+        Cast cast = CreateCast(
+            username: username,
+            email: "cast@wrap.local",
+            phone: "+359888000111",
+            firstName: "A",
+            lastName: "B",
+            nickname: null, 
+            profileImagePath: "/img/profile/cast.webp",
+            birthDate: new DateTime(2000, 1, 1),
+            isActive: true,
+            biography: "bio");
+
+        IVariantImageStrategy strategy = Mock.Of<IVariantImageStrategy>();
+
+        profileRepositoryMock
+            .Setup(pr => pr.GetCastByUsernameAsync(username))
+            .ReturnsAsync(cast);
+
+        userManagerMock
+            .Setup(um => um.CheckPasswordAsync(cast.User, dto.Password))
+            .ReturnsAsync(true);
+
+        imageStrategyResolverMock
+            .Setup(isr => isr.Resolve(ProfileFolderName))
+            .Returns(strategy);
+
+        imageServiceMock
+            .Setup(img => img.DeleteAsync(cast.ProfileImagePath, strategy, It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        profileRepositoryMock
+            .Setup(pr => pr.DeleteCastProfileAsync(cast.Id))
+            .ReturnsAsync(true);
+
+        profileRepositoryMock
+            .Setup(pr => pr.SaveAllChangesAsync())
+            .ReturnsAsync(1);
+
+        signInManagerMock
+            .Setup(sm => sm.SignOutAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        bool result = await castProfileService.DeleteCastProfileAsync(username, dto);
+
+        // Assert
+        Assert.That(result, Is.True);
+
+        profileRepositoryMock.Verify(pr => pr.GetCastByUsernameAsync(username), Times.Once);
+        userManagerMock.Verify(um => um.CheckPasswordAsync(cast.User, dto.Password), Times.Once);
+        imageStrategyResolverMock.Verify(isr => isr.Resolve(ProfileFolderName), Times.Once);
+        imageServiceMock.Verify(img => img.DeleteAsync(cast.ProfileImagePath, strategy, It.IsAny<CancellationToken>()), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.DeleteCastProfileAsync(cast.Id), Times.Once);
+        profileRepositoryMock.Verify(pr => pr.SaveAllChangesAsync(), Times.Once);
+        signInManagerMock.Verify(sm => sm.SignOutAsync(), Times.Once);
+    }
+
+    [Test]
+    public void DownloadCastProfileDataAsync_WhenDataIsNull_ThrowsArgumentNullException()
+    {
+        // Arrange
+        const string username = "missing.user";
+
+        profileRepositoryMock
+            .Setup(pr => pr.DownloadCastDataAsync(username))
+            .ReturnsAsync((CastPersonalDataDto[]?)null);
+
+        // Act
+        ArgumentNullException? ex = Assert.ThrowsAsync<ArgumentNullException>(
+            () => castProfileService.DownloadCastProfileDataAsync(username));
+
+        // Assert
+        // Съобразено е с това, че в сървиса се хвърля CrewNotFoundMessage (вероятно typo в кода ти).
+        Assert.That(ex.Message, Does.Contain(string.Format(CrewNotFoundMessage, username)));
+
+        profileRepositoryMock.Verify(pr => pr.DownloadCastDataAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+
+    [Test]
+    public async Task DownloadCastProfileDataAsync_WhenDataExists_ReturnsJsonString()
+    {
+        // Arrange
+        const string username = "cast.user";
+        
+        // Предполага се, че CastPersonalDataDto е наличен и има поне някакви базови пропъртита.
+        CastPersonalDataDto[] data =
+        [
+            new()
+        ];
+
+        profileRepositoryMock
+            .Setup(pr => pr.DownloadCastDataAsync(username))
+            .ReturnsAsync(data);
+
+        // Act
+        string result = await castProfileService.DownloadCastProfileDataAsync(username);
+
+        // Assert
+        Assert.That(result, Is.Not.Null.And.Not.Empty);
+        
+        // Базова проверка дали върнатият резултат изглежда като JSON масив
+        Assert.That(result.TrimStart(), Does.StartWith("["));
+        Assert.That(result.TrimEnd(), Does.EndWith("]"));
+
+        profileRepositoryMock.Verify(pr => pr.DownloadCastDataAsync(username), Times.Once);
+        profileRepositoryMock.VerifyNoOtherCalls();
+    }
+    
+    private static Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
+    {
+        Mock<IUserStore<ApplicationUser>> storeMock = new Mock<IUserStore<ApplicationUser>>(MockBehavior.Loose);
+
+        Mock<UserManager<ApplicationUser>> userManager = new Mock<UserManager<ApplicationUser>>
+        (
+            storeMock.Object,
+            Mock.Of<IOptions<IdentityOptions>>(),
+            Mock.Of<IPasswordHasher<ApplicationUser>>(),
+            Array.Empty<IUserValidator<ApplicationUser>>(),
+            Array.Empty<IPasswordValidator<ApplicationUser>>(),
+            Mock.Of<ILookupNormalizer>(),
+            Mock.Of<IdentityErrorDescriber>(),
+            Mock.Of<IServiceProvider>(),
+            Mock.Of<ILogger<UserManager<ApplicationUser>>>()
+        );
+
+        userManager.SetReturnsDefault(Task.FromResult<ApplicationUser?>(null));
+        
+        return userManager;
+    }
+
+    private static Mock<SignInManager<ApplicationUser>> CreateSignInManagerMock(UserManager<ApplicationUser> userManager)
+    {
+        DefaultHttpContext httpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity())
+        };
+
+        Mock<IHttpContextAccessor> httpContextAccessorMock = new Mock<IHttpContextAccessor>(MockBehavior.Loose);
+        httpContextAccessorMock.Setup(hca => hca.HttpContext).Returns(httpContext);
+
+        Mock<SignInManager<ApplicationUser>> signInManager = new Mock<SignInManager<ApplicationUser>>
+        (
+            userManager,
+            httpContextAccessorMock.Object,
+            Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
+            Mock.Of<IOptions<IdentityOptions>>(),
+            Mock.Of<ILogger<SignInManager<ApplicationUser>>>(),
+            Mock.Of<IAuthenticationSchemeProvider>(),
+            Mock.Of<IUserConfirmation<ApplicationUser>>()
+        )
+        {
+            CallBase = false
+        };
+
+        return signInManager;
+    }
+    
     private static Cast CreateCast(string username, string email, string phone, string firstName, string lastName, 
         string? nickname, string profileImagePath, DateTime birthDate, bool isActive, string? biography)
     {
@@ -639,7 +947,9 @@ public class CastProfileServiceTests
                 UserName = username,
                 Email = email,
                 PhoneNumber = phone
-            }
+            },
+            CastMemberProductions = new HashSet<ProductionCast>(),
+            CastMemberScenes = new HashSet<SceneCast>()
         };
         
         return newCast;
