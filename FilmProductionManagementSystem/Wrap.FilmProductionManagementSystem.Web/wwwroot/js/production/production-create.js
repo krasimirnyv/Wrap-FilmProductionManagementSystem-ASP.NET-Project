@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Optional debug fingerprint (can remove later)
+    // console.log('production-create.js loaded', new Date().toISOString());
 
     // ── Thumbnail preview ─────────────────────────────────────────
     const thumbInput   = document.getElementById('thumbnailInput');
@@ -7,81 +9,126 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadLabel  = document.getElementById('uploadLabel');
     const clearBtn     = document.getElementById('clearThumbnail');
 
-    thumbInput?.addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (!file.type.startsWith('image/'))  { alert('Please select an image file.'); thumbInput.value = ''; return; }
-        if (file.size > 10 * 1024 * 1024)     { alert('Max file size is 10 MB.');      thumbInput.value = ''; return; }
-        const reader = new FileReader();
-        reader.onload = ev => {
-            thumbImg.src = ev.target.result;
-            thumbPreview.style.display = '';
-            uploadLabel.style.display  = 'none';
-        };
-        reader.readAsDataURL(file);
-    });
+    if (thumbInput && thumbPreview && thumbImg && uploadLabel) {
+        thumbInput.addEventListener('change', (e) => {
+            const input = /** @type {HTMLInputElement} */ (e.target);
+            const file = input.files && input.files[0];
+            if (!file) return;
 
-    clearBtn?.addEventListener('click', () => {
-        thumbInput.value           = '';
-        thumbPreview.style.display = 'none';
-        uploadLabel.style.display  = '';
-    });
+            if (!file.type || !file.type.startsWith('image/')) {
+                alert('Please select an image file.');
+                input.value = '';
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Max file size is 10 MB.');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const result = ev.target && ev.target.result;
+                if (!result) return;
+
+                thumbImg.src = String(result);
+                thumbPreview.style.display = '';
+                uploadLabel.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                thumbInput.value = '';
+                thumbPreview.style.display = 'none';
+                uploadLabel.style.display = '';
+            });
+        }
+    }
 
     // ── Description counter ───────────────────────────────────────
     const descField   = document.getElementById('descriptionTextarea');
     const descCounter = document.getElementById('descriptionCounter');
-    descField?.addEventListener('input', () =>
-        descCounter.textContent = descField.value.length);
+
+    if (descField && descCounter) {
+        descField.addEventListener('input', () => {
+            descCounter.textContent = String(descField.value.length);
+        });
+        // init if server pre-filled
+        descCounter.textContent = String(descField.value.length);
+    }
 
     // ── Default start date ────────────────────────────────────────
     const startDate = document.querySelector('[name="StatusStartDate"]');
-    if (startDate && !startDate.value)
+    if (startDate && !startDate.value) {
+        // YYYY-MM-DD (works for <input type="date">)
         startDate.value = new Date().toISOString().split('T')[0];
+    }
 
     // ── Cascading phase → status select ───────────────────────────
     const phaseSelect  = document.getElementById('phaseSelect');
     const statusSelect = document.getElementById('statusTypeSelect');
-    const optgroups    = statusSelect.querySelectorAll('optgroup[data-phase]');
 
-    phaseSelect?.addEventListener('change', () => {
-        const chosen = phaseSelect.value;
+    if (!phaseSelect || !statusSelect) {
+        console.warn('CreateProduction: missing selects. phaseSelect/statusTypeSelect not found.');
+    } else {
+        const optgroups = statusSelect.querySelectorAll('optgroup[data-phase]');
 
-        // Instead of toggling optgroup display (not reliable across browsers),
-        // show/hide individual <option> elements. This ensures only options
-        // relevant to the selected phase appear in the dropdown.
-        const placeholder = statusSelect.querySelector('option[value=""]');
+        const applyPhase = () => {
+            const chosen = phaseSelect.value;
+            const placeholder = statusSelect.querySelector('option[value=""]');
 
-        // Iterate optgroups and their options
-        optgroups.forEach(og => {
-            const match = og.dataset.phase === chosen;
-            og.querySelectorAll('option').forEach(opt => {
-                // Keep the placeholder option visible regardless
-                if (opt.value === '') return;
+            // If there are no optgroups, something is off in the markup
+            if (!optgroups || optgroups.length === 0) {
+                console.warn('CreateProduction: no optgroups[data-phase] found under statusTypeSelect.');
+            }
 
-                // Use `hidden` and `disabled` so options are removed from the list
-                // and cannot be selected in browsers that don't respect optgroup styling.
-                opt.hidden = !match;
-                opt.disabled = !match;
+            optgroups.forEach((og) => {
+                const match = og.dataset.phase === chosen;
+
+                // IMPORTANT: don't rely on optgroup display toggling; hide/disable options instead
+                og.querySelectorAll('option').forEach((opt) => {
+                    if (opt.value === '') return; // keep placeholder visible
+                    opt.hidden = !match;
+                    opt.disabled = !match;
+                });
             });
-        });
 
-        if (!chosen) {
-            // No phase chosen → disable status select and clear its value
-            statusSelect.value = '';
-            statusSelect.disabled = true;
-            if (placeholder) placeholder.textContent = '— Select Phase first —';
-        } else {
-            statusSelect.disabled = false;
-            statusSelect.value = ''; // reset to "please choose" state
-            if (placeholder) placeholder.textContent = '— Select Status —';
-        }
-    });
+            if (!chosen) {
+                statusSelect.value = '';
+                statusSelect.disabled = true;
+                if (placeholder) placeholder.textContent = '— Select Phase first —';
+            } else {
+                statusSelect.disabled = false;
+                statusSelect.value = ''; // reset selection on phase change
+                if (placeholder) placeholder.textContent = '— Select Status —';
+            }
+        };
+
+        phaseSelect.addEventListener('change', applyPhase);
+
+        // Init state on load (handles browser autofill / preselected values)
+        applyPhase();
+    }
 
     // ── Unsaved changes warning ───────────────────────────────────
-    let dirty = false;
-    document.querySelectorAll('#createProductionForm input, #createProductionForm textarea, #createProductionForm select')
-        .forEach(el => el.addEventListener('change', () => dirty = true));
-    window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
-    document.getElementById('createProductionForm')
-        ?.addEventListener('submit', () => dirty = false);
+    const form = document.getElementById('createProductionForm');
+    if (form) {
+        let dirty = false;
+
+        form.querySelectorAll('input, textarea, select').forEach((el) => {
+            el.addEventListener('change', () => (dirty = true));
+            el.addEventListener('input', () => (dirty = true));
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (!dirty) return;
+            e.preventDefault();
+            e.returnValue = '';
+        });
+
+        form.addEventListener('submit', () => (dirty = false));
+    }
 });
